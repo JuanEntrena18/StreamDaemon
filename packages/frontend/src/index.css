@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --theme-primary: #ffffff;
+  --theme-secondary: #333333;
+  --theme-bg: #000000;
+  --theme-accent: #9147ff;
+  --theme-font: 'Inter', sans-serif;
+  --theme-border: none;
+  --theme-glow: none;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--theme-font);
+  background: var(--theme-bg);
+  color: var(--theme-primary);
+  overflow: hidden;
+}
+
+#overlay-root {
+  width: 1920px;
+  height: 1080px;
+  position: relative;
+}
