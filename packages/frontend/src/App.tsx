@@ -3,6 +3,7 @@ import { useSocket } from './hooks/useSocket';
 import { GiveawayPanel } from './components/GiveawayPanel';
 import { PredictionPanel } from './components/PredictionPanel';
 import { TransparentOverlay } from './components/TransparentOverlay';
+import { Logo } from './components/Logo';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
@@ -15,11 +16,15 @@ export function App() {
     <div className="min-h-screen bg-zinc-900 text-white p-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">StreamForger</h1>
-            <p className="text-zinc-400 text-sm mt-1">
-              Open-source stream tools, forged for creators.
-            </p>
+          <div className="flex items-center gap-4">
+            <Logo size={48} />
+            <div>
+              <h1 className="text-3xl font-bold">StreamForger</h1>
+              <p className="text-zinc-400 text-sm mt-1">
+                by <span className="text-blue-400 font-medium">Cyber Haute Couture</span>
+                &nbsp;· Open-source stream tools
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <input

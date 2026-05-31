@@ -37,7 +37,11 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "resources/icon.ico"
+      "icon": "resources/icon.svg"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "resources/icon.svg"
     },
     "nsis": {
       "oneClick": false,
