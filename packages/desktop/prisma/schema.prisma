@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./streamforger.db"
+}
+
+model User {
+  id             String   @id @default(cuid())
+  twitchId       String   @unique
+  login          String
+  displayName    String
+  avatarUrl      String?
+  accessToken    String
+  refreshToken   String
+  tokenExpiresAt DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  channelConfig ChannelConfig?
+  giveaways     Giveaway[]
+  predictions   Prediction[]
+}
+
+model ChannelConfig {
+  id             String @id @default(cuid())
+  userId         String @unique
+  user           User   @relation(fields: [userId], references: [id])
+  activeGame     String?
+  overlaySettings String? @default("{}")
+  socialLinks    String? @default("[]")
+}
+
+model Giveaway {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  prize     String
+  status    String   @default("pending")
+  entries   String   @default("[]")
+  winnerId  String?
+  createdAt DateTime @default(now())
+  endedAt   DateTime?
+}
+
+model Prediction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  options   String
+  status    String   @default("active")
+  outcome   String?
+  createdAt DateTime @default(now())
+  endedAt   DateTime?
+}

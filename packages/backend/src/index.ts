@@ -7,24 +7,32 @@ import { setupSocketIO } from './socket/index.js';
 import { setupGiveaways, enterGiveaway } from './giveaways/index.js';
 import { setupPredictions } from './predictions/index.js';
 
-const app = Fastify({ logger: true });
+export async function startServer(port?: number) {
+  const app = Fastify({ logger: true });
 
-await app.register(cors, { origin: true });
+  await app.register(cors, { origin: true });
 
-await setupAuth(app);
-setupSocketIO(app);
-setupGiveaways(app);
-setEnterGiveaway(enterGiveaway);
-setupChat();
-setupPredictions(app);
+  await setupAuth(app);
+  setupSocketIO(app);
+  setupGiveaways(app);
+  setEnterGiveaway(enterGiveaway);
+  setupChat();
+  setupPredictions(app);
 
-app.get('/health', async () => ({ status: 'ok', timestamp: Date.now() }));
+  app.get('/health', async () => ({ status: 'ok', timestamp: Date.now() }));
 
-try {
-  const port = parseInt(config.PORT, 10);
-  await app.listen({ port, host: '0.0.0.0' });
-  console.log(`🚀 Server running on http://localhost:${port}`);
-} catch (err) {
-  app.log.error(err);
-  process.exit(1);
+  const listenPort = port ?? parseInt(config.PORT, 10);
+  await app.listen({ port: listenPort, host: '0.0.0.0' });
+  console.log(`🚀 Server running on http://localhost:${listenPort}`);
+
+  return app;
+}
+
+// Auto-start when run directly (not imported)
+const isMainModule = process.argv[1]?.includes('index');
+if (isMainModule) {
+  startServer().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
 }

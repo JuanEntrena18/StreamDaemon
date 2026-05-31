@@ -1,0 +1,47 @@
+{
+  "name": "@streamforger/desktop",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "tsc && electron .",
+    "build": "tsc",
+    "dist": "tsc && electron-builder --win --x64",
+    "db:generate": "prisma generate"
+  },
+  "dependencies": {
+    "@streamforger/backend": "*",
+    "@streamforger/shared": "*",
+    "electron-store": "^8.2.0",
+    "better-sqlite3": "^11.0.0",
+    "@prisma/client": "^5.10.0",
+    "prisma": "^5.10.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0",
+    "typescript": "^5.4.0",
+    "@types/better-sqlite3": "^7.6.0"
+  },
+  "build": {
+    "appId": "com.streamforger.app",
+    "productName": "StreamForger",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "prisma/**/*",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "resources/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

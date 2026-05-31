@@ -6,7 +6,9 @@
   ],
   "scripts": {
     "dev": "concurrently -n api,web -c blue,green \"npm run dev -w packages/backend\" \"npm run dev -w packages/frontend\"",
+    "dev:desktop": "npm run dev -w packages/desktop",
     "build": "npm run build --workspaces --if-present",
+    "build:desktop": "npm run dist -w packages/desktop",
     "lint": "eslint packages/",
     "format": "prettier --write \"packages/**/*.{ts,tsx,json,css}\"",
     "typecheck": "tsc -b packages/*"
