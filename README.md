@@ -78,18 +78,25 @@ cd StreamForge
 # 2. Dependencias
 npm install
 
-# 3. Generar Prisma client para SQLite
+# 3. Configurar credenciales de Twitch
+cp packages/backend/.env.example packages/backend/.env
+# Editar packages/backend/.env con TWITCH_CLIENT_ID y TWITCH_CLIENT_SECRET
+
+# 4. Generar Prisma client para SQLite
 npx prisma generate --schema=packages/desktop/prisma/schema.prisma
 
-# 4. Iniciar en modo desarrollo (ventana Electron)
+# 5. Iniciar en modo desarrollo (ventana Electron)
 npm run dev:desktop
 
-# 5. Generar instalador .exe
+# 6. Generar instalador .exe
 npm run build:desktop
-# El .exe se genera en packages/desktop/release/
+# El instalador se genera en packages/desktop/release/StreamForger Setup 0.0.1.exe
+# También queda una versión portable en packages/desktop/release/win-unpacked/
 ```
 
-No requiere Docker, PostgreSQL ni Redis. La base de datos SQLite se crea automáticamente en `packages/desktop/prisma/streamforger.db`.
+> El instalador incluye Node.js, SQLite y todo lo necesario. Al ejecutarlo, la app arranca el servidor en `localhost:3000` y abre la ventana del dashboard. No requiere Docker, PostgreSQL ni Redis.
+
+> ⚠️ Al no tener firma digital, Windows mostrará "Windows protected your PC". Hacé clic en **More info → Run anyway** la primera vez. Para distribución oficial obtené un certificado de firma de código.
 
 ---
 
