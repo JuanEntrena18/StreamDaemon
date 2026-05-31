@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { config } from './config.js';
-import { setupAuth } from './auth/index.js';
+import { setupAuth, onAuth } from './auth/index.js';
 import { setupChat, setEnterGiveaway } from './chat/index.js';
 import { setupSocketIO } from './socket/index.js';
 import { setupGiveaways, enterGiveaway } from './giveaways/index.js';
@@ -17,6 +17,7 @@ export async function startServer(port?: number) {
   setupGiveaways(app);
   setEnterGiveaway(enterGiveaway);
   setupChat();
+  onAuth(() => setupChat());
   setupPredictions(app);
 
   app.get('/health', async () => ({ status: 'ok', timestamp: Date.now() }));

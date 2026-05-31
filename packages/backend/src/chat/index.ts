@@ -1,14 +1,14 @@
 import { ChatClient } from '@twurple/chat';
 import { getIO } from '../socket/index.js';
-import { authProvider } from '../auth/index.js';
+import { authProvider, currentUser } from '../auth/index.js';
 import type { enterGiveaway } from '../giveaways/index.js';
 
 let chatClient: ChatClient | null = null;
 let enterGiveawayFn: typeof enterGiveaway | null = null;
 
 export function setupChat() {
-  if (!authProvider) {
-    console.log('⏳ Auth not ready, skipping chat setup');
+  if (!authProvider || !currentUser) {
+    console.log('⏳ Auth not ready or no user logged in, skipping chat setup');
     return;
   }
 

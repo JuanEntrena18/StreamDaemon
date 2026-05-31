@@ -18,6 +18,16 @@ const SCOPES = [
 export let authProvider: RefreshingAuthProvider | null = null;
 export let currentUser: { id: string; login: string; displayName: string } | null = null;
 
+const authCallbacks: Array<() => void> = [];
+
+export function onAuth(cb: () => void) {
+  authCallbacks.push(cb);
+}
+
+function notifyAuth() {
+  authCallbacks.forEach((cb) => cb());
+}
+
 export async function setupAuth(app: FastifyInstance) {
   authProvider = new RefreshingAuthProvider({
     clientId: config.TWITCH_CLIENT_ID,
@@ -119,6 +129,7 @@ export async function setupAuth(app: FastifyInstance) {
     });
 
     authProvider?.addUserForToken(tokenData, ['chat']);
+    notifyAuth();
 
     reply.redirect(`${config.FRONTEND_URL}?auth=success`);
   });
@@ -151,6 +162,8 @@ async function restoreSession() {
     },
     ['chat'],
   );
+
+  notifyAuth();
 
   console.log(`🔑 Session restored for ${user.displayName}`);
 }
