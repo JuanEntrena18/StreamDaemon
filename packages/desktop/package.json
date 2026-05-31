@@ -1,6 +1,8 @@
 {
   "name": "@streamforger/desktop",
   "version": "0.0.1",
+  "description": "StreamForger — Open-source stream tools, forged for creators",
+  "author": "Cyber Haute Couture",
   "private": true,
   "type": "module",
   "main": "dist/main.js",
@@ -27,8 +29,10 @@
   "build": {
     "appId": "com.streamforger.app",
     "productName": "StreamForger",
+    "electronVersion": "33.4.11",
     "directories": {
-      "output": "release"
+      "output": "dist-electron",
+      "buildResources": "resources"
     },
     "files": [
       "dist/**/*",

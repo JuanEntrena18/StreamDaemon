@@ -24,6 +24,7 @@ function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -35,7 +36,15 @@ function createMainWindow() {
     ? 'http://localhost:5173'
     : 'http://localhost:3000';
 
-  mainWindow.loadURL(url);
+  mainWindow.loadURL(url).catch(() => {
+    // Retry after a short delay if backend isn't ready yet
+    setTimeout(() => mainWindow?.loadURL(url), 2000);
+  });
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow?.show();
+  });
+
   mainWindow.on('closed', () => { mainWindow = null; });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
