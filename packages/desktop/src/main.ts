@@ -33,13 +33,16 @@ function createMainWindow() {
   });
 }
 
-function createOverlayWindow(channel: string, theme?: string) {
-  if (overlayWindow) {
-    overlayWindow.close();
-  }
+function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: string) {
+  if (overlayWindow) overlayWindow.close();
 
-  let url = `http://localhost:5173/overlay.html?mode=chat&channel=${channel}`;
-  if (theme) url += `&theme=${theme}`;
+  let url: string;
+  if (isUrl) {
+    url = urlOrChannel;
+  } else {
+    url = `http://localhost:5173/overlay.html?mode=chat&channel=${urlOrChannel}`;
+    if (theme) url += `&theme=${theme}`;
+  }
 
   overlayWindow = new BrowserWindow({
     width: 400,
@@ -60,11 +63,8 @@ function createOverlayWindow(channel: string, theme?: string) {
   });
 
   overlayWindow.loadURL(url);
-
-  // Click-through mode by default (mouse passes through to game)
   overlayWindow.setIgnoreMouseEvents(true, { forward: true });
 
-  // Thin invisible border at top for dragging + right-click menu
   overlayWindow.webContents.on('did-finish-load', () => {
     overlayWindow?.webContents.insertCSS(`
       #overlay-root { width: 100%; height: 100%; }
@@ -89,8 +89,8 @@ function toggleClickThrough() {
 
 // ── IPC handlers ──────────────────────────────────────────
 
-ipcMain.on('overlay:open', (_event, channel: string, theme?: string) => {
-  createOverlayWindow(channel, theme);
+ipcMain.on('overlay:open', (_event, url: string, isUrl: boolean, theme?: string) => {
+  createOverlayWindow(url, isUrl, theme);
 });
 
 ipcMain.on('overlay:close', () => {
@@ -103,7 +103,12 @@ ipcMain.on('overlay:toggleClickThrough', toggleClickThrough);
 
 ipcMain.handle('overlay:getClickThrough', () => overlayIgnoreMouse);
 
-// ── Keyboard shortcuts for overlay ─────────────────────────
+// Open external URL in system browser (for OAuth)
+ipcMain.on('auth:login', () => {
+  shell.openExternal('http://localhost:3001/auth/login');
+});
+
+// ── Keyboard shortcuts ────────────────────────────────────
 
 app.whenReady().then(() => {
   globalShortcut.register('CommandOrControl+Shift+T', toggleClickThrough);

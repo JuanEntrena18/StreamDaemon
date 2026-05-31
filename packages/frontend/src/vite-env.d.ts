@@ -4,11 +4,14 @@ interface StreamforgerAPI {
   platform: string;
   backendUrl: string;
   overlay: {
-    open: (channel: string, theme?: string) => void;
+    open: (url: string, isUrl: boolean, theme?: string) => void;
     close: () => void;
     isOpen: () => Promise<boolean>;
     toggleClickThrough: () => void;
     getClickThrough: () => Promise<boolean>;
+  };
+  auth: {
+    login: () => void;
   };
 }
 
