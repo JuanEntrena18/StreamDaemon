@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "tsc && electron .",
     "build": "tsc",
-    "dist": "tsc && electron-builder --win --x64",
+    "dist": "prisma generate && tsc && electron-builder --win --x64",
     "db:generate": "prisma generate"
   },
   "dependencies": {
@@ -33,11 +33,12 @@
     "files": [
       "dist/**/*",
       "prisma/**/*",
-      "node_modules/**/*"
+      "node_modules/**/*",
+      "../frontend/dist/**/*"
     ],
     "win": {
       "target": "nsis",
-      "icon": "resources/icon.svg"
+      "icon": "resources/icon.ico"
     },
     "linux": {
       "target": "AppImage",

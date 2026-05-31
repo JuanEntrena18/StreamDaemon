@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const isDev = !app.isPackaged;
 
 let mainWindow: BrowserWindow | null = null;
 let overlayWindow: BrowserWindow | null = null;
@@ -10,7 +11,13 @@ let overlayIgnoreMouse = true;
 
 async function startBackend() {
   const { startServer } = await import('@streamforger/backend/dist/index.js');
-  await startServer(3000);
+  const opts: { port: number; frontendDir?: string } = { port: 3000 };
+
+  if (!isDev) {
+    opts.frontendDir = path.resolve(__dirname, '../../frontend/dist');
+  }
+
+  await startServer(opts);
 }
 
 function createMainWindow() {
@@ -24,7 +31,11 @@ function createMainWindow() {
     },
   });
 
-  mainWindow.loadURL('http://localhost:5173');
+  const url = isDev
+    ? 'http://localhost:5173'
+    : 'http://localhost:3000';
+
+  mainWindow.loadURL(url);
   mainWindow.on('closed', () => { mainWindow = null; });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -40,7 +51,8 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
   if (isUrl) {
     url = urlOrChannel;
   } else {
-    url = `http://localhost:5173/overlay.html?mode=chat&channel=${urlOrChannel}`;
+    const base = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
+    url = `${base}/overlay.html?mode=chat&channel=${urlOrChannel}`;
     if (theme) url += `&theme=${theme}`;
   }
 
@@ -87,7 +99,7 @@ function toggleClickThrough() {
   overlayWindow.setIgnoreMouseEvents(overlayIgnoreMouse, { forward: true });
 }
 
-// ── IPC handlers ──────────────────────────────────────────
+// ── IPC ───────────────────────────────────────────────────
 
 ipcMain.on('overlay:open', (_event, url: string, isUrl: boolean, theme?: string) => {
   createOverlayWindow(url, isUrl, theme);
@@ -98,23 +110,17 @@ ipcMain.on('overlay:close', () => {
 });
 
 ipcMain.handle('overlay:isOpen', () => overlayWindow !== null && !overlayWindow.isDestroyed());
-
 ipcMain.on('overlay:toggleClickThrough', toggleClickThrough);
-
 ipcMain.handle('overlay:getClickThrough', () => overlayIgnoreMouse);
+ipcMain.on('auth:login', () => shell.openExternal('http://localhost:3000/auth/login'));
 
-// Open external URL in system browser (for OAuth)
-ipcMain.on('auth:login', () => {
-  shell.openExternal('http://localhost:3001/auth/login');
-});
-
-// ── Keyboard shortcuts ────────────────────────────────────
+// ── Shortcuts ─────────────────────────────────────────────
 
 app.whenReady().then(() => {
   globalShortcut.register('CommandOrControl+Shift+T', toggleClickThrough);
 });
 
-// ── App lifecycle ──────────────────────────────────────────
+// ── Lifecycle ─────────────────────────────────────────────
 
 app.whenReady().then(async () => {
   await startBackend();
