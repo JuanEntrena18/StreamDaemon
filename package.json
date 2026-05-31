@@ -7,15 +7,14 @@
   "scripts": {
     "dev": "npm run dev --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
-    "lint": "eslint packages --ext .ts,.tsx",
+    "lint": "eslint packages/",
     "format": "prettier --write \"packages/**/*.{ts,tsx,json,css}\"",
     "typecheck": "tsc -b packages/*"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.57.0",
+    "eslint": "^9.0.0",
     "prettier": "^3.2.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "typescript-eslint": "^8.0.0"
   }
 }
