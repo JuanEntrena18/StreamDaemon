@@ -48,8 +48,8 @@ cd StreamForge
 npm install
 
 # 3. Configurar variables de entorno
-cp packages/backend/.env packages/backend/.env.local
-# Editar .env.local con tu TWITCH_CLIENT_ID y TWITCH_CLIENT_SECRET
+cp packages/backend/.env.example packages/backend/.env
+# Editar packages/backend/.env con tu TWITCH_CLIENT_ID y TWITCH_CLIENT_SECRET
 
 # 4. Iniciar base de datos y Redis
 docker compose up -d
