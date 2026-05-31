@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useSocket } from './hooks/useSocket';
 import { GiveawayPanel } from './components/GiveawayPanel';
 import { PredictionPanel } from './components/PredictionPanel';
+import { TransparentOverlay } from './components/TransparentOverlay';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
+const isDesktop = typeof window.streamforger !== 'undefined';
 
 export function App() {
   const { connected } = useSocket();
@@ -38,6 +40,12 @@ export function App() {
           <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />
           <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />
         </div>
+
+        {isDesktop && (
+          <div className="mb-8">
+            <TransparentOverlay channel={channel} />
+          </div>
+        )}
 
         <div className="bg-zinc-800 rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">🔌 URLs para OBS (Browser Source)</h2>
