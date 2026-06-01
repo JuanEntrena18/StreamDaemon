@@ -15,6 +15,12 @@ const dbPath = isDev
 
 process.env.DATABASE_URL = `file:${dbPath}`;
 
+// ── Frontend path (production only) ──────────────────────
+// extraResources copies packages/frontend/dist → resources/frontend/dist
+function getFrontendPath(...parts: string[]): string {
+  return path.join(process.resourcesPath, 'frontend', 'dist', ...parts);
+}
+
 let mainWindow: BrowserWindow | null = null;
 let overlayWindow: BrowserWindow | null = null;
 let overlayIgnoreMouse = true;
@@ -23,19 +29,13 @@ async function startBackend() {
   try {
     const { startServer } = await import('@streamforger/backend/dist/index.js');
     const opts: { port: number; frontendDir?: string } = { port: 3000 };
-
-    if (!isDev) {
-      // electron-builder copies ../frontend/dist → resources/frontend/dist (extraResources)
-      // process.resourcesPath points to the resources/ folder at runtime
-      opts.frontendDir = path.join(process.resourcesPath, 'frontend', 'dist');
-    }
-
     await startServer(opts);
     console.log('✅ Backend started successfully');
   } catch (err) {
     // Backend failure should not prevent the window from showing.
-    // In dev mode the frontend runs on Vite's own server (port 5173).
-    console.error('⚠️  Backend failed to start — window will open anyway:', err);
+    // The UI loads directly from the file system (loadFile), so it
+    // is always visible regardless of backend status.
+    console.error('⚠️  Backend failed to start:', err);
   }
 }
 
@@ -65,25 +65,34 @@ function createMainWindow() {
     },
   });
 
-  const url = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
-
   // Show as soon as the page is ready to paint
   mainWindow.once('ready-to-show', () => {
     mainWindow?.show();
     mainWindow?.focus();
   });
 
-  // Fallback: if ready-to-show never fires within 8 seconds, show anyway
+  // Fallback: if ready-to-show never fires within 3 seconds, show anyway.
+  // With loadFile() this should almost never happen.
   const showFallback = setTimeout(() => {
     if (mainWindow && !mainWindow.isVisible()) {
       console.warn('⚠️  ready-to-show never fired — forcing window visibility');
       mainWindow.show();
     }
-  }, 8000);
+  }, 3000);
 
   mainWindow.once('show', () => clearTimeout(showFallback));
 
-  loadWithRetry(mainWindow, url);
+  if (isDev) {
+    // Dev: Vite serves the app on localhost:5173
+    loadWithRetry(mainWindow, 'http://localhost:5173');
+  } else {
+    // Production: load the bundled index.html directly from the file system.
+    // This is instant and does not depend on the backend being ready.
+    mainWindow.loadFile(getFrontendPath('index.html')).catch((err) => {
+      console.error('❌ Failed to load index.html:', err);
+      mainWindow?.show();
+    });
+  }
 
   mainWindow.on('closed', () => { mainWindow = null; });
 
@@ -95,15 +104,6 @@ function createMainWindow() {
 
 function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: string) {
   if (overlayWindow) overlayWindow.close();
-
-  let url: string;
-  if (isUrl) {
-    url = urlOrChannel;
-  } else {
-    const base = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
-    url = `${base}/overlay.html?mode=chat&channel=${urlOrChannel}`;
-    if (theme) url += `&theme=${theme}`;
-  }
 
   overlayWindow = new BrowserWindow({
     width: 400,
@@ -123,7 +123,17 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
     },
   });
 
-  overlayWindow.loadURL(url);
+  if (isUrl) {
+    overlayWindow.loadURL(urlOrChannel);
+  } else if (isDev) {
+    const devUrl = `http://localhost:5173/overlay.html?mode=chat&channel=${urlOrChannel}${theme ? `&theme=${theme}` : ''}`;
+    overlayWindow.loadURL(devUrl);
+  } else {
+    // Production: load overlay.html from file system with query params
+    overlayWindow.loadFile(getFrontendPath('overlay.html'), {
+      query: { mode: 'chat', channel: urlOrChannel, ...(theme ? { theme } : {}) },
+    });
+  }
   overlayWindow.setIgnoreMouseEvents(true, { forward: true });
 
   overlayWindow.webContents.on('did-finish-load', () => {
