@@ -237,9 +237,6 @@ ipcMain.on('auth:login', () => {
   }, 500);
 });
 
-// Backend readiness — the backend has already started before the window opens
-ipcMain.handle('backend:isReady', () => true);
-
 // Main window — always-on-top toggle (para gestionar sobre el juego)
 ipcMain.handle('window:getAlwaysOnTop', () => mainAlwaysOnTop);
 ipcMain.on('window:setAlwaysOnTop', (_e, value: boolean) => {

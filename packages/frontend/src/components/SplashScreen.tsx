@@ -8,57 +8,45 @@ interface Props {
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 
 export function SplashScreen({ onReady }: Props) {
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const isDesktop = !!window.streamforger?.isDesktop;
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (isDesktop) {
+      // Desktop: backend already started before window opened.
+      // Show splash 1.5s for aesthetics, then transition.
+      const t = setTimeout(() => setReady(true), 1500);
+      return () => clearTimeout(t);
+    }
+
+    // Browser: poll backend until ready
     let cancelled = false;
     let attempts = 0;
 
     const check = async () => {
       if (cancelled) return;
-
-      let isReady = false;
-
-      // Desktop: use IPC (no CORS issues)
-      if (window.streamforger?.backend?.isReady) {
-        try {
-          isReady = await window.streamforger.backend.isReady();
-        } catch {
-          // IPC failed — fall through to fetch
-        }
+      try {
+        const res = await fetch(`${BACKEND_URL}/auth/status`, { signal: AbortSignal.timeout(5000) });
+        if (cancelled) return;
+        if (res.ok) { setReady(true); return; }
+      } catch {
+        // Backend not ready yet
       }
-
-      if (!isReady) {
-        // Browser or IPC fallback: poll backend via fetch
-        try {
-          const res = await fetch(`${BACKEND_URL}/auth/status`, { signal: AbortSignal.timeout(5000) });
-          if (cancelled) return;
-          isReady = res.ok;
-        } catch {
-          // Backend not ready yet
-        }
-      }
-
-      if (!cancelled && isReady) {
-        setStatus('ready');
-        return;
-      }
-
       attempts++;
       if (cancelled) return;
       setTimeout(check, Math.min(1000 + attempts * 200, 3000));
     };
 
-    const timer = setTimeout(check, 300);
-    return () => { cancelled = true; clearTimeout(timer); };
-  }, [onReady]);
+    setTimeout(check, 300);
+    return () => { cancelled = true; };
+  }, [isDesktop]);
 
   useEffect(() => {
-    if (status === 'ready') {
+    if (ready) {
       const t = setTimeout(onReady, 400);
       return () => clearTimeout(t);
     }
-  }, [status, onReady]);
+  }, [ready, onReady]);
 
   return (
     <div style={{
@@ -132,14 +120,12 @@ export function SplashScreen({ onReady }: Props) {
         <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
           <span style={{
             width: 8, height: 8, borderRadius: '50%',
-            background: status === 'error' ? '#ef4444' : '#7c3aed',
-            opacity: status === 'loading' ? 0.4 : 1,
-            animation: status === 'loading' ? 'pulse-spinner 1s ease-in-out infinite' : 'none',
+            background: ready ? 'var(--sf-success)' : '#7c3aed',
+            opacity: ready ? 1 : 0.4,
+            animation: ready ? 'none' : 'pulse-spinner 1s ease-in-out infinite',
           }} />
           <span style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)' }}>
-            {status === 'loading' && 'Iniciando servicios…'}
-            {status === 'ready' && '¡Listo!'}
-            {status === 'error' && 'Error de conexión'}
+            {ready ? '¡Listo!' : 'Cargando…'}
           </span>
         </div>
       </div>
