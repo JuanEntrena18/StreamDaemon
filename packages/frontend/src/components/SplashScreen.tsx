@@ -16,16 +16,23 @@ export function SplashScreen({ onReady }: Props) {
 
     const check = async () => {
       if (cancelled) return;
-      try {
-        const res = await fetch(`${BACKEND_URL}/auth/status`, { signal: AbortSignal.timeout(5000) });
+
+      // Desktop: use IPC (no CORS issues)
+      if (window.streamforger?.backend?.isReady) {
+        const ready = await window.streamforger.backend.isReady();
         if (cancelled) return;
-        if (res.ok) {
-          setStatus('ready');
-          return;
+        if (ready) { setStatus('ready'); return; }
+      } else {
+        // Browser (dev mode): poll backend via fetch
+        try {
+          const res = await fetch(`${BACKEND_URL}/auth/status`, { signal: AbortSignal.timeout(5000) });
+          if (cancelled) return;
+          if (res.ok) { setStatus('ready'); return; }
+        } catch {
+          // Backend not ready yet
         }
-      } catch {
-        // Backend not ready yet
       }
+
       attempts++;
       if (cancelled) return;
       setTimeout(check, Math.min(1000 + attempts * 200, 3000));

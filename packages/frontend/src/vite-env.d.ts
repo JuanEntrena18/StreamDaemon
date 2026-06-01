@@ -11,6 +11,9 @@ interface StreamforgerAPI {
     toggleClickThrough: () => void;
     getClickThrough: () => Promise<boolean>;
   };
+  backend: {
+    isReady: () => Promise<boolean>;
+  };
   auth: {
     login: () => void;
   };
