@@ -7,9 +7,10 @@
   "type": "module",
   "main": "dist/main.js",
   "scripts": {
-    "dev": "tsc && wait-on http://localhost:5173 && electron .",
-    "build": "tsc",
-    "dist": "npm run build --prefix ../frontend && npm run build --prefix ../backend && npx prisma generate --schema=prisma/schema.prisma && tsc && electron-builder --win --x64",
+    "dev": "tsc && npm run build:preload && wait-on http://localhost:5173 && electron .",
+    "build": "tsc && npm run build:preload",
+    "build:preload": "tsc -p tsconfig.preload.json && node -e \"require('fs').renameSync('dist/preload.js', 'dist/preload.cjs')\"",
+    "dist": "npm run build --prefix ../frontend && npm run build --prefix ../backend && npx prisma generate --schema=prisma/schema.prisma && npm run build && electron-builder --win --x64",
     "db:generate": "prisma generate"
   },
   "dependencies": {
