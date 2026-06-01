@@ -5,7 +5,7 @@
 StreamForger es una aplicación modular para creadores de contenido que permite gestionar canales de Twitch con overlays personalizados por juego, sorteos interactivos, predicciones y visualización del chat en tiempo real. Compatible con OBS Studio vía Browser Source.
 
 Disponible en dos modos:
-- **🖥️ Servidor Linux** — Multi-usuario, PostgreSQL + Redis, ideal para producción
+- **🖥️ Servidor Linux** — Multi-usuario, SQLite (o PostgreSQL con Docker), ideal para producción
 - **💻 Escritorio Windows** — App portátil con Electron + SQLite, cero configuración
 
 ---
@@ -28,9 +28,9 @@ Disponible en dos modos:
 |---|---|---|
 | **Frontend** | React 18 + Vite + Tailwind + Framer Motion | React 18 + Vite + Tailwind + Framer Motion |
 | **Backend** | Node.js + Fastify + Socket.IO + @twurple | Node.js + Fastify (embebido en Electron) |
-| **Base de datos** | PostgreSQL 16 (Prisma ORM) | SQLite (Prisma ORM) |
-| **Cache** | Redis 7 | Memoria (Map) |
-| **Runtime** | Docker Compose | Electron (.exe) |
+| **Base de datos** | SQLite compartida (Prisma ORM) | SQLite (Prisma ORM) |
+| **Cache** | Memoria (Map) | Memoria (Map) |
+| **Runtime** | Node.js directo / Docker opcional | Electron (.exe) |
 
 ---
 
@@ -76,17 +76,17 @@ Panel: `http://localhost:5173` · API: `http://localhost:3000`
 git clone https://github.com/JuanEntrena18/StreamForge.git
 cd StreamForge
 
-# 2. Dependencias
+# 2. Dependencias (incluye wait-on)
 npm install
 
 # 3. Configurar credenciales de Twitch
 cp packages/backend/.env.example packages/backend/.env
 # Editar packages/backend/.env con TWITCH_CLIENT_ID y TWITCH_CLIENT_SECRET
 
-# 4. Generar Prisma client para SQLite
-npx prisma generate --schema=packages/desktop/prisma/schema.prisma
+# 4. Crear tablas en la base de datos SQLite
+npx prisma db push --schema=packages/desktop/prisma/schema.prisma
 
-# 5. Iniciar en modo desarrollo (ventana Electron)
+# 5. Iniciar en modo desarrollo (Vite + Electron arrancan juntos)
 npm run dev:desktop
 
 # 6. Generar instalador .exe
@@ -154,8 +154,8 @@ Para cambiar el tema visual agrega `&theme=subnautica2`, `&theme=poe2` o `&theme
 ```
 StreamForge/
 ├── packages/
-│   ├── backend/           # Servidor (PostgreSQL + Redis)
-│   │   ├── prisma/        # Schema PostgreSQL
+│   ├── backend/           # Servidor (SQLite compartida, schema unificado)
+│   │   ├── prisma/        # Schema SQLite (provider: sqlite)
 │   │   └── src/
 │   │       ├── auth/      # OAuth Twitch
 │   │       ├── chat/      # IRC + comandos
@@ -168,21 +168,21 @@ StreamForge/
 │   │       ├── hooks/     # useSocket, useTheme
 │   │       └── themes/    # Subnautica 2, PoE 2, WoW
 │   ├── desktop/           # Electron + SQLite
-│   │   ├── prisma/        # Schema SQLite
+│   │   ├── prisma/        # Schema SQLite + streamforger.db (base de datos)
 │   │   └── src/
-│   │       ├── main.ts    # Proceso principal (con retry y fallback de ventana)
+│   │       ├── main.ts    # Proceso principal (inyecta DATABASE_URL, retry, fallback)
 │   │       └── preload.ts # Bridge IPC seguro
 │   └── shared/            # Tipos, schemas, cache interface
-├── docker-compose.yml     # PostgreSQL + Redis
+├── docker-compose.yml     # PostgreSQL + Redis (opcional, para producción)
 ├── STACK_TECNOLOGICO.md
 └── README.md
 ```
 
 ---
 
-## 🐛 Fixes conocidos (v0.1.0)
+## 🐛 Fixes conocidos
 
-### Ventana Electron invisible al iniciar
+### v0.1.0 — Ventana Electron invisible al iniciar
 
 **Causa:** El proceso principal de Electron fallaba silenciosamente si el backend no arrancaba, impidiendo que se mostrara la ventana.
 
@@ -191,6 +191,26 @@ StreamForge/
 - Timeout de fallback de 8 segundos: si `ready-to-show` no dispara, la ventana se fuerza visible
 - Hasta 5 reintentos con backoff de 2 s por intento al cargar la URL
 - Las dos llamadas a `app.whenReady()` consolidadas en una sola
+
+### v0.1.1 — Pantalla negra: Vite no arrancaba junto con Electron
+
+**Causa:** `npm run dev:desktop` solo lanzaba el proceso Electron sin el servidor de Vite. La ventana intentaba conectarse a `http://localhost:5173` que no tenía nada escuchando.
+
+**Solución:**
+- `dev:desktop` (raíz) usa `concurrently` para arrancar Vite **y** Electron al mismo tiempo
+- El script `dev` del desktop añade `wait-on http://localhost:5173` — Electron no se lanza hasta que Vite esté respondiendo
+- Añadida dependencia `wait-on ^8.0.0` al package desktop
+
+### v0.1.1 — Error Prisma P2021: tabla `main.User` no encontrada
+
+**Causa:** El backend usaba el proveedor PostgreSQL de Prisma pero en modo desktop no hay PostgreSQL. Además, la base de datos SQLite existía pero sin tablas (nunca se había ejecutado `prisma db push`).
+
+**Solución:**
+- Unificación de la base de datos: **tanto el backend como el desktop usan SQLite**
+- `packages/backend/prisma/schema.prisma` cambiado de `postgresql` → `sqlite`; campos `Json` → `String` (SQLite no tiene tipo JSON nativo)
+- `packages/backend/.env` — `DATABASE_URL` apunta a `file:../desktop/prisma/streamforger.db`
+- `packages/desktop/src/main.ts` — inyecta `process.env.DATABASE_URL` con la ruta absoluta al `.db` **antes** de importar el backend, garantizando que Prisma use SQLite siempre
+- Ejecutado `prisma db push` para crear las tablas en la base de datos
 
 ---
 

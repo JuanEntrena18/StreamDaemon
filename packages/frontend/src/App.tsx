@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket } from './hooks/useSocket';
+import { useAuthStatus } from './hooks/useAuthStatus';
 import { GiveawayPanel } from './components/GiveawayPanel';
 import { PredictionPanel } from './components/PredictionPanel';
 import { TransparentOverlay } from './components/TransparentOverlay';
@@ -21,8 +22,17 @@ const NAV_ITEMS: { id: Tab; icon: string; label: string; desktopOnly?: boolean }
 
 export function App() {
   const { connected } = useSocket();
+  const { authenticated, user, loading: authLoading, login } = useAuthStatus();
   const [channel, setChannel] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('giveaway');
+
+  // Auto-fill channel from authenticated Twitch user
+  const userLogin = user?.login;
+  useEffect(() => {
+    if (userLogin && !channel) {
+      setChannel(userLogin);
+    }
+  }, [userLogin]);
 
   const visibleTabs = NAV_ITEMS.filter((t) => !t.desktopOnly || isDesktop);
 
@@ -174,9 +184,64 @@ export function App() {
                 value={channel}
                 onChange={(e) => setChannel(e.target.value.replace(/^#/, '').toLowerCase())}
                 className="sf-input"
-                style={{ paddingLeft: '1.5rem', width: '200px' }}
+                style={{ paddingLeft: '1.5rem', width: '180px' }}
               />
             </div>
+
+            {/* ── Twitch Auth ── */}
+            {!authLoading && (
+              authenticated && user ? (
+                /* Logged-in pill */
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '0.5rem',
+                  background: 'rgba(145,71,255,0.12)',
+                  border: '1px solid rgba(145,71,255,0.3)',
+                  borderRadius: '99px',
+                  padding: '0.25rem 0.75rem 0.25rem 0.35rem',
+                }}>
+                  {/* Twitch avatar */}
+                  <div style={{
+                    width: 22, height: 22, borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #7c3aed, #6366f1)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.65rem', fontWeight: 700, color: '#fff',
+                    flexShrink: 0,
+                  }}>
+                    {user.displayName.charAt(0).toUpperCase()}
+                  </div>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--sf-text)', whiteSpace: 'nowrap' }}>
+                    {user.displayName}
+                  </span>
+                  <span style={{
+                    width: 5, height: 5, borderRadius: '50%',
+                    background: 'var(--sf-success)',
+                    display: 'inline-block', flexShrink: 0,
+                  }} />
+                </div>
+              ) : (
+                /* Login button */
+                <button
+                  id="twitch-login-btn"
+                  onClick={login}
+                  className="sf-btn"
+                  style={{
+                    background: 'linear-gradient(135deg, #9147ff 0%, #6441a5 100%)',
+                    color: '#fff',
+                    fontSize: '0.8rem',
+                    padding: '0.5rem 1rem',
+                    gap: '0.4rem',
+                    boxShadow: '0 2px 12px rgba(145,71,255,0.35)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {/* Twitch logo SVG */}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
+                  </svg>
+                  Conectar Twitch
+                </button>
+              )
+            )}
 
             {/* Connection badge */}
             <div

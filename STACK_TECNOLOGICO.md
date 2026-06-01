@@ -99,6 +99,36 @@ El proceso principal gestiona:
 - **IPC handlers** — `overlay:open/close/isOpen/toggleClickThrough`, `auth:login`
 - **Shortcut global** — `Ctrl+Shift+T` activa/desactiva el click-through del overlay
 
+### Scripts de desarrollo
+
+```bash
+# Arrancar Vite (frontend) + Electron juntos:
+npm run dev:desktop
+# Internamente: concurrently "npm run dev -w packages/frontend" "npm run dev -w packages/desktop"
+# El proceso Electron espera a que Vite esté listo con: wait-on http://localhost:5173
+
+# Arrancar solo el servidor web (sin Electron):
+npm run dev
+```
+
+### Fix: Pantalla negra al iniciar (v0.1.1)
+
+Problema detectado y corregido: la ventana Electron arrancaba vacía porque el servidor de Vite no se lanzaba. Solución:
+
+1. `dev:desktop` usa `concurrently` para lanzar **Vite + Electron** simultáneamente
+2. `wait-on http://localhost:5173` — Electron no abre hasta que Vite responde
+3. `wait-on ^8.0.0` añadido como `devDependency` del package desktop
+
+### Fix: Error Prisma P2021 — tabla no encontrada (v0.1.1)
+
+Problema detectado y corregido: el backend usaba el proveedor PostgreSQL de Prisma, incompatible con SQLite en modo desktop. Solución:
+
+1. `packages/backend/prisma/schema.prisma` — proveedor cambiado de `postgresql` → `sqlite`
+2. Campos `Json` convertidos a `String` (SQLite no tiene tipo JSON nativo en Prisma)
+3. `packages/backend/.env` — `DATABASE_URL` apunta a `file:../desktop/prisma/streamforger.db`
+4. `packages/desktop/src/main.ts` — inyecta `process.env.DATABASE_URL` antes de importar el backend
+5. `prisma db push` ejecutado para crear las tablas en la SQLite
+
 ### Fix: Ventana invisible al iniciar (v0.1.0)
 
 Problema detectado y corregido: el proceso de Electron arrancaba sin mostrar la ventana cuando el backend fallaba al iniciar. Solución:
@@ -114,9 +144,10 @@ Problema detectado y corregido: el proceso de Electron arrancaba sin mostrar la 
 
 | Tecnología | Propósito |
 |---|---|
-| **PostgreSQL 16** | Almacenamiento principal en modo servidor (usuarios, canales, configuraciones, historial) |
-| **SQLite** | Base de datos local en modo escritorio (sin servidor externo) |
-| **Redis 7** | Cache, sesiones, colas de pub/sub para eventos tiempo real (modo servidor) |
+| **SQLite** | Base de datos única compartida entre backend y desktop. Sin servidor externo, cero configuración. |
+| **Prisma 5** | ORM para ambos packages. Schema en `packages/desktop/prisma/schema.prisma` (fuente de verdad). |
+| **PostgreSQL 16** | Opcional — disponible vía `docker-compose.yml` para entornos de producción multi-usuario. |
+| **Redis 7** | Opcional — disponible vía Docker para cache/pub-sub en producción. |
 
 ### Esquema principal (Prisma)
 
@@ -180,7 +211,9 @@ OBS (Browser Source) ←→ Frontend (React SPA)
 
 | Herramienta | Propósito |
 |---|---|
-| **Docker** + **Docker Compose** | Entorno local reproducible (app + postgres + redis) |
+| **Docker** + **Docker Compose** | Entorno opcional para PostgreSQL + Redis en producción |
+| **concurrently** | Lanza Vite y Electron en paralelo con `npm run dev:desktop` |
+| **wait-on** | Garantiza que Electron arranca solo cuando Vite ya responde en `:5173` |
 | **ESLint** + **Prettier** | Linter y formateo consistente |
 | **Husky** + **lint-staged** | Hooks pre-commit para calidad de código |
 | **Jest** + **React Testing Library** | Tests unitarios y de componentes |
@@ -238,3 +271,4 @@ twitch_overlay/
 | 7. Predicciones | Integración con Twitch Predictions API, panel admin en frontend | ✅ |
 | 8. Social overlay | Overlay con enlaces a redes sociales animados | ✅ |
 | 9. Dashboard premium | Sidebar, glassmorphism, sistema de diseño, ObsPanel, bug fix Electron | ✅ |
+| 10. Unificación SQLite | Backend migrado a SQLite; `dev:desktop` corregido con `concurrently` + `wait-on` | ✅ |
