@@ -17,20 +17,31 @@ export function SplashScreen({ onReady }: Props) {
     const check = async () => {
       if (cancelled) return;
 
+      let isReady = false;
+
       // Desktop: use IPC (no CORS issues)
       if (window.streamforger?.backend?.isReady) {
-        const ready = await window.streamforger.backend.isReady();
-        if (cancelled) return;
-        if (ready) { setStatus('ready'); return; }
-      } else {
-        // Browser (dev mode): poll backend via fetch
+        try {
+          isReady = await window.streamforger.backend.isReady();
+        } catch {
+          // IPC failed — fall through to fetch
+        }
+      }
+
+      if (!isReady) {
+        // Browser or IPC fallback: poll backend via fetch
         try {
           const res = await fetch(`${BACKEND_URL}/auth/status`, { signal: AbortSignal.timeout(5000) });
           if (cancelled) return;
-          if (res.ok) { setStatus('ready'); return; }
+          isReady = res.ok;
         } catch {
           // Backend not ready yet
         }
+      }
+
+      if (!cancelled && isReady) {
+        setStatus('ready');
+        return;
       }
 
       attempts++;

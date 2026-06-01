@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket } from './hooks/useSocket';
 import { useAuthStatus } from './hooks/useAuthStatus';
@@ -45,12 +45,13 @@ const TAB_LABELS: Record<Tab, string> = {
 
 export function App() {
   const [backendReady, setBackendReady] = useState(false);
+  const onReady = useCallback(() => setBackendReady(true), []);
   const { connected } = useSocket();
   const { authenticated, user, loading: authLoading, login } = useAuthStatus();
   const [channel, setChannel] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('chat');
 
-  if (!backendReady) return <SplashScreen onReady={() => setBackendReady(true)} />;
+  if (!backendReady) return <SplashScreen onReady={onReady} />;
 
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
   const [opacity, setOpacity] = useState(1);
