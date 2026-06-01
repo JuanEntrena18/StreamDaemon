@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 
@@ -32,9 +32,11 @@ export function PredictionOverlay({ channel }: Props) {
     setPrediction((prev) => prev && prev.id === data.id ? { ...prev, status: data.status, outcome: data.outcome } : prev);
   }, []));
 
-  if (channel && socket) {
-    socket.emit('join:channel', channel);
-  }
+  useEffect(() => {
+    if (channel && socket?.connected) {
+      socket.emit('join:channel', channel);
+    }
+  }, [channel, socket?.connected]);
 
   const totalVotes = prediction?.options.reduce((acc, o) => acc + o.votes, 0) ?? 0;
 

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import type { ChatMessage } from '@streamforger/shared';
@@ -17,9 +17,11 @@ export function ChatOverlay({ channel }: Props) {
     setMessages((prev) => [...prev.slice(-MAX_MESSAGES + 1), msg]);
   }, []));
 
-  if (channel && socket) {
-    socket.emit('join:channel', channel);
-  }
+  useEffect(() => {
+    if (channel && socket?.connected) {
+      socket.emit('join:channel', channel);
+    }
+  }, [channel, socket?.connected]);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 p-6 max-w-lg">

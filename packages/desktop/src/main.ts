@@ -204,23 +204,37 @@ ipcMain.handle('overlay:isOpen', () => overlayWindow !== null && !overlayWindow.
 ipcMain.on('overlay:toggleClickThrough', toggleClickThrough);
 ipcMain.handle('overlay:getClickThrough', () => overlayIgnoreMouse);
 
-// Auth: fetch the OAuth URL from the backend and open in default browser
-ipcMain.on('auth:login', async () => {
-  try {
-    const res = await fetch('http://localhost:3000/auth/login-url');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { url } = await res.json() as { url: string };
-    if (url) {
-      shell.openExternal(url);
-      console.log('🔗 OAuth URL opened in browser');
-      return;
-    }
-  } catch (err) {
-    console.warn('⚠️  Failed to fetch /auth/login-url, falling back to /auth/login', err);
+// Auth: construct OAuth URL from env vars and open in default browser
+ipcMain.on('auth:login', () => {
+  const clientId = process.env.TWITCH_CLIENT_ID;
+  if (!clientId) {
+    console.warn('⚠️  TWITCH_CLIENT_ID not configured — open .env.example for instructions');
+    return;
   }
-  // Fallback: open the login page directly — it will redirect to Twitch
-  shell.openExternal('http://localhost:3000/auth/login');
-  console.log('🔗 Fallback OAuth URL opened');
+  const redirectUri = process.env.TWITCH_REDIRECT_URI || 'http://localhost:3000/auth/callback';
+  const scopes = [
+    'chat:read', 'chat:edit',
+    'channel:read:redemptions',
+    'channel:manage:predictions', 'channel:read:predictions',
+    'channel:manage:raids', 'channel:manage:moderators',
+  ];
+
+  const url =
+    `https://id.twitch.tv/oauth2/authorize` +
+    `?client_id=${clientId}` +
+    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+    `&response_type=code` +
+    `&scope=${scopes.join('+')}` +
+    `&state=${Math.random().toString(36).slice(2)}`;
+
+  shell.openExternal(url);
+  console.log('🔗 OAuth URL opened in browser');
+
+  // Re-focus the main window after the browser opens (prevents window from appearing minimized)
+  setTimeout(() => {
+    mainWindow?.focus();
+    mainWindow?.show();
+  }, 500);
 });
 
 // Main window — always-on-top toggle (para gestionar sobre el juego)

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 
@@ -33,9 +33,11 @@ export function GiveawayOverlay({ channel }: Props) {
     setTimeout(() => setWinner(null), 15000);
   }, []));
 
-  if (channel && socket) {
-    socket.emit('join:channel', channel);
-  }
+  useEffect(() => {
+    if (channel && socket?.connected) {
+      socket.emit('join:channel', channel);
+    }
+  }, [channel, socket?.connected]);
 
   return (
     <>
