@@ -1,52 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Logo } from './Logo';
 
 interface Props {
   onReady: () => void;
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
-
 export function SplashScreen({ onReady }: Props) {
-  const isDesktop = !!window.streamforger?.isDesktop;
-  const [ready, setReady] = useState(false);
-
   useEffect(() => {
-    if (isDesktop) {
-      // Desktop: backend already started before window opened.
-      // Show splash 1.5s for aesthetics, then transition.
-      const t = setTimeout(() => setReady(true), 1500);
-      return () => clearTimeout(t);
-    }
-
-    // Browser: poll backend until ready
-    let cancelled = false;
-    let attempts = 0;
-
-    const check = async () => {
-      if (cancelled) return;
-      try {
-        const res = await fetch(`${BACKEND_URL}/auth/status`, { signal: AbortSignal.timeout(5000) });
-        if (cancelled) return;
-        if (res.ok) { setReady(true); return; }
-      } catch {
-        // Backend not ready yet
-      }
-      attempts++;
-      if (cancelled) return;
-      setTimeout(check, Math.min(1000 + attempts * 200, 3000));
-    };
-
-    setTimeout(check, 300);
-    return () => { cancelled = true; };
-  }, [isDesktop]);
-
-  useEffect(() => {
-    if (ready) {
-      const t = setTimeout(onReady, 400);
-      return () => clearTimeout(t);
-    }
-  }, [ready, onReady]);
+    const t = setTimeout(onReady, 2000);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div style={{
@@ -120,12 +83,11 @@ export function SplashScreen({ onReady }: Props) {
         <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
           <span style={{
             width: 8, height: 8, borderRadius: '50%',
-            background: ready ? 'var(--sf-success)' : '#7c3aed',
-            opacity: ready ? 1 : 0.4,
-            animation: ready ? 'none' : 'pulse-spinner 1s ease-in-out infinite',
+            background: '#7c3aed',
+            animation: 'pulse-spinner 1s ease-in-out infinite',
           }} />
           <span style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)' }}>
-            {ready ? '¡Listo!' : 'Cargando…'}
+            Cargando…
           </span>
         </div>
       </div>
