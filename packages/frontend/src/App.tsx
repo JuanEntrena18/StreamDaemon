@@ -4,49 +4,84 @@ import { useSocket } from './hooks/useSocket';
 import { useAuthStatus } from './hooks/useAuthStatus';
 import { GiveawayPanel } from './components/GiveawayPanel';
 import { PredictionPanel } from './components/PredictionPanel';
-import { TransparentOverlay } from './components/TransparentOverlay';
 import { ObsPanel } from './components/ObsPanel';
 import { Logo } from './components/Logo';
+import { ChatPanel } from './components/ChatPanel';
+import { ConfigPanel } from './components/ConfigPanel';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-type Tab = 'giveaway' | 'prediction' | 'overlay' | 'obs';
+type Tab = 'chat' | 'giveaway' | 'prediction' | 'obs' | 'config';
 
-const NAV_ITEMS: { id: Tab; icon: string; label: string; desktopOnly?: boolean }[] = [
-  { id: 'giveaway',   icon: '🎁', label: 'Sorteos' },
-  { id: 'prediction', icon: '📊', label: 'Predicciones' },
-  { id: 'overlay',    icon: '🪟', label: 'Overlay', desktopOnly: true },
-  { id: 'obs',        icon: '🔌', label: 'OBS URLs' },
+const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string; label: string }[] }[] = [
+  {
+    id: 'tools',
+    label: 'Herramientas',
+    items: [
+      { id: 'chat',       icon: '💬', label: 'Chat' },
+      { id: 'giveaway',   icon: '🎁', label: 'Sorteos' },
+      { id: 'prediction', icon: '📊', label: 'Predicciones' },
+      { id: 'obs',        icon: '🔌', label: 'OBS URLs' },
+    ],
+  },
+  {
+    id: 'config',
+    label: 'Configuración',
+    items: [
+      { id: 'config', icon: '⚙️', label: 'Configuración' },
+    ],
+  },
 ];
+
+const TAB_LABELS: Record<Tab, string> = {
+  chat: 'Chat',
+  giveaway: 'Sorteos',
+  prediction: 'Predicciones',
+  obs: 'OBS URLs',
+  config: 'Configuración',
+};
 
 export function App() {
   const { connected } = useSocket();
   const { authenticated, user, loading: authLoading, login } = useAuthStatus();
   const [channel, setChannel] = useState('');
-  const [activeTab, setActiveTab] = useState<Tab>('giveaway');
+  const [activeTab, setActiveTab] = useState<Tab>('chat');
 
-  // Auto-fill channel from authenticated Twitch user
+  const [alwaysOnTop, setAlwaysOnTop] = useState(false);
+  const [opacity, setOpacity] = useState(1);
+
   const userLogin = user?.login;
   useEffect(() => {
-    if (userLogin && !channel) {
-      setChannel(userLogin);
-    }
+    if (userLogin && !channel) setChannel(userLogin);
   }, [userLogin]);
 
-  const visibleTabs = NAV_ITEMS.filter((t) => !t.desktopOnly || isDesktop);
+  useEffect(() => {
+    if (!isDesktop) return;
+    window.streamforger?.window.getAlwaysOnTop().then(setAlwaysOnTop);
+  }, []);
+
+  function toggleAlwaysOnTop() {
+    const next = !alwaysOnTop;
+    setAlwaysOnTop(next);
+    window.streamforger?.window.setAlwaysOnTop(next);
+  }
+
+  function handleOpacity(v: number) {
+    setOpacity(v);
+    window.streamforger?.window.setOpacity(v);
+  }
 
   return (
     <div
       style={{
         minHeight: '100vh',
         display: 'flex',
-        background: 'var(--sf-bg)',
+        background: opacity < 1 ? `rgba(10,10,26,${opacity})` : 'var(--sf-bg)',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      {/* Background decoration blobs */}
       <div style={{
         position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
         background: `
@@ -63,17 +98,51 @@ export function App() {
         borderRight: '1px solid var(--sf-border)',
         display: 'flex',
         flexDirection: 'column',
-        padding: '1.5rem 0',
+        padding: '0',
         position: 'relative',
         zIndex: 10,
         flexShrink: 0,
       }}>
-        {/* Brand */}
-        <div style={{ padding: '0 1.25rem 1.75rem', borderBottom: '1px solid var(--sf-border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
-            <div className="animate-float">
-              <Logo size={38} />
+        {/* Title bar */}
+        <div
+          {...{ style: {
+            height: 38,
+            background: 'rgba(8,8,20,0.98)',
+            borderBottom: '1px solid var(--sf-border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 10px 0 14px',
+            WebkitAppRegion: 'drag',
+            flexShrink: 0,
+          } as React.CSSProperties }}
+        >
+          <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', letterSpacing: '0.06em', fontWeight: 600, userSelect: 'none' }}>
+            StreamForger
+          </span>
+
+          {isDesktop && (
+            <div
+            {...{ style: { display: 'flex', gap: 6, WebkitAppRegion: 'no-drag' } as React.CSSProperties }}
+            >
+              <button
+                onClick={() => window.streamforger?.window.minimize()}
+                title="Minimizar"
+                style={winBtnStyle('#f59e0b')}
+              >–</button>
+              <button
+                onClick={() => window.streamforger?.window.close()}
+                title="Cerrar"
+                style={winBtnStyle('#ef4444')}
+              >×</button>
             </div>
+          )}
+        </div>
+
+        {/* Brand */}
+        <div style={{ padding: '1.25rem 1.25rem 1rem', borderBottom: '1px solid var(--sf-border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
+            <div className="animate-float"><Logo size={38} /></div>
             <div>
               <div style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.02em', color: 'var(--sf-text)' }}>
                 StreamForger
@@ -85,56 +154,110 @@ export function App() {
           </div>
         </div>
 
-        {/* Nav */}
-        <nav style={{ flex: 1, padding: '1.25rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-          <p className="sf-section-title" style={{ paddingLeft: '0.5rem' }}>Herramientas</p>
-          {visibleTabs.map((item) => {
-            const isActive = activeTab === item.id;
-            return (
+        {/* Navigation */}
+        <nav style={{ flex: 1, padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', overflowY: 'auto' }}>
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.id}>
+              <p className="sf-section-title" style={{ paddingLeft: '0.5rem', marginBottom: '0.5rem' }}>
+                {section.label}
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                {section.items.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.625rem',
+                        padding: '0.625rem 0.75rem', borderRadius: '10px', border: 'none',
+                        cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.875rem',
+                        fontWeight: isActive ? 600 : 400, textAlign: 'left',
+                        transition: 'all 0.15s ease',
+                        background: isActive
+                          ? 'linear-gradient(135deg, rgba(124,58,237,0.25), rgba(99,102,241,0.15))'
+                          : 'transparent',
+                        color: isActive ? 'var(--sf-text)' : 'var(--sf-text-2)',
+                        borderLeft: isActive ? '2px solid var(--sf-primary)' : '2px solid transparent',
+                        outline: 'none',
+                        width: '100%',
+                      }}
+                    >
+                      <span style={{ fontSize: '1rem', minWidth: '1.25rem' }}>{item.icon}</span>
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+
+        {/* Overlay controls (desktop only) */}
+        {isDesktop && (
+          <div style={{
+            padding: '1rem 1.25rem',
+            borderTop: '1px solid var(--sf-border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.625rem',
+          }}>
+            <p className="sf-section-title">Modo overlay</p>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)' }}>
+                🎮 Siempre encima
+              </span>
               <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={toggleAlwaysOnTop}
+                title={alwaysOnTop ? 'Desactivar siempre encima' : 'Activar siempre encima'}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.625rem',
-                  padding: '0.625rem 0.75rem',
-                  borderRadius: '10px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  fontSize: '0.875rem',
-                  fontWeight: isActive ? 600 : 400,
-                  textAlign: 'left',
-                  transition: 'all 0.15s ease',
-                  background: isActive
-                    ? 'linear-gradient(135deg, rgba(124,58,237,0.25), rgba(99,102,241,0.15))'
-                    : 'transparent',
-                  color: isActive ? 'var(--sf-text)' : 'var(--sf-text-2)',
-                  borderLeft: isActive ? '2px solid var(--sf-primary)' : '2px solid transparent',
-                  outline: 'none',
+                  width: 38, height: 20, borderRadius: 99,
+                  background: alwaysOnTop ? 'var(--sf-primary)' : 'var(--sf-border)',
+                  border: 'none', cursor: 'pointer', position: 'relative',
+                  transition: 'background 0.2s', flexShrink: 0,
                 }}
               >
-                <span style={{ fontSize: '1rem', minWidth: '1.25rem' }}>{item.icon}</span>
-                {item.label}
+                <span style={{
+                  position: 'absolute', top: 2,
+                  left: alwaysOnTop ? 'calc(100% - 18px)' : 2,
+                  width: 16, height: 16, borderRadius: '50%',
+                  background: 'white', transition: 'left 0.2s',
+                }} />
               </button>
-            );
-          })}
-        </nav>
+            </div>
+
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)' }}>
+                  💧 Transparencia
+                </span>
+                <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)' }}>
+                  {Math.round(opacity * 100)}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min={10}
+                max={100}
+                value={Math.round(opacity * 100)}
+                onChange={(e) => handleOpacity(parseInt(e.target.value) / 100)}
+                style={{ width: '100%', accentColor: 'var(--sf-primary)', cursor: 'pointer' }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div style={{
-          padding: '1.25rem',
+          padding: '0.875rem 1.25rem',
           borderTop: '1px solid var(--sf-border)',
-          fontSize: '0.7rem',
-          color: 'var(--sf-text-3)',
-          lineHeight: 1.6,
+          fontSize: '0.7rem', color: 'var(--sf-text-3)', lineHeight: 1.6,
         }}>
-          <div>v0.1.0 · Open Source</div>
+          <div>v0.2.0 · Open Source</div>
           <a
-            href="https://github.com/cyber-haute-couture"
-            target="_blank"
-            rel="noreferrer"
+            href="https://github.com/JuanEntrena18/StreamForge"
+            target="_blank" rel="noreferrer"
             style={{ color: 'var(--sf-primary-light)', textDecoration: 'none' }}
           >
             GitHub ↗
@@ -145,23 +268,28 @@ export function App() {
       {/* ── Main ── */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, position: 'relative', zIndex: 1 }}>
 
+        {isDesktop && (
+          <div {...{ style: {
+            height: 38,
+            background: 'rgba(8,8,20,0.9)',
+            borderBottom: '1px solid var(--sf-border)',
+            WebkitAppRegion: 'drag',
+            flexShrink: 0,
+          } as React.CSSProperties }} />
+        )}
+
         {/* Top bar */}
         <header style={{
           padding: '1rem 2rem',
           borderBottom: '1px solid var(--sf-border)',
           background: 'rgba(13,13,30,0.7)',
           backdropFilter: 'blur(12px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '1rem',
-          position: 'sticky',
-          top: 0,
-          zIndex: 5,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+          position: 'sticky', top: 0, zIndex: 5,
         }}>
           <div>
             <h1 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--sf-text)', letterSpacing: '-0.01em' }}>
-              {NAV_ITEMS.find(t => t.id === activeTab)?.label}
+              {TAB_LABELS[activeTab]}
             </h1>
             <p style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)', marginTop: '1px' }}>
               Panel de control · StreamForger
@@ -174,11 +302,8 @@ export function App() {
               <span style={{
                 position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)',
                 fontSize: '0.85rem', color: 'var(--sf-text-3)', pointerEvents: 'none',
-              }}>
-                #
-              </span>
+              }}>#</span>
               <input
-                id="channel-input"
                 type="text"
                 placeholder="canal de twitch..."
                 value={channel}
@@ -188,10 +313,9 @@ export function App() {
               />
             </div>
 
-            {/* ── Twitch Auth ── */}
+            {/* Twitch Auth */}
             {!authLoading && (
               authenticated && user ? (
-                /* Logged-in pill */
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: '0.5rem',
                   background: 'rgba(145,71,255,0.12)',
@@ -199,13 +323,11 @@ export function App() {
                   borderRadius: '99px',
                   padding: '0.25rem 0.75rem 0.25rem 0.35rem',
                 }}>
-                  {/* Twitch avatar */}
                   <div style={{
                     width: 22, height: 22, borderRadius: '50%',
                     background: 'linear-gradient(135deg, #7c3aed, #6366f1)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '0.65rem', fontWeight: 700, color: '#fff',
-                    flexShrink: 0,
+                    fontSize: '0.65rem', fontWeight: 700, color: '#fff', flexShrink: 0,
                   }}>
                     {user.displayName.charAt(0).toUpperCase()}
                   </div>
@@ -214,27 +336,19 @@ export function App() {
                   </span>
                   <span style={{
                     width: 5, height: 5, borderRadius: '50%',
-                    background: 'var(--sf-success)',
-                    display: 'inline-block', flexShrink: 0,
+                    background: 'var(--sf-success)', display: 'inline-block', flexShrink: 0,
                   }} />
                 </div>
               ) : (
-                /* Login button */
                 <button
-                  id="twitch-login-btn"
-                  onClick={login}
+                  onClick={authLoading ? undefined : login}
                   className="sf-btn"
                   style={{
                     background: 'linear-gradient(135deg, #9147ff 0%, #6441a5 100%)',
-                    color: '#fff',
-                    fontSize: '0.8rem',
-                    padding: '0.5rem 1rem',
-                    gap: '0.4rem',
-                    boxShadow: '0 2px 12px rgba(145,71,255,0.35)',
-                    whiteSpace: 'nowrap',
+                    color: '#fff', fontSize: '0.8rem', padding: '0.5rem 1rem',
+                    gap: '0.4rem', boxShadow: '0 2px 12px rgba(145,71,255,0.35)', whiteSpace: 'nowrap',
                   }}
                 >
-                  {/* Twitch logo SVG */}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
                   </svg>
@@ -271,22 +385,26 @@ export function App() {
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
             >
-              {activeTab === 'giveaway' && (
-                <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />
-              )}
-              {activeTab === 'prediction' && (
-                <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />
-              )}
-              {activeTab === 'overlay' && isDesktop && (
-                <TransparentOverlay channel={channel} />
-              )}
-              {activeTab === 'obs' && (
-                <ObsPanel channel={channel} />
-              )}
+              {activeTab === 'chat'       && <ChatPanel channel={channel} />}
+              {activeTab === 'giveaway'   && <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'prediction' && <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'obs'        && <ObsPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'config'     && <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />}
             </motion.div>
           </AnimatePresence>
         </div>
       </main>
     </div>
   );
+}
+
+function winBtnStyle(color: string): React.CSSProperties {
+  return {
+    width: 14, height: 14, borderRadius: '50%',
+    background: color, border: 'none', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: '0.55rem', fontWeight: 700, color: 'transparent',
+    transition: 'color 0.1s',
+    padding: 0,
+  };
 }

@@ -61,6 +61,21 @@ export async function setupAuth(app: FastifyInstance) {
     reply.redirect(url);
   });
 
+  // Returns the Twitch OAuth URL as JSON — used by the Electron main process
+  // so it can open the URL directly with shell.openExternal without needing
+  // to follow a redirect (which fails in packaged apps).
+  app.get('/auth/login-url', (_req, reply) => {
+    const state = Math.random().toString(36).slice(2);
+    const url =
+      `https://id.twitch.tv/oauth2/authorize` +
+      `?client_id=${config.TWITCH_CLIENT_ID}` +
+      `&redirect_uri=${encodeURIComponent(config.TWITCH_REDIRECT_URI)}` +
+      `&response_type=code` +
+      `&scope=${SCOPES.join('+')}` +
+      `&state=${state}`;
+    reply.send({ url });
+  });
+
   app.get('/auth/callback', async (req, reply) => {
     const { code } = req.query as { code?: string };
     if (!code) return reply.status(400).send({ error: 'Missing code' });

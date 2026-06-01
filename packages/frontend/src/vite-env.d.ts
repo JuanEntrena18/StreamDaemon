@@ -13,6 +13,13 @@ interface StreamforgerAPI {
   auth: {
     login: () => void;
   };
+  window: {
+    minimize:       () => void;
+    close:          () => void;
+    setAlwaysOnTop: (value: boolean) => void;
+    getAlwaysOnTop: () => Promise<boolean>;
+    setOpacity:     (value: number) => void;
+  };
 }
 
 interface Window {

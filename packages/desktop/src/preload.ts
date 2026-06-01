@@ -1,7 +1,7 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, shell } from 'electron';
 
 contextBridge.exposeInMainWorld('streamforger', {
-  platform: process.platform,
+  isDesktop: true,
   backendUrl: 'http://localhost:3000',
 
   overlay: {
@@ -15,5 +15,17 @@ contextBridge.exposeInMainWorld('streamforger', {
 
   auth: {
     login: () => ipcRenderer.send('auth:login'),
+  },
+
+  window: {
+    minimize:       ()              => ipcRenderer.send('window:minimize'),
+    close:          ()              => ipcRenderer.send('window:close'),
+    setAlwaysOnTop: (v: boolean)    => ipcRenderer.send('window:setAlwaysOnTop', v),
+    getAlwaysOnTop: ()              => ipcRenderer.invoke('window:getAlwaysOnTop'),
+    setOpacity:     (v: number)     => ipcRenderer.send('window:setOpacity', v),
+  },
+
+  shell: {
+    openExternal: (url: string) => shell.openExternal(url),
   },
 });

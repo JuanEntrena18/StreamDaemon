@@ -103,20 +103,29 @@ npm run build:desktop
 
 ## 🎨 Dashboard
 
-El panel de control cuenta con un rediseño premium (v0.1.0):
+El panel de control cuenta con un rediseño premium (v0.2.0):
 
-- **Sidebar de navegación** con acceso a Sorteos, Predicciones, Overlay Transparente y URLs de OBS
+- **Sidebar de navegación** con secciones:
+  - **Herramientas:** Chat en vivo, Sorteos, Predicciones, OBS URLs
+  - **Configuración:** Conexión Twitch, preferencias de ventana, acerca de
 - **Glassmorphism** — cards semitransparentes con blur y bordes sutiles
 - **Animaciones** con Framer Motion en transiciones de tab y estados activos
 - **Tipografía Inter** (Google Fonts) con sistema de tokens CSS
 - **Indicador de conexión** animado (pulso) en la barra superior
 - **Badge de estado** con color temático por sección
 
+### Panel de Chat
+
+- Visor de chat en vivo con scroll automático
+- Botón para abrir el chat en ventana transparente siempre encima de todo
+- Conexión en tiempo real vía Socket.IO
+
 ### Panel de Sorteos
 
 - Formulario con selector de duración tipo pills
 - Card activa con contador de participantes animado y badge pulsante
 - Botón para finalizar con selección aleatoria de ganador
+- **Ruleta aleatoria** — añade nombres y haz girar la ruleta para escoger un ganador al azar
 
 ### Panel de Predicciones
 

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
   channel: string;
+  backendUrl?: string;
 }
 
 interface OBSUrl {
@@ -79,12 +80,12 @@ const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
   { platform: 'github',    icon: '💻', label: 'GitHub',        placeholder: 'https://github.com/tu_usuario',   url: '', color: '#e6edf3' },
 ];
 
-export function ObsPanel({ channel }: Props) {
+export function ObsPanel({ channel, backendUrl }: Props) {
   const [selectedTheme, setSelectedTheme] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
   const [socialExpanded, setSocialExpanded] = useState(false);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(DEFAULT_SOCIAL_LINKS);
-  const baseUrl = 'http://localhost:5173';
+  const baseUrl = backendUrl || 'http://localhost:3000';
 
   function buildUrl(mode: string, supportsTheme: boolean): string {
     let url = `${baseUrl}/overlay.html?mode=${mode}`;

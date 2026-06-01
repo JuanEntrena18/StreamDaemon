@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocketEvent } from '../hooks/useSocket';
 
@@ -22,11 +22,25 @@ const DURATION_OPTIONS = [
   { value: 600, label: '10 min' },
 ];
 
+const WHEEL_COLORS = [
+  '#7c3aed', '#6366f1', '#8b5cf6', '#a78bfa',
+  '#06b6d4', '#10b981', '#f59e0b', '#ef4444',
+  '#ec4899', '#f97316',
+];
+
 export function GiveawayPanel({ channel, backendUrl }: Props) {
   const [prize, setPrize] = useState('');
   const [duration, setDuration] = useState(60);
   const [message, setMessage] = useState('');
   const [active, setActive] = useState<ActiveGiveaway | null>(null);
+
+  // Wheel state
+  const [wheelNames, setWheelNames] = useState<string[]>([]);
+  const [wheelInput, setWheelInput] = useState('');
+  const [spinning, setSpinning] = useState(false);
+  const [winner, setWinner] = useState<string | null>(null);
+  const [rotation, setRotation] = useState(0);
+  const wheelRef = useRef<HTMLCanvasElement>(null);
 
   useSocketEvent('giveaway:start', useCallback((data: ActiveGiveaway) => {
     setActive(data);
@@ -45,6 +59,108 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
       .then((data) => { if (data && data.id) setActive(data); })
       .catch(() => {});
   }, [channel, backendUrl]);
+
+  useEffect(() => {
+    drawWheel();
+  }, [wheelNames, rotation]);
+
+  function drawWheel() {
+    const canvas = wheelRef.current;
+    if (!canvas || wheelNames.length === 0) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const w = canvas.width;
+    const h = canvas.height;
+    const cx = w / 2;
+    const cy = h / 2;
+    const r = Math.min(cx, cy) - 4;
+    const slice = (2 * Math.PI) / wheelNames.length;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rotation);
+    ctx.translate(-cx, -cy);
+
+    for (let i = 0; i < wheelNames.length; i++) {
+      const startAngle = i * slice - Math.PI / 2;
+      const endAngle = startAngle + slice;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fillStyle = WHEEL_COLORS[i % WHEEL_COLORS.length];
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Text
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(startAngle + slice / 2);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px Inter, sans-serif';
+      ctx.fillText(wheelNames[i].substring(0, 12), r - 12, 4);
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  function addWheelName() {
+    const name = wheelInput.trim();
+    if (!name || wheelNames.includes(name)) return;
+    setWheelNames([...wheelNames, name]);
+    setWheelInput('');
+    setWinner(null);
+  }
+
+  function removeWheelName(idx: number) {
+    setWheelNames(wheelNames.filter((_, i) => i !== idx));
+    setWinner(null);
+  }
+
+  function spinWheel() {
+    if (wheelNames.length < 2 || spinning) return;
+    setSpinning(true);
+    setWinner(null);
+
+    const spins = 5 + Math.floor(Math.random() * 5);
+    const target = Math.random() * 2 * Math.PI;
+    const totalRotation = spins * 2 * Math.PI + target;
+    const startRotation = rotation;
+    const endRotation = startRotation + totalRotation;
+
+    const duration = 4000;
+    const startTime = performance.now();
+
+    function animate(time: number) {
+      const elapsed = time - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Easing: cubic out
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const currentRotation = startRotation + totalRotation * eased;
+      setRotation(currentRotation);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setRotation(endRotation);
+        setSpinning(false);
+        // Determine winner
+        const slice = (2 * Math.PI) / wheelNames.length;
+        // The pointer is at top (270 degrees / -PI/2)
+        const normalizedRotation = ((endRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+        const pointerAngle = (3 * Math.PI / 2 - normalizedRotation + 2 * Math.PI) % (2 * Math.PI);
+        const winnerIdx = Math.floor(pointerAngle / slice) % wheelNames.length;
+        setWinner(wheelNames[winnerIdx]);
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
 
   const startGiveaway = async () => {
     if (!prize.trim() || !channel) return;
@@ -70,154 +186,248 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
   };
 
   return (
-    <div style={{ maxWidth: 600 }}>
-      {/* Header */}
+    <div style={{ maxWidth: 700 }}>
       <div style={{ marginBottom: '1.75rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           🎁 Sorteos
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-          Gestiona sorteos en tiempo real a través del chat de Twitch.
+          Gestiona sorteos o usa la ruleta aleatoria para escoger ganadores
         </p>
       </div>
 
-      <AnimatePresence mode="wait">
-        {active ? (
-          /* ── Active giveaway card ── */
-          <motion.div
-            key="active"
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.97 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div
-              className="glass-card glass-card--accent animate-glow"
-              style={{ padding: '1.5rem', marginBottom: '1rem' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <div>
-                  <span className="sf-badge sf-badge-success" style={{ marginBottom: '0.625rem' }}>
-                    <span className="animate-pulse-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--sf-success)', display: 'inline-block' }} />
-                    Sorteo activo
-                  </span>
-                  <h3 style={{ fontSize: '1.375rem', fontWeight: 700, color: 'var(--sf-text)', marginTop: '0.25rem', lineHeight: 1.3 }}>
-                    {active.prize}
-                  </h3>
-                </div>
-              </div>
-
-              <div style={{
-                background: 'rgba(16,185,129,0.08)',
-                border: '1px solid rgba(16,185,129,0.2)',
-                borderRadius: 10,
-                padding: '0.875rem 1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                marginBottom: '1.25rem',
-              }}>
-                <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#34d399' }}>
-                  {active.entries}
-                </span>
-                <div>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#34d399' }}>participantes</div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)' }}>Escribe !sorteo en el chat para participar</div>
-                </div>
-              </div>
-
-              <button
-                id="end-giveaway-btn"
-                onClick={endGiveaway}
-                className="sf-btn sf-btn-danger"
-                style={{ width: '100%' }}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        {/* ── Existing giveaway system ── */}
+        <div>
+          <AnimatePresence mode="wait">
+            {active ? (
+              <motion.div
+                key="active"
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={{ duration: 0.2 }}
               >
-                Finalizar sorteo y escoger ganador
-              </button>
-            </div>
-          </motion.div>
-        ) : (
-          /* ── Create giveaway form ── */
-          <motion.div
-            key="form"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="glass-card" style={{ padding: '1.5rem' }}>
-              <p className="sf-section-title">Nuevo sorteo</p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
-                    Premio
-                  </label>
-                  <input
-                    id="giveaway-prize-input"
-                    type="text"
-                    placeholder="ej. Suscripción de 3 meses..."
-                    value={prize}
-                    onChange={(e) => setPrize(e.target.value)}
-                    disabled={!channel}
-                    className="sf-input"
-                  />
+                <div className="glass-card glass-card--accent animate-glow" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                    <div>
+                      <span className="sf-badge sf-badge-success" style={{ marginBottom: '0.625rem' }}>
+                        <span className="animate-pulse-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--sf-success)', display: 'inline-block' }} />
+                        Sorteo activo
+                      </span>
+                      <h3 style={{ fontSize: '1.375rem', fontWeight: 700, color: 'var(--sf-text)', marginTop: '0.25rem', lineHeight: 1.3 }}>
+                        {active.prize}
+                      </h3>
+                    </div>
+                  </div>
+                  <div style={{
+                    background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)',
+                    borderRadius: 10, padding: '0.875rem 1rem',
+                    display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem',
+                  }}>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#34d399' }}>
+                      {active.entries}
+                    </span>
+                    <div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#34d399' }}>participantes</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)' }}>Escribe !sorteo en el chat para participar</div>
+                    </div>
+                  </div>
+                  <button onClick={endGiveaway} className="sf-btn sf-btn-danger" style={{ width: '100%' }}>
+                    Finalizar sorteo y escoger ganador
+                  </button>
                 </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
-                    Duración
-                  </label>
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    {DURATION_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setDuration(opt.value)}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="form"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                  <p className="sf-section-title">Nuevo sorteo</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
+                        Premio
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="ej. Suscripción de 3 meses..."
+                        value={prize}
+                        onChange={(e) => setPrize(e.target.value)}
                         disabled={!channel}
-                        style={{
-                          padding: '0.35rem 0.875rem',
-                          borderRadius: 99,
-                          border: '1px solid',
-                          borderColor: duration === opt.value ? 'var(--sf-primary)' : 'var(--sf-border)',
-                          background: duration === opt.value ? 'rgba(124,58,237,0.2)' : 'transparent',
-                          color: duration === opt.value ? '#a78bfa' : 'var(--sf-text-3)',
-                          fontSize: '0.8rem',
-                          fontWeight: duration === opt.value ? 600 : 400,
-                          cursor: 'pointer',
-                          fontFamily: 'inherit',
-                          transition: 'all 0.15s ease',
-                          opacity: !channel ? 0.4 : 1,
-                        }}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
+                        className="sf-input"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
+                        Duración
+                      </label>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {DURATION_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.value}
+                            onClick={() => setDuration(opt.value)}
+                            disabled={!channel}
+                            style={{
+                              padding: '0.35rem 0.875rem', borderRadius: 99, border: '1px solid',
+                              borderColor: duration === opt.value ? 'var(--sf-primary)' : 'var(--sf-border)',
+                              background: duration === opt.value ? 'rgba(124,58,237,0.2)' : 'transparent',
+                              color: duration === opt.value ? '#a78bfa' : 'var(--sf-text-3)',
+                              fontSize: '0.8rem', fontWeight: duration === opt.value ? 600 : 400,
+                              cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s ease',
+                              opacity: !channel ? 0.4 : 1,
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <button
+                      onClick={startGiveaway}
+                      disabled={!prize.trim() || !channel}
+                      className="sf-btn sf-btn-primary"
+                      style={{ width: '100%', marginTop: '0.25rem' }}
+                    >
+                      🎁 Iniciar sorteo
+                    </button>
+                    {message && <p style={{ fontSize: '0.8rem', color: 'var(--sf-warning)', textAlign: 'center' }}>{message}</p>}
+                    {!channel && (
+                      <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', textAlign: 'center' }}>
+                        Ingresa tu canal de Twitch en la barra superior
+                      </p>
+                    )}
                   </div>
                 </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-                <button
-                  id="start-giveaway-btn"
-                  onClick={startGiveaway}
-                  disabled={!prize.trim() || !channel}
-                  className="sf-btn sf-btn-primary"
-                  style={{ width: '100%', marginTop: '0.25rem' }}
-                >
-                  🎁 Iniciar sorteo
-                </button>
+        {/* ── Spin wheel ── */}
+        <div>
+          <div className="glass-card" style={{ padding: '1.5rem' }}>
+            <p className="sf-section-title" style={{ marginBottom: '0.75rem' }}>🎡 Ruleta aleatoria</p>
+            <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '1rem', lineHeight: 1.4 }}>
+              Añade nombres y haz girar la ruleta para escoger un ganador al azar.
+            </p>
 
-                {message && (
-                  <p style={{ fontSize: '0.8rem', color: 'var(--sf-warning)', textAlign: 'center' }}>{message}</p>
-                )}
-                {!channel && (
-                  <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', textAlign: 'center' }}>
-                    Ingresa tu canal de Twitch en la barra superior para comenzar
-                  </p>
-                )}
-              </div>
+            {/* Input */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+              <input
+                type="text"
+                value={wheelInput}
+                onChange={(e) => setWheelInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') addWheelName(); }}
+                placeholder="Nombre del participante"
+                className="sf-input"
+                style={{ flex: 1, fontSize: '0.82rem' }}
+              />
+              <button
+                onClick={addWheelName}
+                disabled={!wheelInput.trim()}
+                className="sf-btn sf-btn-primary"
+                style={{ padding: '0.4rem 0.75rem', fontSize: '0.78rem' }}
+              >
+                Añadir
+              </button>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+            {/* Names list */}
+            {wheelNames.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginBottom: '1rem' }}>
+                {wheelNames.map((name, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+                      padding: '0.2rem 0.6rem', borderRadius: 99,
+                      background: `${WHEEL_COLORS[i % WHEEL_COLORS.length]}33`,
+                      border: `1px solid ${WHEEL_COLORS[i % WHEEL_COLORS.length]}66`,
+                      fontSize: '0.78rem', color: 'var(--sf-text-2)',
+                    }}
+                  >
+                    {name}
+                    <button
+                      onClick={() => removeWheelName(i)}
+                      style={{
+                        background: 'none', border: 'none', color: 'var(--sf-text-3)',
+                        cursor: 'pointer', padding: 0, fontSize: '0.85rem', lineHeight: 1,
+                      }}
+                    >×</button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Canvas wheel */}
+            <div style={{ position: 'relative', width: '100%', aspectRatio: '1', marginBottom: '1rem' }}>
+              {wheelNames.length < 2 ? (
+                <div style={{
+                  width: '100%', height: '100%', borderRadius: '50%',
+                  border: '2px dashed var(--sf-border)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--sf-text-3)', fontSize: '0.82rem',
+                }}>
+                  Añade al menos 2 nombres
+                </div>
+              ) : (
+                <>
+                  <canvas
+                    ref={wheelRef}
+                    width={280}
+                    height={280}
+                    style={{ width: '100%', height: '100%', borderRadius: '50%' }}
+                  />
+                  {/* Pointer */}
+                  <div style={{
+                    position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%)',
+                    width: 0, height: 0,
+                    borderLeft: '10px solid transparent',
+                    borderRight: '10px solid transparent',
+                    borderTop: '14px solid var(--sf-text)',
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+                    zIndex: 2,
+                  }} />
+                </>
+              )}
+            </div>
+
+            {/* Spin button + winner */}
+            <button
+              onClick={spinWheel}
+              disabled={wheelNames.length < 2 || spinning}
+              className={`sf-btn ${spinning ? 'sf-btn-ghost' : 'sf-btn-primary'}`}
+              style={{ width: '100%', marginBottom: winner ? '0.75rem' : 0 }}
+            >
+              {spinning ? '🎡 Girando...' : '🎡 Girar ruleta'}
+            </button>
+
+            {winner && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                style={{
+                  padding: '0.75rem 1rem', borderRadius: 'var(--sf-radius-sm)',
+                  background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)',
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 600, marginBottom: '0.15rem' }}>
+                  🏆 GANADOR
+                </div>
+                <div style={{ fontSize: '1.125rem', fontWeight: 700, color: '#6ee7b7' }}>
+                  {winner}
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

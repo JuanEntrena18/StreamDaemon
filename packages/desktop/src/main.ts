@@ -1,58 +1,94 @@
-import { app, BrowserWindow, shell, ipcMain, globalShortcut } from 'electron';
-import { config as dotenvConfig } from 'dotenv';
-import { resolve } from 'path';
+import {
+  app, BrowserWindow, shell, ipcMain,
+  globalShortcut, Menu,
+} from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { readFileSync } from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = !app.isPackaged;
 
-// Load backend .env so we have Twitch credentials available in the main process
-dotenvConfig({ path: resolve(__dirname, '../../backend/.env') });
+// ── Remove default menu (File / Edit / View…) ─────────────
+Menu.setApplicationMenu(null);
+
+// ── Load backend credentials BEFORE importing the backend ──
+// The backend's config.ts uses `import 'dotenv/config'` which reads
+// from process.cwd() — but Electron's CWD is the desktop package,
+// not the backend package. We manually inject the vars here.
+function loadBackendEnv() {
+  const envPath = isDev
+    ? path.resolve(__dirname, '../../backend/.env')       // dev: source tree
+    : path.join(process.resourcesPath, 'backend.env');   // prod: extraResources
+
+  try {
+    const raw = readFileSync(envPath, 'utf8');
+    for (const line of raw.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eq = trimmed.indexOf('=');
+      if (eq === -1) continue;
+      const key = trimmed.slice(0, eq).trim();
+      const val = trimmed.slice(eq + 1).trim();
+      // Only set if not already overridden by the OS environment
+      if (!process.env[key]) process.env[key] = val;
+    }
+    console.log('✅ Backend .env loaded');
+  } catch (err) {
+    console.warn('⚠️  Could not load backend .env:', err);
+  }
+}
+
+loadBackendEnv();
 
 // ── Database setup ────────────────────────────────────────
-// Point Prisma at the SQLite file bundled with the desktop package.
-// This must be set BEFORE the backend module is imported so that
-// PrismaClient picks up the correct datasource URL at initialisation.
 const dbPath = isDev
   ? path.resolve(__dirname, '../prisma/streamforger.db')
   : path.join(app.getPath('userData'), 'streamforger.db');
 
 process.env.DATABASE_URL = `file:${dbPath}`;
 
-// ── Frontend path (production only) ──────────────────────
-// extraResources copies packages/frontend/dist → resources/frontend/dist
+// In production, the backend serves the frontend — redirect after OAuth must
+// point to the embedded server, not the Vite dev server.
+if (!isDev) {
+  process.env.FRONTEND_URL = 'http://localhost:3000';
+}
+
+// ── Frontend dist path ────────────────────────────────────
+// In production, extraResources copies frontend/dist → resources/frontend/dist
+function getFrontendDistDir(): string {
+  return isDev
+    ? path.resolve(__dirname, '../../frontend/dist')
+    : path.join(process.resourcesPath, 'frontend', 'dist');
+}
+
 function getFrontendPath(...parts: string[]): string {
-  return path.join(process.resourcesPath, 'frontend', 'dist', ...parts);
+  return path.join(getFrontendDistDir(), ...parts);
 }
 
 let mainWindow: BrowserWindow | null = null;
 let overlayWindow: BrowserWindow | null = null;
 let overlayIgnoreMouse = true;
+let mainAlwaysOnTop = false;
 
+// ── Backend ───────────────────────────────────────────────
 async function startBackend() {
   try {
     const { startServer } = await import('@streamforger/backend/dist/index.js');
-    const opts: { port: number; frontendDir?: string } = { port: 3000 };
-    await startServer(opts);
-    console.log('✅ Backend started successfully');
+    // Pass frontendDir so the backend serves overlay.html at localhost:3000
+    // This makes OBS Browser Source URLs work in production.
+    await startServer({ port: 3000, frontendDir: getFrontendDistDir() });
+    console.log('✅ Backend started — serving frontend at http://localhost:3000');
   } catch (err) {
-    // Backend failure should not prevent the window from showing.
-    // The UI loads directly from the file system (loadFile), so it
-    // is always visible regardless of backend status.
     console.error('⚠️  Backend failed to start:', err);
   }
 }
 
+// ── Main window ───────────────────────────────────────────
 function loadWithRetry(win: BrowserWindow, url: string, attempts = 5, delay = 2000): void {
   win.loadURL(url).catch((err) => {
-    if (attempts <= 1) {
-      console.error('❌ Could not load URL after all retries:', url, err);
-      // Last resort: show the window with an error page rather than staying invisible
-      win.show();
-      return;
-    }
-    console.warn(`⚠️  loadURL failed, retrying in ${delay}ms… (${attempts - 1} attempts left)`);
+    if (attempts <= 1) { win.show(); return; }
+    console.warn(`⚠️  loadURL failed, retrying in ${delay}ms… (${attempts - 1} left)`);
     setTimeout(() => loadWithRetry(win, url, attempts - 1, delay), delay);
   });
 }
@@ -61,8 +97,13 @@ function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
+    minWidth: 900,
+    minHeight: 600,
     show: false,
-    backgroundColor: '#0f0f23',
+    frame: false,             // Custom titlebar — removes OS chrome
+    transparent: true,        // Allows opacity/transparency over games
+    backgroundColor: '#00000000',
+    titleBarStyle: 'hidden',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -70,33 +111,21 @@ function createMainWindow() {
     },
   });
 
-  // Show as soon as the page is ready to paint
   mainWindow.once('ready-to-show', () => {
     mainWindow?.show();
     mainWindow?.focus();
   });
 
-  // Fallback: if ready-to-show never fires within 3 seconds, show anyway.
-  // With loadFile() this should almost never happen.
   const showFallback = setTimeout(() => {
-    if (mainWindow && !mainWindow.isVisible()) {
-      console.warn('⚠️  ready-to-show never fired — forcing window visibility');
-      mainWindow.show();
-    }
+    if (mainWindow && !mainWindow.isVisible()) mainWindow.show();
   }, 3000);
-
   mainWindow.once('show', () => clearTimeout(showFallback));
 
   if (isDev) {
-    // Dev: Vite serves the app on localhost:5173
     loadWithRetry(mainWindow, 'http://localhost:5173');
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
-    // Production: load the bundled index.html directly from the file system.
-    // This is instant and does not depend on the backend being ready.
-    mainWindow.loadFile(getFrontendPath('index.html')).catch((err) => {
-      console.error('❌ Failed to load index.html:', err);
-      mainWindow?.show();
-    });
+    mainWindow.loadFile(getFrontendPath('index.html')).catch(() => mainWindow?.show());
   }
 
   mainWindow.on('closed', () => { mainWindow = null; });
@@ -107,6 +136,7 @@ function createMainWindow() {
   });
 }
 
+// ── Overlay window ────────────────────────────────────────
 function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: string) {
   if (overlayWindow) overlayWindow.close();
 
@@ -134,11 +164,11 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
     const devUrl = `http://localhost:5173/overlay.html?mode=chat&channel=${urlOrChannel}${theme ? `&theme=${theme}` : ''}`;
     overlayWindow.loadURL(devUrl);
   } else {
-    // Production: load overlay.html from file system with query params
     overlayWindow.loadFile(getFrontendPath('overlay.html'), {
       query: { mode: 'chat', channel: urlOrChannel, ...(theme ? { theme } : {}) },
     });
   }
+
   overlayWindow.setIgnoreMouseEvents(true, { forward: true });
 
   overlayWindow.webContents.on('did-finish-load', () => {
@@ -165,55 +195,57 @@ function toggleClickThrough() {
 
 // ── IPC ───────────────────────────────────────────────────
 
-ipcMain.on('overlay:open', (_event, url: string, isUrl: boolean, theme?: string) => {
+// Overlay controls
+ipcMain.on('overlay:open', (_e, url: string, isUrl: boolean, theme?: string) => {
   createOverlayWindow(url, isUrl, theme);
 });
-
-ipcMain.on('overlay:close', () => {
-  overlayWindow?.close();
-});
-
+ipcMain.on('overlay:close', () => overlayWindow?.close());
 ipcMain.handle('overlay:isOpen', () => overlayWindow !== null && !overlayWindow.isDestroyed());
 ipcMain.on('overlay:toggleClickThrough', toggleClickThrough);
 ipcMain.handle('overlay:getClickThrough', () => overlayIgnoreMouse);
-ipcMain.on('auth:login', () => {
-  const clientId = process.env.TWITCH_CLIENT_ID ?? '';
-  const redirectUri = process.env.TWITCH_REDIRECT_URI ?? 'http://localhost:3000/auth/callback';
-  const scopes = [
-    'chat:read',
-    'chat:edit',
-    'channel:read:redemptions',
-    'channel:manage:predictions',
-    'channel:read:predictions',
-    'channel:manage:raids',
-    'channel:manage:moderators',
-  ];
-  if (!clientId) {
-    // Fallback to backend redirect if no client ID is configured
-    shell.openExternal('http://localhost:3000/auth/login');
-    return;
+
+// Auth: fetch the OAuth URL from the backend and open in default browser
+ipcMain.on('auth:login', async () => {
+  try {
+    const res = await fetch('http://localhost:3000/auth/login-url');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { url } = await res.json() as { url: string };
+    if (url) {
+      shell.openExternal(url);
+      console.log('🔗 OAuth URL opened in browser');
+      return;
+    }
+  } catch (err) {
+    console.warn('⚠️  Failed to fetch /auth/login-url, falling back to /auth/login', err);
   }
-  const state = Math.random().toString(36).slice(2);
-  const url =
-    `https://id.twitch.tv/oauth2/authorize` +
-    `?client_id=${clientId}` +
-    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-    `&response_type=code` +
-    `&scope=${scopes.join('+')}` +
-    `&state=${state}`;
-  shell.openExternal(url);
+  // Fallback: open the login page directly — it will redirect to Twitch
+  shell.openExternal('http://localhost:3000/auth/login');
+  console.log('🔗 Fallback OAuth URL opened');
 });
+
+// Main window — always-on-top toggle (para gestionar sobre el juego)
+ipcMain.handle('window:getAlwaysOnTop', () => mainAlwaysOnTop);
+ipcMain.on('window:setAlwaysOnTop', (_e, value: boolean) => {
+  mainAlwaysOnTop = value;
+  mainWindow?.setAlwaysOnTop(value, 'screen-saver');
+});
+
+// Main window — opacity (0.1 – 1.0)
+ipcMain.on('window:setOpacity', (_e, value: number) => {
+  mainWindow?.setOpacity(Math.max(0.1, Math.min(1, value)));
+});
+
+// Main window drag / minimize / close
+ipcMain.on('window:minimize', () => mainWindow?.minimize());
+ipcMain.on('window:close',    () => mainWindow?.close());
 
 // ── Lifecycle ─────────────────────────────────────────────
 
 app.whenReady().then(async () => {
-  // Register global shortcuts
   globalShortcut.register('CommandOrControl+Shift+T', toggleClickThrough);
 
-  // Start backend (non-fatal — window opens regardless)
+  // Load backend credentials, then start the backend, then open the window
   await startBackend();
-
-  // Create and show the main dashboard window
   createMainWindow();
 });
 

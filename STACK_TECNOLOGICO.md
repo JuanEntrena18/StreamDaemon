@@ -44,13 +44,15 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 ### Componentes del Dashboard
 
 | Componente | Descripción |
-|---|---|
-| `App.tsx` | Layout principal con sidebar de navegación + header sticky + tab transitions |
+|---|---|---|
+| `App.tsx` | Layout principal con sidebar (Chat, Sorteos, Predicciones, OBS URLs, Configuración) + header + tab transitions |
 | `Logo.tsx` | SVG hexagonal con gradiente violeta-índigo y rayo (ícono de "forja") |
-| `GiveawayPanel.tsx` | Panel de sorteos con badge pulsante de estado y counter de participantes |
+| `ChatPanel.tsx` | Visor de chat en vivo con scroll infinito y botón para abrir ventana transparente siempre-encima |
+| `GiveawayPanel.tsx` | Panel de sorteos con badge pulsante, counter de participantes + ruleta aleatoria con canvas |
 | `PredictionPanel.tsx` | Panel de predicciones con opciones A/B/C y feedback animado |
-| `TransparentOverlay.tsx` | Control del overlay con toggle switch y selector de tema por color de juego |
-| `ObsPanel.tsx` | Panel de URLs para OBS con cards, copiar al portapapeles y selector de tema |
+| `ConfigPanel.tsx` | Configuración: conexión Twitch OAuth, toggle siempre-encima, acerca de con GitHub |
+| `TransparentOverlay.tsx` | Control del overlay transparente (modo canal / URL personalizada) |
+| `ObsPanel.tsx` | Panel de URLs para OBS Browser Source con cards, copiar al portapapeles y selector de tema |
 | `ChatOverlay.tsx` | Overlay de chat para Browser Source con animaciones temáticas |
 | `GiveawayOverlay.tsx` | Overlay de sorteos para Browser Source |
 | `PredictionOverlay.tsx` | Overlay de predicciones para Browser Source |

@@ -1,6 +1,6 @@
 {
   "name": "@streamforger/desktop",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "description": "StreamForger — Open-source stream tools, forged for creators",
   "author": "Cyber Haute Couture",
   "private": true,
@@ -40,12 +40,15 @@
       "prisma/**/*",
       "node_modules/**/*"
     ],
-    "extraFiles": [],
     "extraResources": [
       {
         "from": "../frontend/dist",
         "to": "frontend/dist",
         "filter": ["**/*"]
+      },
+      {
+        "from": "../backend/.env",
+        "to": "backend.env"
       }
     ],
     "win": {
