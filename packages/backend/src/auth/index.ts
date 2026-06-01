@@ -205,8 +205,14 @@ export async function setupAuth(app: FastifyInstance) {
   }));
 }
 
+function normalizeScope(scope: unknown): string[] {
+  if (Array.isArray(scope)) return scope as string[];
+  if (typeof scope === 'string') return scope.split(' ');
+  return SCOPES;
+}
+
 async function finishAuth(
-  tokenData: { access_token: string; refresh_token?: string; expires_in?: number; scope?: string },
+  tokenData: { access_token: string; refresh_token?: string; expires_in?: number; scope?: string | string[] },
   twitchUser: { id: string; login: string; display_name: string; profile_image_url: string },
 ) {
   currentUser = {
@@ -246,7 +252,7 @@ async function finishAuth(
       refreshToken: tokenData.refresh_token ?? null,
       expiresIn: tokenData.expires_in ?? null,
       obtainmentTimestamp: Date.now(),
-      scope: tokenData.scope?.split(' ') ?? SCOPES,
+      scope: normalizeScope(tokenData.scope),
     },
     ['chat'],
   );
