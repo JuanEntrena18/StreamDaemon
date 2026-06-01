@@ -42,10 +42,8 @@ export function useAuthStatus() {
 
   const login = useCallback(() => {
     if (window.streamforger) {
-      // Desktop: open Twitch OAuth in the default browser via Electron IPC
       window.streamforger.auth.login();
     } else {
-      // Web: navigate directly
       window.location.href = `${BACKEND_URL}/auth/login`;
     }
   }, []);

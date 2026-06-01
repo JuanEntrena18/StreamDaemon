@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, shell } from 'electron';
 
 contextBridge.exposeInMainWorld('streamforger', {
   isDesktop: true,
@@ -14,7 +14,20 @@ contextBridge.exposeInMainWorld('streamforger', {
   },
 
   auth: {
-    login: () => ipcRenderer.send('auth:login'),
+    login: async () => {
+      try {
+        const res = await fetch('http://localhost:3000/auth/login-url');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { url } = await res.json() as { url: string };
+        if (url) {
+          shell.openExternal(url);
+          return;
+        }
+      } catch {
+        // fallback
+      }
+      shell.openExternal('http://localhost:3000/auth/login');
+    },
   },
 
   window: {
