@@ -47,7 +47,7 @@ export function App() {
   const [backendReady, setBackendReady] = useState(false);
   const onReady = useCallback(() => setBackendReady(true), []);
   const { connected } = useSocket();
-  const { authenticated, user, loading: authLoading, login } = useAuthStatus();
+  const { authenticated, user, loading: authLoading, login, logout } = useAuthStatus();
   const [channel, setChannel] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('chat');
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
@@ -342,6 +342,19 @@ export function App() {
                     width: 5, height: 5, borderRadius: '50%',
                     background: 'var(--sf-success)', display: 'inline-block', flexShrink: 0,
                   }} />
+                  <button
+                    onClick={logout}
+                    title="Desconectar Twitch"
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: 'var(--sf-text-3)', fontSize: '0.7rem', padding: '0.15rem',
+                      lineHeight: 1, opacity: 0.6, transition: 'opacity 0.15s',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                  >
+                    ✕
+                  </button>
                 </div>
               ) : (
                 <button

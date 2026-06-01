@@ -17,7 +17,7 @@ const MAX_MSGS = 100;
 export function ChatPanel({ channel }: Props) {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [overlayOpen, setOverlayOpen] = useState(false);
-  const { socket, connected } = useSocket();
+  const { socket, connected, reconnect } = useSocket();
   const listRef = useRef<HTMLDivElement>(null);
 
   useSocketEvent('chat:message', useCallback((msg: ChatMsg) => {
@@ -26,8 +26,13 @@ export function ChatPanel({ channel }: Props) {
 
   useEffect(() => {
     if (!channel || !socket) return;
-    socket.emit('join:channel', channel);
-    return () => { socket.emit('leave:channel', channel); };
+    const rejoin = () => socket.emit('join:channel', channel);
+    rejoin();
+    socket.on('connect', rejoin);
+    return () => {
+      socket.off('connect', rejoin);
+      socket.emit('leave:channel', channel);
+    };
   }, [channel, socket]);
 
   useEffect(() => {
@@ -102,9 +107,17 @@ export function ChatPanel({ channel }: Props) {
         <div style={{
           padding: '0.75rem 1rem', marginBottom: '1rem',
           background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
-          borderRadius: 'var(--sf-radius-sm)', fontSize: '0.82rem', color: '#f87171', textAlign: 'center',
+          borderRadius: 'var(--sf-radius-sm)', fontSize: '0.82rem', color: '#f87171',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
         }}>
-          Desconectado del servidor. Reintentando...
+          <span>Desconectado del servidor.</span>
+          <button
+            onClick={reconnect}
+            className="sf-btn sf-btn-primary"
+            style={{ fontSize: '0.78rem', padding: '0.3rem 0.75rem' }}
+          >
+            Reconectar
+          </button>
         </div>
       )}
 

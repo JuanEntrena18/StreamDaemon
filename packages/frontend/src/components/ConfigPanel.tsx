@@ -10,7 +10,7 @@ interface Props {
 
 export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) {
   const { connected } = useSocket();
-  const { authenticated, user, loading: authLoading, login, deviceState, cancelDeviceLogin } = useAuthStatus();
+  const { authenticated, user, loading: authLoading, login, logout, deviceState, cancelDeviceLogin } = useAuthStatus();
 
   return (
     <div style={{ maxWidth: 600 }}>
@@ -39,7 +39,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
           }}>
             {authenticated ? '✅' : '🔌'}
           </div>
-          <div style={{ flex: 1 }}>
+            <div style={{ flex: 1 }}>
             <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--sf-text)' }}>
               {authenticated && user ? user.displayName : 'No conectado'}
             </div>
@@ -63,6 +63,15 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
                 <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
               </svg>
               Conectar
+            </button>
+          )}
+          {!authLoading && authenticated && (
+            <button
+              onClick={logout}
+              className="sf-btn sf-btn-ghost"
+              style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem', color: 'var(--sf-text-3)', whiteSpace: 'nowrap', flexShrink: 0 }}
+            >
+              Desconectar
             </button>
           )}
         </div>

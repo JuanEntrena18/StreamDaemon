@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 const SOCKET_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
@@ -28,7 +28,12 @@ export function useSocket() {
     };
   }, [s]);
 
-  return { socket: s, connected };
+  const reconnect = useCallback(() => {
+    s.disconnect();
+    s.connect();
+  }, [s]);
+
+  return { socket: s, connected, reconnect };
 }
 
 export function useSocketEvent<T>(event: string, handler: (data: T) => void) {

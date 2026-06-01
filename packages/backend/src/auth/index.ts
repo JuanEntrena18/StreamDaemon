@@ -197,6 +197,17 @@ export async function setupAuth(app: FastifyInstance) {
     reply.send({ status: 'authenticated', user: currentUser });
   });
 
+  // ── Logout ──
+
+  app.post('/auth/logout', async (_req, reply) => {
+    if (currentUser) {
+      console.log(`🔓 Logging out ${currentUser.displayName}`);
+      currentUser = null;
+      await prisma.user.deleteMany({});
+    }
+    reply.send({ success: true });
+  });
+
   // ── Status ──
 
   app.get('/auth/status', () => ({

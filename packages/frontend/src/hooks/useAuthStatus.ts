@@ -129,5 +129,12 @@ export function useAuthStatus() {
     }
   }, [startDeviceLogin]);
 
-  return { ...status, loading, login, deviceState, cancelDeviceLogin, refresh };
+  const logout = useCallback(async () => {
+    try {
+      await fetch(`${BACKEND_URL}/auth/logout`, { method: 'POST' });
+    } catch { /* ignore */ }
+    setStatus({ authenticated: false, user: null });
+  }, []);
+
+  return { ...status, loading, login, logout, deviceState, cancelDeviceLogin, refresh };
 }
