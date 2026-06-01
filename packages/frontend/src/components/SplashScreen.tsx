@@ -7,7 +7,7 @@ interface Props {
 
 export function SplashScreen({ onReady }: Props) {
   useEffect(() => {
-    const t = setTimeout(onReady, 2000);
+    const t = setTimeout(onReady, 5000);
     return () => clearTimeout(t);
   }, []);
 

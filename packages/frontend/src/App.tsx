@@ -50,9 +50,6 @@ export function App() {
   const { authenticated, user, loading: authLoading, login } = useAuthStatus();
   const [channel, setChannel] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('chat');
-
-  if (!backendReady) return <SplashScreen onReady={onReady} />;
-
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
   const [opacity, setOpacity] = useState(1);
 
@@ -65,6 +62,8 @@ export function App() {
     if (!isDesktop) return;
     window.streamforger?.window.getAlwaysOnTop().then(setAlwaysOnTop);
   }, []);
+
+  if (!backendReady) return <SplashScreen onReady={onReady} />;
 
   function toggleAlwaysOnTop() {
     const next = !alwaysOnTop;
