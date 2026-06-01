@@ -1,9 +1,14 @@
 import { app, BrowserWindow, shell, ipcMain, globalShortcut } from 'electron';
+import { config as dotenvConfig } from 'dotenv';
+import { resolve } from 'path';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = !app.isPackaged;
+
+// Load backend .env so we have Twitch credentials available in the main process
+dotenvConfig({ path: resolve(__dirname, '../../backend/.env') });
 
 // ── Database setup ────────────────────────────────────────
 // Point Prisma at the SQLite file bundled with the desktop package.
@@ -171,7 +176,33 @@ ipcMain.on('overlay:close', () => {
 ipcMain.handle('overlay:isOpen', () => overlayWindow !== null && !overlayWindow.isDestroyed());
 ipcMain.on('overlay:toggleClickThrough', toggleClickThrough);
 ipcMain.handle('overlay:getClickThrough', () => overlayIgnoreMouse);
-ipcMain.on('auth:login', () => shell.openExternal('http://localhost:3000/auth/login'));
+ipcMain.on('auth:login', () => {
+  const clientId = process.env.TWITCH_CLIENT_ID ?? '';
+  const redirectUri = process.env.TWITCH_REDIRECT_URI ?? 'http://localhost:3000/auth/callback';
+  const scopes = [
+    'chat:read',
+    'chat:edit',
+    'channel:read:redemptions',
+    'channel:manage:predictions',
+    'channel:read:predictions',
+    'channel:manage:raids',
+    'channel:manage:moderators',
+  ];
+  if (!clientId) {
+    // Fallback to backend redirect if no client ID is configured
+    shell.openExternal('http://localhost:3000/auth/login');
+    return;
+  }
+  const state = Math.random().toString(36).slice(2);
+  const url =
+    `https://id.twitch.tv/oauth2/authorize` +
+    `?client_id=${clientId}` +
+    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+    `&response_type=code` +
+    `&scope=${scopes.join('+')}` +
+    `&state=${state}`;
+  shell.openExternal(url);
+});
 
 // ── Lifecycle ─────────────────────────────────────────────
 

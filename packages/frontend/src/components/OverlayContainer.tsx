@@ -3,6 +3,7 @@ import { ChatOverlay } from './ChatOverlay';
 import { GiveawayOverlay } from './GiveawayOverlay';
 import { PredictionOverlay } from './PredictionOverlay';
 import { SocialOverlay } from './SocialOverlay';
+import { Subnautica2ChatOverlay } from './Subnautica2ChatOverlay';
 
 function getParams() {
   const params = new URLSearchParams(window.location.search);
@@ -26,6 +27,9 @@ export function OverlayContainer() {
       return <SocialOverlay />;
     case 'chat':
     default:
+      if (theme === 'subnautica2') {
+        return <Subnautica2ChatOverlay channel={channel} />;
+      }
       return <ChatOverlay channel={channel} />;
   }
 }
