@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 
@@ -13,9 +13,20 @@ export interface AuthStatus {
   user: AuthUser | null;
 }
 
+export interface DeviceCodeState {
+  status: 'idle' | 'loading' | 'polling';
+  userCode?: string;
+  verificationUri?: string;
+  deviceCode?: string;
+  interval?: number;
+  error?: string;
+}
+
 export function useAuthStatus() {
   const [status, setStatus] = useState<AuthStatus>({ authenticated: false, user: null });
   const [loading, setLoading] = useState(true);
+  const [deviceState, setDeviceState] = useState<DeviceCodeState>({ status: 'idle' });
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -23,6 +34,9 @@ export function useAuthStatus() {
       if (res.ok) {
         const data: AuthStatus = await res.json();
         setStatus(data);
+        if (data.authenticated) {
+          setDeviceState({ status: 'idle' });
+        }
       }
     } catch {
       // Backend not ready yet — keep previous state
@@ -34,19 +48,86 @@ export function useAuthStatus() {
   useEffect(() => {
     refresh();
 
-    // Poll every 3 s so the UI updates automatically after the OAuth
-    // redirect in the external browser completes.
     const id = setInterval(refresh, 3000);
     return () => clearInterval(id);
   }, [refresh]);
 
-  const login = useCallback(() => {
-    // Use window.open so Electron's setWindowOpenHandler intercepts it
-    // and opens in the default browser via shell.openExternal.
-    // The backend's /auth/login endpoint responds with a 302 redirect to
-    // Twitch's OAuth page, which the browser follows normally.
-    window.open(`${BACKEND_URL}/auth/login`, '_blank');
+  const startDeviceLogin = useCallback(async () => {
+    setDeviceState({ status: 'loading' });
+    try {
+      const res = await fetch(`${BACKEND_URL}/auth/device`, { method: 'POST' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setDeviceState({ status: 'idle', error: err.error || 'Error al iniciar login' });
+        return;
+      }
+      const data = await res.json();
+      setDeviceState({
+        status: 'polling',
+        userCode: data.user_code,
+        verificationUri: data.verification_uri,
+        deviceCode: data.device_code,
+        interval: data.interval,
+      });
+    } catch {
+      setDeviceState({ status: 'idle', error: 'Error de red' });
+    }
   }, []);
 
-  return { ...status, loading, login, refresh };
+  useEffect(() => {
+    if (deviceState.status !== 'polling' || !deviceState.deviceCode) return;
+
+    let cancelled = false;
+    const intervalMs = (deviceState.interval || 5) * 1000;
+
+    const poll = async () => {
+      if (cancelled) return;
+      try {
+        const res = await fetch(`${BACKEND_URL}/auth/device/poll`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ device_code: deviceState.deviceCode }),
+        });
+        if (cancelled) return;
+        const data = await res.json();
+        if (data.status === 'authenticated') {
+          setDeviceState({ status: 'idle' });
+          refresh();
+          return;
+        }
+        if (data.error === 'expired_token' || data.error === 'access_denied') {
+          setDeviceState({
+            status: 'idle',
+            error: data.error === 'expired_token' ? 'Código expirado, intenta de nuevo' : 'Acceso denegado',
+          });
+          return;
+        }
+      } catch {
+        // Network error — keep polling
+      }
+      if (!cancelled) {
+        timeoutRef.current = setTimeout(poll, intervalMs);
+      }
+    };
+
+    timeoutRef.current = setTimeout(poll, 100);
+    return () => {
+      cancelled = true;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [deviceState.status, deviceState.deviceCode, deviceState.interval, refresh]);
+
+  const cancelDeviceLogin = useCallback(() => {
+    setDeviceState({ status: 'idle' });
+  }, []);
+
+  const login = useCallback(() => {
+    if (window.streamforger?.isDesktop) {
+      startDeviceLogin();
+    } else {
+      window.open(`${BACKEND_URL}/auth/login`, '_blank');
+    }
+  }, [startDeviceLogin]);
+
+  return { ...status, loading, login, deviceState, cancelDeviceLogin, refresh };
 }

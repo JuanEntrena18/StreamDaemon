@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 interface StreamforgerAPI {
+  isDesktop: boolean;
   platform: string;
   backendUrl: string;
   overlay: {

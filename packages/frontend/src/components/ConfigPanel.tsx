@@ -10,7 +10,7 @@ interface Props {
 
 export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) {
   const { connected } = useSocket();
-  const { authenticated, user, loading: authLoading, login } = useAuthStatus();
+  const { authenticated, user, loading: authLoading, login, deviceState, cancelDeviceLogin } = useAuthStatus();
 
   return (
     <div style={{ maxWidth: 600 }}>
@@ -66,6 +66,78 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
             </button>
           )}
         </div>
+
+        {/* ── Device Code Dialog ── */}
+        {deviceState.status !== 'idle' && (
+          <div style={{
+            marginTop: '1.25rem', padding: '1.25rem',
+            background: 'rgba(124,58,237,0.08)',
+            border: '1px solid rgba(124,58,237,0.25)',
+            borderRadius: 'var(--sf-radius-sm)',
+          }}>
+            {deviceState.status === 'loading' && (
+              <div style={{ fontSize: '0.85rem', color: 'var(--sf-text-2)', textAlign: 'center' }}>
+                Conectando con Twitch…
+              </div>
+            )}
+
+            {deviceState.status === 'polling' && (
+              <>
+                <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.75rem' }}>
+                  🔑 Autorizar en Twitch
+                </p>
+                <ol style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', lineHeight: 1.8, paddingLeft: '1.25rem', marginBottom: '1rem' }}>
+                  <li>Abre <strong style={{ color: '#a78bfa' }}>{deviceState.verificationUri}</strong> en tu navegador</li>
+                  <li>Ingresa el código: <strong style={{
+                    fontSize: '1.4rem', fontFamily: 'monospace',
+                    color: '#c4b5fd', letterSpacing: '0.15em',
+                    background: 'rgba(0,0,0,0.25)', padding: '0.15rem 0.6rem',
+                    borderRadius: 6, marginLeft: '0.25rem',
+                  }}>{deviceState.userCode}</strong></li>
+                  <li>Autoriza la aplicación y vuelve aquí</li>
+                </ol>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    onClick={() => {
+                      if (deviceState.verificationUri) {
+                        if (window.streamforger?.isDesktop) {
+                          window.open(deviceState.verificationUri, '_blank');
+                        } else {
+                          window.open(deviceState.verificationUri, '_blank');
+                        }
+                      }
+                    }}
+                    className="sf-btn"
+                    style={{
+                      background: 'linear-gradient(135deg, #9147ff 0%, #6441a5 100%)',
+                      color: '#fff', fontSize: '0.78rem', padding: '0.4rem 0.875rem',
+                      flex: 1, justifyContent: 'center',
+                    }}
+                  >
+                    Abrir twitch.tv/activate
+                  </button>
+                  <button
+                    onClick={cancelDeviceLogin}
+                    className="sf-btn"
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      color: 'var(--sf-text-2)', fontSize: '0.78rem',
+                      padding: '0.4rem 0.875rem',
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </>
+            )}
+
+            {deviceState.error && (
+              <p style={{ fontSize: '0.8rem', color: '#f87171', marginTop: '0.5rem' }}>
+                {deviceState.error}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Channel connector */}
         <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--sf-border)' }}>

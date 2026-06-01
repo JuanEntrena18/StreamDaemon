@@ -177,17 +177,42 @@ Cada tema define variables CSS (`--theme-primary`, `--theme-bg`, `--theme-font`,
 
 ## Autenticación Twitch
 
-Flujo OAuth 2.0 con **Code Grant** + **PKCE**:
+Dos flujos OAuth 2.0 según el entorno:
 
-1. Usuario hace clic en "Login con Twitch"
-2. Backend genera `auth_url` con scopes:
-   - `chat:read` / `chat:edit`
-   - `channel:read:redemptions`
-   - `channel:manage:predictions` / `channel:read:predictions`
-   - `channel:manage:raids`
-   - `channel:manage:moderators`
-3. Twitch redirige a `/callback` → backend intercambia code → almacena `access_token` + `refresh_token` (cifrados en DB)
-4. Middleware refresca token automáticamente al expirar
+### Authorization Code Grant (browser / servidor Linux)
+
+1. Usuario hace clic en "Conectar con Twitch"
+2. `window.open('/auth/login')` → backend redirige a Twitch
+3. Twitch redirige a `/auth/callback` → backend intercambia code → almacena `access_token` + `refresh_token`
+4. Backend redirige al frontend con `?auth=success`
+5. Frontend sondea `/auth/status` cada 3 segundos para detectar la sesión activa
+6. `RefreshingAuthProvider` refresca token automáticamente al expirar
+
+Scopes solicitados:
+- `chat:read` / `chat:edit`
+- `channel:read:redemptions`
+- `channel:manage:predictions` / `channel:read:predictions`
+- `channel:manage:raids`
+- `channel:manage:moderators`
+
+### Device Code Grant (Electron / escritorio Windows)
+
+Recomendado oficialmente por Twitch para apps desktop. No requiere redirect URI ni ventana emergente:
+
+1. Usuario hace clic en "Conectar con Twitch"
+2. `POST /auth/device` → backend pide un device code a Twitch
+3. Backend devuelve `user_code`, `verification_uri`, `device_code`, `interval`
+4. El panel muestra el código y el link `twitch.tv/activate`
+5. Usuario abre el link en su navegador voluntariamente e ingresa el código
+6. Frontend sondea `POST /auth/device/poll` cada `interval` segundos
+7. Twitch responde con el token → backend completa el login (misma lógica que Code Grant)
+8. El código expira tras `expires_in` segundos · El usuario puede cancelar en cualquier momento
+
+**Ventajas sobre el flujo con redirect:**
+- No requiere `redirect_uri` configurado en la app de Twitch
+- El usuario abre el navegador voluntariamente (no hay window que "desaparece")
+- Funciona correctamente en .exe empaquetado sin firma digital
+- No depende de `shell.openExternal` ni de `setWindowOpenHandler`
 
 ---
 
@@ -233,17 +258,20 @@ twitch_overlay/
 │   ├── frontend/          # Vite + React + Dashboard + Overlays
 │   │   └── src/
 │   │       ├── components/
-│   │       │   ├── App.tsx              # Layout sidebar
+│   │       │   ├── App.tsx              # Layout sidebar + tabs
 │   │       │   ├── Logo.tsx             # SVG hexagonal
-│   │       │   ├── GiveawayPanel.tsx    # Panel sorteos (dashboard)
-│   │       │   ├── PredictionPanel.tsx  # Panel predicciones (dashboard)
-│   │       │   ├── TransparentOverlay.tsx # Control overlay (desktop)
-│   │       │   ├── ObsPanel.tsx         # URLs para OBS con copiar
+│   │       │   ├── ChatPanel.tsx        # Visor chat en vivo
+│   │       │   ├── ConfigPanel.tsx      # Login Twitch + device code + always-on-top
+│   │       │   ├── GiveawayPanel.tsx    # Panel sorteos + ruleta canvas
+│   │       │   ├── PredictionPanel.tsx  # Panel predicciones
+│   │       │   ├── ObsPanel.tsx         # URLs OBS con copiar
+│   │       │   ├── TransparentOverlay.tsx # Control overlay transparente
 │   │       │   ├── ChatOverlay.tsx      # Overlay chat (OBS)
 │   │       │   ├── GiveawayOverlay.tsx  # Overlay sorteos (OBS)
 │   │       │   ├── PredictionOverlay.tsx # Overlay predicciones (OBS)
 │   │       │   └── SocialOverlay.tsx    # Overlay redes (OBS)
 │   │       ├── hooks/
+│   │       │   ├── useAuthStatus.ts     # Estado OAuth + Device Code Grant polling
 │   │       │   ├── useSocket.ts         # Conexión Socket.IO
 │   │       │   └── useTheme.ts          # Variables CSS por tema
 │   │       └── index.css               # Sistema de diseño (tokens + utilidades)

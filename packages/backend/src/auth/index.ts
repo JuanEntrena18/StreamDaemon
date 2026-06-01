@@ -49,6 +49,8 @@ export async function setupAuth(app: FastifyInstance) {
 
   await restoreSession();
 
+  // ── Authorization Code Grant (browser, redirect flow) ──
+
   app.get('/auth/login', (_req, reply) => {
     const state = Math.random().toString(36).slice(2);
     const url =
@@ -61,9 +63,6 @@ export async function setupAuth(app: FastifyInstance) {
     reply.redirect(url);
   });
 
-  // Returns the Twitch OAuth URL as JSON — used by the Electron main process
-  // so it can open the URL directly with shell.openExternal without needing
-  // to follow a redirect (which fails in packaged apps).
   app.get('/auth/login-url', (_req, reply) => {
     const state = Math.random().toString(36).slice(2);
     const url =
@@ -112,47 +111,146 @@ export async function setupAuth(app: FastifyInstance) {
     const twitchUser = userBody.data?.[0];
     if (!twitchUser) return reply.status(500).send({ error: 'Failed to fetch user' });
 
-    currentUser = {
-      id: twitchUser.id,
-      login: twitchUser.login,
-      displayName: twitchUser.display_name,
-    };
-
-    await prisma.user.upsert({
-      where: { twitchId: twitchUser.id },
-      update: {
-        login: twitchUser.login,
-        displayName: twitchUser.display_name,
-        avatarUrl: twitchUser.profile_image_url,
-        accessToken: tokenData.access_token,
-        refreshToken: tokenData.refresh_token ?? '',
-        tokenExpiresAt: tokenData.expires_in
-          ? new Date(Date.now() + tokenData.expires_in * 1000)
-          : null,
-      },
-      create: {
-        twitchId: twitchUser.id,
-        login: twitchUser.login,
-        displayName: twitchUser.display_name,
-        avatarUrl: twitchUser.profile_image_url,
-        accessToken: tokenData.access_token,
-        refreshToken: tokenData.refresh_token ?? '',
-        tokenExpiresAt: tokenData.expires_in
-          ? new Date(Date.now() + tokenData.expires_in * 1000)
-          : null,
-      },
-    });
-
-    authProvider?.addUserForToken(tokenData, ['chat']);
-    notifyAuth();
+    await finishAuth(tokenData, twitchUser);
 
     reply.redirect(`${config.FRONTEND_URL}?auth=success`);
   });
+
+  // ── Device Code Grant (Electron / desktop, no redirect) ──
+
+  app.post('/auth/device', async (_req, reply) => {
+    const params = new URLSearchParams({
+      client_id: config.TWITCH_CLIENT_ID,
+      scopes: SCOPES.join(' '),
+    });
+
+    const res = await fetch('https://id.twitch.tv/oauth2/device', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params,
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return reply.status(400).send({ error: 'Failed to get device code', details: err });
+    }
+
+    const data = await res.json() as {
+      device_code: string;
+      user_code: string;
+      verification_uri: string;
+      expires_in: number;
+      interval: number;
+    };
+
+    reply.send({
+      device_code: data.device_code,
+      user_code: data.user_code,
+      verification_uri: data.verification_uri,
+      expires_in: data.expires_in,
+      interval: data.interval,
+    });
+  });
+
+  app.post('/auth/device/poll', async (req, reply) => {
+    const { device_code } = req.body as { device_code: string };
+    if (!device_code) return reply.status(400).send({ error: 'Missing device_code' });
+
+    const params = new URLSearchParams({
+      client_id: config.TWITCH_CLIENT_ID,
+      client_secret: config.TWITCH_CLIENT_SECRET,
+      grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
+      device_code,
+    });
+
+    const res = await fetch('https://id.twitch.tv/oauth2/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params,
+    });
+
+    // Device code errors come as 400 with { error, message? }
+    // - authorization_pending: user hasn't completed yet (keep polling)
+    // - slow_down: increase interval
+    // - expired_token: restart flow
+    // - access_denied: user denied
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return reply.send({ status: 'pending', error: err.error, message: err.message });
+    }
+
+    const tokenData = await res.json();
+
+    const userRes = await fetch('https://api.twitch.tv/helix/users', {
+      headers: {
+        Authorization: `Bearer ${tokenData.access_token}`,
+        'Client-Id': config.TWITCH_CLIENT_ID,
+      },
+    });
+
+    const userBody = await userRes.json();
+    const twitchUser = userBody.data?.[0];
+    if (!twitchUser) return reply.status(500).send({ error: 'Failed to fetch user' });
+
+    await finishAuth(tokenData, twitchUser);
+    reply.send({ status: 'authenticated', user: currentUser });
+  });
+
+  // ── Status ──
 
   app.get('/auth/status', () => ({
     authenticated: authProvider !== null && currentUser !== null,
     user: currentUser,
   }));
+}
+
+async function finishAuth(
+  tokenData: { access_token: string; refresh_token?: string; expires_in?: number; scope?: string },
+  twitchUser: { id: string; login: string; display_name: string; profile_image_url: string },
+) {
+  currentUser = {
+    id: twitchUser.id,
+    login: twitchUser.login,
+    displayName: twitchUser.display_name,
+  };
+
+  await prisma.user.upsert({
+    where: { twitchId: twitchUser.id },
+    update: {
+      login: twitchUser.login,
+      displayName: twitchUser.display_name,
+      avatarUrl: twitchUser.profile_image_url,
+      accessToken: tokenData.access_token,
+      refreshToken: tokenData.refresh_token ?? '',
+      tokenExpiresAt: tokenData.expires_in
+        ? new Date(Date.now() + tokenData.expires_in * 1000)
+        : null,
+    },
+    create: {
+      twitchId: twitchUser.id,
+      login: twitchUser.login,
+      displayName: twitchUser.display_name,
+      avatarUrl: twitchUser.profile_image_url,
+      accessToken: tokenData.access_token,
+      refreshToken: tokenData.refresh_token ?? '',
+      tokenExpiresAt: tokenData.expires_in
+        ? new Date(Date.now() + tokenData.expires_in * 1000)
+        : null,
+    },
+  });
+
+  authProvider?.addUserForToken(
+    {
+      accessToken: tokenData.access_token,
+      refreshToken: tokenData.refresh_token ?? null,
+      expiresIn: tokenData.expires_in ?? null,
+      obtainmentTimestamp: Date.now(),
+      scope: tokenData.scope?.split(' ') ?? SCOPES,
+    },
+    ['chat'],
+  );
+  notifyAuth();
 }
 
 async function restoreSession() {

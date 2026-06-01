@@ -17,7 +17,7 @@ Disponible en dos modos:
 - **🎁 Sorteos interactivos** — Comando `!sorteo` en el chat para participar. Panel de control para iniciar/finalizar sorteos con selección aleatoria de ganador.
 - **📊 Predicciones** — Integración con la API de Predicciones de Twitch. Creación de encuestas desde el panel de control con resolución automática.
 - **🌐 Redes sociales** — Overlay animado que muestra las redes del streamer de forma rotativa.
-- **🔐 Autenticación OAuth** — Login con Twitch mediante OAuth 2.0 + PKCE. Tokens persistidos con refresco automático.
+- **🔐 Autenticación OAuth** — Login con Twitch. En navegador: flujo Authorization Code Grant con redirect. En escritorio: flujo **Device Code Grant** (el usuario ve un código en la app y lo ingresa en twitch.tv/activate). Tokens persistidos con refresco automático.
 - **🖥️ Dashboard premium** — Interfaz con sidebar de navegación, glassmorphism, animaciones Framer Motion y paleta violeta/índigo.
 
 ---
@@ -91,8 +91,8 @@ npm run dev:desktop
 
 # 6. Generar instalador .exe
 npm run build:desktop
-# El instalador se genera en packages/desktop/release/StreamForger Setup 0.0.1.exe
-# También queda una versión portable en packages/desktop/release/win-unpacked/
+# El instalador se genera en packages/desktop/dist-electron/StreamForger Setup 0.2.0.exe
+# También queda una versión portable en packages/desktop/dist-electron/win-unpacked/
 ```
 
 > El instalador incluye Node.js, SQLite y todo lo necesario. Al ejecutarlo, la app arranca el servidor en `localhost:3000` y abre la ventana del dashboard. No requiere Docker, PostgreSQL ni Redis.
