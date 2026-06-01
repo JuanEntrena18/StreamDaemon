@@ -5,6 +5,16 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = !app.isPackaged;
 
+// ── Database setup ────────────────────────────────────────
+// Point Prisma at the SQLite file bundled with the desktop package.
+// This must be set BEFORE the backend module is imported so that
+// PrismaClient picks up the correct datasource URL at initialisation.
+const dbPath = isDev
+  ? path.resolve(__dirname, '../prisma/streamforger.db')
+  : path.join(app.getPath('userData'), 'streamforger.db');
+
+process.env.DATABASE_URL = `file:${dbPath}`;
+
 let mainWindow: BrowserWindow | null = null;
 let overlayWindow: BrowserWindow | null = null;
 let overlayIgnoreMouse = true;
