@@ -7,7 +7,7 @@
   "type": "module",
   "main": "dist/main.js",
   "scripts": {
-    "dev": "tsc && electron .",
+    "dev": "tsc && wait-on http://localhost:5173 && electron .",
     "build": "tsc",
     "dist": "prisma generate && tsc && electron-builder --win --x64",
     "db:generate": "prisma generate"
@@ -24,7 +24,8 @@
     "electron": "^33.0.0",
     "electron-builder": "^25.0.0",
     "typescript": "^5.4.0",
-    "@types/better-sqlite3": "^7.6.0"
+    "@types/better-sqlite3": "^7.6.0",
+    "wait-on": "^8.0.0"
   },
   "build": {
     "appId": "com.streamforger.app",

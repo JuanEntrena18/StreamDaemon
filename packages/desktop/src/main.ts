@@ -10,14 +10,34 @@ let overlayWindow: BrowserWindow | null = null;
 let overlayIgnoreMouse = true;
 
 async function startBackend() {
-  const { startServer } = await import('@streamforger/backend/dist/index.js');
-  const opts: { port: number; frontendDir?: string } = { port: 3000 };
+  try {
+    const { startServer } = await import('@streamforger/backend/dist/index.js');
+    const opts: { port: number; frontendDir?: string } = { port: 3000 };
 
-  if (!isDev) {
-    opts.frontendDir = path.resolve(__dirname, '../../frontend/dist');
+    if (!isDev) {
+      opts.frontendDir = path.resolve(__dirname, '../../frontend/dist');
+    }
+
+    await startServer(opts);
+    console.log('✅ Backend started successfully');
+  } catch (err) {
+    // Backend failure should not prevent the window from showing.
+    // In dev mode the frontend runs on Vite's own server (port 5173).
+    console.error('⚠️  Backend failed to start — window will open anyway:', err);
   }
+}
 
-  await startServer(opts);
+function loadWithRetry(win: BrowserWindow, url: string, attempts = 5, delay = 2000): void {
+  win.loadURL(url).catch((err) => {
+    if (attempts <= 1) {
+      console.error('❌ Could not load URL after all retries:', url, err);
+      // Last resort: show the window with an error page rather than staying invisible
+      win.show();
+      return;
+    }
+    console.warn(`⚠️  loadURL failed, retrying in ${delay}ms… (${attempts - 1} attempts left)`);
+    setTimeout(() => loadWithRetry(win, url, attempts - 1, delay), delay);
+  });
 }
 
 function createMainWindow() {
@@ -25,6 +45,7 @@ function createMainWindow() {
     width: 1280,
     height: 800,
     show: false,
+    backgroundColor: '#0f0f23',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -32,23 +53,30 @@ function createMainWindow() {
     },
   });
 
-  const url = isDev
-    ? 'http://localhost:5173'
-    : 'http://localhost:3000';
+  const url = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
 
-  mainWindow.loadURL(url).catch(() => {
-    // Retry after a short delay if backend isn't ready yet
-    setTimeout(() => mainWindow?.loadURL(url), 2000);
-  });
-
+  // Show as soon as the page is ready to paint
   mainWindow.once('ready-to-show', () => {
     mainWindow?.show();
+    mainWindow?.focus();
   });
+
+  // Fallback: if ready-to-show never fires within 8 seconds, show anyway
+  const showFallback = setTimeout(() => {
+    if (mainWindow && !mainWindow.isVisible()) {
+      console.warn('⚠️  ready-to-show never fired — forcing window visibility');
+      mainWindow.show();
+    }
+  }, 8000);
+
+  mainWindow.once('show', () => clearTimeout(showFallback));
+
+  loadWithRetry(mainWindow, url);
 
   mainWindow.on('closed', () => { mainWindow = null; });
 
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
+  mainWindow.webContents.setWindowOpenHandler(({ url: openUrl }) => {
+    shell.openExternal(openUrl);
     return { action: 'deny' };
   });
 }
@@ -123,16 +151,16 @@ ipcMain.on('overlay:toggleClickThrough', toggleClickThrough);
 ipcMain.handle('overlay:getClickThrough', () => overlayIgnoreMouse);
 ipcMain.on('auth:login', () => shell.openExternal('http://localhost:3000/auth/login'));
 
-// ── Shortcuts ─────────────────────────────────────────────
-
-app.whenReady().then(() => {
-  globalShortcut.register('CommandOrControl+Shift+T', toggleClickThrough);
-});
-
 // ── Lifecycle ─────────────────────────────────────────────
 
 app.whenReady().then(async () => {
+  // Register global shortcuts
+  globalShortcut.register('CommandOrControl+Shift+T', toggleClickThrough);
+
+  // Start backend (non-fatal — window opens regardless)
   await startBackend();
+
+  // Create and show the main dashboard window
   createMainWindow();
 });
 

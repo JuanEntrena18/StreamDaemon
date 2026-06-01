@@ -18,6 +18,7 @@ Disponible en dos modos:
 - **📊 Predicciones** — Integración con la API de Predicciones de Twitch. Creación de encuestas desde el panel de control con resolución automática.
 - **🌐 Redes sociales** — Overlay animado que muestra las redes del streamer de forma rotativa.
 - **🔐 Autenticación OAuth** — Login con Twitch mediante OAuth 2.0 + PKCE. Tokens persistidos con refresco automático.
+- **🖥️ Dashboard premium** — Interfaz con sidebar de navegación, glassmorphism, animaciones Framer Motion y paleta violeta/índigo.
 
 ---
 
@@ -100,6 +101,37 @@ npm run build:desktop
 
 ---
 
+## 🎨 Dashboard
+
+El panel de control cuenta con un rediseño premium (v0.1.0):
+
+- **Sidebar de navegación** con acceso a Sorteos, Predicciones, Overlay Transparente y URLs de OBS
+- **Glassmorphism** — cards semitransparentes con blur y bordes sutiles
+- **Animaciones** con Framer Motion en transiciones de tab y estados activos
+- **Tipografía Inter** (Google Fonts) con sistema de tokens CSS
+- **Indicador de conexión** animado (pulso) en la barra superior
+- **Badge de estado** con color temático por sección
+
+### Panel de Sorteos
+
+- Formulario con selector de duración tipo pills
+- Card activa con contador de participantes animado y badge pulsante
+- Botón para finalizar con selección aleatoria de ganador
+
+### Panel de Predicciones
+
+- Opciones identificadas con letras (A, B, C…)
+- Feedback animado al crear la predicción en Twitch
+- Estado de carga para la llamada a la API
+
+### Panel OBS URLs
+
+- Cards individuales por overlay con botón **Copiar al portapapeles**
+- Selector de tema global (Subnautica 2 / PoE 2 / WoW) con preview de color
+- URLs actualizadas automáticamente al escribir el canal
+
+---
+
 ## 🎮 Overlays para OBS
 
 Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
@@ -132,18 +164,33 @@ StreamForge/
 │   │       └── predictions/ # Predicciones
 │   ├── frontend/          # React + Vite + Overlays
 │   │   └── src/
-│   │       ├── components/# Chat, Giveaway, Prediction, Social
+│   │       ├── components/# Chat, Giveaway, Prediction, Social, ObsPanel
 │   │       ├── hooks/     # useSocket, useTheme
 │   │       └── themes/    # Subnautica 2, PoE 2, WoW
 │   ├── desktop/           # Electron + SQLite
 │   │   ├── prisma/        # Schema SQLite
 │   │   └── src/
-│   │       ├── main.ts    # Proceso principal de Electron
+│   │       ├── main.ts    # Proceso principal (con retry y fallback de ventana)
 │   │       └── preload.ts # Bridge IPC seguro
 │   └── shared/            # Tipos, schemas, cache interface
 ├── docker-compose.yml     # PostgreSQL + Redis
-└── STACK_TECNOLOGICO.md
+├── STACK_TECNOLOGICO.md
+└── README.md
 ```
+
+---
+
+## 🐛 Fixes conocidos (v0.1.0)
+
+### Ventana Electron invisible al iniciar
+
+**Causa:** El proceso principal de Electron fallaba silenciosamente si el backend no arrancaba, impidiendo que se mostrara la ventana.
+
+**Solución aplicada en `packages/desktop/src/main.ts`:**
+- `startBackend()` envuelto en `try/catch` — el backend puede fallar sin bloquear la UI
+- Timeout de fallback de 8 segundos: si `ready-to-show` no dispara, la ventana se fuerza visible
+- Hasta 5 reintentos con backoff de 2 s por intento al cargar la URL
+- Las dos llamadas a `app.whenReady()` consolidadas en una sola
 
 ---
 

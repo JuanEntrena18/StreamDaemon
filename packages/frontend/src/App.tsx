@@ -1,77 +1,227 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket } from './hooks/useSocket';
 import { GiveawayPanel } from './components/GiveawayPanel';
 import { PredictionPanel } from './components/PredictionPanel';
 import { TransparentOverlay } from './components/TransparentOverlay';
+import { ObsPanel } from './components/ObsPanel';
 import { Logo } from './components/Logo';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
+type Tab = 'giveaway' | 'prediction' | 'overlay' | 'obs';
+
+const NAV_ITEMS: { id: Tab; icon: string; label: string; desktopOnly?: boolean }[] = [
+  { id: 'giveaway',   icon: '🎁', label: 'Sorteos' },
+  { id: 'prediction', icon: '📊', label: 'Predicciones' },
+  { id: 'overlay',    icon: '🪟', label: 'Overlay', desktopOnly: true },
+  { id: 'obs',        icon: '🔌', label: 'OBS URLs' },
+];
+
 export function App() {
   const { connected } = useSocket();
   const [channel, setChannel] = useState('');
+  const [activeTab, setActiveTab] = useState<Tab>('giveaway');
+
+  const visibleTabs = NAV_ITEMS.filter((t) => !t.desktopOnly || isDesktop);
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Logo size={48} />
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        background: 'var(--sf-bg)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Background decoration blobs */}
+      <div style={{
+        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+        background: `
+          radial-gradient(ellipse 60% 50% at 10% 0%, rgba(124,58,237,0.12) 0%, transparent 70%),
+          radial-gradient(ellipse 50% 40% at 90% 100%, rgba(99,102,241,0.1) 0%, transparent 70%)
+        `,
+      }} />
+
+      {/* ── Sidebar ── */}
+      <aside style={{
+        width: 220,
+        minHeight: '100vh',
+        background: 'rgba(13,13,30,0.95)',
+        borderRight: '1px solid var(--sf-border)',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '1.5rem 0',
+        position: 'relative',
+        zIndex: 10,
+        flexShrink: 0,
+      }}>
+        {/* Brand */}
+        <div style={{ padding: '0 1.25rem 1.75rem', borderBottom: '1px solid var(--sf-border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
+            <div className="animate-float">
+              <Logo size={38} />
+            </div>
             <div>
-              <h1 className="text-3xl font-bold">StreamForger</h1>
-              <p className="text-zinc-400 text-sm mt-1">
-                by <span className="text-blue-400 font-medium">Cyber Haute Couture</span>
-                &nbsp;· Open-source stream tools
-              </p>
+              <div style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.02em', color: 'var(--sf-text)' }}>
+                StreamForger
+              </div>
+              <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', marginTop: '1px' }}>
+                by Cyber Haute Couture
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <input
-              type="text"
-              placeholder="Nombre del canal..."
-              value={channel}
-              onChange={(e) => setChannel(e.target.value.replace(/^#/, ''))}
-              className="bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm w-48 focus:outline-none focus:border-zinc-500"
-            />
-            <span className={`flex items-center gap-2 text-sm ${connected ? 'text-green-400' : 'text-red-400'}`}>
-              <span className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
+        </div>
+
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: '1.25rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <p className="sf-section-title" style={{ paddingLeft: '0.5rem' }}>Herramientas</p>
+          {visibleTabs.map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.625rem',
+                  padding: '0.625rem 0.75rem',
+                  borderRadius: '10px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  fontSize: '0.875rem',
+                  fontWeight: isActive ? 600 : 400,
+                  textAlign: 'left',
+                  transition: 'all 0.15s ease',
+                  background: isActive
+                    ? 'linear-gradient(135deg, rgba(124,58,237,0.25), rgba(99,102,241,0.15))'
+                    : 'transparent',
+                  color: isActive ? 'var(--sf-text)' : 'var(--sf-text-2)',
+                  borderLeft: isActive ? '2px solid var(--sf-primary)' : '2px solid transparent',
+                  outline: 'none',
+                }}
+              >
+                <span style={{ fontSize: '1rem', minWidth: '1.25rem' }}>{item.icon}</span>
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div style={{
+          padding: '1.25rem',
+          borderTop: '1px solid var(--sf-border)',
+          fontSize: '0.7rem',
+          color: 'var(--sf-text-3)',
+          lineHeight: 1.6,
+        }}>
+          <div>v0.1.0 · Open Source</div>
+          <a
+            href="https://github.com/cyber-haute-couture"
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: 'var(--sf-primary-light)', textDecoration: 'none' }}
+          >
+            GitHub ↗
+          </a>
+        </div>
+      </aside>
+
+      {/* ── Main ── */}
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, position: 'relative', zIndex: 1 }}>
+
+        {/* Top bar */}
+        <header style={{
+          padding: '1rem 2rem',
+          borderBottom: '1px solid var(--sf-border)',
+          background: 'rgba(13,13,30,0.7)',
+          backdropFilter: 'blur(12px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+          position: 'sticky',
+          top: 0,
+          zIndex: 5,
+        }}>
+          <div>
+            <h1 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--sf-text)', letterSpacing: '-0.01em' }}>
+              {NAV_ITEMS.find(t => t.id === activeTab)?.label}
+            </h1>
+            <p style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)', marginTop: '1px' }}>
+              Panel de control · StreamForger
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+            {/* Channel input */}
+            <div style={{ position: 'relative' }}>
+              <span style={{
+                position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)',
+                fontSize: '0.85rem', color: 'var(--sf-text-3)', pointerEvents: 'none',
+              }}>
+                #
+              </span>
+              <input
+                id="channel-input"
+                type="text"
+                placeholder="canal de twitch..."
+                value={channel}
+                onChange={(e) => setChannel(e.target.value.replace(/^#/, '').toLowerCase())}
+                className="sf-input"
+                style={{ paddingLeft: '1.5rem', width: '200px' }}
+              />
+            </div>
+
+            {/* Connection badge */}
+            <div
+              className={connected ? 'sf-badge sf-badge-success' : 'sf-badge sf-badge-danger'}
+              style={{ gap: '0.4rem' }}
+            >
+              <span
+                className={connected ? 'animate-pulse-dot' : ''}
+                style={{
+                  width: 6, height: 6, borderRadius: '50%',
+                  background: connected ? 'var(--sf-success)' : 'var(--sf-danger)',
+                  display: 'inline-block',
+                }}
+              />
               {connected ? 'Conectado' : 'Desconectado'}
-            </span>
+            </div>
           </div>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />
-          <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />
+        {/* Content */}
+        <div style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+            >
+              {activeTab === 'giveaway' && (
+                <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />
+              )}
+              {activeTab === 'prediction' && (
+                <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />
+              )}
+              {activeTab === 'overlay' && isDesktop && (
+                <TransparentOverlay channel={channel} />
+              )}
+              {activeTab === 'obs' && (
+                <ObsPanel channel={channel} />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
-
-        {isDesktop && (
-          <div className="mb-8">
-            <TransparentOverlay channel={channel} />
-          </div>
-        )}
-
-        <div className="bg-zinc-800 rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">🔌 URLs para OBS (Browser Source)</h2>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            {[
-              { label: 'Chat Overlay', url: `http://localhost:5173/overlay.html?mode=chat${channel ? `&channel=${channel}` : ''}` },
-              { label: 'Sorteos', url: `http://localhost:5173/overlay.html?mode=giveaway${channel ? `&channel=${channel}` : ''}` },
-              { label: 'Predicciones', url: `http://localhost:5173/overlay.html?mode=prediction${channel ? `&channel=${channel}` : ''}` },
-              { label: 'Redes Sociales', url: 'http://localhost:5173/overlay.html?mode=social' },
-            ].map((item) => (
-              <div key={item.label} className="bg-zinc-900 rounded p-3">
-                <p className="text-zinc-400 mb-1">{item.label}</p>
-                <code className="text-xs text-zinc-300 break-all">{item.url}</code>
-                <p className="text-xs text-zinc-500 mt-1">
-                  Agregar tema: <code className="bg-zinc-800 px-1 rounded">&theme=subnautica2|poe2|wow</code>
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }

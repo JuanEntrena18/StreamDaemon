@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface Props {
   channel: string;
@@ -9,6 +10,7 @@ export function PredictionPanel({ channel, backendUrl }: Props) {
   const [title, setTitle] = useState('');
   const [options, setOptions] = useState(['', '']);
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const addOption = () => {
     if (options.length < 10) setOptions([...options, '']);
@@ -28,6 +30,7 @@ export function PredictionPanel({ channel, backendUrl }: Props) {
     const validOptions = options.filter((o) => o.trim());
     if (!title.trim() || validOptions.length < 2 || !channel) return;
 
+    setLoading(true);
     const res = await fetch(`${backendUrl}/predictions/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -38,75 +41,168 @@ export function PredictionPanel({ channel, backendUrl }: Props) {
       }),
     });
 
+    setLoading(false);
     if (res.ok) {
       setTitle('');
       setOptions(['', '']);
-      setMessage('✅ Predicción creada');
+      setMessage('success');
       setTimeout(() => setMessage(''), 3000);
     } else {
       const err = await res.json().catch(() => ({}));
-      setMessage(err.error || 'Error al crear predicción');
+      setMessage(err.error || 'error');
     }
   };
 
+  const validOptions = options.filter((o) => o.trim());
+  const canCreate = title.trim() && validOptions.length >= 2 && !!channel;
+
   return (
-    <div className="bg-zinc-800 rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">📊 Predicciones</h2>
+    <div style={{ maxWidth: 600 }}>
+      {/* Header */}
+      <div style={{ marginBottom: '1.75rem' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          📊 Predicciones
+        </h2>
+        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
+          Crea predicciones de Twitch y permite que tu audiencia vote con puntos del canal.
+        </p>
+      </div>
 
-      <div className="space-y-3">
-        <input
-          type="text"
-          placeholder="Título de la predicción..."
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          disabled={!channel}
-          className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-zinc-500 disabled:opacity-50"
-        />
+      <div className="glass-card" style={{ padding: '1.5rem' }}>
+        <p className="sf-section-title">Nueva predicción</p>
 
-        <div className="space-y-2">
-          {options.map((opt, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder={`Opción ${i + 1}`}
-                value={opt}
-                onChange={(e) => updateOption(i, e.target.value)}
-                disabled={!channel}
-                className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-zinc-500 disabled:opacity-50"
-              />
-              {options.length > 2 && (
-                <button
-                  onClick={() => removeOption(i)}
-                  className="text-red-400 hover:text-red-300 text-sm disabled:opacity-30"
-                  disabled={!channel}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.125rem' }}>
+          {/* Title */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
+              Pregunta de la predicción
+            </label>
+            <input
+              id="prediction-title-input"
+              type="text"
+              placeholder="ej. ¿Pasaremos el boss en este intento?"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              disabled={!channel}
+              className="sf-input"
+            />
+          </div>
+
+          {/* Options */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.5rem', fontWeight: 500 }}>
+              Opciones de voto
+              <span style={{ color: 'var(--sf-text-3)', fontWeight: 400, marginLeft: '0.4rem' }}>
+                (mín. 2, máx. 10)
+              </span>
+            </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {options.map((opt, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}
                 >
-                  ✕
-                </button>
-              )}
+                  <div style={{
+                    width: 28, height: 28, borderRadius: 8, flexShrink: 0,
+                    background: 'rgba(124,58,237,0.15)',
+                    border: '1px solid rgba(124,58,237,0.3)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.72rem', fontWeight: 700, color: '#a78bfa',
+                  }}>
+                    {String.fromCharCode(65 + i)}
+                  </div>
+                  <input
+                    id={`prediction-option-${i}`}
+                    type="text"
+                    placeholder={`Opción ${i + 1}`}
+                    value={opt}
+                    onChange={(e) => updateOption(i, e.target.value)}
+                    disabled={!channel}
+                    className="sf-input"
+                    style={{ flex: 1 }}
+                  />
+                  {options.length > 2 && (
+                    <button
+                      onClick={() => removeOption(i)}
+                      disabled={!channel}
+                      style={{
+                        width: 28, height: 28, borderRadius: 6, border: '1px solid var(--sf-border)',
+                        background: 'transparent', color: 'var(--sf-text-3)', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.875rem', flexShrink: 0, transition: 'all 0.15s',
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sf-danger)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--sf-danger)'; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sf-text-3)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--sf-border)'; }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </motion.div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {options.length < 10 && (
+            {options.length < 10 && (
+              <button
+                onClick={addOption}
+                disabled={!channel}
+                style={{
+                  marginTop: '0.625rem',
+                  fontSize: '0.8rem',
+                  color: 'var(--sf-primary-light)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  padding: '0.25rem 0',
+                  opacity: !channel ? 0.4 : 1,
+                  transition: 'opacity 0.15s',
+                }}
+              >
+                + Agregar opción
+              </button>
+            )}
+          </div>
+
+          {/* Submit */}
           <button
-            onClick={addOption}
-            disabled={!channel}
-            className="text-sm text-zinc-400 hover:text-zinc-300 disabled:opacity-30"
+            id="create-prediction-btn"
+            onClick={createPrediction}
+            disabled={!canCreate || loading}
+            className="sf-btn sf-btn-primary"
+            style={{ width: '100%', marginTop: '0.25rem' }}
           >
-            + Agregar opción
+            {loading ? '⏳ Creando...' : '📊 Crear predicción'}
           </button>
-        )}
 
-        <button
-          onClick={createPrediction}
-          disabled={!title.trim() || options.filter((o) => o.trim()).length < 2 || !channel}
-          className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-700 text-white py-2 rounded transition-colors disabled:text-zinc-500 mt-2"
-        >
-          Crear predicción
-        </button>
-
-        {message && <p className={`text-sm ${message.startsWith('✅') ? 'text-green-400' : 'text-yellow-400'}`}>{message}</p>}
-        {!channel && <p className="text-xs text-zinc-500">Ingresa un canal para comenzar</p>}
+          {/* Feedback */}
+          {message === 'success' && (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                padding: '0.625rem 1rem',
+                background: 'rgba(16,185,129,0.1)',
+                border: '1px solid rgba(16,185,129,0.2)',
+                borderRadius: 8,
+                fontSize: '0.82rem',
+                color: '#34d399',
+                textAlign: 'center',
+              }}
+            >
+              ✅ Predicción creada en Twitch
+            </motion.div>
+          )}
+          {message && message !== 'success' && (
+            <p style={{ fontSize: '0.8rem', color: 'var(--sf-warning)', textAlign: 'center' }}>{message}</p>
+          )}
+          {!channel && (
+            <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', textAlign: 'center' }}>
+              Ingresa tu canal de Twitch en la barra superior para comenzar
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

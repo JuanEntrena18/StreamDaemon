@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 interface Props {
   channel: string;
 }
 
 const THEMES = [
-  { id: '', label: 'Ninguno' },
-  { id: 'subnautica2', label: 'Subnautica 2' },
-  { id: 'poe2', label: 'Path of Exile 2' },
-  { id: 'wow', label: 'World of Warcraft' },
+  { id: '', label: 'Sin tema', icon: '⬜' },
+  { id: 'subnautica2', label: 'Subnautica 2', icon: '🌊', color: '#00d4ff' },
+  { id: 'poe2', label: 'Path of Exile 2', icon: '⚔️', color: '#c9a04a' },
+  { id: 'wow', label: 'World of Warcraft', icon: '🛡️', color: '#ffd100' },
 ];
 
 export function TransparentOverlay({ channel }: Props) {
@@ -42,7 +43,6 @@ export function TransparentOverlay({ channel }: Props) {
       setIsOpen(false);
       return;
     }
-
     if (mode === 'url' && customUrl) {
       window.streamforger?.overlay.open(customUrl, true);
       setIsOpen(true);
@@ -59,7 +59,6 @@ export function TransparentOverlay({ channel }: Props) {
 
   const handleLogin = () => {
     window.streamforger?.auth.login();
-    // Poll for auth completion
     const interval = setInterval(async () => {
       await checkAuth();
       if (authStatus === 'logged') clearInterval(interval);
@@ -70,115 +69,183 @@ export function TransparentOverlay({ channel }: Props) {
   const canOpen = (mode === 'url' && customUrl) || (mode === 'channel' && channel);
 
   return (
-    <div className="bg-zinc-800 rounded-lg p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold flex items-center gap-2">🪟 Overlay Transparente</h2>
-        <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${authStatus === 'logged' ? 'bg-green-400' : authStatus === 'checking' ? 'bg-yellow-400' : 'bg-red-400'}`} />
-          <span className="text-xs text-zinc-400">
-            {authStatus === 'logged' ? 'Twitch conectado' : authStatus === 'checking' ? 'Verificando...' : 'No autenticado'}
+    <div style={{ maxWidth: 600 }}>
+      {/* Header */}
+      <div style={{ marginBottom: '1.75rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
+            🪟 Overlay Transparente
+          </h2>
+          <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
+            Ventana siempre visible sobre tus juegos.{' '}
+            <kbd style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid var(--sf-border)', padding: '0.1rem 0.4rem', borderRadius: 4, fontSize: '0.72rem', color: 'var(--sf-text-2)' }}>
+              Ctrl+Shift+T
+            </kbd>{' '}
+            para toggle click-through.
+          </p>
+        </div>
+
+        {/* Auth status */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0, marginLeft: '1rem' }}>
+          <span
+            className={
+              authStatus === 'logged' ? 'sf-badge sf-badge-success' :
+              authStatus === 'checking' ? 'sf-badge sf-badge-teal' :
+              'sf-badge sf-badge-danger'
+            }
+          >
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor', display: 'inline-block' }} />
+            {authStatus === 'logged' ? 'Twitch ✓' : authStatus === 'checking' ? 'Verificando' : 'Sin sesión'}
           </span>
           {authStatus !== 'logged' && (
-            <button onClick={handleLogin} className="text-xs text-purple-400 hover:text-purple-300 ml-1">
+            <button
+              id="twitch-login-btn"
+              onClick={handleLogin}
+              className="sf-btn sf-btn-primary"
+              style={{ fontSize: '0.75rem', padding: '0.3rem 0.75rem' }}
+            >
               Iniciar sesión
             </button>
           )}
         </div>
       </div>
 
-      <p className="text-sm text-zinc-400 mb-4">
-        Ventana transparente siempre visible sobre tus juegos.
-        Atajo: <kbd className="bg-zinc-700 px-1.5 py-0.5 rounded text-xs">Ctrl+Shift+T</kbd> click-through.
-      </p>
+      <div className="glass-card" style={{ padding: '1.5rem' }}>
+        {/* Mode selector */}
+        <p className="sf-section-title">Fuente del overlay</p>
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
+          {(['channel', 'url'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              style={{
+                padding: '0.4rem 1rem',
+                borderRadius: 8,
+                border: '1px solid',
+                borderColor: mode === m ? 'var(--sf-primary)' : 'var(--sf-border)',
+                background: mode === m ? 'rgba(124,58,237,0.2)' : 'transparent',
+                color: mode === m ? '#a78bfa' : 'var(--sf-text-2)',
+                fontSize: '0.825rem',
+                fontWeight: mode === m ? 600 : 400,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {m === 'channel' ? '💬 Chat del canal' : '🔗 URL personalizada'}
+            </button>
+          ))}
+        </div>
 
-      {/* Mode selector */}
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setMode('channel')}
-          className={`px-3 py-1.5 text-xs rounded transition-colors ${mode === 'channel' ? 'bg-purple-600 text-white' : 'bg-zinc-700 text-zinc-400 hover:text-white'}`}
-        >
-          Chat del canal
-        </button>
-        <button
-          onClick={() => setMode('url')}
-          className={`px-3 py-1.5 text-xs rounded transition-colors ${mode === 'url' ? 'bg-purple-600 text-white' : 'bg-zinc-700 text-zinc-400 hover:text-white'}`}
-        >
-          URL personalizada
-        </button>
-      </div>
-
-      {mode === 'url' ? (
-        <div className="flex items-end gap-3">
-          <div className="flex-1">
-            <label className="text-xs text-zinc-500 block mb-1">
-              URL del overlay (Cyan Chat, StreamElements, etc.)
+        {mode === 'url' ? (
+          <div>
+            <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
+              URL del overlay
             </label>
             <input
+              id="overlay-custom-url"
               type="url"
               value={customUrl}
               onChange={(e) => setCustomUrl(e.target.value)}
               placeholder="https://chat.johnnycyan.com/?channel=..."
-              className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-zinc-500"
+              className="sf-input"
+              style={{ marginBottom: '0.875rem' }}
             />
           </div>
-          <button
-            onClick={toggle}
-            disabled={!customUrl}
-            className={`shrink-0 px-5 py-2 rounded text-sm font-medium transition-colors ${
-              isOpen
-                ? 'bg-red-600 hover:bg-red-700 text-white'
-                : 'bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-700 text-white disabled:text-zinc-500'
-            }`}
-          >
-            {isOpen ? 'Cerrar' : 'Abrir'}
-          </button>
-        </div>
-      ) : (
-        <div className="flex items-end gap-3">
-          <div className="flex-1">
-            <label className="text-xs text-zinc-500 block mb-1">Tema visual</label>
-            <select
-              value={selectedTheme}
-              onChange={(e) => setSelectedTheme(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm focus:outline-none"
-            >
+        ) : (
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.625rem', fontWeight: 500 }}>
+              Tema visual
+            </label>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {THEMES.map((t) => (
-                <option key={t.id} value={t.id}>{t.label}</option>
+                <button
+                  key={t.id}
+                  onClick={() => setSelectedTheme(t.id)}
+                  style={{
+                    padding: '0.4rem 0.875rem',
+                    borderRadius: 8,
+                    border: '1px solid',
+                    borderColor: selectedTheme === t.id ? (t.color ?? 'var(--sf-primary)') : 'var(--sf-border)',
+                    background: selectedTheme === t.id ? `${(t.color ?? '#7c3aed')}22` : 'transparent',
+                    color: selectedTheme === t.id ? (t.color ?? '#a78bfa') : 'var(--sf-text-3)',
+                    fontSize: '0.8rem',
+                    fontWeight: selectedTheme === t.id ? 600 : 400,
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    transition: 'all 0.15s ease',
+                    display: 'flex', alignItems: 'center', gap: '0.375rem',
+                  }}
+                >
+                  <span>{t.icon}</span>
+                  {t.label}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
-          <button
-            onClick={toggle}
-            disabled={!canOpen}
-            className={`shrink-0 px-5 py-2 rounded text-sm font-medium transition-colors ${
-              isOpen
-                ? 'bg-red-600 hover:bg-red-700 text-white'
-                : 'bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-700 text-white disabled:text-zinc-500'
-            }`}
+        )}
+
+        {/* Toggle button */}
+        <button
+          id="overlay-toggle-btn"
+          onClick={toggle}
+          disabled={!canOpen}
+          className={`sf-btn ${isOpen ? 'sf-btn-danger' : 'sf-btn-primary'}`}
+          style={{ width: '100%', marginBottom: isOpen ? '1rem' : 0 }}
+        >
+          {isOpen ? '✕ Cerrar overlay' : '▶ Abrir overlay'}
+        </button>
+
+        {/* Click-through toggle (only when open) */}
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            style={{ overflow: 'hidden' }}
           >
-            {isOpen ? 'Cerrar' : 'Abrir'}
-          </button>
-        </div>
-      )}
+            <div style={{
+              padding: '0.75rem 1rem',
+              background: 'rgba(0,0,0,0.2)',
+              borderRadius: 8,
+              border: '1px solid var(--sf-border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+              <div>
+                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.1rem' }}>
+                  Click-through
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)' }}>
+                  Arrastra desde el borde superior para mover
+                </div>
+              </div>
+              <button
+                id="overlay-clickthrough-toggle"
+                onClick={toggleClickThrough}
+                style={{
+                  width: 44, height: 24, borderRadius: 99,
+                  background: clickThrough ? 'var(--sf-primary)' : 'var(--sf-border)',
+                  border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s',
+                }}
+              >
+                <span style={{
+                  position: 'absolute', top: 3,
+                  left: clickThrough ? 'calc(100% - 21px)' : 3,
+                  width: 18, height: 18, borderRadius: '50%',
+                  background: 'white', transition: 'left 0.2s',
+                }} />
+              </button>
+            </div>
+          </motion.div>
+        )}
 
-      {isOpen && (
-        <div className="mt-3 flex items-center gap-3">
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input
-              type="checkbox"
-              checked={clickThrough}
-              onChange={toggleClickThrough}
-              className="accent-purple-500"
-            />
-            Click-through
-          </label>
-          <span className="text-xs text-zinc-500">Arrastrá desde el borde superior</span>
-        </div>
-      )}
-
-      {!canOpen && mode === 'channel' && (
-        <p className="text-xs text-zinc-500 mt-2">Ingresá un canal para abrir el overlay</p>
-      )}
+        {!canOpen && mode === 'channel' && (
+          <p style={{ marginTop: '0.75rem', fontSize: '0.78rem', color: 'var(--sf-text-3)', textAlign: 'center' }}>
+            Ingresa tu canal de Twitch en la barra superior
+          </p>
+        )}
+      </div>
     </div>
   );
 }

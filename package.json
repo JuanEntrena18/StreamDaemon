@@ -6,7 +6,7 @@
   ],
   "scripts": {
     "dev": "concurrently -n api,web -c blue,green \"npm run dev -w packages/backend\" \"npm run dev -w packages/frontend\"",
-    "dev:desktop": "npm run dev -w packages/desktop",
+    "dev:desktop": "concurrently -n vite,electron -c green,cyan --kill-others \"npm run dev -w packages/frontend\" \"npm run dev -w packages/desktop\"",
     "build": "npm run build --workspaces --if-present",
     "build:desktop": "npm run build -w packages/frontend && npm run build -w packages/backend && npm run dist -w packages/desktop",
     "lint": "eslint packages/",
