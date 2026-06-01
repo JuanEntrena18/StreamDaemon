@@ -41,11 +41,11 @@ export function useAuthStatus() {
   }, [refresh]);
 
   const login = useCallback(() => {
-    if (window.streamforger) {
-      window.streamforger.auth.login();
-    } else {
-      window.location.href = `${BACKEND_URL}/auth/login`;
-    }
+    // Use window.open so Electron's setWindowOpenHandler intercepts it
+    // and opens in the default browser via shell.openExternal.
+    // The backend's /auth/login endpoint responds with a 302 redirect to
+    // Twitch's OAuth page, which the browser follows normally.
+    window.open(`${BACKEND_URL}/auth/login`, '_blank');
   }, []);
 
   return { ...status, loading, login, refresh };

@@ -61,15 +61,21 @@ export function setEnterGiveaway(fn: typeof enterGiveaway) {
   enterGiveawayFn = fn;
 }
 
+const joinedChannels = new Set<string>();
+
 export function joinChannel(channel: string) {
-  if (chatClient) {
+  if (chatClient && !joinedChannels.has(channel)) {
+    joinedChannels.add(channel);
     chatClient.join(channel);
+    console.log(`📡 Joined channel: ${channel}`);
   }
 }
 
 export function leaveChannel(channel: string) {
-  if (chatClient) {
+  if (chatClient && joinedChannels.has(channel)) {
+    joinedChannels.delete(channel);
     chatClient.part(channel);
+    console.log(`📡 Left channel: ${channel}`);
   }
 }
 
