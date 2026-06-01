@@ -8,6 +8,7 @@ import { ObsPanel } from './components/ObsPanel';
 import { Logo } from './components/Logo';
 import { ChatPanel } from './components/ChatPanel';
 import { ConfigPanel } from './components/ConfigPanel';
+import { SplashScreen } from './components/SplashScreen';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
@@ -43,10 +44,13 @@ const TAB_LABELS: Record<Tab, string> = {
 };
 
 export function App() {
+  const [backendReady, setBackendReady] = useState(false);
   const { connected } = useSocket();
   const { authenticated, user, loading: authLoading, login } = useAuthStatus();
   const [channel, setChannel] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('chat');
+
+  if (!backendReady) return <SplashScreen onReady={() => setBackendReady(true)} />;
 
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
   const [opacity, setOpacity] = useState(1);
