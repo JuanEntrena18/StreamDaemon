@@ -25,7 +25,9 @@ async function startBackend() {
     const opts: { port: number; frontendDir?: string } = { port: 3000 };
 
     if (!isDev) {
-      opts.frontendDir = path.resolve(__dirname, '../../frontend/dist');
+      // electron-builder copies ../frontend/dist → resources/frontend/dist (extraResources)
+      // process.resourcesPath points to the resources/ folder at runtime
+      opts.frontendDir = path.join(process.resourcesPath, 'frontend', 'dist');
     }
 
     await startServer(opts);

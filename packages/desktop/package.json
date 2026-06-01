@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "tsc && wait-on http://localhost:5173 && electron .",
     "build": "tsc",
-    "dist": "prisma generate && tsc && electron-builder --win --x64",
+    "dist": "npm run build --prefix ../frontend && npm run build --prefix ../backend && npx prisma generate --schema=prisma/schema.prisma && tsc && electron-builder --win --x64",
     "db:generate": "prisma generate"
   },
   "dependencies": {
@@ -38,8 +38,15 @@
     "files": [
       "dist/**/*",
       "prisma/**/*",
-      "node_modules/**/*",
-      "../frontend/dist/**/*"
+      "node_modules/**/*"
+    ],
+    "extraFiles": [],
+    "extraResources": [
+      {
+        "from": "../frontend/dist",
+        "to": "frontend/dist",
+        "filter": ["**/*"]
+      }
     ],
     "win": {
       "target": "nsis",
