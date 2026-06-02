@@ -15,7 +15,7 @@ export function Subnautica2ChatOverlay({ channel }: Props) {
   const [particles, setParticles] = useState<
     { id: number; x: number; y: number; size: number; speed: number; opacity: number }[]
   >([]);
-  const { socket } = useSocket();
+  const { socket, connected } = useSocket();
 
   useSocketEvent(
     'chat:message',
@@ -25,10 +25,10 @@ export function Subnautica2ChatOverlay({ channel }: Props) {
   );
 
   useEffect(() => {
-    if (channel && socket?.connected) {
+    if (channel && connected) {
       socket.emit('join:channel', channel);
     }
-  }, [channel, socket?.connected]);
+  }, [channel, connected, socket]);
 
   // Generate ambient floating particles
   useEffect(() => {

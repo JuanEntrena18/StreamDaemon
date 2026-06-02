@@ -127,8 +127,9 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
     setSpinning(true);
     setWinner(null);
 
+    const slice = (2 * Math.PI) / wheelNames.length;
     const spins = 5 + Math.floor(Math.random() * 5);
-    const target = Math.random() * 2 * Math.PI;
+    const target = Math.random() * slice;
     const totalRotation = spins * 2 * Math.PI + target;
     const startRotation = rotation;
     const endRotation = startRotation + totalRotation;
@@ -139,7 +140,6 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
     function animate(time: number) {
       const elapsed = time - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // Easing: cubic out
       const eased = 1 - Math.pow(1 - progress, 3);
       const currentRotation = startRotation + totalRotation * eased;
       setRotation(currentRotation);
@@ -149,12 +149,8 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
       } else {
         setRotation(endRotation);
         setSpinning(false);
-        // Determine winner
-        const slice = (2 * Math.PI) / wheelNames.length;
-        // The pointer is at top (270 degrees / -PI/2)
-        const normalizedRotation = ((endRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-        const pointerAngle = (3 * Math.PI / 2 - normalizedRotation + 2 * Math.PI) % (2 * Math.PI);
-        const winnerIdx = Math.floor(pointerAngle / slice) % wheelNames.length;
+        const normalized = ((endRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+        const winnerIdx = Math.floor(((2 * Math.PI - normalized) % (2 * Math.PI)) / slice) % wheelNames.length;
         setWinner(wheelNames[winnerIdx]);
       }
     }
@@ -315,6 +311,34 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
             <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '1rem', lineHeight: 1.4 }}>
               Añade nombres y haz girar la ruleta para escoger un ganador al azar.
             </p>
+
+            {/* Bulk import */}
+            <details style={{ marginBottom: '0.75rem' }}>
+              <summary style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', cursor: 'pointer', userSelect: 'none' }}>
+                📋 Importar lista de nombres
+              </summary>
+              <textarea
+                placeholder="Pega aquí los nombres, separados por comas o uno por línea&#10;Ej: usuario1, usuario2, usuario3&#10;o:&#10;usuario1&#10;usuario2"
+                className="sf-input"
+                style={{ marginTop: '0.5rem', minHeight: 80, fontSize: '0.78rem', lineHeight: 1.5, resize: 'vertical' }}
+                onPaste={(e) => {
+                  const text = e.clipboardData.getData('text');
+                  const names = text.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+                  if (names.length > 0) {
+                    e.preventDefault();
+                    setWheelNames((prev) => {
+                      const existing = new Set(prev);
+                      const newNames = names.filter((n) => !existing.has(n));
+                      return [...prev, ...newNames];
+                    });
+                    setWinner(null);
+                  }
+                }}
+              />
+              <p style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', marginTop: '0.3rem' }}>
+                Pega nombres separados por comas o saltos de línea
+              </p>
+            </details>
 
             {/* Input */}
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>

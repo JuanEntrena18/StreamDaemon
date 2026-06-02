@@ -19,7 +19,7 @@ interface Activity {
 export function CustomOverlay({ channel }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
-  const { socket } = useSocket();
+  const { socket, connected } = useSocket();
   const params = new URLSearchParams(window.location.search);
   const gameName = params.get('game') || '';
   const recentCharters = useRef<Set<string>>(new Set());
@@ -36,10 +36,10 @@ export function CustomOverlay({ channel }: Props) {
   }, []));
 
   useEffect(() => {
-    if (channel && socket?.connected) {
+    if (channel && connected) {
       socket.emit('join:channel', channel);
     }
-  }, [channel, socket?.connected]);
+  }, [channel, connected, socket]);
 
   // Periodic cleanup of activity hints
   useEffect(() => {

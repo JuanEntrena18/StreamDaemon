@@ -18,13 +18,22 @@ export function useSocket() {
 
   useEffect(() => {
     s.connect();
+    if (s.connected) {
+      setConnected(true);
+    }
 
-    s.on('connect', () => setConnected(true));
-    s.on('disconnect', () => setConnected(false));
+    const onConnect = () => setConnected(true);
+    const onDisconnect = () => setConnected(false);
+    const onError = (err: Error) => console.error('Socket error:', err.message);
+
+    s.on('connect', onConnect);
+    s.on('disconnect', onDisconnect);
+    s.on('connect_error', onError);
 
     return () => {
-      s.off('connect');
-      s.off('disconnect');
+      s.off('connect', onConnect);
+      s.off('disconnect', onDisconnect);
+      s.off('connect_error', onError);
     };
   }, [s]);
 

@@ -17,7 +17,7 @@ interface GiveawayState {
 export function GiveawayOverlay({ channel }: Props) {
   const [giveaway, setGiveaway] = useState<GiveawayState | null>(null);
   const [winner, setWinner] = useState<{ winner: string; prize: string } | null>(null);
-  const { socket } = useSocket();
+  const { socket, connected } = useSocket();
 
   useSocketEvent('giveaway:start', useCallback((data: GiveawayState) => {
     setGiveaway(data);
@@ -34,10 +34,10 @@ export function GiveawayOverlay({ channel }: Props) {
   }, []));
 
   useEffect(() => {
-    if (channel && socket?.connected) {
+    if (channel && connected) {
       socket.emit('join:channel', channel);
     }
-  }, [channel, socket?.connected]);
+  }, [channel, connected, socket]);
 
   return (
     <>

@@ -22,7 +22,7 @@ interface Props {
 
 export function PredictionOverlay({ channel }: Props) {
   const [prediction, setPrediction] = useState<PredictionState | null>(null);
-  const { socket } = useSocket();
+  const { socket, connected } = useSocket();
 
   useSocketEvent('prediction:create', useCallback((data: PredictionState) => {
     setPrediction(data);
@@ -33,10 +33,10 @@ export function PredictionOverlay({ channel }: Props) {
   }, []));
 
   useEffect(() => {
-    if (channel && socket?.connected) {
+    if (channel && connected) {
       socket.emit('join:channel', channel);
     }
-  }, [channel, socket?.connected]);
+  }, [channel, connected, socket]);
 
   const totalVotes = prediction?.options.reduce((acc, o) => acc + o.votes, 0) ?? 0;
 

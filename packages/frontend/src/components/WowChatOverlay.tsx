@@ -11,17 +11,17 @@ interface Props {
 
 export function WowChatOverlay({ channel }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const { socket } = useSocket();
+  const { socket, connected } = useSocket();
 
   useSocketEvent('chat:message', useCallback((msg: ChatMessage) => {
     setMessages((prev) => [...prev.slice(-MAX_MESSAGES + 1), msg]);
   }, []));
 
   useEffect(() => {
-    if (channel && socket?.connected) {
+    if (channel && connected) {
       socket.emit('join:channel', channel);
     }
-  }, [channel, socket?.connected]);
+  }, [channel, connected, socket]);
 
   return (
     <div
