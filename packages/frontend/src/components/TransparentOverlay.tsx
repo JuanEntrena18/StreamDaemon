@@ -5,6 +5,12 @@ interface Props {
   channel: string;
 }
 
+const OVERLAY_MODES = [
+  { mode: 'channel', icon: '💬', label: 'Chat del canal' },
+  { mode: 'custom', icon: '🎨', label: 'Overlay Personalizado' },
+  { mode: 'url', icon: '🔗', label: 'URL personalizada' },
+];
+
 const THEMES = [
   { id: '', label: 'Sin tema', icon: '⬜' },
   { id: 'subnautica2', label: 'Subnautica 2', icon: '🌊', color: '#00d4ff' },
@@ -13,11 +19,12 @@ const THEMES = [
 ];
 
 export function TransparentOverlay({ channel }: Props) {
-  const [mode, setMode] = useState<'channel' | 'url'>('channel');
+  const [mode, setMode] = useState<'channel' | 'url' | 'custom'>('channel');
   const [isOpen, setIsOpen] = useState(false);
   const [clickThrough, setClickThrough] = useState(true);
   const [selectedTheme, setSelectedTheme] = useState('');
   const [customUrl, setCustomUrl] = useState('https://chat.johnnycyan.com/');
+  const [customGame, setCustomGame] = useState('');
   const [authStatus, setAuthStatus] = useState<'checking' | 'logged' | 'guest'>('checking');
 
   useEffect(() => {
@@ -46,6 +53,11 @@ export function TransparentOverlay({ channel }: Props) {
     if (mode === 'url' && customUrl) {
       window.streamforger?.overlay.open(customUrl, true);
       setIsOpen(true);
+    } else if (mode === 'custom') {
+      const gameParam = customGame ? `&game=${encodeURIComponent(customGame)}` : '';
+      const url = `http://localhost:3000/overlay.html?mode=custom&channel=${channel}${gameParam}`;
+      window.streamforger?.overlay.open(url, true);
+      setIsOpen(true);
     } else if (channel) {
       window.streamforger?.overlay.open(channel, false, selectedTheme || undefined);
       setIsOpen(true);
@@ -66,7 +78,7 @@ export function TransparentOverlay({ channel }: Props) {
     setTimeout(() => clearInterval(interval), 120000);
   };
 
-  const canOpen = (mode === 'url' && customUrl) || (mode === 'channel' && channel);
+  const canOpen = (mode === 'url' && customUrl) || (mode === 'channel' && channel) || (mode === 'custom' && channel);
 
   return (
     <div style={{ maxWidth: 600 }}>
@@ -114,25 +126,25 @@ export function TransparentOverlay({ channel }: Props) {
         {/* Mode selector */}
         <p className="sf-section-title">Fuente del overlay</p>
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
-          {(['channel', 'url'] as const).map((m) => (
+          {OVERLAY_MODES.map((m) => (
             <button
-              key={m}
-              onClick={() => setMode(m)}
+              key={m.mode}
+              onClick={() => setMode(m.mode as 'channel' | 'url' | 'custom')}
               style={{
                 padding: '0.4rem 1rem',
                 borderRadius: 8,
                 border: '1px solid',
-                borderColor: mode === m ? 'var(--sf-primary)' : 'var(--sf-border)',
-                background: mode === m ? 'rgba(124,58,237,0.2)' : 'transparent',
-                color: mode === m ? '#a78bfa' : 'var(--sf-text-2)',
+                borderColor: mode === m.mode ? 'var(--sf-primary)' : 'var(--sf-border)',
+                background: mode === m.mode ? 'rgba(124,58,237,0.2)' : 'transparent',
+                color: mode === m.mode ? '#a78bfa' : 'var(--sf-text-2)',
                 fontSize: '0.825rem',
-                fontWeight: mode === m ? 600 : 400,
+                fontWeight: mode === m.mode ? 600 : 400,
                 cursor: 'pointer',
                 fontFamily: 'inherit',
                 transition: 'all 0.15s ease',
               }}
             >
-              {m === 'channel' ? '💬 Chat del canal' : '🔗 URL personalizada'}
+              {m.icon} {m.label}
             </button>
           ))}
         </div>
@@ -151,6 +163,23 @@ export function TransparentOverlay({ channel }: Props) {
               className="sf-input"
               style={{ marginBottom: '0.875rem' }}
             />
+          </div>
+        ) : mode === 'custom' ? (
+          <div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
+                Nombre del juego
+              </label>
+              <input
+                id="overlay-custom-game"
+                type="text"
+                value={customGame}
+                onChange={(e) => setCustomGame(e.target.value)}
+                placeholder="Ej: Subnautica 2, World of Warcraft..."
+                className="sf-input"
+                style={{ marginBottom: '0.875rem', maxWidth: 300 }}
+              />
+            </div>
           </div>
         ) : (
           <div style={{ marginBottom: '1rem' }}>
@@ -240,7 +269,7 @@ export function TransparentOverlay({ channel }: Props) {
           </motion.div>
         )}
 
-        {!canOpen && mode === 'channel' && (
+        {!canOpen && mode !== 'url' && (
           <p style={{ marginTop: '0.75rem', fontSize: '0.78rem', color: 'var(--sf-text-3)', textAlign: 'center' }}>
             Ingresa tu canal de Twitch en la barra superior
           </p>

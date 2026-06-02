@@ -27,6 +27,15 @@ const OBS_URLS: OBSUrl[] = [
     color: '#7c3aed',
   },
   {
+    id: 'custom',
+    icon: '🎨',
+    label: 'Overlay Personalizado',
+    description: 'Overlay interactivo con nombre del canal, juego y actividad de usuarios',
+    mode: 'custom',
+    supportsTheme: false,
+    color: '#a855f7',
+  },
+  {
     id: 'giveaway',
     icon: '🎁',
     label: 'Sorteos',
@@ -87,10 +96,13 @@ export function ObsPanel({ channel, backendUrl }: Props) {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(DEFAULT_SOCIAL_LINKS);
   const baseUrl = backendUrl || 'http://localhost:3000';
 
+  const [customGame, setCustomGame] = useState('');
+
   function buildUrl(mode: string, supportsTheme: boolean): string {
     let url = `${baseUrl}/overlay.html?mode=${mode}`;
     if (channel) url += `&channel=${channel}`;
     if (supportsTheme && selectedTheme) url += `&theme=${selectedTheme}`;
+    if (mode === 'custom' && customGame) url += `&game=${encodeURIComponent(customGame)}`;
     return url;
   }
 
@@ -209,6 +221,19 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                   <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '0.625rem' }}>
                     {item.description}
                   </p>
+                  {item.id === 'custom' && (
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <input
+                        id="custom-game-input"
+                        type="text"
+                        value={customGame}
+                        onChange={(e) => setCustomGame(e.target.value)}
+                        placeholder="Nombre del juego (opcional)"
+                        className="sf-input"
+                        style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem', maxWidth: 280 }}
+                      />
+                    </div>
+                  )}
                   <code style={{
                     fontSize: '0.72rem',
                     color: 'var(--sf-text-2)',
