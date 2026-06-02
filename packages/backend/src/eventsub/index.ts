@@ -9,6 +9,15 @@ function emit(channel: string, event: string, data: unknown) {
   getIO().to(`channel:${channel}`).emit(event, data);
 }
 
+function trySubscribe(label: string, fn: () => void) {
+  try {
+    fn();
+    console.log(`  ✅ EventSub: ${label}`);
+  } catch (e) {
+    console.warn(`  ⚠️ EventSub: ${label} failed — ${(e as Error)?.message ?? e}`);
+  }
+}
+
 export async function setupEventSub() {
   if (!authProvider || !currentUser) {
     console.log('⏳ No user logged in, skipping EventSub setup');
@@ -27,8 +36,10 @@ export async function setupEventSub() {
   const userId = currentUser.id;
   const channelName = currentUser.login;
 
-  try {
-    listener.onChannelFollow(userId, userId, (e) => {
+  console.log(`🎯 Setting up EventSub subscriptions for ${currentUser.displayName}...`);
+
+  trySubscribe('channel.follow', () => {
+    listener!.onChannelFollow(userId, userId, (e) => {
       emit(channelName, 'channel:follow', {
         userDisplayName: e.userDisplayName,
         userName: e.userName,
@@ -36,10 +47,10 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
     });
-  } catch (e) { console.warn('⚠️ EventSub follow subscription failed:', e); }
+  });
 
-  try {
-    listener.onChannelSubscription(userId, (e) => {
+  trySubscribe('channel.subscription', () => {
+    listener!.onChannelSubscription(userId, (e) => {
       emit(channelName, 'channel:subscribe', {
         userDisplayName: e.userDisplayName,
         userName: e.userName,
@@ -48,10 +59,10 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
     });
-  } catch (e) { console.warn('⚠️ EventSub subscription subscription failed:', e); }
+  });
 
-  try {
-    listener.onChannelSubscriptionMessage(userId, (e) => {
+  trySubscribe('channel.subscription.message', () => {
+    listener!.onChannelSubscriptionMessage(userId, (e) => {
       emit(channelName, 'channel:subscription-message', {
         userDisplayName: e.userDisplayName,
         userName: e.userName,
@@ -62,10 +73,10 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
     });
-  } catch (e) { console.warn('⚠️ EventSub subscription message subscription failed:', e); }
+  });
 
-  try {
-    listener.onChannelSubscriptionGift(userId, (e) => {
+  trySubscribe('channel.subscription.gift', () => {
+    listener!.onChannelSubscriptionGift(userId, (e) => {
       const gifter = e.isAnonymous ? 'Anónimo' : e.gifterDisplayName;
       emit(channelName, 'channel:subgift', {
         gifterDisplayName: gifter,
@@ -76,10 +87,10 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
     });
-  } catch (e) { console.warn('⚠️ EventSub subgift subscription failed:', e); }
+  });
 
-  try {
-    listener.onChannelRedemptionAdd(userId, (e) => {
+  trySubscribe('channel.redemption.add', () => {
+    listener!.onChannelRedemptionAdd(userId, (e) => {
       emit(channelName, 'channel:redemption', {
         userDisplayName: e.userDisplayName,
         userName: e.userName,
@@ -89,10 +100,10 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
     });
-  } catch (e) { console.warn('⚠️ EventSub redemption subscription failed:', e); }
+  });
 
-  try {
-    listener.onChannelCheer(userId, (e) => {
+  trySubscribe('channel.cheer', () => {
+    listener!.onChannelCheer(userId, (e) => {
       emit(channelName, 'channel:cheer', {
         userDisplayName: e.userDisplayName ?? 'Anónimo',
         userName: e.userName ?? 'anonymous',
@@ -101,9 +112,9 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
     });
-  } catch (e) { console.warn('⚠️ EventSub cheer subscription failed:', e); }
+  });
 
-  console.log(`🎯 EventSub listener started for ${currentUser.displayName}`);
+  console.log(`✅ EventSub listener started for ${currentUser.displayName}`);
 }
 
 export async function stopEventSub() {

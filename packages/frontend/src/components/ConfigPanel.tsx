@@ -178,6 +178,19 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
         </div>
       </div>
 
+      {/* ── Re-auth note ── */}
+      {authenticated && (
+        <div style={{
+          padding: '0.75rem 1rem', marginBottom: '1.25rem',
+          background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
+          borderRadius: 'var(--sf-radius-sm)', fontSize: '0.78rem', color: '#fbbf24',
+          lineHeight: 1.5,
+        }}>
+          💡 Si ves errores 403 en la consola sobre EventSub, desconecta y vuelve a conectar
+          Twitch para renovar los permisos con los últimos ámbitos.
+        </div>
+      )}
+
       {/* ── Always on top ── */}
       {window.streamforger && (
         <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
