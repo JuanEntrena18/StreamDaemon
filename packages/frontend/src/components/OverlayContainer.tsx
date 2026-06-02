@@ -6,6 +6,7 @@ import { PredictionOverlay } from './PredictionOverlay';
 import { SocialOverlay } from './SocialOverlay';
 import { Subnautica2ChatOverlay } from './Subnautica2ChatOverlay';
 import { WowChatOverlay } from './WowChatOverlay';
+import { ChannelNotifications } from './ChannelNotifications';
 
 function getParams() {
   const params = new URLSearchParams(window.location.search);
@@ -16,10 +17,7 @@ function getParams() {
   };
 }
 
-export function OverlayContainer() {
-  const { mode, theme, channel } = getParams();
-  useTheme(theme);
-
+function OverlayContent({ mode, theme, channel }: { mode: string; theme: string | null; channel: string }) {
   switch (mode) {
     case 'giveaway':
       return <GiveawayOverlay channel={channel} />;
@@ -35,4 +33,16 @@ export function OverlayContainer() {
       if (theme === 'wow') return <WowChatOverlay channel={channel} />;
       return <ChatOverlay channel={channel} />;
   }
+}
+
+export function OverlayContainer() {
+  const { mode, theme, channel } = getParams();
+  useTheme(theme);
+
+  return (
+    <>
+      <OverlayContent mode={mode} theme={theme} channel={channel} />
+      {channel && <ChannelNotifications />}
+    </>
+  );
 }

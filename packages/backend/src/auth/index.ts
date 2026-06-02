@@ -13,6 +13,9 @@ const SCOPES = [
   'channel:read:predictions',
   'channel:manage:raids',
   'channel:manage:moderators',
+  'moderator:read:followers',
+  'channel:read:subscriptions',
+  'bits:read',
 ];
 
 export let authProvider: RefreshingAuthProvider | null = null;

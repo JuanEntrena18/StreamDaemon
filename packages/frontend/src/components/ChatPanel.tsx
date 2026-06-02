@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { SOUNDS, type SoundKey } from '../utils/sounds';
 
 interface Props {
   channel: string;
@@ -30,14 +31,25 @@ export function ChatPanel({ channel }: Props) {
   const [input, setInput] = useState('');
   const [replyTo, setReplyTo] = useState<{ id: string; user: string } | null>(null);
   const [menuMsg, setMenuMsg] = useState<string | null>(null);
+  const [selectedSound, setSelectedSound] = useState<SoundKey | ''>('');
   const { socket, connected, reconnect } = useSocket();
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const lastSoundRef = useRef(0);
+
+  const playSound = useCallback(() => {
+    if (!selectedSound) return;
+    const now = Date.now();
+    if (now - lastSoundRef.current < 2000) return;
+    lastSoundRef.current = now;
+    SOUNDS[selectedSound]();
+  }, [selectedSound]);
 
   useSocketEvent('chat:message', useCallback((msg: ChatMsg) => {
     setMessages((prev) => [...prev.slice(-MAX_MSGS + 1), msg]);
-  }, []));
+    playSound();
+  }, [playSound]));
 
   useEffect(() => {
     if (!channel || !socket) return;
@@ -354,6 +366,37 @@ export function ChatPanel({ channel }: Props) {
           >✕</button>
         </div>
       )}
+
+      {/* Sound selector */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+        <span style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>Sonido:</span>
+        <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setSelectedSound('')}
+            style={{
+              padding: '0.2rem 0.5rem', borderRadius: 4, border: '1px solid',
+              borderColor: selectedSound === '' ? 'var(--sf-primary)' : 'var(--sf-border)',
+              background: selectedSound === '' ? 'rgba(124,58,237,0.2)' : 'transparent',
+              color: selectedSound === '' ? '#a78bfa' : 'var(--sf-text-3)',
+              fontSize: '0.65rem', cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >Sin</button>
+          {(['pop', 'ding', 'chime', 'notification'] as SoundKey[]).map((s) => (
+            <button
+              key={s}
+              onClick={() => setSelectedSound(s)}
+              style={{
+                padding: '0.2rem 0.5rem', borderRadius: 4, border: '1px solid',
+                borderColor: selectedSound === s ? 'var(--sf-primary)' : 'var(--sf-border)',
+                background: selectedSound === s ? 'rgba(124,58,237,0.2)' : 'transparent',
+                color: selectedSound === s ? '#a78bfa' : 'var(--sf-text-3)',
+                fontSize: '0.65rem', cursor: 'pointer', fontFamily: 'inherit',
+              }}
+              onMouseEnter={() => SOUNDS[s]()}
+            >{s === 'pop' ? 'Pop' : s === 'ding' ? 'Ding' : s === 'chime' ? 'Chime' : 'Notif'}</button>
+          ))}
+        </div>
+      </div>
 
       {/* Input */}
       <div style={{ display: 'flex', gap: '0.5rem' }}>

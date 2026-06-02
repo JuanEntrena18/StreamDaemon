@@ -175,6 +175,7 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
     overlayWindow?.webContents.insertCSS(`
       body { margin: 0; overflow: hidden; }
       #overlay-root { width: 100%; height: 100%; }
+      :root { --bg-alpha: 0.1; }
     `);
     overlayWindow?.webContents.executeJavaScript(`
       (function() {
@@ -208,7 +209,11 @@ ipcMain.on('overlay:close', () => overlayWindow?.close());
 ipcMain.handle('overlay:isOpen', () => overlayWindow !== null && !overlayWindow.isDestroyed());
 ipcMain.on('overlay:toggleClickThrough', toggleClickThrough);
 ipcMain.handle('overlay:getClickThrough', () => overlayIgnoreMouse);
-ipcMain.on('overlay:setOpacity', (_e, v: number) => overlayWindow?.setOpacity(Math.max(0.1, Math.min(1, v))));
+ipcMain.on('overlay:setOpacity', (_e, v: number) => {
+  if (!overlayWindow) return;
+  const alpha = Math.max(0.1, Math.min(1, v));
+  overlayWindow?.webContents.insertCSS(`:root { --bg-alpha: ${1 - alpha}; }`);
+});
 ipcMain.on('overlay:resize', (_e, w: number, h: number) => {
   if (!overlayWindow) return;
   const bounds = overlayWindow.getBounds();

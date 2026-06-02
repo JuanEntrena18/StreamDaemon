@@ -44,6 +44,7 @@ export function setupGiveaways(app: FastifyInstance) {
         status: 'active',
         winnerId: null,
         entries: 0,
+        participants: [],
       });
 
       reply.send({ id, prize, duration });
@@ -72,8 +73,13 @@ export function enterGiveaway(channel: string, user: string) {
   const giveaway = Array.from(giveaways.values()).find(
     (g) => g.channel === channel && g.status === 'active',
   );
-  if (giveaway) {
+  if (giveaway && !giveaway.entries.has(user)) {
     giveaway.entries.add(user);
+    getIO().to(`channel:${channel}`).emit('giveaway:entry', {
+      user,
+      participants: Array.from(giveaway.entries),
+      count: giveaway.entries.size,
+    });
   }
 }
 
@@ -103,6 +109,7 @@ function endGiveaway(id: string) {
     status: 'ended',
     winnerId: winner,
     entries: entries.length,
+    participants: entries,
   });
 
   if (winner) {

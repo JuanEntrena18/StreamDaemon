@@ -37,7 +37,9 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
   // Wheel state
   const [wheelNames, setWheelNames] = useState<string[]>([]);
   const [wheelInput, setWheelInput] = useState('');
+  const [importText, setImportText] = useState('');
   const [spinning, setSpinning] = useState(false);
+  const [spinDuration, setSpinDuration] = useState(15);
   const [winner, setWinner] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
   const wheelRef = useRef<HTMLCanvasElement>(null);
@@ -134,7 +136,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
     const startRotation = rotation;
     const endRotation = startRotation + totalRotation;
 
-    const duration = 4000;
+    const duration = spinDuration * 1000;
     const startTime = performance.now();
 
     function animate(time: number) {
@@ -318,26 +320,35 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                 📋 Importar lista de nombres
               </summary>
               <textarea
+                value={importText}
+                onChange={(e) => setImportText(e.target.value)}
                 placeholder="Pega aquí los nombres, separados por comas o uno por línea&#10;Ej: usuario1, usuario2, usuario3&#10;o:&#10;usuario1&#10;usuario2"
                 className="sf-input"
                 style={{ marginTop: '0.5rem', minHeight: 80, fontSize: '0.78rem', lineHeight: 1.5, resize: 'vertical' }}
-                onPaste={(e) => {
-                  const text = e.clipboardData.getData('text');
-                  const names = text.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
-                  if (names.length > 0) {
-                    e.preventDefault();
+              />
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <button
+                  onClick={() => {
+                    const names = importText.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+                    if (names.length === 0) return;
                     setWheelNames((prev) => {
                       const existing = new Set(prev);
                       const newNames = names.filter((n) => !existing.has(n));
                       return [...prev, ...newNames];
                     });
+                    setImportText('');
                     setWinner(null);
-                  }
-                }}
-              />
-              <p style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', marginTop: '0.3rem' }}>
-                Pega nombres separados por comas o saltos de línea
-              </p>
+                  }}
+                  disabled={!importText.trim()}
+                  className="sf-btn sf-btn-primary"
+                  style={{ fontSize: '0.78rem', padding: '0.35rem 0.875rem' }}
+                >
+                  Añadir a la ruleta
+                </button>
+                <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', alignSelf: 'center' }}>
+                  Nombres separados por comas o saltos de línea
+                </span>
+              </div>
             </details>
 
             {/* Input */}
@@ -387,6 +398,29 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                 ))}
               </div>
             )}
+
+            {/* Spin duration */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>
+                ⏱ Duración del giro
+              </span>
+              {[10, 15, 20].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setSpinDuration(s)}
+                  style={{
+                    padding: '0.25rem 0.625rem', borderRadius: 99, border: '1px solid',
+                    borderColor: spinDuration === s ? 'var(--sf-primary)' : 'var(--sf-border)',
+                    background: spinDuration === s ? 'rgba(124,58,237,0.2)' : 'transparent',
+                    color: spinDuration === s ? '#a78bfa' : 'var(--sf-text-3)',
+                    fontSize: '0.72rem', fontWeight: spinDuration === s ? 600 : 400,
+                    cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s ease',
+                  }}
+                >
+                  {s} seg
+                </button>
+              ))}
+            </div>
 
             {/* Canvas wheel */}
             <div style={{ position: 'relative', width: '100%', aspectRatio: '1', marginBottom: '1rem' }}>

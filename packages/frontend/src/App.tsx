@@ -47,7 +47,7 @@ export function App() {
   const [backendReady, setBackendReady] = useState(false);
   const onReady = useCallback(() => setBackendReady(true), []);
   const { connected } = useSocket();
-  const { authenticated, user, loading: authLoading, login, logout } = useAuthStatus();
+  const { authenticated, user, loading: authLoading } = useAuthStatus();
   const [channel, setChannel] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('chat');
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
@@ -133,12 +133,12 @@ export function App() {
                 onClick={() => window.streamforger?.window.minimize()}
                 title="Minimizar"
                 style={winBtnStyle('#f59e0b')}
-              >–</button>
+              >-</button>
               <button
                 onClick={() => window.streamforger?.window.close()}
                 title="Cerrar"
                 style={winBtnStyle('#ef4444')}
-              >×</button>
+              >x</button>
             </div>
           )}
         </div>
@@ -318,61 +318,46 @@ export function App() {
             </div>
 
             {/* Twitch Auth */}
-            {!authLoading && (
-              authenticated && user ? (
+            {!authLoading && authenticated && user ? (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                background: 'rgba(145,71,255,0.12)',
+                border: '1px solid rgba(145,71,255,0.3)',
+                borderRadius: '99px',
+                padding: '0.25rem 0.75rem 0.25rem 0.35rem',
+              }}>
                 <div style={{
-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  background: 'rgba(145,71,255,0.12)',
-                  border: '1px solid rgba(145,71,255,0.3)',
-                  borderRadius: '99px',
-                  padding: '0.25rem 0.75rem 0.25rem 0.35rem',
+                  width: 22, height: 22, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #7c3aed, #6366f1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.65rem', fontWeight: 700, color: '#fff', flexShrink: 0,
                 }}>
-                  <div style={{
-                    width: 22, height: 22, borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #7c3aed, #6366f1)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '0.65rem', fontWeight: 700, color: '#fff', flexShrink: 0,
-                  }}>
-                    {user.displayName.charAt(0).toUpperCase()}
-                  </div>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--sf-text)', whiteSpace: 'nowrap' }}>
-                    {user.displayName}
-                  </span>
-                  <span style={{
-                    width: 5, height: 5, borderRadius: '50%',
-                    background: 'var(--sf-success)', display: 'inline-block', flexShrink: 0,
-                  }} />
-                  <button
-                    onClick={logout}
-                    title="Desconectar Twitch"
-                    style={{
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      color: 'var(--sf-text-3)', fontSize: '0.7rem', padding: '0.15rem',
-                      lineHeight: 1, opacity: 0.6, transition: 'opacity 0.15s',
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
-                  >
-                    ✕
-                  </button>
+                  {user.displayName.charAt(0).toUpperCase()}
                 </div>
-              ) : (
-                <button
-                  onClick={authLoading ? undefined : login}
-                  className="sf-btn"
-                  style={{
-                    background: 'linear-gradient(135deg, #9147ff 0%, #6441a5 100%)',
-                    color: '#fff', fontSize: '0.8rem', padding: '0.5rem 1rem',
-                    gap: '0.4rem', boxShadow: '0 2px 12px rgba(145,71,255,0.35)', whiteSpace: 'nowrap',
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
-                  </svg>
-                  Conectar Twitch
-                </button>
-              )
-            )}
+                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--sf-text)', whiteSpace: 'nowrap' }}>
+                  {user.displayName}
+                </span>
+                <span style={{
+                  width: 5, height: 5, borderRadius: '50%',
+                  background: 'var(--sf-success)', display: 'inline-block', flexShrink: 0,
+                }} />
+              </div>
+            ) : !authLoading ? (
+              <button
+                onClick={() => setActiveTab('config')}
+                className="sf-btn"
+                style={{
+                  background: 'linear-gradient(135deg, #9147ff 0%, #6441a5 100%)',
+                  color: '#fff', fontSize: '0.8rem', padding: '0.5rem 1rem',
+                  gap: '0.4rem', boxShadow: '0 2px 12px rgba(145,71,255,0.35)', whiteSpace: 'nowrap',
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
+                </svg>
+                Conectar Twitch
+              </button>
+            ) : null}
 
             {/* Connection badge */}
             <div
@@ -420,8 +405,8 @@ function winBtnStyle(color: string): React.CSSProperties {
     width: 14, height: 14, borderRadius: '50%',
     background: color, border: 'none', cursor: 'pointer',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontSize: '0.55rem', fontWeight: 700, color: 'transparent',
+    fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.85)',
     transition: 'color 0.1s',
-    padding: 0,
+    padding: 0, lineHeight: 1,
   };
 }

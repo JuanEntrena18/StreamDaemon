@@ -67,7 +67,7 @@ export function CustomOverlay({ channel }: Props) {
       <div
         style={{
           position: 'absolute', top: 0, left: 0, right: 0,
-          background: 'linear-gradient(180deg, rgba(15,15,35,0.92) 0%, rgba(15,15,35,0) 100%)',
+          background: `linear-gradient(180deg, rgba(15,15,35,calc(var(--bg-alpha,0.75)*1.2)) 0%, rgba(15,15,35,0) 100%)`,
           padding: '24px 36px 40px',
           display: 'flex', alignItems: 'flex-end', gap: 16,
         }}
@@ -114,7 +114,7 @@ export function CustomOverlay({ channel }: Props) {
                 exit={{ opacity: 0, x: -30 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
                 style={{
-                  background: 'rgba(15,15,35,0.75)',
+                  background: `rgba(15,15,35,var(--bg-alpha,0.75))`,
                   backdropFilter: 'blur(10px)',
                   border: '1px solid rgba(255,255,255,0.06)',
                   borderLeft: `3px solid ${msg.user.color || '#7c3aed'}`,
@@ -171,7 +171,7 @@ export function CustomOverlay({ channel }: Props) {
               exit={{ opacity: 0, x: 40, scale: 0.9 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
               style={{
-                background: 'rgba(15,15,35,0.6)',
+                background: `rgba(15,15,35,var(--bg-alpha,0.6))`,
                 backdropFilter: 'blur(8px)',
                 border: '1px solid rgba(124,58,237,0.15)',
                 borderRadius: 20,

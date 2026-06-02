@@ -51,7 +51,7 @@ export function WowChatOverlay({ channel }: Props) {
 
         <div
           style={{
-            background: 'linear-gradient(180deg, rgba(45,27,0,0.85) 0%, rgba(20,12,4,0.9) 100%)',
+            background: `linear-gradient(180deg, rgba(45,27,0, calc(var(--bg-alpha,0.5)*1.7)) 0%, rgba(20,12,4, calc(var(--bg-alpha,0.5)*1.8)) 100%)`,
             border: '1px solid rgba(255,209,0,0.3)',
             borderRadius: 6,
             padding: '8px 24px',
@@ -106,8 +106,8 @@ export function WowChatOverlay({ channel }: Props) {
                 transition={{ duration: 0.35, ease: 'easeOut', delay: isLast ? 0.1 : 0 }}
                 style={{
                   background: isLast
-                    ? 'linear-gradient(135deg, rgba(255,209,0,0.06) 0%, rgba(45,27,0,0.5) 100%)'
-                    : 'rgba(10,8,6,0.7)',
+                    ? 'linear-gradient(135deg, rgba(255,209,0,0.06) 0%, rgba(45,27,0,calc(var(--bg-alpha,0.5)*0.7)) 100%)'
+                    : `rgba(10,8,6,var(--bg-alpha,0.7))`,
                   border: '1px solid',
                   borderColor: isLast ? 'rgba(255,209,0,0.2)' : 'rgba(255,209,0,0.06)',
                   borderLeft: `3px solid ${msg.user.color || '#ffd100'}`,

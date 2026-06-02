@@ -142,7 +142,7 @@ export function Subnautica2ChatOverlay({ channel }: Props) {
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
               style={{
-                background: 'rgba(0, 10, 20, 0.82)',
+                background: `rgba(0, 10, 20, var(--bg-alpha,0.82))`,
                 backdropFilter: 'blur(8px)',
                 border: '1px solid rgba(0, 212, 255, 0.35)',
                 borderLeft: '3px solid #00d4ff',
@@ -297,7 +297,7 @@ function HudHeader() {
           display: 'flex',
           alignItems: 'center',
           gap: 8,
-          background: 'rgba(0,10,20,0.7)',
+          background: `rgba(0,10,20,var(--bg-alpha,0.7))`,
           border: '1px solid rgba(0,212,255,0.25)',
           borderRadius: 4,
           padding: '5px 12px',
@@ -340,7 +340,7 @@ function HudHeader() {
       {/* Clock */}
       <div
         style={{
-          background: 'rgba(0,10,20,0.7)',
+          background: `rgba(0,10,20,var(--bg-alpha,0.7))`,
           border: '1px solid rgba(0,212,255,0.25)',
           borderRadius: 4,
           padding: '5px 12px',

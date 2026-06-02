@@ -35,7 +35,7 @@ export function ChatOverlay({ channel }: Props) {
               exit={{ opacity: 0, x: -50 }}
               className="flex items-start gap-3 p-3 rounded-lg"
               style={{
-                background: 'rgba(0,0,0,0.6)',
+                background: `rgba(0,0,0,var(--bg-alpha,0.6))`,
                 border: 'var(--theme-border)',
                 boxShadow: 'var(--theme-glow)',
                 backdropFilter: 'blur(4px)',

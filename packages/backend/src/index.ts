@@ -9,6 +9,7 @@ import { setupChat, setEnterGiveaway } from './chat/index.js';
 import { setupSocketIO } from './socket/index.js';
 import { setupGiveaways, enterGiveaway } from './giveaways/index.js';
 import { setupPredictions } from './predictions/index.js';
+import { setupEventSub, stopEventSub } from './eventsub/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -31,7 +32,8 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupGiveaways(app);
   setEnterGiveaway(enterGiveaway);
   setupChat();
-  onAuth(() => setupChat());
+  setupEventSub();
+  onAuth(() => { setupChat(); setupEventSub(); });
   setupPredictions(app);
 
   app.get('/health', async () => ({ status: 'ok', timestamp: Date.now() }));
