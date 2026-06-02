@@ -11,6 +11,10 @@ contextBridge.exposeInMainWorld('streamforger', {
     isOpen: () => ipcRenderer.invoke('overlay:isOpen'),
     toggleClickThrough: () => ipcRenderer.send('overlay:toggleClickThrough'),
     getClickThrough: () => ipcRenderer.invoke('overlay:getClickThrough'),
+    setOpacity: (v: number) => ipcRenderer.send('overlay:setOpacity', v),
+    resize: (w: number, h: number) => ipcRenderer.send('overlay:resize', w, h),
+    setPosition: (x: number, y: number) => ipcRenderer.send('overlay:setPosition', x, y),
+    getBounds: () => ipcRenderer.invoke('overlay:getBounds'),
   },
 
   auth: {

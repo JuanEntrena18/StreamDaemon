@@ -10,6 +10,10 @@ interface StreamforgerAPI {
     isOpen: () => Promise<boolean>;
     toggleClickThrough: () => void;
     getClickThrough: () => Promise<boolean>;
+    setOpacity: (v: number) => void;
+    resize: (w: number, h: number) => void;
+    setPosition: (x: number, y: number) => void;
+    getBounds: () => Promise<{ x: number; y: number; width: number; height: number } | null>;
   };
   backend: {
     isReady: () => Promise<boolean>;

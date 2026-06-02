@@ -173,11 +173,16 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
 
   overlayWindow.webContents.on('did-finish-load', () => {
     overlayWindow?.webContents.insertCSS(`
+      body { margin: 0; overflow: hidden; }
       #overlay-root { width: 100%; height: 100%; }
-      .drag-handle {
-        position: fixed; top: 0; left: 0; right: 0; height: 4px;
-        z-index: 9999; cursor: move; -webkit-app-region: drag;
-      }
+    `);
+    overlayWindow?.webContents.executeJavaScript(`
+      (function() {
+        const bar = document.createElement('div');
+        bar.id = 'overlay-drag-bar';
+        bar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:20px;z-index:99999;cursor:move;-webkit-app-region:drag;background:transparent;';
+        document.body.appendChild(bar);
+      })();
     `);
   });
 
@@ -203,6 +208,16 @@ ipcMain.on('overlay:close', () => overlayWindow?.close());
 ipcMain.handle('overlay:isOpen', () => overlayWindow !== null && !overlayWindow.isDestroyed());
 ipcMain.on('overlay:toggleClickThrough', toggleClickThrough);
 ipcMain.handle('overlay:getClickThrough', () => overlayIgnoreMouse);
+ipcMain.on('overlay:setOpacity', (_e, v: number) => overlayWindow?.setOpacity(Math.max(0.1, Math.min(1, v))));
+ipcMain.on('overlay:resize', (_e, w: number, h: number) => {
+  if (!overlayWindow) return;
+  const bounds = overlayWindow.getBounds();
+  overlayWindow.setBounds({ x: bounds.x, y: bounds.y, width: Math.max(200, w), height: Math.max(100, h) });
+});
+ipcMain.on('overlay:setPosition', (_e, x: number, y: number) => {
+  overlayWindow?.setPosition(x, y);
+});
+ipcMain.handle('overlay:getBounds', () => overlayWindow?.getBounds() ?? null);
 
 // Auth: construct OAuth URL from env vars and open in default browser
 ipcMain.on('auth:login', () => {

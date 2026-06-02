@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { Server as SocketIOServer } from 'socket.io';
-import { joinChannel, leaveChannel } from '../chat/index.js';
+import { joinChannel, leaveChannel, sendMessage } from '../chat/index.js';
 
 let io: SocketIOServer | null = null;
 
@@ -14,13 +14,17 @@ export function setupSocketIO(app: FastifyInstance) {
 
     socket.on('join:channel', (channel: string) => {
       socket.join(`channel:${channel}`);
-      // Also join the actual Twitch IRC channel so we receive messages
       joinChannel(channel);
     });
 
     socket.on('leave:channel', (channel: string) => {
       socket.leave(`channel:${channel}`);
       leaveChannel(channel);
+    });
+
+    socket.on('chat:send', ({ channel, text }: { channel: string; text: string }) => {
+      if (!channel || !text) return;
+      sendMessage(channel, text);
     });
 
     socket.on('disconnect', () => {
