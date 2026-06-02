@@ -17,9 +17,11 @@ Aplicación modular para creadores de contenido que permite gestionar el canal d
 | **Framer Motion** | ^11.x | Animaciones de transición entre tabs, estados activos, badges, cards |
 | **Socket.IO Client** | ^4.x | Comunicación en tiempo real con el backend |
 | **@twurple/chat** | ^6.x | Cliente IRC para leer el chat de Twitch (en backend, expuesto vía WS al frontend) |
+| **@twurple/eventsub-ws** | ^7.x | EventSub WebSocket (follows, subs, gifts, redemptions, cheers) |
 | **Inter (Google Fonts)** | — | Tipografía principal del dashboard |
+| **Friz Quadrata** | — | Tipografía temática WoW (overlays Horda y Alianza) |
 
-### Sistema de Diseño (v0.1.0)
+### Sistema de Diseño (v0.2.0)
 
 El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 
@@ -33,6 +35,7 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 | `--sf-border` | `rgba(255,255,255,0.08)` | Bordes sutiles |
 | `--sf-success` | `#10b981` | Verde esmeralda (sorteo activo, conectado) |
 | `--sf-danger` | `#ef4444` | Rojo (desconectado, finalizar) |
+| `--bg-alpha` | `1` | Opacidad del fondo de overlays (0-1, solo fondos, no texto) |
 
 **Clases utilitarias personalizadas:**
 - `.glass-card` / `.glass-card--accent` — Glassmorphism con blur y borde semitransparente
@@ -41,27 +44,42 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 - `.sf-badge-success/danger/violet/teal` — Badges de estado con pill redondeada
 - `.animate-pulse-dot`, `.animate-glow`, `.animate-float`, `.animate-slide-up` — Animaciones CSS
 
+### Temas visuales (overlays)
+
+Los temas se definen en `useTheme.ts` y se aplican mediante variables CSS en el root:
+
+| Tema | Colores clave | Tipografía |
+|---|---|---|
+| **Subnautica 2** | Cian `#00d4ff`, verde neón `#00ff88` | `Courier New`, monospace |
+| **Path of Exile 2** | Dorado `#c9a04a`, rojo `#ff4444` | `Times New Roman`, serif |
+| **WoW - Horda** | Dorado `#ffd100`, marrón `#2d1b00` | `Friz Quadrata`, serif |
+| **WoW - Alianza** | Oro `#d4af37`, azul rey `#1a3a8a`, plata | `Friz Quadrata`, serif |
+
 ### Componentes del Dashboard
 
 | Componente | Descripción |
-|---|---|---|
-| `App.tsx` | Layout principal con sidebar (Chat, Sorteos, Predicciones, OBS URLs, Configuración) + header + tab transitions |
+|---|---|
+| `App.tsx` | Layout principal con sidebar + header (input #canal, badge usuario, conexión) + tab transitions |
 | `Logo.tsx` | SVG hexagonal con gradiente violeta-índigo y rayo (ícono de "forja") |
-| `ChatPanel.tsx` | Visor de chat en vivo con scroll infinito y botón para abrir ventana transparente siempre-encima |
-| `GiveawayPanel.tsx` | Panel de sorteos con badge pulsante, counter de participantes + ruleta aleatoria con canvas |
+| `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación (timeout/ban), selector de sonido, overlay controls (tamaño, opacidad) |
+| `GiveawayPanel.tsx` | Panel sorteos con badge pulsante, counter + ruleta canvas con selector duración giro (10/15/20s) e importación masiva de nombres |
 | `PredictionPanel.tsx` | Panel de predicciones con opciones A/B/C y feedback animado |
-| `ConfigPanel.tsx` | Configuración: conexión Twitch OAuth, toggle siempre-encima, acerca de con GitHub |
-| `TransparentOverlay.tsx` | Control del overlay transparente (modo canal / URL personalizada) |
-| `ObsPanel.tsx` | Panel de URLs para OBS Browser Source con cards, copiar al portapapeles y selector de tema |
-| `ChatOverlay.tsx` | Overlay de chat para Browser Source con animaciones temáticas |
-| `GiveawayOverlay.tsx` | Overlay de sorteos para Browser Source |
-| `PredictionOverlay.tsx` | Overlay de predicciones para Browser Source |
-| `SocialOverlay.tsx` | Overlay de redes sociales animado para Browser Source |
+| `ConfigPanel.tsx` | Configuración: conexión Twitch OAuth con Device Code Grant, logout, aviso re-autenticación, acerca de |
+| `ObsPanel.tsx` | Panel de URLs para OBS Browser Source con cards, copiar al portapapeles y selector de temas |
+| `ChannelNotifications.tsx` | Notificaciones animadas (follows, subs, gifts, redemptions, cheers) en overlay |
 
-### Librerías de overlay (OBS Browser Source)
+### Overlays (OBS Browser Source)
 
-- **`obs-browser-source`** — APIs nativas de OBS para resolución dinámica, FPS, etc.
-- **`obs-websocket-js`** (futuro) — Control remoto desde la app (cambio de escenas, fuentes)
+| Componente | Modo URL | Descripción |
+|---|---|---|
+| `ChatOverlay.tsx` | `mode=chat` | Overlay chat genérico con animaciones |
+| `Subnautica2ChatOverlay.tsx` | `mode=chat&theme=subnautica2` | Chat estilo PDA bioluminiscente |
+| `WowChatOverlay.tsx` | `mode=chat&theme=wow` | Chat estilo diario de misión Horda |
+| `AllianceChatOverlay.tsx` | `mode=chat&theme=alliance` | Chat Alianza: corona, león, azul/dorado, marco gótico |
+| `CustomOverlay.tsx` | `mode=custom` | Overlay interactivo: canal, juego, actividad de usuarios |
+| `GiveawayOverlay.tsx` | `mode=giveaway` | Sorteos: participantes izquierda + ruleta derecha + ganador gigante |
+| `PredictionOverlay.tsx` | `mode=prediction` | Predicciones en vivo |
+| `SocialOverlay.tsx` | `mode=social` | Redes sociales animadas |
 
 ---
 
@@ -71,14 +89,24 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 |---|---|---|
 | **Node.js** | 20 LTS | Runtime principal |
 | **TypeScript** | ^5.4 | Tipado estático |
-| **Fastify** | ^4.x | Framework HTTP rápido y eficiente |
+| **Fastify** | ^5.x | Framework HTTP rápido y eficiente |
 | **Socket.IO** | ^4.x | WebSocket bidireccional (chat en vivo, sorteos, predicciones) |
-| **@twurple/api** | ^6.x | Cliente oficial Twitch API (autenticación, datos de stream, usuarios) |
-| **@twurple/chat** | ^6.x | Conexión IRC para leer/enviar mensajes del chat |
-| **@twurple/eventsub** | ^6.x | Webhooks EventSub (follows, raids, predicciones, puntos de canal) |
+| **@twurple/api** | ^7.x | Cliente oficial Twitch API (autenticación, datos de stream, usuarios) |
+| **@twurple/chat** | ^7.x | Conexión IRC para leer/enviar mensajes del chat |
+| **@twurple/eventsub-ws** | ^7.x | EventSub WebSocket (follows, subs, gifts, redemptions, cheers) |
 | **Prisma** | ^5.x | ORM para base de datos |
 | **Zod** | ^3.x | Validación de schemas y tipos runtime |
-| **node-cron** | ^3.x | Tareas programadas (recordatorios, limpieza) |
+
+### Módulos del backend
+
+| Módulo | Archivo | Descripción |
+|---|---|---|
+| **Auth** | `src/auth/index.ts` | OAuth Twitch (Authorization Code + Device Code Grant), logout, restoreSession, refresco automático de tokens |
+| **Chat** | `src/chat/index.ts` | ChatClient IRC, comandos (`!sorteo`), reenvío de mensajes vía socket, envío de mensajes con error handling |
+| **Socket** | `src/socket/index.ts` | Socket.IO server, eventos `join:channel`, `leave:channel`, `chat:send` |
+| **Giveaways** | `src/giveaways/index.ts` | Sorteos: crear, finalizar, entrada vía chat, selección aleatoria, emisión `giveaway:entry` con lista de participantes |
+| **Predictions** | `src/predictions/index.ts` | Predicciones Twitch: crear, resolver |
+| **EventSub** | `src/eventsub/index.ts` | EventSub WebSocket listener: follows, subs, resubs, gifts, redemptions, cheers |
 
 ---
 
@@ -89,17 +117,21 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 | **Electron** | ^33.x | Shell de escritorio (ventana principal + overlay transparente) |
 | **electron-builder** | ^25.x | Generación del instalador `.exe` (NSIS) |
 | **better-sqlite3** | ^11.x | SQLite sin dependencias externas |
-| **electron-store** | ^8.x | Persistencia de configuración local |
 
 ### Proceso principal (`packages/desktop/src/main.ts`)
 
 El proceso principal gestiona:
-- **`startBackend()`** — Arranca el servidor Fastify embebido. Envuelto en `try/catch`: si el backend falla, la ventana se muestra igualmente.
-- **`createMainWindow()`** — Crea la ventana principal con `show: false`. La muestra en `ready-to-show` o tras un timeout de fallback de 8 s (previene ventana invisible).
-- **`loadWithRetry()`** — Intenta cargar la URL hasta 5 veces con backoff de 2 s.
-- **`createOverlayWindow()`** — Ventana transparente siempre visible para el overlay sobre juegos.
-- **IPC handlers** — `overlay:open/close/isOpen/toggleClickThrough`, `auth:login`
-- **Shortcut global** — `Ctrl+Shift+T` activa/desactiva el click-through del overlay
+- **`startBackend()`** — Arranca el servidor Fastify embebido. Envuelto en `try/catch`.
+- **`createMainWindow()`** — Ventana principal con `show: false`, timeout de fallback 8 s.
+- **`loadWithRetry()`** — Hasta 5 reintentos con backoff de 2 s.
+- **`createOverlayWindow()`** — Ventana transparente para overlay sobre juegos.
+- **IPC handlers**:
+  - `overlay:setOpacity` — Inyecta CSS `--bg-alpha` (opacidad solo de fondo, texto intacto)
+  - `overlay:resize` — Redimensiona ventana overlay (sm 300x450 / md 400x600 / lg 550x800)
+  - `overlay:setPosition` / `overlay:getBounds` — Arrastre de ventana
+  - `overlay:open/close/isOpen/toggleClickThrough`
+  - `auth:login` — Autenticación Twitch
+- **Shortcut global** — `Ctrl+Shift+T` activa/desactiva click-through del overlay
 
 ### Scripts de desarrollo
 
@@ -125,11 +157,9 @@ Problema detectado y corregido: la ventana Electron arrancaba vacía porque el s
 
 Problema detectado y corregido: el backend usaba el proveedor PostgreSQL de Prisma, incompatible con SQLite en modo desktop. Solución:
 
-1. `packages/backend/prisma/schema.prisma` — proveedor cambiado de `postgresql` → `sqlite`
-2. Campos `Json` convertidos a `String` (SQLite no tiene tipo JSON nativo en Prisma)
-3. `packages/backend/.env` — `DATABASE_URL` apunta a `file:../desktop/prisma/streamforger.db`
-4. `packages/desktop/src/main.ts` — inyecta `process.env.DATABASE_URL` antes de importar el backend
-5. `prisma db push` ejecutado para crear las tablas en la SQLite
+1. Backend migrado a SQLite; campos `Json` convertidos a `String`
+2. `DATABASE_URL` apunta a `file:../desktop/prisma/streamforger.db`
+3. `main.ts` inyecta `process.env.DATABASE_URL` antes de importar el backend
 
 ### Fix: Ventana invisible al iniciar (v0.1.0)
 
@@ -139,6 +169,10 @@ Problema detectado y corregido: el proceso de Electron arrancaba sin mostrar la 
 2. Timeout de 8 s — si `ready-to-show` no dispara, `mainWindow.show()` se llama forzosamente
 3. `loadWithRetry()` — hasta 5 reintentos con 2 s de espera entre intentos
 4. Doble `app.whenReady()` consolidada en una única llamada
+
+### Fix: Overlay opacidad global (v0.2.0)
+
+Problema: `BrowserWindow.setOpacity()` hacía transparente todo (texto incluido). Solución: se reemplazó por inyección de CSS `:root { --bg-alpha }` y todos los overlays usan `rgba(..., var(--bg-alpha, default))` para que solo los fondos sean semitransparentes.
 
 ---
 

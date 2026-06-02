@@ -12,13 +12,15 @@ Disponible en dos modos:
 
 ## ✨ Características
 
-- **🎨 Overlays temáticos** — Overlays con la estética de Subnautica 2, Path of Exile 2 y World of Warcraft. Cada tema define su propia paleta de colores, tipografía y animaciones.
-- **💬 Chat en vivo** — Lectura del chat de Twitch vía IRC con reenvío en tiempo real a los overlays mediante Socket.IO.
-- **🎁 Sorteos interactivos** — Comando `!sorteo` en el chat para participar. Panel de control para iniciar/finalizar sorteos con selección aleatoria de ganador.
+- **🎨 Overlays temáticos** — Overlays con la estética de Subnautica 2, Path of Exile 2, WoW Horda y WoW Alianza. Cada tema define su propia paleta de colores, tipografía y animaciones.
+- **💬 Chat en vivo** — Lectura del chat de Twitch vía IRC con reenvío en tiempo real a los overlays mediante Socket.IO. Incluye envío de mensajes, reply (↩ @usuario), moderación (timeout/ban), badges por rol y selector de sonido de notificación.
+- **🎁 Sorteos interactivos** — Comando `!sorteo` en el chat para participar. Panel de control con ruleta canvas, selector de duración del giro (10/15/20s) e importación masiva de nombres. Overlay dedicado con lista de participantes en vivo y ruleta animada con ganador gigante.
 - **📊 Predicciones** — Integración con la API de Predicciones de Twitch. Creación de encuestas desde el panel de control con resolución automática.
+- **🔔 Notificaciones EventSub** — Follows, subs, re-suscripciones, gifts, redemptions y cheers en tiempo real vía EventSub WebSocket, con overlay animado en pantalla.
 - **🌐 Redes sociales** — Overlay animado que muestra las redes del streamer de forma rotativa.
-- **🔐 Autenticación OAuth** — Login con Twitch. En navegador: flujo Authorization Code Grant con redirect. En escritorio: flujo **Device Code Grant** (el usuario ve un código en la app y lo ingresa en twitch.tv/activate). Tokens persistidos con refresco automático.
-- **🖥️ Dashboard premium** — Interfaz con sidebar de navegación, glassmorphism, animaciones Framer Motion y paleta violeta/índigo.
+- **🎮 Control de overlay transparente** — Ventana always-on-top con click-through toggleable (Ctrl+Shift+T), opacidad solo del fondo, redimensionable (Peq/Med/Grande) y barra de arrastre.
+- **🔐 Autenticación OAuth** — Login con Twitch. En navegador: flujo Authorization Code Grant con redirect. En escritorio: flujo **Device Code Grant** (el usuario ve un código en la app y lo ingresa en twitch.tv/activate). Tokens persistidos con refresco automático. Logout completo.
+- **🖥️ Dashboard premium** — Interfaz con sidebar de navegación, glassmorphism, animaciones Framer Motion, paleta violeta/índigo, badge de usuario Twitch y estado de conexión en tiempo real.
 
 ---
 
@@ -116,16 +118,22 @@ El panel de control cuenta con un rediseño premium (v0.2.0):
 
 ### Panel de Chat
 
-- Visor de chat en vivo con scroll automático
-- Botón para abrir el chat en ventana transparente siempre encima de todo
-- Conexión en tiempo real vía Socket.IO
+- Visor de chat en vivo con scroll automático y máximo 100 mensajes
+- Envío de mensajes al chat de Twitch con Enter
+- Reply a usuarios (↩ pre-filla @usuario en el input)
+- Moderación: timeout y ban directo desde hover sobre mensaje
+- Badges por rol (👑 broadcaster, 🛡️ mod, ⭐ VIP, 🎗️ sub, etc.)
+- Timestamp formato local HH:MM
+- Selector de sonido de notificación (pop/ding/chime/notification) generado con Web Audio API
+- Control de overlay transparente: tamaño (Peq 300×450 / Med 400×600 / Grande 550×800) y opacidad
 
 ### Panel de Sorteos
 
-- Formulario con selector de duración tipo pills
+- Formulario con selector de duración tipo pills (30s, 1min, 2min, 5min, 10min)
 - Card activa con contador de participantes animado y badge pulsante
 - Botón para finalizar con selección aleatoria de ganador
-- **Ruleta aleatoria** — añade nombres y haz girar la ruleta para escoger un ganador al azar
+- **Ruleta aleatoria** — añade nombres manualmente o importación masiva (textarea separado por comas/saltos de línea)
+- Selector de duración del giro: 10s / 15s / 20s
 
 ### Panel de Predicciones
 
@@ -136,8 +144,9 @@ El panel de control cuenta con un rediseño premium (v0.2.0):
 ### Panel OBS URLs
 
 - Cards individuales por overlay con botón **Copiar al portapapeles**
-- Selector de tema global (Subnautica 2 / PoE 2 / WoW) con preview de color
+- Selector de tema global (Subnautica 2 / PoE 2 / WoW Horda / WoW Alianza)
 - URLs actualizadas automáticamente al escribir el canal
+- Overlay Personalizado con campo de nombre del juego (`?game=`)
 
 ---
 
@@ -151,8 +160,9 @@ Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 | Sorteos | `http://localhost:3000/overlay.html?mode=giveaway&channel=tucanal` |
 | Predicciones | `http://localhost:3000/overlay.html?mode=prediction&channel=tucanal` |
 | Redes Sociales | `http://localhost:3000/overlay.html?mode=social` |
+| Overlay Personalizado | `http://localhost:3000/overlay.html?mode=custom&channel=tucanal` |
 
-Para cambiar el tema visual agrega `&theme=subnautica2`, `&theme=poe2` o `&theme=wow`.
+Para cambiar el tema visual del chat agrega `&theme=subnautica2`, `&theme=poe2`, `&theme=wow` (Horda) o `&theme=alliance` (Alianza).
 
 > Si usás el modo servidor, reemplazá `localhost:3000` por la IP o dominio del servidor.
 
@@ -166,22 +176,25 @@ StreamForge/
 │   ├── backend/           # Servidor (SQLite compartida, schema unificado)
 │   │   ├── prisma/        # Schema SQLite (provider: sqlite)
 │   │   └── src/
-│   │       ├── auth/      # OAuth Twitch
-│   │       ├── chat/      # IRC + comandos
-│   │       ├── socket/    # WebSocket
-│   │       ├── giveaways/ # Sorteos
-│   │       └── predictions/ # Predicciones
+│   │       ├── auth/      # OAuth Twitch (Code Grant + Device Code)
+│   │       ├── chat/      # IRC + comandos (!sorteo)
+│   │       ├── socket/    # WebSocket (chat:send, join/leave channel)
+│   │       ├── giveaways/ # Sorteos (crear, entrar, finalizar, entry events)
+│   │       ├── predictions/ # Predicciones Twitch API
+│   │       └── eventsub/  # EventSub WebSocket (follows, subs, cheers, etc.)
 │   ├── frontend/          # React + Vite + Overlays
 │   │   └── src/
-│   │       ├── components/# Chat, Giveaway, Prediction, Social, ObsPanel
-│   │       ├── hooks/     # useSocket, useTheme
-│   │       └── themes/    # Subnautica 2, PoE 2, WoW
+│   │       ├── components/# ChatPanel, GiveawayPanel, PredictionPanel, ConfigPanel,
+│   │       │              # ObsPanel, ChannelNotifications, Overlays (Chat, Giveaway,
+│   │       │              # Prediction, Social, Custom, Subnautica2, Wow, Alliance)
+│   │       ├── hooks/     # useSocket, useTheme, useAuthStatus
+│   │       └── utils/     # sounds.ts (Web Audio API)
 │   ├── desktop/           # Electron + SQLite
-│   │   ├── prisma/        # Schema SQLite + streamforger.db (base de datos)
+│   │   ├── prisma/        # Schema SQLite + streamforger.db
 │   │   └── src/
-│   │       ├── main.ts    # Proceso principal (inyecta DATABASE_URL, retry, fallback)
-│   │       └── preload.ts # Bridge IPC seguro
-│   └── shared/            # Tipos, schemas, cache interface
+│   │       ├── main.ts    # Proceso principal (overlay opacity/resize/position por IPC)
+│   │       └── preload.ts # Bridge IPC seguro (overlay.setOpacity, .resize, etc.)
+│   └── shared/            # Tipos compartidos (ChatMessage, GiveawayData, ServerEvent, etc.)
 ├── docker-compose.yml     # PostgreSQL + Redis (opcional, para producción)
 ├── STACK_TECNOLOGICO.md
 └── README.md
@@ -220,6 +233,30 @@ StreamForge/
 - `packages/backend/.env` — `DATABASE_URL` apunta a `file:../desktop/prisma/streamforger.db`
 - `packages/desktop/src/main.ts` — inyecta `process.env.DATABASE_URL` con la ruta absoluta al `.db` **antes** de importar el backend, garantizando que Prisma use SQLite siempre
 - Ejecutado `prisma db push` para crear las tablas en la base de datos
+
+### v0.2.0 — Overlay opacidad global: texto también se volvía transparente
+
+**Causa:** `BrowserWindow.setOpacity()` aplicaba transparencia a toda la ventana, incluyendo el texto de los mensajes.
+
+**Solución:** Reemplazado por inyección de CSS variable `:root { --bg-alpha }`. Todos los overlays ahora usan `rgba(..., var(--bg-alpha, default))` en los fondos, mientras el texto y elementos decorativos mantienen opacidad total.
+
+### v0.2.0 — Socket StrictMode: mensajes duplicados y conexión inestable
+
+**Causa:** En desarrollo con React StrictMode, los efectos se montan/desmontan dos veces, causando que los handlers del socket se registraran múltiples veces.
+
+**Solución:** Se usan referencias de handler específicas al hacer `s.off()`, se verifica `s.connected` inmediato, y se añadió handler `connect_error`. Todos los overlays usan el estado `connected` del hook en vez de `socket?.connected`.
+
+### v0.2.0 — Chat intent no registrado: "None of the queried intents (chat) are known"
+
+**Causa:** `addUserForToken()` no se await-eaba, por lo que `ChatClient` consultaba el intent `chat` antes de que `RefreshingAuthProvider` lo registrara.
+
+**Solución:** Se añadió `await` a `addUserForToken(token, ['chat'])` tanto en `finishAuth()` como en `restoreSession()`.
+
+### v0.2.0 — Chat send: mensajes no aparecían en Twitch
+
+**Causa:** `chatClient.say()` devuelve una Promise que no se await-eaba, por lo que errores (permisos, rate limit) se tragaban en silencio.
+
+**Solución:** `sendMessage()` ahora es `async` con `try/catch` que registra errores en consola, y el handler `chat:send` hace `await`.
 
 ---
 
