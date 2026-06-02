@@ -6,6 +6,7 @@ import { PredictionOverlay } from './PredictionOverlay';
 import { SocialOverlay } from './SocialOverlay';
 import { Subnautica2ChatOverlay } from './Subnautica2ChatOverlay';
 import { WowChatOverlay } from './WowChatOverlay';
+import { AllianceChatOverlay } from './AllianceChatOverlay';
 import { ChannelNotifications } from './ChannelNotifications';
 
 function getParams() {
@@ -31,6 +32,7 @@ function OverlayContent({ mode, theme, channel }: { mode: string; theme: string 
     default:
       if (theme === 'subnautica2') return <Subnautica2ChatOverlay channel={channel} />;
       if (theme === 'wow') return <WowChatOverlay channel={channel} />;
+      if (theme === 'alliance') return <AllianceChatOverlay channel={channel} />;
       return <ChatOverlay channel={channel} />;
   }
 }

@@ -68,7 +68,8 @@ const THEMES = [
   { id: '', label: 'Sin tema' },
   { id: 'subnautica2', label: '🌊 Subnautica 2' },
   { id: 'poe2', label: '⚔️ Path of Exile 2' },
-  { id: 'wow', label: '🛡️ World of Warcraft' },
+  { id: 'wow', label: '🛡️ WoW - Horda' },
+  { id: 'alliance', label: '👑 WoW - Alianza' },
 ];
 
 interface SocialLink {

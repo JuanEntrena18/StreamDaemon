@@ -38,6 +38,15 @@ const themes: Record<string, ThemeVars> = {
     '--theme-border': '3px solid #ffd100',
     '--theme-glow': '0 0 12px rgba(255, 209, 0, 0.3)',
   },
+  alliance: {
+    '--theme-primary': '#d4af37',
+    '--theme-secondary': '#1a3a8a',
+    '--theme-bg': 'linear-gradient(180deg, #0b0e1a 0%, #141832 50%, #0b0e1a 100%)',
+    '--theme-accent': '#4a7cff',
+    '--theme-font': "'Friz Quadrata', 'Times New Roman', serif",
+    '--theme-border': '2px solid #d4af37',
+    '--theme-glow': '0 0 15px rgba(212, 175, 55, 0.25)',
+  },
 };
 
 export function useTheme(themeId?: string | null) {
