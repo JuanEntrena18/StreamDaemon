@@ -1,17 +1,25 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import type { ChatMessage } from '@streamforger/shared';
 
-const MAX_MESSAGES = 30;
+const MAX_MESSAGES = 18;
 
 interface Props {
   channel: string;
 }
 
+/* ─────────────────────────────────────────
+   WoW ALIANZA OVERLAY
+   Paleta: azul real + plata + dorado imperial
+   - Marco de webcam: piedra de Ventormenta, arcos góticos
+   - Chat en formato pergamino regio con sello de la Alianza
+   - Decoraciones: leones heráldicos, escudos, runas arcanas
+───────────────────────────────────────── */
 export function AllianceChatOverlay({ channel }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const { socket, connected } = useSocket();
+  const chatRef = useRef<HTMLDivElement>(null);
 
   useSocketEvent('chat:message', useCallback((msg: ChatMessage) => {
     setMessages((prev) => [...prev.slice(-MAX_MESSAGES + 1), msg]);
@@ -23,204 +31,527 @@ export function AllianceChatOverlay({ channel }: Props) {
     }
   }, [channel, connected, socket]);
 
-  const GOLD = '#d4af37';
-  const BLUE = '#2b5fc6';
-  const LIGHT_BLUE = '#4a7cff';
-  const SILVER = '#a8b8d0';
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  /* ── Tokens de color Alianza ── */
+  const A = {
+    blue:        '#0a1f5c',
+    blueLight:   '#1a3a8c',
+    blueBright:  '#2255cc',
+    blueGlow:    '#4488ff',
+    azure:       '#0066cc',
+    gold:        '#b8860b',
+    goldLight:   '#d4af37',
+    goldGlow:    '#ffd700',
+    silver:      '#c0c8d8',
+    silverLight: '#e8edf5',
+    parchment:   '#d4c8b0',
+    ink:         '#0a0e1c',
+    stone:       '#0f1830',
+    lionGold:    '#c8a028',
+    glow:        '#6699ff',
+  };
 
   return (
     <div
       style={{
         position: 'fixed', inset: 0,
         pointerEvents: 'none', overflow: 'hidden',
-        fontFamily: "'Friz Quadrata', 'Times New Roman', serif",
-        background: 'linear-gradient(180deg, #0b0e1a 0%, #111630 30%, #1a2040 60%, #111630 100%)',
+        fontFamily: "'Cinzel', 'Palatino Linotype', 'Times New Roman', serif",
       }}
     >
-      {/* Stone masonry pattern overlay */}
+      {/* ── Google Fonts ── */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap');
+
+        @keyframes allianceShimmer {
+          0%   { opacity: 0.6; }
+          50%  { opacity: 1; }
+          100% { opacity: 0.6; }
+        }
+        @keyframes magicPulse {
+          0%,100% { box-shadow: 0 0 8px ${A.blueGlow}44; }
+          50%     { box-shadow: 0 0 20px ${A.blueGlow}88, 0 0 40px ${A.azure}44; }
+        }
+        @keyframes lionGlow {
+          0%,100% { text-shadow: 0 0 6px ${A.goldLight}66; }
+          50%     { text-shadow: 0 0 16px ${A.goldGlow}, 0 0 30px ${A.goldLight}88; }
+        }
+        @keyframes runeShine {
+          0%   { opacity: 0.3; }
+          50%  { opacity: 0.7; }
+          100% { opacity: 0.3; }
+        }
+        @keyframes manaFloat {
+          0%,100% { transform: translateY(0); opacity: 0.5; }
+          50%     { transform: translateY(-5px); opacity: 0.9; }
+        }
+        .alliance-shimmer { animation: allianceShimmer 4s ease-in-out infinite; }
+        .alliance-rune    { animation: runeShine 3s ease-in-out infinite; }
+        .alliance-mana    { animation: manaFloat 4s ease-in-out infinite; }
+        .alliance-lion    { animation: lionGlow 5s ease-in-out infinite; }
+      `}</style>
+
+      {/* ════════════════════════════════
+          VIGNETTE lateral arcana
+      ════════════════════════════════ */}
       <div style={{
-        position: 'absolute', inset: 0, opacity: 0.02,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${BLUE.replace('#','')}' fill-opacity='0.06'%3E%3Crect x='0' y='0' width='38' height='38' rx='2'/%3E%3Crect x='42' y='0' width='38' height='38' rx='2'/%3E%3Crect x='0' y='42' width='38' height='38' rx='2'/%3E%3Crect x='42' y='42' width='38' height='38' rx='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        position: 'absolute', inset: 0,
+        background: `
+          radial-gradient(ellipse 18% 100% at 0% 50%, ${A.blueGlow}06 0%, transparent 100%),
+          radial-gradient(ellipse 18% 100% at 100% 50%, ${A.blueGlow}06 0%, transparent 100%)
+        `,
         pointerEvents: 'none',
       }} />
 
-      {/* Vignette */}
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.7) 100%)', pointerEvents: 'none' }} />
-
-      {/* ── Left pillar (gothic stone column) ── */}
-      <div style={{ position: 'absolute', top: '10%', left: 12, width: 3, height: '75%', pointerEvents: 'none' }}>
-        <div style={{ width: 3, height: '100%', background: `linear-gradient(180deg, transparent, ${GOLD}22, ${BLUE}44, ${GOLD}22, transparent)`, borderRadius: 2 }} />
-      </div>
-
-      {/* ── Right pillar ── */}
-      <div style={{ position: 'absolute', top: '10%', right: 12, width: 3, height: '75%', pointerEvents: 'none' }}>
-        <div style={{ width: 3, height: '100%', background: `linear-gradient(180deg, transparent, ${GOLD}22, ${BLUE}44, ${GOLD}22, transparent)`, borderRadius: 2 }} />
-      </div>
-
-      {/* ── Top Banner / Crest ── */}
-      <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', minWidth: 520, pointerEvents: 'none' }}>
-        {/* Corner ornaments */}
-        <div style={{ position: 'absolute', top: -2, left: -8, width: 20, height: 20, borderTop: `2px solid ${GOLD}`, borderLeft: `2px solid ${GOLD}`, opacity: 0.5 }} />
-        <div style={{ position: 'absolute', top: -2, right: -8, width: 20, height: 20, borderTop: `2px solid ${GOLD}`, borderRight: `2px solid ${GOLD}`, opacity: 0.5 }} />
-        <div style={{ position: 'absolute', bottom: -2, left: -8, width: 20, height: 20, borderBottom: `2px solid ${GOLD}`, borderLeft: `2px solid ${GOLD}`, opacity: 0.5 }} />
-        <div style={{ position: 'absolute', bottom: -2, right: -8, width: 20, height: 20, borderBottom: `2px solid ${GOLD}`, borderRight: `2px solid ${GOLD}`, opacity: 0.5 }} />
-
+      {/* ════════════════════════════════
+          SECCIÓN WEBCAM — arriba derecha
+          Marco: Piedra gótica de Ventormenta
+      ════════════════════════════════ */}
+      <div style={{
+        position: 'absolute',
+        top: 24, right: 24,
+        width: 320, height: 240,
+        pointerEvents: 'none',
+      }}>
+        {/* Zona de video: transparente para la webcam */}
         <div style={{
-          background: `linear-gradient(180deg, rgba(26,58,138,calc(var(--bg-alpha,0.5)*1.5)) 0%, rgba(15,25,70,calc(var(--bg-alpha,0.5)*1.8)) 100%)`,
-          border: `1px solid ${GOLD}44`,
-          borderRadius: 8,
-          padding: '10px 28px',
-          textAlign: 'center',
-          boxShadow: `0 0 30px rgba(212,175,55,0.06), inset 0 0 40px rgba(42,95,198,0.08)`,
-        }}>
-          {/* Crown / Lion decoration */}
-          <div style={{ fontSize: '1.2rem', marginBottom: 2 }}>👑</div>
+          position: 'absolute', inset: 16,
+          background: 'transparent',
+          border: `1px solid ${A.blueBright}44`,
+        }} />
 
-          {/* Title with gold side bars */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, justifyContent: 'center' }}>
-            <div style={{ width: 50, height: 1, background: `linear-gradient(to left, ${GOLD}55, transparent)` }} />
-            <div>
-              <div style={{ fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.25em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: 1 }}>
-                🛡️ ¡Por la Alianza!
-              </div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 800, color: GOLD, textShadow: `0 0 20px ${GOLD}33, 0 2px 4px rgba(0,0,0,0.5)`, letterSpacing: '0.04em', lineHeight: 1.1 }}>
-                {channel}
-              </div>
-            </div>
-            <div style={{ width: 50, height: 1, background: `linear-gradient(to right, ${GOLD}55, transparent)` }} />
-          </div>
+        {/* Marco SVG gótico */}
+        <svg
+          width="320" height="240"
+          viewBox="0 0 320 240"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+        >
+          <defs>
+            <linearGradient id="allianceStone" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#1a2560" />
+              <stop offset="50%" stopColor="#0f1840" />
+              <stop offset="100%" stopColor="#080f28" />
+            </linearGradient>
+            <linearGradient id="allianceGoldH" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stopColor={A.gold}      stopOpacity="0" />
+              <stop offset="25%"  stopColor={A.goldLight}  stopOpacity="0.8" />
+              <stop offset="50%"  stopColor={A.goldGlow}   stopOpacity="1" />
+              <stop offset="75%"  stopColor={A.goldLight}  stopOpacity="0.8" />
+              <stop offset="100%" stopColor={A.gold}       stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="allianceBlueH" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stopColor={A.blueGlow}   stopOpacity="0" />
+              <stop offset="40%"  stopColor={A.blueGlow}   stopOpacity="0.6" />
+              <stop offset="60%"  stopColor={A.blueGlow}   stopOpacity="0.6" />
+              <stop offset="100%" stopColor={A.blueGlow}   stopOpacity="0" />
+            </linearGradient>
+            <filter id="allianceGlow">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
 
-          <div style={{ fontSize: '0.6rem', color: `${GOLD}55`, marginTop: 3, letterSpacing: '0.15em' }}>
-            — El Rey honra —
-          </div>
-        </div>
-      </div>
+          {/* Fondos del marco */}
+          <rect x="0"   y="0"   width="320" height="16"  fill="url(#allianceStone)" />
+          <rect x="0"   y="224" width="320" height="16"  fill="url(#allianceStone)" />
+          <rect x="0"   y="0"   width="16"  height="240" fill="url(#allianceStone)" />
+          <rect x="304" y="0"   width="16"  height="240" fill="url(#allianceStone)" />
 
-      {/* ── Chat messages (stone scroll style) ── */}
-      <div
-        style={{
-          position: 'absolute', bottom: 100, left: 40,
-          width: 480, maxHeight: 520,
-          display: 'flex', flexDirection: 'column',
-          gap: 3,
-          overflow: 'hidden',
-        }}
-      >
-        <AnimatePresence initial={false}>
-          {messages.map((msg, i) => {
-            const isLast = i === messages.length - 1;
-            return (
-              <motion.div
-                key={msg.id}
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.35, ease: 'easeOut', delay: isLast ? 0.1 : 0 }}
-                style={{
-                  background: isLast
-                    ? `linear-gradient(135deg, ${GOLD}08 0%, rgba(26,58,138,calc(var(--bg-alpha,0.5)*0.5)) 100%)`
-                    : `rgba(10,14,30,var(--bg-alpha,0.7))`,
-                  border: '1px solid',
-                  borderColor: isLast ? `${GOLD}22` : `${LIGHT_BLUE}0f`,
-                  borderLeft: `3px solid ${msg.user.color || GOLD}`,
-                  borderRadius: '0 6px 6px 0',
-                  padding: '8px 16px 8px 14px',
-                  position: 'relative',
-                }}
-              >
-                {/* Lion head / shield marker */}
-                <div style={{
-                  position: 'absolute', left: -7, top: '50%', transform: 'translateY(-50%)',
-                  width: 10, height: 10,
-                  background: msg.user.color || GOLD,
-                  clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
-                  boxShadow: `0 0 5px ${msg.user.color || GOLD}`,
-                  opacity: 0.5,
-                }} />
+          {/* Reflejos dorados */}
+          <rect x="0" y="0"   width="320" height="16" fill="url(#allianceGoldH)" opacity="0.5" />
+          <rect x="0" y="224" width="320" height="16" fill="url(#allianceGoldH)" opacity="0.5" />
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 1 }}>
-                  {/* Decorative vertical bar */}
-                  <div style={{ width: 2, height: 14, background: msg.user.color || GOLD, borderRadius: 1, opacity: 0.35 }} />
-                  <span style={{
-                    fontSize: '0.68rem', fontWeight: 700,
-                    color: msg.user.color || GOLD,
-                    letterSpacing: '0.04em',
-                    textShadow: `${(msg.user.color || GOLD)}22 0 0 6px`,
-                  }}>
-                    [{msg.user.displayName}]
-                  </span>
-                  <span style={{ fontSize: '0.5rem', color: `${GOLD}33`, marginLeft: 'auto', letterSpacing: '0.12em' }}>
-                    Dice:
-                  </span>
-                </div>
-                <div style={{ fontSize: '0.82rem', color: `${SILVER}CC`, lineHeight: 1.45, wordBreak: 'break-word', paddingLeft: 12 }}>
-                  {msg.text}
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
+          {/* Líneas de borde doradas */}
+          <line x1="0" y1="15.5" x2="320" y2="15.5" stroke={A.goldLight} strokeWidth="0.75" opacity="0.7" />
+          <line x1="0" y1="224.5" x2="320" y2="224.5" stroke={A.goldLight} strokeWidth="0.75" opacity="0.7" />
+          <line x1="15.5" y1="0" x2="15.5" y2="240" stroke={A.goldLight} strokeWidth="0.75" opacity="0.6" />
+          <line x1="304.5" y1="0" x2="304.5" y2="240" stroke={A.goldLight} strokeWidth="0.75" opacity="0.6" />
 
-      {/* ── Bottom Action Bar (stone + gold) ── */}
-      <div style={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none' }}>
-        <div style={{
-          display: 'flex', gap: 6,
-          padding: '7px 18px',
-          background: 'rgba(10,14,30,0.85)',
-          border: `1px solid ${GOLD}18`,
-          borderRadius: 8,
-          boxShadow: `inset 0 1px 0 ${GOLD}08, 0 4px 20px rgba(0,0,0,0.4)`,
-        }}>
-          {[{ cmd: '!sorteo', active: true }, { cmd: '!predict', active: false }, { cmd: '!comando', active: false }, { cmd: '!redes', active: false }].map((item) => (
-            <div
-              key={item.cmd}
-              style={{
-                padding: '4px 12px',
-                border: `1px solid ${item.active ? `${GOLD}33` : `${GOLD}0d`}`,
-                borderRadius: 4,
-                background: item.active ? `linear-gradient(135deg, ${BLUE}44, ${BLUE}22)` : 'transparent',
-                fontSize: '0.58rem',
-                fontWeight: 600,
-                color: item.active ? GOLD : `${GOLD}44`,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-              }}
+          {/* Segunda línea interior azul */}
+          <line x1="20" y1="20" x2="300" y2="20" stroke={A.blueGlow} strokeWidth="0.4" opacity="0.4" />
+          <line x1="20" y1="220" x2="300" y2="220" stroke={A.blueGlow} strokeWidth="0.4" opacity="0.4" />
+          <line x1="20" y1="20" x2="20" y2="220" stroke={A.blueGlow} strokeWidth="0.4" opacity="0.4" />
+          <line x1="300" y1="20" x2="300" y2="220" stroke={A.blueGlow} strokeWidth="0.4" opacity="0.4" />
+
+          {/* ── Esquinas: escudos heráldicos de la Alianza ── */}
+          {/* Esquina superior izquierda */}
+          <g>
+            <polygon points="0,0 36,0 0,36" fill="#0d1440" opacity="0.98" />
+            {/* Escudo pequeño */}
+            <path d="M4,4 L16,4 L16,18 Q10,22 4,18 Z" fill={A.blueLight} stroke={A.goldLight} strokeWidth="0.5" />
+            <text x="10" y="15" fontSize="7" fill={A.goldLight} textAnchor="middle" fontFamily="serif">✦</text>
+            <line x1="0" y1="36" x2="36" y2="0" stroke={A.goldLight} strokeWidth="0.5" opacity="0.5" />
+          </g>
+          {/* Esquina superior derecha */}
+          <g transform="translate(320,0) scale(-1,1)">
+            <polygon points="0,0 36,0 0,36" fill="#0d1440" opacity="0.98" />
+            <path d="M4,4 L16,4 L16,18 Q10,22 4,18 Z" fill={A.blueLight} stroke={A.goldLight} strokeWidth="0.5" />
+            <text x="10" y="15" fontSize="7" fill={A.goldLight} textAnchor="middle" fontFamily="serif">✦</text>
+            <line x1="0" y1="36" x2="36" y2="0" stroke={A.goldLight} strokeWidth="0.5" opacity="0.5" />
+          </g>
+          {/* Esquina inferior izquierda */}
+          <g transform="translate(0,240) scale(1,-1)">
+            <polygon points="0,0 36,0 0,36" fill="#0d1440" opacity="0.98" />
+            <path d="M4,4 L16,4 L16,18 Q10,22 4,18 Z" fill={A.blueLight} stroke={A.goldLight} strokeWidth="0.5" />
+            <text x="10" y="15" fontSize="7" fill={A.goldLight} textAnchor="middle" fontFamily="serif">✦</text>
+            <line x1="0" y1="36" x2="36" y2="0" stroke={A.goldLight} strokeWidth="0.5" opacity="0.5" />
+          </g>
+          {/* Esquina inferior derecha */}
+          <g transform="translate(320,240) scale(-1,-1)">
+            <polygon points="0,0 36,0 0,36" fill="#0d1440" opacity="0.98" />
+            <path d="M4,4 L16,4 L16,18 Q10,22 4,18 Z" fill={A.blueLight} stroke={A.goldLight} strokeWidth="0.5" />
+            <text x="10" y="15" fontSize="7" fill={A.goldLight} textAnchor="middle" fontFamily="serif">✦</text>
+            <line x1="0" y1="36" x2="36" y2="0" stroke={A.goldLight} strokeWidth="0.5" opacity="0.5" />
+          </g>
+
+          {/* ── Arco gótico superior central ── */}
+          <g transform="translate(60,0)">
+            <rect width="200" height="16" fill="#0d1440" />
+            {/* Arco en el centro */}
+            <path d="M80,16 Q100,-4 120,16" fill="none" stroke={A.goldLight} strokeWidth="0.75" opacity="0.6" />
+            <text
+              x="100" y="12"
+              fontSize="9" fontFamily="'Cinzel', serif" fontWeight="700"
+              fill={A.goldLight} textAnchor="middle" letterSpacing="2"
+              opacity="0.85"
             >
-              {item.cmd}
-            </div>
+              ⚜ FOR THE ALLIANCE ⚜
+            </text>
+          </g>
+
+          {/* ── Runas arcanas en laterales ── */}
+          {['✦', '◈', '✦'].map((rune, i) => (
+            <text key={i} x="7" y={80 + i * 28} fontSize="9"
+              fill={A.blueGlow} opacity="0.5" textAnchor="middle" fontFamily="serif">{rune}</text>
           ))}
-        </div>
+          {['✦', '◈', '✦'].map((rune, i) => (
+            <text key={i} x="313" y={80 + i * 28} fontSize="9"
+              fill={A.blueGlow} opacity="0.5" textAnchor="middle" fontFamily="serif">{rune}</text>
+          ))}
+
+          {/* ── Banner inferior: nombre del canal ── */}
+          <g transform="translate(40,224)">
+            <rect x="0" y="0" width="240" height="16" fill="#0a1030" opacity="0.96" />
+            <rect x="0" y="0" width="240" height="16" fill="url(#allianceGoldH)" opacity="0.3" />
+            <text
+              x="120" y="12"
+              fontSize="9" fontFamily="'Cinzel', serif" fontWeight="600"
+              fill={A.goldLight} textAnchor="middle" letterSpacing="2" opacity="0.85"
+            >
+              {channel.toUpperCase()}
+            </text>
+          </g>
+
+          {/* Destellos de mana en esquinas */}
+          <circle cx="36" cy="36" r="2.5" fill={A.blueGlow} opacity="0.5" />
+          <circle cx="284" cy="36" r="2.5" fill={A.blueGlow} opacity="0.5" />
+          <circle cx="36" cy="204" r="2.5" fill={A.blueGlow} opacity="0.5" />
+          <circle cx="284" cy="204" r="2.5" fill={A.blueGlow} opacity="0.5" />
+        </svg>
+
+        {/* Partícula de mana animada */}
+        <div className="alliance-mana" style={{
+          position: 'absolute', top: 30, left: 30,
+          width: 4, height: 4, borderRadius: '50%',
+          background: A.blueGlow,
+          boxShadow: `0 0 8px ${A.blueGlow}, 0 0 16px ${A.azure}88`,
+        }} />
+        <div className="alliance-mana" style={{
+          position: 'absolute', bottom: 30, right: 30,
+          width: 3, height: 3, borderRadius: '50%',
+          background: A.goldGlow,
+          boxShadow: `0 0 6px ${A.goldGlow}, 0 0 12px ${A.goldLight}88`,
+          animationDelay: '1.5s',
+        }} />
       </div>
 
-      {/* ── Bottom-right decorative resource bars ── */}
-      <div style={{ position: 'absolute', bottom: 30, right: 30, pointerEvents: 'none' }}>
-        <div style={{ marginBottom: 5 }}>
-          <div style={{ fontSize: '0.45rem', color: `${LIGHT_BLUE}55`, letterSpacing: '0.18em', marginBottom: 2, fontWeight: 600 }}>MANA</div>
-          <div style={{ width: 140, height: 8, background: 'rgba(255,255,255,0.02)', border: `1px solid ${LIGHT_BLUE}22`, borderRadius: 2, position: 'relative', overflow: 'hidden' }}>
-            <motion.div
-              style={{ height: '100%', background: `linear-gradient(90deg, ${LIGHT_BLUE}, #1a3a8a)`, borderRadius: 2 }}
-              animate={{ width: ['65%', '85%', '65%'] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            />
+      {/* ════════════════════════════════
+          SECCIÓN CHAT — pergamino real
+          Posición: abajo izquierda
+      ════════════════════════════════ */}
+      <div style={{
+        position: 'absolute',
+        bottom: 20, left: 20,
+        width: 420,
+        pointerEvents: 'none',
+      }}>
+
+        {/* ── Cabecera regia del pergamino ── */}
+        <svg width="420" height="56" viewBox="0 0 420 56" style={{ display: 'block' }}>
+          <defs>
+            <linearGradient id="allianceHeaderBg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor="#1a2e80" />
+              <stop offset="60%"  stopColor="#0f1d5c" />
+              <stop offset="100%" stopColor="#080e30" />
+            </linearGradient>
+            <linearGradient id="allianceHeaderGlow" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stopColor={A.blueGlow} stopOpacity="0" />
+              <stop offset="30%"  stopColor={A.blueGlow} stopOpacity="0.6" />
+              <stop offset="50%"  stopColor={A.glow}     stopOpacity="0.8" />
+              <stop offset="70%"  stopColor={A.blueGlow} stopOpacity="0.6" />
+              <stop offset="100%" stopColor={A.blueGlow} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+
+          {/* Forma con arco gótico en la cima */}
+          <path
+            d="M0,20 Q0,0 20,0 L400,0 Q420,0 420,20 L420,56 L0,56 Z"
+            fill="url(#allianceHeaderBg)"
+          />
+          {/* Brillo azul superior */}
+          <path
+            d="M0,20 Q0,0 20,0 L400,0 Q420,0 420,20"
+            fill="none" stroke="url(#allianceHeaderGlow)" strokeWidth="1.5"
+          />
+          {/* Borde dorado */}
+          <path
+            d="M0,20 Q0,0.5 20,0.5 L400,0.5 Q419.5,0.5 419.5,20 L419.5,56 L0.5,56"
+            fill="none" stroke={A.goldLight} strokeWidth="0.5" opacity="0.5"
+          />
+
+          {/* León heráldico izquierdo */}
+          <text x="24" y="38" fontSize="22" fill={A.lionGold} opacity="0.85" fontFamily="serif">🦁</text>
+
+          {/* Título */}
+          <text
+            x="210" y="24"
+            fontSize="9" fontFamily="'Cinzel', serif" fontWeight="700"
+            fill={A.blueGlow} textAnchor="middle" letterSpacing="4" opacity="0.7"
+          >
+            HERALDS OF THE KING
+          </text>
+          <text
+            x="210" y="44"
+            fontSize="14" fontFamily="'Cinzel Decorative', serif" fontWeight="700"
+            fill={A.goldGlow} textAnchor="middle" letterSpacing="1"
+            style={{ filter: `drop-shadow(0 0 6px ${A.blueGlow}88)` }}
+          >
+            Chat de la Alianza
+          </text>
+
+          {/* León derecho */}
+          <text x="396" y="38" fontSize="22" fill={A.lionGold} opacity="0.85" fontFamily="serif" textAnchor="end">🦁</text>
+
+          {/* Separador dorado */}
+          <line x1="0" y1="55.5" x2="420" y2="55.5" stroke={A.goldLight} strokeWidth="0.6" opacity="0.55" />
+        </svg>
+
+        {/* ── Cuerpo del pergamino ── */}
+        <div style={{
+          position: 'relative',
+          background: `linear-gradient(180deg, #080e30 0%, #060a22 40%, #080f28 100%)`,
+          borderLeft: `1px solid ${A.goldLight}44`,
+          borderRight: `1px solid ${A.goldLight}44`,
+        }}>
+          {/* Líneas de pauta arcana */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: `
+              repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 22px,
+                ${A.blueGlow}05 22px,
+                ${A.blueGlow}05 23px
+              )
+            `,
+            pointerEvents: 'none',
+          }} />
+
+          {/* Textura de piedra arcana */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: `
+              radial-gradient(ellipse 50% 40% at 15% 60%, ${A.blueGlow}05 0%, transparent 100%),
+              radial-gradient(ellipse 35% 25% at 85% 30%, ${A.goldLight}04 0%, transparent 100%)
+            `,
+            pointerEvents: 'none',
+          }} />
+
+          {/* Mensajes */}
+          <div
+            ref={chatRef}
+            style={{
+              maxHeight: 340,
+              overflow: 'hidden',
+              padding: '8px 0 4px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0,
+            }}
+          >
+            <AnimatePresence initial={false}>
+              {messages.map((msg, i) => {
+                const isLast = i === messages.length - 1;
+                return (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    style={{
+                      padding: '5px 14px 5px 12px',
+                      borderLeft: isLast
+                        ? `3px solid ${A.blueGlow}`
+                        : `3px solid ${msg.user.color || A.goldLight}88`,
+                      background: isLast
+                        ? `linear-gradient(90deg, ${A.blueGlow}14 0%, transparent 75%)`
+                        : 'transparent',
+                      position: 'relative',
+                    }}
+                  >
+                    {/* Gema de mana a la izquierda (sólo último mensaje) */}
+                    {isLast && (
+                      <div style={{
+                        position: 'absolute', left: -5, top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: 6, height: 6,
+                        background: A.blueGlow,
+                        clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+                        boxShadow: `0 0 10px ${A.blueGlow}`,
+                      }} />
+                    )}
+
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+                      {/* Nombre */}
+                      <span style={{
+                        fontFamily: "'Cinzel', serif",
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        color: msg.user.color || A.goldLight,
+                        letterSpacing: '0.04em',
+                        textShadow: `0 0 8px ${msg.user.color || A.goldLight}66`,
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {msg.user.displayName}
+                      </span>
+
+                      {/* Separador heráldico */}
+                      <span style={{
+                        fontSize: '0.6rem',
+                        color: `${A.blueGlow}88`,
+                        fontFamily: 'serif',
+                      }}>⸬</span>
+
+                      {/* Mensaje */}
+                      <span style={{
+                        fontFamily: "'IM Fell English', 'Palatino Linotype', serif",
+                        fontSize: '0.78rem',
+                        color: `${A.silver}cc`,
+                        lineHeight: 1.5,
+                        wordBreak: 'break-word',
+                      }}>
+                        {msg.text}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+
+            {/* Placeholder */}
+            {messages.length === 0 && (
+              <div style={{ padding: '20px 16px', textAlign: 'center' }}>
+                <div style={{
+                  fontFamily: "'Cinzel', serif",
+                  fontSize: '0.7rem',
+                  color: `${A.blueGlow}55`,
+                  letterSpacing: '0.15em',
+                }}>
+                  — LOS HERALDOS ESPERAN —
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        <div>
-          <div style={{ fontSize: '0.45rem', color: `${GOLD}55`, letterSpacing: '0.18em', marginBottom: 2, fontWeight: 600 }}>HONOR</div>
-          <div style={{ width: 140, height: 8, background: 'rgba(255,255,255,0.02)', border: `1px solid ${GOLD}22`, borderRadius: 2, position: 'relative', overflow: 'hidden' }}>
-            <motion.div
-              style={{ height: '100%', background: `linear-gradient(90deg, ${GOLD}, #b8860b)`, borderRadius: 2 }}
-              animate={{ width: ['45%', '70%', '45%'] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            />
-          </div>
-        </div>
+
+        {/* ── Pie del pergamino ── */}
+        <svg width="420" height="32" viewBox="0 0 420 32" style={{ display: 'block' }}>
+          <defs>
+            <linearGradient id="allianceFooterBg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor="#080e30" />
+              <stop offset="100%" stopColor="#1a2e80" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M0,0 L420,0 L420,16 Q420,32 400,32 L20,32 Q0,32 0,16 Z"
+            fill="url(#allianceFooterBg)"
+          />
+          <line x1="0" y1="0.5" x2="420" y2="0.5" stroke={A.goldLight} strokeWidth="0.5" opacity="0.4" />
+          <text
+            x="210" y="22"
+            fontSize="9" fontFamily="'Cinzel', serif"
+            fill={A.blueGlow} textAnchor="middle" letterSpacing="3" opacity="0.6"
+          >
+            ✦ FOR AZEROTH ✦
+          </text>
+          {/* Gemas de mana */}
+          <circle cx="20"  cy="16" r="2.5" fill={A.blueGlow} opacity="0.55" />
+          <circle cx="400" cy="16" r="2.5" fill={A.blueGlow} opacity="0.55" />
+        </svg>
+
       </div>
 
-      {/* ── Bottom-left Lion crest watermark ── */}
-      <div style={{ position: 'absolute', bottom: 16, left: 20, pointerEvents: 'none', opacity: 0.06, fontSize: '4rem', lineHeight: 1 }}>
-        🦁
+      {/* ════════════════════════════════
+          ESCUDO ALIANZA — watermark
+      ════════════════════════════════ */}
+      <div style={{
+        position: 'absolute',
+        top: 280, right: 60,
+        pointerEvents: 'none',
+        opacity: 0.04,
+      }}>
+        <svg width="180" height="220" viewBox="0 0 180 220">
+          {/* Escudo heráldico */}
+          <path
+            d="M10,10 L170,10 L170,140 Q90,210 10,140 Z"
+            fill="none" stroke={A.goldLight} strokeWidth="3"
+          />
+          <path
+            d="M25,25 L155,25 L155,138 Q90,195 25,138 Z"
+            fill="none" stroke={A.blueGlow} strokeWidth="1.5"
+          />
+          {/* Cruz de la Alianza */}
+          <line x1="90" y1="30" x2="90" y2="185" stroke={A.goldLight} strokeWidth="2.5" />
+          <line x1="28" y1="90" x2="152" y2="90" stroke={A.goldLight} strokeWidth="2.5" />
+          {/* León */}
+          <text x="90" y="75" fontSize="52" textAnchor="middle" fill={A.goldLight} fontFamily="serif">🦁</text>
+        </svg>
       </div>
+
+      {/* ════════════════════════════════
+          INDICADOR DE CONEXIÓN
+      ════════════════════════════════ */}
+      <div style={{
+        position: 'absolute',
+        top: 276, right: 28,
+        display: 'flex', alignItems: 'center', gap: 5,
+        pointerEvents: 'none',
+      }}>
+        <div style={{
+          width: 6, height: 6, borderRadius: '50%',
+          background: connected ? A.blueGlow : `${A.blueGlow}44`,
+          boxShadow: connected
+            ? `0 0 6px ${A.blueGlow}, 0 0 12px ${A.azure}88`
+            : 'none',
+        }} />
+        <span style={{
+          fontFamily: "'Cinzel', serif",
+          fontSize: '0.55rem',
+          color: connected ? `${A.blueGlow}cc` : `${A.silver}55`,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+        }}>
+          {connected ? 'En Vivo' : 'Desconectado'}
+        </span>
+      </div>
+
     </div>
   );
 }

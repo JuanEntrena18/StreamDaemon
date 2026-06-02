@@ -1,17 +1,25 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import type { ChatMessage } from '@streamforger/shared';
 
-const MAX_MESSAGES = 30;
+const MAX_MESSAGES = 18;
 
 interface Props {
   channel: string;
 }
 
+/* ─────────────────────────────────────────
+   WoW HORDA OVERLAY
+   Paleta: rojo sangre + negro carbón + dorado ominoso
+   - Marco de webcam estilo piedra orco grabada
+   - Chat en formato pergamino envejecido
+   - Decoraciones: cráneos, huesos, runas orcas
+───────────────────────────────────────── */
 export function WowChatOverlay({ channel }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const { socket, connected } = useSocket();
+  const chatRef = useRef<HTMLDivElement>(null);
 
   useSocketEvent('chat:message', useCallback((msg: ChatMessage) => {
     setMessages((prev) => [...prev.slice(-MAX_MESSAGES + 1), msg]);
@@ -23,204 +31,544 @@ export function WowChatOverlay({ channel }: Props) {
     }
   }, [channel, connected, socket]);
 
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  /* ── Tokens de color Horda ── */
+  const H = {
+    red:       '#8b0000',
+    redBright: '#c41e1e',
+    redGlow:   '#ff2020',
+    gold:      '#b8860b',
+    goldLight: '#daa520',
+    goldGlow:  '#ffd700',
+    bone:      '#d4c5a0',
+    parchment: '#c8b070',
+    ink:       '#1a0a00',
+    shadow:    '#0d0500',
+    stone:     '#1c1008',
+    ember:     '#ff6600',
+  };
+
   return (
     <div
       style={{
         position: 'fixed', inset: 0,
         pointerEvents: 'none', overflow: 'hidden',
-        fontFamily: "'Friz Quadrata', 'Times New Roman', serif",
-        background: 'linear-gradient(180deg, #08080c 0%, #0f0b08 30%, #1a1410 70%, #0f0b08 100%)',
+        fontFamily: "'Cinzel', 'Palatino Linotype', 'Times New Roman', serif",
       }}
     >
-      {/* Background vignette */}
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%)', pointerEvents: 'none' }} />
+      {/* ── Google Font: Cinzel ── */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap');
 
-      {/* Subtle background pattern */}
-      <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffd100\' fill-opacity=\'0.08\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")', pointerEvents: 'none' }} />
+        @keyframes hordaFlicker {
+          0%,100%  { opacity: 1; }
+          92%      { opacity: 1; }
+          93%      { opacity: 0.88; }
+          94%      { opacity: 1; }
+          97%      { opacity: 0.92; }
+          98%      { opacity: 1; }
+        }
+        @keyframes emberFloat {
+          0%   { transform: translateY(0) scale(1);   opacity: 0.7; }
+          50%  { transform: translateY(-8px) scale(1.1); opacity: 1; }
+          100% { transform: translateY(0) scale(1);   opacity: 0.7; }
+        }
+        @keyframes runeGlow {
+          0%,100% { text-shadow: 0 0 4px ${H.red}88; }
+          50%     { text-shadow: 0 0 12px ${H.redGlow}, 0 0 24px ${H.red}66; }
+        }
+        @keyframes bloodPulse {
+          0%,100% { box-shadow: inset 0 0 20px ${H.red}22; }
+          50%     { box-shadow: inset 0 0 40px ${H.red}44; }
+        }
+        @keyframes scrollReveal {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .horda-rune { animation: runeGlow 2.5s ease-in-out infinite; }
+        .horda-ember { animation: emberFloat 3s ease-in-out infinite; }
+        .horda-flicker { animation: hordaFlicker 8s ease-in-out infinite; }
+      `}</style>
 
-      {/* ── Top Frame (WoW quest / title frame) ── */}
-      <div
-        style={{
-          position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)',
-          minWidth: 500,
-        }}
-      >
-        {/* Frame top corners */}
-        <div style={{ position: 'absolute', top: -4, left: -12, width: 24, height: 24, borderTop: '2px solid #ffd100', borderLeft: '2px solid #ffd100', opacity: 0.6 }} />
-        <div style={{ position: 'absolute', top: -4, right: -12, width: 24, height: 24, borderTop: '2px solid #ffd100', borderRight: '2px solid #ffd100', opacity: 0.6 }} />
+      {/* ════════════════════════════════
+          FONDO: Niebla de guerra oscura
+      ════════════════════════════════ */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'transparent',
+        pointerEvents: 'none',
+      }} />
 
-        <div
-          style={{
-            background: `linear-gradient(180deg, rgba(45,27,0, calc(var(--bg-alpha,0.5)*1.7)) 0%, rgba(20,12,4, calc(var(--bg-alpha,0.5)*1.8)) 100%)`,
-            border: '1px solid rgba(255,209,0,0.3)',
-            borderRadius: 6,
-            padding: '8px 24px',
-            textAlign: 'center',
-            boxShadow: '0 0 20px rgba(255,209,0,0.05), inset 0 0 30px rgba(255,209,0,0.03)',
-          }}
-        >
-          {/* Title with decorative lines */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, justifyContent: 'center' }}>
-            <div style={{ width: 60, height: 1, background: 'linear-gradient(to left, rgba(255,209,0,0.4), transparent)' }} />
-            <div>
-              <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,209,0,0.6)', marginBottom: 2 }}>
-                🛡️ Chat del canal
-              </div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffd100', textShadow: '0 0 20px rgba(255,209,0,0.3), 0 2px 4px rgba(0,0,0,0.5)', letterSpacing: '0.02em', lineHeight: 1.1 }}>
-                {channel}
-              </div>
-            </div>
-            <div style={{ width: 60, height: 1, background: 'linear-gradient(to right, rgba(255,209,0,0.4), transparent)' }} />
-          </div>
+      {/* Vignette lateral suave */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `
+          radial-gradient(ellipse 20% 100% at 0% 50%, ${H.red}08 0%, transparent 100%),
+          radial-gradient(ellipse 20% 100% at 100% 50%, ${H.red}08 0%, transparent 100%)
+        `,
+        pointerEvents: 'none',
+      }} />
 
-          {/* Subtitle */}
-          <div style={{ fontSize: '0.65rem', color: 'rgba(255,209,0,0.4)', marginTop: 4, letterSpacing: '0.12em' }}>
-            — Stream en vivo —
-          </div>
-        </div>
-
-        {/* Frame bottom corners */}
-        <div style={{ position: 'absolute', bottom: -4, left: -12, width: 24, height: 24, borderBottom: '2px solid #ffd100', borderLeft: '2px solid #ffd100', opacity: 0.6 }} />
-        <div style={{ position: 'absolute', bottom: -4, right: -12, width: 24, height: 24, borderBottom: '2px solid #ffd100', borderRight: '2px solid #ffd100', opacity: 0.6 }} />
-      </div>
-
-      {/* ── Chat messages (quest log style) ── */}
-      <div
-        style={{
-          position: 'absolute', bottom: 100, left: 40,
-          width: 480, maxHeight: 500,
-          display: 'flex', flexDirection: 'column',
-          gap: 2,
-          overflow: 'hidden',
-        }}
-      >
-        <AnimatePresence initial={false}>
-          {messages.map((msg, i) => {
-            const isLast = i === messages.length - 1;
-            return (
-              <motion.div
-                key={msg.id}
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.35, ease: 'easeOut', delay: isLast ? 0.1 : 0 }}
-                style={{
-                  background: isLast
-                    ? 'linear-gradient(135deg, rgba(255,209,0,0.06) 0%, rgba(45,27,0,calc(var(--bg-alpha,0.5)*0.7)) 100%)'
-                    : `rgba(10,8,6,var(--bg-alpha,0.7))`,
-                  border: '1px solid',
-                  borderColor: isLast ? 'rgba(255,209,0,0.2)' : 'rgba(255,209,0,0.06)',
-                  borderLeft: `3px solid ${msg.user.color || '#ffd100'}`,
-                  borderRadius: '0 4px 4px 0',
-                  padding: '7px 14px 7px 12px',
-                  position: 'relative',
-                }}
-              >
-                {/* Quest-style diamond marker */}
-                <div style={{
-                  position: 'absolute', left: -6, top: '50%', transform: 'translateY(-50%)',
-                  width: 8, height: 8,
-                  background: msg.user.color || '#ffd100',
-                  clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-                  boxShadow: `0 0 6px ${msg.user.color || '#ffd100'}`,
-                  opacity: 0.6,
-                }} />
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 1 }}>
-                  {/* Class color bar */}
-                  <div style={{
-                    width: 2, height: 14,
-                    background: msg.user.color || '#ffd100',
-                    borderRadius: 1, opacity: 0.5,
-                  }} />
-                  <span style={{
-                    fontSize: '0.7rem', fontWeight: 700,
-                    color: msg.user.color || '#ffd100',
-                    letterSpacing: '0.04em',
-                    textShadow: `0 0 6px ${msg.user.color || '#ffd100'}33`,
-                  }}>
-                    [{msg.user.displayName}]
-                  </span>
-                  <span style={{ fontSize: '0.55rem', color: 'rgba(255,209,0,0.25)', marginLeft: 'auto', letterSpacing: '0.1em' }}>
-                    Dice:
-                  </span>
-                </div>
-                <div style={{ fontSize: '0.82rem', color: 'rgba(220,200,170,0.9)', lineHeight: 1.45, wordBreak: 'break-word', paddingLeft: 10 }}>
-                  {msg.text}
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
-
-      {/* ── Bottom Action Bar ── */}
-      <div
-        style={{
-          position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-        }}
-      >
+      {/* ════════════════════════════════
+          SECCIÓN WEBCAM — arriba derecha
+          Marco: Piedra orco grabada con runas
+      ════════════════════════════════ */}
+      <div style={{
+        position: 'absolute',
+        top: 24, right: 24,
+        width: 320, height: 240,
+        pointerEvents: 'none',
+      }}>
+        {/* Zona de video (transparente para la webcam de OBS) */}
         <div style={{
-          display: 'flex', gap: 4,
-          padding: '6px 14px',
-          background: 'rgba(10,8,6,0.8)',
-          border: '1px solid rgba(255,209,0,0.15)',
-          borderRadius: 6,
-          boxShadow: 'inset 0 1px 0 rgba(255,209,0,0.05)',
-        }}>
-          {['!sorteo', '!predict', '!comando', '!redes'].map((cmd, i) => (
-            <div
-              key={cmd}
-              style={{
-                padding: '4px 10px',
-                border: '1px solid rgba(255,209,0,0.1)',
-                borderRadius: 4,
-                background: i === 0 ? 'rgba(255,209,0,0.08)' : 'transparent',
-                fontSize: '0.6rem',
-                fontWeight: 600,
-                color: i === 0 ? '#ffd100' : 'rgba(255,209,0,0.4)',
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                cursor: 'default',
-              }}
+          position: 'absolute', inset: 16,
+          background: 'transparent',
+          border: `2px solid ${H.red}66`,
+        }} />
+
+        {/* Marco exterior de piedra orco - SVG */}
+        <svg
+          width="320" height="240"
+          viewBox="0 0 320 240"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+        >
+          <defs>
+            <linearGradient id="hordaStone" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#2a1505" />
+              <stop offset="50%" stopColor="#1a0d02" />
+              <stop offset="100%" stopColor="#0d0500" />
+            </linearGradient>
+            <linearGradient id="hordaGoldH" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor={H.gold} stopOpacity="0" />
+              <stop offset="30%" stopColor={H.goldLight} stopOpacity="0.9" />
+              <stop offset="70%" stopColor={H.goldLight} stopOpacity="0.9" />
+              <stop offset="100%" stopColor={H.gold} stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="hordaGoldV" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={H.gold} stopOpacity="0" />
+              <stop offset="30%" stopColor={H.goldLight} stopOpacity="0.8" />
+              <stop offset="70%" stopColor={H.goldLight} stopOpacity="0.8" />
+              <stop offset="100%" stopColor={H.gold} stopOpacity="0" />
+            </linearGradient>
+            <filter id="hordaBlur">
+              <feGaussianBlur stdDeviation="1.5" />
+            </filter>
+            <filter id="hordaRedGlow">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+
+          {/* Relleno fondo del marco */}
+          <rect x="0" y="0" width="320" height="240" fill="url(#hordaStone)" rx="4" />
+          <rect x="0" y="0" width="320" height="240" fill="transparent" />
+
+          {/* Borde superior */}
+          <rect x="0" y="0" width="320" height="16" fill="url(#hordaStone)" />
+          {/* Borde inferior */}
+          <rect x="0" y="224" width="320" height="16" fill="url(#hordaStone)" />
+          {/* Borde izquierdo */}
+          <rect x="0" y="0" width="16" height="240" fill="url(#hordaStone)" />
+          {/* Borde derecho */}
+          <rect x="304" y="0" width="16" height="240" fill="url(#hordaStone)" />
+
+          {/* Líneas de borde dorado */}
+          <rect x="0" y="0" width="320" height="16" fill="url(#hordaGoldH)" opacity="0.4" />
+          <rect x="0" y="224" width="320" height="16" fill="url(#hordaGoldH)" opacity="0.4" />
+          <line x1="0" y1="15.5" x2="320" y2="15.5" stroke={H.goldLight} strokeWidth="0.5" opacity="0.6" />
+          <line x1="0" y1="224.5" x2="320" y2="224.5" stroke={H.goldLight} strokeWidth="0.5" opacity="0.6" />
+          <line x1="15.5" y1="0" x2="15.5" y2="240" stroke={H.goldLight} strokeWidth="0.5" opacity="0.6" />
+          <line x1="304.5" y1="0" x2="304.5" y2="240" stroke={H.goldLight} strokeWidth="0.5" opacity="0.6" />
+
+          {/* ── Esquinas: cráneos orcos estilizados ── */}
+          {/* Esquina superior izquierda */}
+          <g transform="translate(0,0)">
+            <polygon points="0,0 32,0 0,32" fill={H.stone} opacity="0.95" />
+            <text x="8" y="22" fontSize="16" fill={H.red} opacity="0.9" fontFamily="serif">☠</text>
+            <line x1="0" y1="32" x2="32" y2="0" stroke={H.goldLight} strokeWidth="0.5" opacity="0.5" />
+          </g>
+          {/* Esquina superior derecha */}
+          <g transform="translate(320,0) scale(-1,1)">
+            <polygon points="0,0 32,0 0,32" fill={H.stone} opacity="0.95" />
+            <text x="8" y="22" fontSize="16" fill={H.red} opacity="0.9" fontFamily="serif">☠</text>
+            <line x1="0" y1="32" x2="32" y2="0" stroke={H.goldLight} strokeWidth="0.5" opacity="0.5" />
+          </g>
+          {/* Esquina inferior izquierda */}
+          <g transform="translate(0,240) scale(1,-1)">
+            <polygon points="0,0 32,0 0,32" fill={H.stone} opacity="0.95" />
+            <text x="8" y="22" fontSize="16" fill={H.red} opacity="0.9" fontFamily="serif">☠</text>
+            <line x1="0" y1="32" x2="32" y2="0" stroke={H.goldLight} strokeWidth="0.5" opacity="0.5" />
+          </g>
+          {/* Esquina inferior derecha */}
+          <g transform="translate(320,240) scale(-1,-1)">
+            <polygon points="0,0 32,0 0,32" fill={H.stone} opacity="0.95" />
+            <text x="8" y="22" fontSize="16" fill={H.red} opacity="0.9" fontFamily="serif">☠</text>
+            <line x1="0" y1="32" x2="32" y2="0" stroke={H.goldLight} strokeWidth="0.5" opacity="0.5" />
+          </g>
+
+          {/* ── Banner central superior: emblema Horda ── */}
+          <g transform="translate(80,0)">
+            {/* Pergamino central */}
+            <rect x="0" y="0" width="160" height="16" fill={H.stone} />
+            {/* Símbolo de la Horda (H estilizada con colgantes) */}
+            <text
+              x="80" y="13"
+              fontSize="10" fontFamily="'Cinzel', serif" fontWeight="700"
+              fill={H.goldLight} textAnchor="middle" letterSpacing="3"
+              opacity="0.9"
             >
-              {cmd}
-            </div>
+              ⚔ FOR THE HORDE ⚔
+            </text>
+          </g>
+
+          {/* ── Runas laterales izquierdas ── */}
+          {['᚛', '᚜', 'ᚈ'].map((rune, i) => (
+            <text
+              key={i}
+              x="7" y={80 + i * 28}
+              fontSize="12" fontFamily="serif"
+              fill={H.red} opacity="0.6" textAnchor="middle"
+            >
+              {rune}
+            </text>
           ))}
-        </div>
+          {/* ── Runas laterales derechas ── */}
+          {['᚛', '᚜', 'ᚈ'].map((rune, i) => (
+            <text
+              key={i}
+              x="313" y={80 + i * 28}
+              fontSize="12" fontFamily="serif"
+              fill={H.red} opacity="0.6" textAnchor="middle"
+            >
+              {rune}
+            </text>
+          ))}
+
+          {/* ── Banner inferior: nombre del canal ── */}
+          <g transform="translate(40,224)">
+            <rect x="0" y="0" width="240" height="16" fill="#1a0803" opacity="0.95" />
+            <rect x="0" y="0" width="240" height="16" fill="url(#hordaGoldH)" opacity="0.25" />
+            <text
+              x="120" y="12"
+              fontSize="9" fontFamily="'Cinzel', serif" fontWeight="600"
+              fill={H.goldLight} textAnchor="middle" letterSpacing="2"
+              opacity="0.85"
+            >
+              {channel.toUpperCase()}
+            </text>
+          </g>
+
+          {/* Destellos de brasa en esquinas (círculos pequeños) */}
+          <circle cx="32" cy="32" r="2" fill={H.ember} opacity="0.4" />
+          <circle cx="288" cy="32" r="2" fill={H.ember} opacity="0.4" />
+          <circle cx="32" cy="208" r="2" fill={H.ember} opacity="0.4" />
+          <circle cx="288" cy="208" r="2" fill={H.ember} opacity="0.4" />
+        </svg>
+
+        {/* Destello de brasa animado */}
+        <div className="horda-ember" style={{
+          position: 'absolute', top: 28, right: 28,
+          width: 4, height: 4, borderRadius: '50%',
+          background: H.ember,
+          boxShadow: `0 0 6px ${H.ember}, 0 0 12px ${H.redGlow}`,
+        }} />
+        <div className="horda-ember" style={{
+          position: 'absolute', bottom: 28, left: 28,
+          width: 3, height: 3, borderRadius: '50%',
+          background: H.ember,
+          boxShadow: `0 0 6px ${H.ember}, 0 0 12px ${H.redGlow}`,
+          animationDelay: '1.2s',
+        }} />
       </div>
 
-      {/* ── Bottom-right HP/Resource bar (decorative) ── */}
-      <div style={{ position: 'absolute', bottom: 30, right: 30, pointerEvents: 'none' }}>
-        <div style={{ marginBottom: 4 }}>
-          <div style={{ fontSize: '0.5rem', color: 'rgba(255,209,0,0.25)', letterSpacing: '0.15em', marginBottom: 2 }}>CHAT</div>
-          <div style={{ width: 140, height: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,209,0,0.1)', borderRadius: 2, position: 'relative', overflow: 'hidden' }}>
-            <motion.div
-              style={{ height: '100%', background: 'linear-gradient(90deg, #ffd100, #ff8c00)', borderRadius: 2 }}
-              animate={{ width: ['60%', '80%', '60%'] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+      {/* ════════════════════════════════
+          SECCIÓN CHAT — pergamino Horda
+          Posición: abajo izquierda
+      ════════════════════════════════ */}
+      <div style={{
+        position: 'absolute',
+        bottom: 20, left: 20,
+        width: 420,
+        pointerEvents: 'none',
+      }}>
+
+        {/* ── Cabecera del pergamino ── */}
+        <div style={{
+          position: 'relative',
+          marginBottom: 0,
+        }}>
+          <svg width="420" height="52" viewBox="0 0 420 52" style={{ display: 'block' }}>
+            <defs>
+              <linearGradient id="hordaHeaderBg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3d1500" />
+                <stop offset="60%" stopColor="#2a0d00" />
+                <stop offset="100%" stopColor="#1a0500" />
+              </linearGradient>
+              <linearGradient id="hordaHeaderTop" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor={H.red} stopOpacity="0" />
+                <stop offset="20%" stopColor={H.redBright} stopOpacity="0.7" />
+                <stop offset="50%" stopColor={H.redGlow} stopOpacity="0.9" />
+                <stop offset="80%" stopColor={H.redBright} stopOpacity="0.7" />
+                <stop offset="100%" stopColor={H.red} stopOpacity="0" />
+              </linearGradient>
+            </defs>
+
+            {/* Forma del pergamino: enrrollado arriba */}
+            <path
+              d="M0,16 Q0,0 16,0 L404,0 Q420,0 420,16 L420,52 L0,52 Z"
+              fill="url(#hordaHeaderBg)"
             />
+            {/* Línea de brillo superior roja */}
+            <path
+              d="M0,16 Q0,0 16,0 L404,0 Q420,0 420,16"
+              fill="none" stroke="url(#hordaHeaderTop)" strokeWidth="1.5"
+            />
+
+            {/* Símbolo central Horda */}
+            <text x="24" y="34" fontSize="20" fill={H.red} opacity="0.8" fontFamily="serif">⚔</text>
+
+            {/* Título */}
+            <text
+              x="210" y="22"
+              fontSize="9" fontFamily="'Cinzel', serif" fontWeight="700"
+              fill={H.goldLight} textAnchor="middle" letterSpacing="4"
+              opacity="0.7"
+            >
+              SUSURROS DE GUERRA
+            </text>
+            <text
+              x="210" y="40"
+              fontSize="14" fontFamily="'Cinzel Decorative', serif" fontWeight="700"
+              fill={H.goldGlow} textAnchor="middle" letterSpacing="1"
+              style={{ filter: `drop-shadow(0 0 6px ${H.red}88)` }}
+            >
+              Chat de la Horda
+            </text>
+
+            <text x="396" y="34" fontSize="20" fill={H.red} opacity="0.8" fontFamily="serif" textAnchor="end">⚔</text>
+
+            {/* Separador inferior dorado */}
+            <line x1="0" y1="51.5" x2="420" y2="51.5" stroke={H.goldLight} strokeWidth="0.5" opacity="0.5" />
+          </svg>
+        </div>
+
+        {/* ── Cuerpo del pergamino: mensajes ── */}
+        <div style={{
+          position: 'relative',
+          background: `linear-gradient(180deg, #1a0500 0%, #150400 40%, #1a0800 100%)`,
+          borderLeft: `1px solid ${H.gold}44`,
+          borderRight: `1px solid ${H.gold}44`,
+        }}>
+          {/* Textura de pergamino viejo */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: `
+              repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 22px,
+                ${H.red}06 22px,
+                ${H.red}06 23px
+              )
+            `,
+            pointerEvents: 'none',
+          }} />
+
+          {/* Manchas de tinta / desgaste */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: `
+              radial-gradient(ellipse 60% 30% at 20% 70%, ${H.red}06 0%, transparent 100%),
+              radial-gradient(ellipse 40% 20% at 80% 30%, ${H.red}04 0%, transparent 100%)
+            `,
+            pointerEvents: 'none',
+          }} />
+
+          {/* Contenedor de mensajes */}
+          <div
+            ref={chatRef}
+            style={{
+              maxHeight: 340,
+              overflow: 'hidden',
+              padding: '8px 0 4px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0,
+            }}
+          >
+            <AnimatePresence initial={false}>
+              {messages.map((msg, i) => {
+                const isLast = i === messages.length - 1;
+                return (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    style={{
+                      padding: '5px 14px 5px 12px',
+                      borderLeft: isLast
+                        ? `3px solid ${H.redBright}`
+                        : `3px solid ${msg.user.color || H.red}99`,
+                      background: isLast
+                        ? `linear-gradient(90deg, ${H.red}18 0%, transparent 80%)`
+                        : 'transparent',
+                      position: 'relative',
+                    }}
+                  >
+                    {/* Punto de sangre a la izquierda (sólo último) */}
+                    {isLast && (
+                      <div style={{
+                        position: 'absolute', left: -5, top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: 6, height: 6, borderRadius: '50%',
+                        background: H.redBright,
+                        boxShadow: `0 0 8px ${H.redGlow}`,
+                      }} />
+                    )}
+
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+                      {/* Nombre del usuario */}
+                      <span style={{
+                        fontFamily: "'Cinzel', serif",
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        color: msg.user.color || H.goldLight,
+                        letterSpacing: '0.05em',
+                        textShadow: `0 0 8px ${msg.user.color || H.gold}66`,
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {msg.user.displayName}
+                      </span>
+
+                      {/* Separador */}
+                      <span style={{
+                        fontSize: '0.65rem',
+                        color: `${H.red}99`,
+                        fontFamily: 'serif',
+                      }}>⸬</span>
+
+                      {/* Texto del mensaje */}
+                      <span style={{
+                        fontFamily: "'IM Fell English', 'Palatino Linotype', serif",
+                        fontSize: '0.78rem',
+                        color: `${H.bone}cc`,
+                        lineHeight: 1.5,
+                        wordBreak: 'break-word',
+                        fontStyle: isLast ? 'normal' : 'normal',
+                      }}>
+                        {msg.text}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+
+            {/* Placeholder si no hay mensajes */}
+            {messages.length === 0 && (
+              <div style={{
+                padding: '20px 16px',
+                textAlign: 'center',
+              }}>
+                <div style={{
+                  fontFamily: "'Cinzel', serif",
+                  fontSize: '0.7rem',
+                  color: `${H.red}66`,
+                  letterSpacing: '0.15em',
+                }}>
+                  — LOS GUERREROS AGUARDAN —
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        <div>
-          <div style={{ fontSize: '0.5rem', color: 'rgba(0,184,255,0.25)', letterSpacing: '0.15em', marginBottom: 2 }}>ACTIVIDAD</div>
-          <div style={{ width: 140, height: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,184,255,0.1)', borderRadius: 2, position: 'relative', overflow: 'hidden' }}>
-            <motion.div
-              style={{ height: '100%', background: 'linear-gradient(90deg, #00b8ff, #0066ff)', borderRadius: 2 }}
-              animate={{ width: ['40%', '65%', '40%'] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            />
-          </div>
-        </div>
+
+        {/* ── Pie del pergamino: enrollado abajo ── */}
+        <svg width="420" height="32" viewBox="0 0 420 32" style={{ display: 'block' }}>
+          <defs>
+            <linearGradient id="hordaFooterBg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#1a0500" />
+              <stop offset="100%" stopColor="#3d1500" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M0,0 L420,0 L420,16 Q420,32 404,32 L16,32 Q0,32 0,16 Z"
+            fill="url(#hordaFooterBg)"
+          />
+          {/* Línea de separación dorada */}
+          <line x1="0" y1="0.5" x2="420" y2="0.5" stroke={H.goldLight} strokeWidth="0.5" opacity="0.4" />
+          {/* Decoración central */}
+          <text
+            x="210" y="22"
+            fontSize="9" fontFamily="'Cinzel', serif"
+            fill={H.red} textAnchor="middle" letterSpacing="3" opacity="0.6"
+          >
+            ✦ LOK'TAR OGAR ✦
+          </text>
+          {/* Puntos de brasa */}
+          <circle cx="20" cy="16" r="2" fill={H.ember} opacity="0.5" />
+          <circle cx="400" cy="16" r="2" fill={H.ember} opacity="0.5" />
+        </svg>
+
       </div>
 
-      {/* ── Left decorative frame (like a quest tracker frame) ── */}
-      <div style={{ position: 'absolute', top: '20%', left: 16, pointerEvents: 'none' }}>
-        <div style={{ width: 3, height: 200, background: 'linear-gradient(180deg, transparent, rgba(255,209,0,0.1), transparent)', borderRadius: 2 }} />
+      {/* ════════════════════════════════
+          EMBLEMA HORDA — watermark sutil
+          (centro-derecha, debajo webcam)
+      ════════════════════════════════ */}
+      <div style={{
+        position: 'absolute',
+        top: 280, right: 60,
+        pointerEvents: 'none',
+        opacity: 0.04,
+      }}>
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          {/* Círculo exterior */}
+          <circle cx="100" cy="100" r="90" fill="none" stroke={H.red} strokeWidth="2" />
+          <circle cx="100" cy="100" r="75" fill="none" stroke={H.red} strokeWidth="0.5" />
+          {/* H estilizada de la Horda */}
+          <text x="100" y="130" fontSize="100" fontFamily="serif" fontWeight="900"
+            fill={H.red} textAnchor="middle">H</text>
+          {/* Colmillos */}
+          <polygon points="60,160 70,200 80,155" fill={H.red} />
+          <polygon points="120,160 130,200 140,155" fill={H.red} />
+        </svg>
       </div>
-      <div style={{ position: 'absolute', top: '20%', right: 16, pointerEvents: 'none' }}>
-        <div style={{ width: 3, height: 200, background: 'linear-gradient(180deg, transparent, rgba(255,209,0,0.1), transparent)', borderRadius: 2 }} />
+
+      {/* ════════════════════════════════
+          INDICADOR DE CONEXIÓN
+      ════════════════════════════════ */}
+      <div style={{
+        position: 'absolute',
+        top: 276, right: 28,
+        display: 'flex', alignItems: 'center', gap: 5,
+        pointerEvents: 'none',
+      }}>
+        <div style={{
+          width: 6, height: 6, borderRadius: '50%',
+          background: connected ? H.ember : H.red,
+          boxShadow: connected
+            ? `0 0 6px ${H.ember}, 0 0 12px ${H.ember}88`
+            : `0 0 6px ${H.red}`,
+        }} />
+        <span style={{
+          fontFamily: "'Cinzel', serif",
+          fontSize: '0.55rem',
+          color: connected ? `${H.ember}cc` : `${H.red}88`,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+        }}>
+          {connected ? 'En Vivo' : 'Desconectado'}
+        </span>
       </div>
+
     </div>
   );
 }
