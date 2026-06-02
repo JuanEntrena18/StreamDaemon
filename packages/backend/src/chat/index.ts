@@ -79,8 +79,15 @@ export function leaveChannel(channel: string) {
   }
 }
 
-export function sendMessage(channel: string, message: string) {
-  if (chatClient) {
-    chatClient.say(channel, message);
+export async function sendMessage(channel: string, message: string) {
+  if (!chatClient) {
+    console.warn('⚠️ Chat client not ready, cannot send message');
+    return;
+  }
+  try {
+    await chatClient.say(channel, message);
+    console.log(`📤 Message sent to #${channel}: ${message.substring(0, 50)}`);
+  } catch (err) {
+    console.error(`❌ Failed to send message to #${channel}:`, err);
   }
 }

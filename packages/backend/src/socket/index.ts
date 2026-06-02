@@ -22,9 +22,9 @@ export function setupSocketIO(app: FastifyInstance) {
       leaveChannel(channel);
     });
 
-    socket.on('chat:send', ({ channel, text }: { channel: string; text: string }) => {
+    socket.on('chat:send', async ({ channel, text }: { channel: string; text: string }) => {
       if (!channel || !text) return;
-      sendMessage(channel, text);
+      await sendMessage(channel, text);
     });
 
     socket.on('disconnect', () => {
