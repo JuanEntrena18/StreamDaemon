@@ -257,7 +257,7 @@ async function finishAuth(
     },
   });
 
-  authProvider?.addUserForToken(
+  await authProvider?.addUserForToken(
     {
       accessToken: tokenData.access_token,
       refreshToken: tokenData.refresh_token ?? null,
@@ -280,7 +280,7 @@ async function restoreSession() {
     displayName: user.displayName,
   };
 
-  authProvider?.addUserForToken(
+  await authProvider?.addUserForToken(
     {
       accessToken: user.accessToken,
       refreshToken: user.refreshToken,
