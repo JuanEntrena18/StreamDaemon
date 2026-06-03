@@ -20,20 +20,17 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   await app.register(cors, { origin: true });
 
   // Serve frontend static files in production / standalone mode
-  // Wildcard: true allows SPA routing — all paths fall through to static file
-  // serving. Exact routes (auth, health, etc.) take priority over * in Fastify.
   if (opts?.frontendDir) {
     await app.register(fastifyStatic, {
       root: opts.frontendDir,
       prefix: '/',
-      wildcard: false,
+      wildcard: true,
       index: ['index.html'],
     });
 
-    // SPA fallback: solo para rutas sin extensión (navegación del dashboard).
-    // Con wildcard:true, cualquier asset no encontrado devolvía index.html
-    // con content-type text/html → el navegador lo ejecutaba como JS → overlay en blanco.
-    // Ahora solo rutas sin punto (ej: /sorteos, /config) caen aquí.
+    // SPA fallback: client-side routes (paths without dots like /sorteos, /config)
+    // return index.html. Actual assets (JS/CSS/overlay.html) are served by the
+    // wildcard handler; missing file paths with dots get 404.
     app.setNotFoundHandler((req, reply) => {
       const url = req.url.split('?')[0];
       if (!url.includes('.')) {

@@ -2,7 +2,14 @@ import { FastifyInstance } from 'fastify';
 import { RefreshingAuthProvider } from '@twurple/auth';
 import { PrismaClient } from '@prisma/client';
 import { config } from '../config.js';
+import { existsSync } from 'fs';
+import { execFileSync } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const _require = createRequire(import.meta.url);
 const prisma = new PrismaClient();
 
 const SCOPES = [
@@ -31,7 +38,45 @@ function notifyAuth() {
   authCallbacks.forEach((cb) => cb());
 }
 
+/**
+ * Push the Prisma schema to the database, creating tables if they don't exist.
+ * Uses the bundled Prisma CLI (found via require.resolve) and the schema file
+ * bundled at the app root or in extra/.prisma/client/.
+ */
+async function pushDbSchema() {
+  try {
+    const cliPath = _require.resolve('prisma/build/index.js');
+    // Try multiple schema locations (app root prisma/, or extra/.prisma/client/)
+    let schemaPath = '';
+    for (const candidate of [
+      path.resolve(__dirname, '../../../../../prisma/schema.prisma'),           // appRoot/prisma/
+      path.resolve(__dirname, '../../../../extra/.prisma/client/schema.prisma'), // appRoot/extra/.prisma/
+    ]) {
+      if (existsSync(candidate)) { schemaPath = candidate; break; }
+    }
+    if (!schemaPath || !existsSync(cliPath)) return;
+
+    console.log('🗄️  Pushing database schema...');
+    execFileSync('node', [
+      cliPath, 'db', 'push',
+      `--schema=${schemaPath}`,
+      '--accept-data-loss',
+      '--skip-generate',
+    ], {
+      env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL! },
+      cwd: path.dirname(schemaPath),
+      stdio: 'pipe',
+      timeout: 30_000,
+    });
+    console.log('✅ Database schema synchronized');
+  } catch (err) {
+    console.warn('⚠️  Schema push failed (non-fatal):', err instanceof Error ? err.message : err);
+  }
+}
+
 export async function setupAuth(app: FastifyInstance) {
+  await pushDbSchema();
+
   authProvider = new RefreshingAuthProvider({
     clientId: config.TWITCH_CLIENT_ID,
     clientSecret: config.TWITCH_CLIENT_SECRET,
