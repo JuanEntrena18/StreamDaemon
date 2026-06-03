@@ -121,11 +121,14 @@ function createMainWindow() {
   }, 3000);
   mainWindow.once('show', () => clearTimeout(showFallback));
 
+  const mainUrl = isDev
+    ? 'http://localhost:5173'
+    : 'http://localhost:3000';
+
+  loadWithRetry(mainWindow, mainUrl);
+
   if (isDev) {
-    loadWithRetry(mainWindow, 'http://localhost:5173');
     mainWindow.webContents.openDevTools({ mode: 'detach' });
-  } else {
-    mainWindow.loadFile(getFrontendPath('index.html')).catch(() => mainWindow?.show());
   }
 
   mainWindow.on('closed', () => { mainWindow = null; });
@@ -158,16 +161,11 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
     },
   });
 
-  if (isUrl) {
-    overlayWindow.loadURL(urlOrChannel);
-  } else if (isDev) {
-    const devUrl = `http://localhost:5173/overlay.html?mode=chat&channel=${urlOrChannel}${theme ? `&theme=${theme}` : ''}`;
-    overlayWindow.loadURL(devUrl);
-  } else {
-    overlayWindow.loadFile(getFrontendPath('overlay.html'), {
-      query: { mode: 'chat', channel: urlOrChannel, ...(theme ? { theme } : {}) },
-    });
-  }
+  const overlayBaseUrl = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
+  const overlayUrl = isUrl
+    ? urlOrChannel
+    : `${overlayBaseUrl}/overlay.html?mode=chat&channel=${urlOrChannel}${theme ? `&theme=${theme}` : ''}`;
+  overlayWindow.loadURL(overlayUrl);
 
   overlayWindow.setIgnoreMouseEvents(true, { forward: true });
 
