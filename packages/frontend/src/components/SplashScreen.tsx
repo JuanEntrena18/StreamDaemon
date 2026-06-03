@@ -80,7 +80,26 @@ export function SplashScreen({ onReady }: Props) {
           github.com/JuanEntrena18/StreamForge
         </a>
 
-        <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+        <a
+          href="https://buymeacoffee.com/jentrena"
+          target="_blank" rel="noreferrer"
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.4rem',
+            padding: '0.35rem 0.875rem',
+            borderRadius: 99,
+            background: 'rgba(255,221,0,0.1)',
+            border: '1px solid rgba(255,221,0,0.2)',
+            color: '#fbbf24',
+            textDecoration: 'none',
+            fontSize: '0.75rem',
+            fontWeight: 500,
+            transition: 'all 0.15s',
+          }}
+        >
+          ☕ Apoya el desarrollo de StreamForger aquí
+        </a>
+
+        <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
           <span style={{
             width: 8, height: 8, borderRadius: '50%',
             background: '#7c3aed',
