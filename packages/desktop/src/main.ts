@@ -75,34 +75,27 @@ let mainAlwaysOnTop = false;
 async function startBackend() {
   try {
     const { startServer } = await import('@streamforger/backend/dist/index.js');
-    // Pass frontendDir so the backend serves overlay.html at localhost:3000
-    // This makes OBS Browser Source URLs work in production.
     await startServer({ port: 3000, frontendDir: getFrontendDistDir() });
     console.log('✅ Backend started — serving frontend at http://localhost:3000');
   } catch (err) {
-    console.error('⚠️  Backend failed to start:', err);
+    console.error('⚠️  Backend failed to start:', err instanceof Error ? err.message : err);
   }
 }
 
 // ── Main window ───────────────────────────────────────────
-function loadWithRetry(win: BrowserWindow, url: string, attempts = 5, delay = 2000): void {
-  win.loadURL(url).catch((err) => {
-    if (attempts <= 1) { win.show(); return; }
-    console.warn(`⚠️  loadURL failed, retrying in ${delay}ms… (${attempts - 1} left)`);
-    setTimeout(() => loadWithRetry(win, url, attempts - 1, delay), delay);
-  });
-}
-
 function createMainWindow() {
+  const mainUrl = isDev
+    ? 'http://localhost:5173'
+    : 'http://localhost:3000';
+
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    show: false,
-    frame: false,             // Custom titlebar — removes OS chrome
-    transparent: true,        // Allows opacity/transparency over games
-    backgroundColor: '#00000000',
+    show: true,
+    frame: false,
+    backgroundColor: '#0a0a1a',
     titleBarStyle: 'hidden',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
@@ -111,32 +104,31 @@ function createMainWindow() {
     },
   });
 
-  mainWindow.once('ready-to-show', () => {
-    mainWindow?.show();
-    mainWindow?.focus();
-  });
-
-  const showFallback = setTimeout(() => {
-    if (mainWindow && !mainWindow.isVisible()) mainWindow.show();
-  }, 3000);
-  mainWindow.once('show', () => clearTimeout(showFallback));
-
-  const mainUrl = isDev
-    ? 'http://localhost:5173'
-    : 'http://localhost:3000';
-
-  loadWithRetry(mainWindow, mainUrl);
-
-  if (isDev) {
-    mainWindow.webContents.openDevTools({ mode: 'detach' });
-  }
-
   mainWindow.on('closed', () => { mainWindow = null; });
 
   mainWindow.webContents.setWindowOpenHandler(({ url: openUrl }) => {
     shell.openExternal(openUrl);
     return { action: 'deny' };
   });
+
+  // Try loadURL first; fall back to loadFile if backend isn't serving
+  const tryLoadURL = (attempts = 5): void => {
+    mainWindow!.loadURL(mainUrl).catch(() => {
+      if (attempts <= 1) {
+        console.warn('⚠️  loadURL failed, falling back to loadFile');
+        mainWindow!.loadFile(getFrontendPath('index.html')).catch(() => {});
+        return;
+      }
+      console.warn(`⚠️  loadURL failed, retrying in 1500ms… (${attempts - 1} left)`);
+      setTimeout(() => tryLoadURL(attempts - 1), 1500);
+    });
+  };
+
+  tryLoadURL();
+
+  if (isDev) {
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
+  }
 }
 
 // ── Overlay window ────────────────────────────────────────
