@@ -8,12 +8,13 @@ import { ObsPanel } from './components/ObsPanel';
 import { Logo } from './components/Logo';
 import { ChatPanel } from './components/ChatPanel';
 import { ConfigPanel } from './components/ConfigPanel';
+import { PreviewPanel } from './components/PreviewPanel';
 import { SplashScreen } from './components/SplashScreen';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-type Tab = 'chat' | 'giveaway' | 'prediction' | 'obs' | 'config';
+type Tab = 'chat' | 'giveaway' | 'prediction' | 'obs' | 'preview' | 'config';
 
 const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string; label: string }[] }[] = [
   {
@@ -24,6 +25,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string;
       { id: 'giveaway',   icon: '🎁', label: 'Sorteos' },
       { id: 'prediction', icon: '📊', label: 'Predicciones' },
       { id: 'obs',        icon: '🔌', label: 'OBS URLs' },
+      { id: 'preview',    icon: '📺', label: 'Vista previa' },
     ],
   },
   {
@@ -40,6 +42,7 @@ const TAB_LABELS: Record<Tab, string> = {
   giveaway: 'Sorteos',
   prediction: 'Predicciones',
   obs: 'OBS URLs',
+  preview: 'Vista previa',
   config: 'Configuración',
 };
 
@@ -391,6 +394,7 @@ export function App() {
               {activeTab === 'giveaway'   && <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />}
               {activeTab === 'prediction' && <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />}
               {activeTab === 'obs'        && <ObsPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'preview'    && <PreviewPanel channel={channel} />}
               {activeTab === 'config'     && <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />}
             </motion.div>
           </AnimatePresence>
