@@ -10,6 +10,7 @@ import { setupSocketIO } from './socket/index.js';
 import { setupGiveaways, enterGiveaway } from './giveaways/index.js';
 import { setupPredictions } from './predictions/index.js';
 import { setupEventSub, stopEventSub } from './eventsub/index.js';
+import { setupTracker } from './tracker/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -35,6 +36,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupEventSub();
   onAuth(() => { setupChat(); setupEventSub(); });
   setupPredictions(app);
+  setupTracker(app);
 
   app.get('/health', async () => ({ status: 'ok', timestamp: Date.now() }));
 

@@ -9,12 +9,13 @@ import { Logo } from './components/Logo';
 import { ChatPanel } from './components/ChatPanel';
 import { ConfigPanel } from './components/ConfigPanel';
 import { PreviewPanel } from './components/PreviewPanel';
+import { TrackerPanel } from './components/TrackerPanel';
 import { SplashScreen } from './components/SplashScreen';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-type Tab = 'chat' | 'giveaway' | 'prediction' | 'obs' | 'preview' | 'config';
+type Tab = 'chat' | 'giveaway' | 'prediction' | 'obs' | 'preview' | 'tracker' | 'config';
 
 const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string; label: string }[] }[] = [
   {
@@ -24,6 +25,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string;
       { id: 'chat',       icon: '💬', label: 'Chat' },
       { id: 'giveaway',   icon: '🎁', label: 'Sorteos' },
       { id: 'prediction', icon: '📊', label: 'Predicciones' },
+      { id: 'tracker',    icon: '📈', label: 'Twitch Tracker' },
       { id: 'obs',        icon: '🔌', label: 'OBS URLs' },
       { id: 'preview',    icon: '📺', label: 'Vista previa' },
     ],
@@ -41,6 +43,7 @@ const TAB_LABELS: Record<Tab, string> = {
   chat: 'Chat',
   giveaway: 'Sorteos',
   prediction: 'Predicciones',
+  tracker: 'Twitch Tracker',
   obs: 'OBS URLs',
   preview: 'Vista previa',
   config: 'Configuración',
@@ -393,6 +396,7 @@ export function App() {
               {activeTab === 'chat'       && <ChatPanel channel={channel} />}
               {activeTab === 'giveaway'   && <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />}
               {activeTab === 'prediction' && <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'tracker'    && <TrackerPanel channel={channel} backendUrl={BACKEND_URL} />}
               {activeTab === 'obs'        && <ObsPanel channel={channel} backendUrl={BACKEND_URL} />}
               {activeTab === 'preview'    && <PreviewPanel channel={channel} />}
               {activeTab === 'config'     && <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />}
