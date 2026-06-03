@@ -20,11 +20,14 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   await app.register(cors, { origin: true });
 
   // Serve frontend static files in production / standalone mode
+  // Wildcard: true allows SPA routing — all paths fall through to static file
+  // serving. Exact routes (auth, health, etc.) take priority over * in Fastify.
   if (opts?.frontendDir) {
     await app.register(fastifyStatic, {
       root: opts.frontendDir,
       prefix: '/',
-      wildcard: false,
+      wildcard: true,
+      index: ['index.html'],
     });
   }
 

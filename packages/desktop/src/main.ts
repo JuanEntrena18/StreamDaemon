@@ -4,7 +4,9 @@ import {
 } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { readFileSync } from 'fs';
+import { readFileSync, mkdirSync } from 'fs';
+import { createRequire } from 'module';
+const _require = createRequire(import.meta.url);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = !app.isPackaged;
@@ -18,8 +20,8 @@ Menu.setApplicationMenu(null);
 // not the backend package. We manually inject the vars here.
 function loadBackendEnv() {
   const envPath = isDev
-    ? path.resolve(__dirname, '../../backend/.env')       // dev: source tree
-    : path.join(process.resourcesPath, 'backend.env');   // prod: extraResources
+    ? path.resolve(__dirname, '../../backend/.env')           // dev: source tree
+    : path.join(app.getAppPath(), 'extra', 'backend.env');    // prod: extra/
 
   try {
     const raw = readFileSync(envPath, 'utf8');
@@ -41,10 +43,24 @@ function loadBackendEnv() {
 
 loadBackendEnv();
 
+// Add extra/ to NODE_PATH so `@prisma/client` can resolve `.prisma/client`
+// as a bare specifier when running from the packaged app (asar disabled).
+const extraPath = isDev
+  ? path.resolve(__dirname, '../extra')
+  : path.join(app.getAppPath(), 'extra');
+const existingPath = process.env.NODE_PATH || '';
+process.env.NODE_PATH = existingPath
+  ? `${extraPath}${path.delimiter}${existingPath}`
+  : extraPath;
+_require('module').Module._initPaths();
+
 // ── Database setup ────────────────────────────────────────
 const dbPath = isDev
   ? path.resolve(__dirname, '../prisma/streamforger.db')
   : path.join(app.getPath('userData'), 'streamforger.db');
+
+// Ensure the directory for the database exists before Prisma connects
+mkdirSync(path.dirname(dbPath), { recursive: true });
 
 process.env.DATABASE_URL = `file:${dbPath}`;
 
@@ -55,11 +71,11 @@ if (!isDev) {
 }
 
 // ── Frontend dist path ────────────────────────────────────
-// In production, extraResources copies frontend/dist → resources/frontend/dist
+// In production, the frontend dist is inside the asar at extra/frontend/dist
 function getFrontendDistDir(): string {
   return isDev
     ? path.resolve(__dirname, '../../frontend/dist')
-    : path.join(process.resourcesPath, 'frontend', 'dist');
+    : path.join(app.getAppPath(), 'extra', 'frontend', 'dist');
 }
 
 function getFrontendPath(...parts: string[]): string {
@@ -70,12 +86,14 @@ let mainWindow: BrowserWindow | null = null;
 let overlayWindow: BrowserWindow | null = null;
 let overlayIgnoreMouse = true;
 let mainAlwaysOnTop = false;
+let backendReady = false;
 
 // ── Backend ───────────────────────────────────────────────
 async function startBackend() {
   try {
     const { startServer } = await import('@streamforger/backend/dist/index.js');
     await startServer({ port: 3000, frontendDir: getFrontendDistDir() });
+    backendReady = true;
     console.log('✅ Backend started — serving frontend at http://localhost:3000');
   } catch (err) {
     console.error('⚠️  Backend failed to start:', err instanceof Error ? err.message : err);
@@ -246,6 +264,9 @@ ipcMain.on('auth:login', () => {
     mainWindow?.show();
   }, 500);
 });
+
+// Backend readiness
+ipcMain.handle('backend:isReady', () => backendReady);
 
 // Main window — always-on-top toggle (para gestionar sobre el juego)
 ipcMain.handle('window:getAlwaysOnTop', () => mainAlwaysOnTop);
