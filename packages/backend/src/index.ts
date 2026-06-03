@@ -26,8 +26,20 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
     await app.register(fastifyStatic, {
       root: opts.frontendDir,
       prefix: '/',
-      wildcard: true,
+      wildcard: false,
       index: ['index.html'],
+    });
+
+    // SPA fallback: solo para rutas sin extensión (navegación del dashboard).
+    // Con wildcard:true, cualquier asset no encontrado devolvía index.html
+    // con content-type text/html → el navegador lo ejecutaba como JS → overlay en blanco.
+    // Ahora solo rutas sin punto (ej: /sorteos, /config) caen aquí.
+    app.setNotFoundHandler((req, reply) => {
+      const url = req.url.split('?')[0];
+      if (!url.includes('.')) {
+        return reply.sendFile('index.html');
+      }
+      reply.status(404).send({ error: 'Not found', path: req.url });
     });
   }
 
