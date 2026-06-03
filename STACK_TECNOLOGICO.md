@@ -322,6 +322,14 @@ twitch_overlay/
 
 ---
 
+---
+
+## ☕ Apoya el proyecto
+
+**buymeacoffee.com/jentrena** — invitame un café y ayudá a mantener StreamForger vivo.
+
+---
+
 ## Plan de Implementación
 
 | Paso | Descripción | Estado |

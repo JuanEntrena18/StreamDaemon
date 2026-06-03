@@ -282,6 +282,16 @@ StreamForge/
 
 ---
 
+## ☕ Apoya el proyecto
+
+StreamForger es open-source y gratuito. Si te gusta lo que hacemos, considerá invitarnos un café:
+
+[**buymeacoffee.com/jentrena**](https://buymeacoffee.com/jentrena)
+
+Cada aporte ayuda a mantener el desarrollo, el café y las horas de código.
+
+---
+
 ## 📄 Licencia
 
 **AGPLv3** — Ver [LICENSE](LICENSE).
