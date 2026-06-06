@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,6 +19,18 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   const app = Fastify({ logger: true });
 
   await app.register(cors, { origin: true });
+
+  // Rate limiting — 100 req/min per IP
+  await app.register(rateLimit, { max: 100, timeWindow: '1 minute' });
+
+  // Security headers
+  app.addHook('onSend', async (_req, reply, payload) => {
+    reply.header('X-Content-Type-Options', 'nosniff');
+    reply.header('X-Frame-Options', 'SAMEORIGIN');
+    reply.header('X-XSS-Protection', '0');
+    reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+    return payload;
+  });
 
   // Serve frontend static files in production / standalone mode
   if (opts?.frontendDir) {
@@ -53,7 +66,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   app.get('/health', async () => ({ status: 'ok', timestamp: Date.now() }));
 
   const listenPort = opts?.port ?? parseInt(config.PORT, 10);
-  await app.listen({ port: listenPort, host: '0.0.0.0' });
+  await app.listen({ port: listenPort, host: '127.0.0.1' });
   console.log(`🚀 Server running on http://localhost:${listenPort}`);
 
   return app;

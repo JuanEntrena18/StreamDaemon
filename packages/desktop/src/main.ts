@@ -129,6 +129,13 @@ function createMainWindow() {
     return { action: 'deny' };
   });
 
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    const allowed = ['http://localhost:3000', 'http://localhost:5173'];
+    if (!allowed.some((prefix) => url.startsWith(prefix))) {
+      event.preventDefault();
+    }
+  });
+
   // Try loadURL first; fall back to loadFile if backend isn't serving
   const tryLoadURL = (attempts = 5): void => {
     mainWindow!.loadURL(mainUrl).catch(() => {
@@ -193,6 +200,13 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
         document.body.appendChild(bar);
       })();
     `);
+  });
+
+  overlayWindow.webContents.on('will-navigate', (event, url) => {
+    const overlayBase = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
+    if (!url.startsWith(overlayBase)) {
+      event.preventDefault();
+    }
   });
 
   overlayWindow.on('closed', () => {
