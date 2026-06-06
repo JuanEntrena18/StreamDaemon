@@ -3,6 +3,7 @@ import { ApiClient } from '@twurple/api';
 import { authProvider } from '../auth/index.js';
 import { getIO } from '../socket/index.js';
 import { config } from '../config.js';
+import { PredictionCreateSchema } from '@streamforger/shared';
 
 let apiClient: ApiClient | null = null;
 
@@ -15,6 +16,9 @@ export function setupPredictions(app: FastifyInstance) {
     '/predictions/create',
     async (req, reply) => {
       const { channelId, title, options } = req.body;
+      if (!channelId || !title || !Array.isArray(options) || options.length < 2) {
+        return reply.status(400).send({ error: 'Missing or invalid fields' });
+      }
 
       if (!apiClient) {
         return reply.status(503).send({ error: 'API not ready' });

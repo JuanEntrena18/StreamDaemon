@@ -8,3 +8,9 @@ dist/
 *.tsbuildinfo
 dist-electron/
 release/
+*.db
+*.db-journal
+packages/desktop/extra/backend.env
+*.docx
+*.pdf
+REVISION_SEGURIDAD.md

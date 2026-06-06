@@ -3,6 +3,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('streamforger', {
   isDesktop: true,
   backendUrl: 'http://localhost:3000',
+  localApiToken: ipcRenderer.sendSync('get-local-api-token'),
 
   overlay: {
     open: (url: string, isUrl: boolean, theme?: string) =>

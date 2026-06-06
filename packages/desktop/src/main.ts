@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { readFileSync, mkdirSync } from 'fs';
 import { createRequire } from 'module';
+import { randomBytes } from 'crypto';
 const _require = createRequire(import.meta.url);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -42,6 +43,10 @@ function loadBackendEnv() {
 }
 
 loadBackendEnv();
+
+// Generate a local API token for backend→frontend authentication
+const LOCAL_API_TOKEN = randomBytes(32).toString('hex');
+process.env.LOCAL_API_TOKEN = LOCAL_API_TOKEN;
 
 // Add extra/ to NODE_PATH so `@prisma/client` can resolve `.prisma/client`
 // as a bare specifier when running from the packaged app (asar disabled).
@@ -224,7 +229,13 @@ function toggleClickThrough() {
 // ── IPC ───────────────────────────────────────────────────
 
 // Overlay controls
+const TRUSTED_OVERLAY_ORIGINS = ['http://localhost:3000', 'http://localhost:5173'];
+
 ipcMain.on('overlay:open', (_e, url: string, isUrl: boolean, theme?: string) => {
+  if (isUrl && !TRUSTED_OVERLAY_ORIGINS.some((o) => url.startsWith(o))) {
+    console.warn('[security] Blocked untrusted overlay URL:', url);
+    return;
+  }
   createOverlayWindow(url, isUrl, theme);
 });
 ipcMain.on('overlay:close', () => overlayWindow?.close());
@@ -267,7 +278,7 @@ ipcMain.on('auth:login', () => {
     `&redirect_uri=${encodeURIComponent(redirectUri)}` +
     `&response_type=code` +
     `&scope=${scopes.join('+')}` +
-    `&state=${Math.random().toString(36).slice(2)}`;
+    `&state=${randomBytes(16).toString('hex')}`;
 
   shell.openExternal(url);
   console.log('🔗 OAuth URL opened in browser');
@@ -277,6 +288,11 @@ ipcMain.on('auth:login', () => {
     mainWindow?.focus();
     mainWindow?.show();
   }, 500);
+});
+
+// Local API token for backend auth
+ipcMain.on('get-local-api-token', (event) => {
+  event.returnValue = LOCAL_API_TOKEN;
 });
 
 // Backend readiness

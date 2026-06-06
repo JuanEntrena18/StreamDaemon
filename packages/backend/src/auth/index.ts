@@ -7,6 +7,8 @@ import { execFileSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
+import { randomBytes } from 'crypto';
+import { encryptToken, decryptToken } from './token-crypto.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const _require = createRequire(import.meta.url);
@@ -82,12 +84,14 @@ export async function setupAuth(app: FastifyInstance) {
     clientSecret: config.TWITCH_CLIENT_SECRET,
   });
 
+  const encKey = config.TWITCH_CLIENT_SECRET;
+
   authProvider.onRefresh(async (userId, newTokenData) => {
     await prisma.user.update({
       where: { twitchId: userId },
       data: {
-        accessToken: newTokenData.accessToken,
-        refreshToken: newTokenData.refreshToken ?? '',
+        accessToken: encryptToken(newTokenData.accessToken, encKey),
+        refreshToken: encryptToken(newTokenData.refreshToken ?? '', encKey),
         tokenExpiresAt: newTokenData.expiresIn
           ? new Date(Date.now() + newTokenData.expiresIn * 1000)
           : null,
@@ -95,12 +99,16 @@ export async function setupAuth(app: FastifyInstance) {
     });
   });
 
+  // ── OAuth state store ──
+  const pendingStates = new Map<string, number>();
+
   await restoreSession();
 
   // ── Authorization Code Grant (browser, redirect flow) ──
 
   app.get('/auth/login', (_req, reply) => {
-    const state = Math.random().toString(36).slice(2);
+    const state = randomBytes(16).toString('hex');
+    pendingStates.set(state, Date.now() + 10 * 60 * 1000);
     const url =
       `https://id.twitch.tv/oauth2/authorize` +
       `?client_id=${config.TWITCH_CLIENT_ID}` +
@@ -112,7 +120,8 @@ export async function setupAuth(app: FastifyInstance) {
   });
 
   app.get('/auth/login-url', (_req, reply) => {
-    const state = Math.random().toString(36).slice(2);
+    const state = randomBytes(16).toString('hex');
+    pendingStates.set(state, Date.now() + 10 * 60 * 1000);
     const url =
       `https://id.twitch.tv/oauth2/authorize` +
       `?client_id=${config.TWITCH_CLIENT_ID}` +
@@ -124,8 +133,15 @@ export async function setupAuth(app: FastifyInstance) {
   });
 
   app.get('/auth/callback', async (req, reply) => {
-    const { code } = req.query as { code?: string };
+    const { code, state } = req.query as { code?: string; state?: string };
     if (!code) return reply.status(400).send({ error: 'Missing code' });
+    if (!state) return reply.status(400).send({ error: 'Missing state' });
+
+    const expiry = pendingStates.get(state);
+    if (!expiry || Date.now() > expiry) {
+      return reply.status(400).send({ error: 'Invalid or expired state' });
+    }
+    pendingStates.delete(state);
 
     const params = new URLSearchParams({
       client_id: config.TWITCH_CLIENT_ID,
@@ -143,7 +159,8 @@ export async function setupAuth(app: FastifyInstance) {
 
     if (!tokenRes.ok) {
       const err = await tokenRes.json().catch(() => ({}));
-      return reply.status(400).send({ error: 'Failed to get token', details: err });
+      req.log.error({ err }, 'Twitch token exchange failed');
+      return reply.status(400).send({ error: 'Authentication failed. Please try again.' });
     }
 
     const tokenData = await tokenRes.json();
@@ -166,7 +183,7 @@ export async function setupAuth(app: FastifyInstance) {
 
   // ── Device Code Grant (Electron / desktop, no redirect) ──
 
-  app.post('/auth/device', async (_req, reply) => {
+  app.post('/auth/device', async (req, reply) => {
     const params = new URLSearchParams({
       client_id: config.TWITCH_CLIENT_ID,
       scopes: SCOPES.join(' '),
@@ -180,7 +197,8 @@ export async function setupAuth(app: FastifyInstance) {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      return reply.status(400).send({ error: 'Failed to get device code', details: err });
+      req.log.error({ err }, 'Twitch device code request failed');
+      return reply.status(400).send({ error: 'Failed to get device code. Please try again.' });
     }
 
     const data = await res.json() as {
@@ -200,7 +218,7 @@ export async function setupAuth(app: FastifyInstance) {
     });
   });
 
-  app.post('/auth/device/poll', async (req, reply) => {
+  app.post('/auth/device/poll', { config: { rateLimit: { max: 12, timeWindow: '1 minute' } } }, async (req, reply) => {
     const { device_code } = req.body as { device_code: string };
     if (!device_code) return reply.status(400).send({ error: 'Missing device_code' });
 
@@ -225,7 +243,8 @@ export async function setupAuth(app: FastifyInstance) {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      return reply.send({ status: 'pending', error: err.error, message: err.message });
+      req.log.error({ err }, 'Twitch token poll failed');
+      return reply.send({ status: 'pending', error: err.error });
     }
 
     const tokenData = await res.json();
@@ -280,14 +299,16 @@ async function finishAuth(
     displayName: twitchUser.display_name,
   };
 
+  const encKey = config.TWITCH_CLIENT_SECRET;
+
   await prisma.user.upsert({
     where: { twitchId: twitchUser.id },
     update: {
       login: twitchUser.login,
       displayName: twitchUser.display_name,
       avatarUrl: twitchUser.profile_image_url,
-      accessToken: tokenData.access_token,
-      refreshToken: tokenData.refresh_token ?? '',
+      accessToken: encryptToken(tokenData.access_token, encKey),
+      refreshToken: encryptToken(tokenData.refresh_token ?? '', encKey),
       tokenExpiresAt: tokenData.expires_in
         ? new Date(Date.now() + tokenData.expires_in * 1000)
         : null,
@@ -297,8 +318,8 @@ async function finishAuth(
       login: twitchUser.login,
       displayName: twitchUser.display_name,
       avatarUrl: twitchUser.profile_image_url,
-      accessToken: tokenData.access_token,
-      refreshToken: tokenData.refresh_token ?? '',
+      accessToken: encryptToken(tokenData.access_token, encKey),
+      refreshToken: encryptToken(tokenData.refresh_token ?? '', encKey),
       tokenExpiresAt: tokenData.expires_in
         ? new Date(Date.now() + tokenData.expires_in * 1000)
         : null,
@@ -322,6 +343,17 @@ async function restoreSession() {
   const user = await prisma.user.findFirst({ orderBy: { updatedAt: 'desc' } });
   if (!user) return;
 
+  let accessToken = user.accessToken;
+  let refreshToken = user.refreshToken;
+
+  const encKey = config.TWITCH_CLIENT_SECRET;
+  try {
+    accessToken = decryptToken(user.accessToken, encKey);
+    refreshToken = decryptToken(user.refreshToken, encKey);
+  } catch {
+    // Tokens may be in plaintext from a previous version — use as-is
+  }
+
   currentUser = {
     id: user.twitchId,
     login: user.login,
@@ -330,8 +362,8 @@ async function restoreSession() {
 
   await authProvider?.addUserForToken(
     {
-      accessToken: user.accessToken,
-      refreshToken: user.refreshToken,
+      accessToken,
+      refreshToken,
       expiresIn: user.tokenExpiresAt
         ? Math.floor((user.tokenExpiresAt.getTime() - Date.now()) / 1000)
         : null,

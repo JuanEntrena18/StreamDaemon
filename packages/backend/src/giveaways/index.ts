@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { getIO } from '../socket/index.js';
 import { sendMessage } from '../chat/index.js';
+import { GiveawayCreateSchema } from '@streamforger/shared';
 
 interface Giveaway {
   id: string;
@@ -19,8 +20,17 @@ let giveawayIdCounter = 0;
 export function setupGiveaways(app: FastifyInstance) {
   app.post<{ Body: { channel: string; prize: string; duration?: number } }>(
     '/giveaways/start',
+    { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
     async (req, reply) => {
-      const { channel, prize, duration = 60 } = req.body;
+      const channel = req.body.channel;
+      if (!channel || typeof channel !== 'string') {
+        return reply.status(400).send({ error: 'Missing or invalid channel' });
+      }
+      const body = GiveawayCreateSchema.safeParse(req.body);
+      if (!body.success) {
+        return reply.status(400).send({ error: body.error.flatten() });
+      }
+      const { prize, duration = 60 } = body.data;
 
       const id = `giveaway_${++giveawayIdCounter}`;
       const giveaway: Giveaway = {

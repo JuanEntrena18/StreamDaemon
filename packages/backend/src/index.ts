@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { config } from './config.js';
 import { setupAuth, onAuth } from './auth/index.js';
+import { requireLocalAuth } from './auth/api-auth.js';
 import { setupChat, setEnterGiveaway } from './chat/index.js';
 import { setupSocketIO } from './socket/index.js';
 import { setupGiveaways, enterGiveaway } from './giveaways/index.js';
@@ -18,7 +19,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export async function startServer(opts?: { port?: number; frontendDir?: string }) {
   const app = Fastify({ logger: true });
 
-  await app.register(cors, { origin: true });
+  const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173'];
+  await app.register(cors, { origin: allowedOrigins, credentials: false });
 
   // Rate limiting — 100 req/min per IP
   await app.register(rateLimit, { max: 100, timeWindow: '1 minute' });
@@ -29,6 +31,14 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
     reply.header('X-Frame-Options', 'SAMEORIGIN');
     reply.header('X-XSS-Protection', '0');
     reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+    reply.header('Content-Security-Policy',
+      "default-src 'self'; " +
+      "connect-src 'self' https://id.twitch.tv https://api.twitch.tv wss://eventsub.wss.twitch.tv; " +
+      "img-src 'self' https://static-cdn.jtvnw.net data:; " +
+      "script-src 'self' 'unsafe-inline'; " +
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+      "font-src 'self' https://fonts.gstatic.com"
+    );
     return payload;
   });
 
@@ -52,6 +62,13 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
       reply.status(404).send({ error: 'Not found', path: req.url });
     });
   }
+
+  // Protect all POST endpoints except auth routes and health check
+  app.addHook('onRequest', async (req, reply) => {
+    if (req.method === 'POST' && !req.url.startsWith('/auth/') && req.url !== '/health') {
+      await requireLocalAuth(req, reply);
+    }
+  });
 
   await setupAuth(app);
   setupSocketIO(app);
