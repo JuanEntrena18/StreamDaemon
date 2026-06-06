@@ -244,7 +244,7 @@ export async function setupAuth(app: FastifyInstance) {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       req.log.error({ err }, 'Twitch token poll failed');
-      return reply.send({ status: 'pending', error: err.error });
+      return reply.send({ status: 'pending', error: 'authorization_pending' });
     }
 
     const tokenData = await res.json();

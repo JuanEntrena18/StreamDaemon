@@ -3,7 +3,13 @@ import { ApiClient } from '@twurple/api';
 import { authProvider } from '../auth/index.js';
 import { getIO } from '../socket/index.js';
 import { config } from '../config.js';
-import { PredictionCreateSchema } from '@streamforger/shared';
+import { z } from 'zod';
+
+const PredictionCreateRouteSchema = z.object({
+  channelId: z.string().min(1),
+  title: z.string().min(1).max(200),
+  options: z.array(z.string().min(1)).min(2).max(10),
+});
 
 let apiClient: ApiClient | null = null;
 
@@ -15,10 +21,11 @@ export function setupPredictions(app: FastifyInstance) {
   app.post<{ Body: { channelId: string; title: string; options: string[] } }>(
     '/predictions/create',
     async (req, reply) => {
-      const { channelId, title, options } = req.body;
-      if (!channelId || !title || !Array.isArray(options) || options.length < 2) {
-        return reply.status(400).send({ error: 'Missing or invalid fields' });
+      const parsed = PredictionCreateRouteSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return reply.status(400).send({ error: parsed.error.flatten() });
       }
+      const { channelId, title, options } = parsed.data;
 
       if (!apiClient) {
         return reply.status(503).send({ error: 'API not ready' });
