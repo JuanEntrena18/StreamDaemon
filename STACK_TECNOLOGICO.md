@@ -64,6 +64,9 @@ Los temas se definen en `useTheme.ts` y se aplican mediante variables CSS en el 
 | `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación (timeout/ban), selector de sonido, overlay controls (tamaño, opacidad) |
 | `GiveawayPanel.tsx` | Panel sorteos con badge pulsante, counter + ruleta canvas con selector duración giro (10/15/20s) e importación masiva de nombres |
 | `PredictionPanel.tsx` | Panel de predicciones con opciones A/B/C y feedback animado |
+| `HudPanel.tsx` | Panel de Stream HUD: botones iniciar/detener polling, muestra estadísticas en vivo |
+| `TimerPanel.tsx` | Panel de temporizador: configurar duración, iniciar, pausar, reanudar, reset |
+| `ScoreboardPanel.tsx` | Panel de scoreboard: añadir/remover jugadores, ajustar puntuaciones, cambiar título, reset |
 | `ConfigPanel.tsx` | Configuración: conexión Twitch OAuth con Device Code Grant, logout, aviso re-autenticación, acerca de |
 | `ObsPanel.tsx` | Panel de URLs para OBS Browser Source con cards, copiar al portapapeles y selector de temas |
 | `ChannelNotifications.tsx` | Notificaciones animadas (follows, subs, gifts, redemptions, cheers) en overlay |
@@ -80,6 +83,9 @@ Los temas se definen en `useTheme.ts` y se aplican mediante variables CSS en el 
 | `GiveawayOverlay.tsx` | `mode=giveaway` | Sorteos: participantes izquierda + ruleta derecha + ganador gigante |
 | `PredictionOverlay.tsx` | `mode=prediction` | Predicciones en vivo |
 | `SocialOverlay.tsx` | `mode=social` | Redes sociales animadas |
+| `HudOverlay.tsx` | `mode=hud` | Stream HUD: viewers, followers, subs, uptime, game y título |
+| `TimerOverlay.tsx` | `mode=timer` | Cuenta regresiva con barra de progreso, color urgente a 30s, glow animado |
+| `ScoreboardOverlay.tsx` | `mode=scoreboard` | Marcador vertical con barras de progreso por jugador, ranking y corona al líder |
 
 ---
 
@@ -106,6 +112,9 @@ Los temas se definen en `useTheme.ts` y se aplican mediante variables CSS en el 
 | **Socket** | `src/socket/index.ts` | Socket.IO server, eventos `join:channel`, `leave:channel`, `chat:send` |
 | **Giveaways** | `src/giveaways/index.ts` | Sorteos: crear, finalizar, entrada vía chat, selección aleatoria, emisión `giveaway:entry` con lista de participantes |
 | **Predictions** | `src/predictions/index.ts` | Predicciones Twitch: crear, resolver |
+| **HUD** | `src/hud/index.ts` | Stream HUD: polling Twitch API cada 10-15s, emisión `hud:update` con statistics en vivo |
+| **Timer** | `src/timer/index.ts` | Temporizador: cuenta regresiva in-memory con tick cada 1s vía Socket.IO, endpoints REST start/pause/resume/reset |
+| **Scoreboard** | `src/scoreboard/index.ts` | Scoreboard: gestión de jugadores y puntuaciones in-memory, emisión `scoreboard:update` |
 | **EventSub** | `src/eventsub/index.ts` | EventSub WebSocket listener: follows, subs, resubs, gifts, redemptions, cheers |
 
 ---
@@ -265,6 +274,9 @@ OBS (Browser Source) ←→ Frontend (React SPA)
 - El backend se conecta al chat IRC de Twitch y reenvía mensajes vía Socket.IO a los overlays.
 - Las predicciones se crean desde el panel de control (React) → API REST → Twitch API.
 - Los sorteos se gestionan completamente en backend (entradas vía chat comando, selección aleatoria).
+- El Stream HUD consulta la API de Twitch cada 10-15s y emite estadísticas vía Socket.IO al overlay.
+- El Temporizador corre en memoria del backend con un `setInterval` de 1s que emite `timer:tick` a la sala del canal.
+- El Scoreboard mantiene el estado en memoria y emite `scoreboard:update` ante cualquier cambio.
 
 ---
 
@@ -298,12 +310,18 @@ twitch_overlay/
 │   │       │   ├── ConfigPanel.tsx      # Login Twitch + device code + always-on-top
 │   │       │   ├── GiveawayPanel.tsx    # Panel sorteos + ruleta canvas
 │   │       │   ├── PredictionPanel.tsx  # Panel predicciones
+│   │       │   ├── HudPanel.tsx         # Panel Stream HUD
+│   │       │   ├── TimerPanel.tsx       # Panel temporizador
+│   │       │   ├── ScoreboardPanel.tsx  # Panel scoreboard
 │   │       │   ├── ObsPanel.tsx         # URLs OBS con copiar
 │   │       │   ├── TransparentOverlay.tsx # Control overlay transparente
 │   │       │   ├── ChatOverlay.tsx      # Overlay chat (OBS)
 │   │       │   ├── GiveawayOverlay.tsx  # Overlay sorteos (OBS)
 │   │       │   ├── PredictionOverlay.tsx # Overlay predicciones (OBS)
-│   │       │   └── SocialOverlay.tsx    # Overlay redes (OBS)
+│   │       │   ├── SocialOverlay.tsx    # Overlay redes (OBS)
+│   │       │   ├── HudOverlay.tsx       # Overlay Stream HUD (OBS)
+│   │       │   ├── TimerOverlay.tsx     # Overlay temporizador (OBS)
+│   │       │   └── ScoreboardOverlay.tsx # Overlay scoreboard (OBS)
 │   │       ├── hooks/
 │   │       │   ├── useAuthStatus.ts     # Estado OAuth + Device Code Grant polling
 │   │       │   ├── useSocket.ts         # Conexión Socket.IO
@@ -313,7 +331,7 @@ twitch_overlay/
 │   │   └── src/
 │   │       ├── main.ts    # Proceso principal (con retry y fallback de ventana)
 │   │       └── preload.ts # Bridge IPC seguro
-│   └── shared/            # Tipos, schemas Zod, constantes
+│   └── shared/            # Tipos, schemas Zod, constantes (ChatMessage, GiveawayData, HudData, TimerState, ScoreboardState, etc.)
 ├── docker-compose.yml
 ├── package.json           # Workspaces (npm)
 ├── README.md
@@ -344,3 +362,6 @@ twitch_overlay/
 | 8. Social overlay | Overlay con enlaces a redes sociales animados | ✅ |
 | 9. Dashboard premium | Sidebar, glassmorphism, sistema de diseño, ObsPanel, bug fix Electron | ✅ |
 | 10. Unificación SQLite | Backend migrado a SQLite; `dev:desktop` corregido con `concurrently` + `wait-on` | ✅ |
+| 11. Stream HUD | Panel y overlay de estadísticas en vivo con polling a Twitch API | ✅ |
+| 12. Temporizador | Cuenta regresiva configurable con REST + Socket.IO tick por segundo | ✅ |
+| 13. Scoreboard | Marcador de torneos con jugadores, puntuaciones y ranking visual | ✅ |

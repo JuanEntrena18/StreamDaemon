@@ -122,12 +122,13 @@ export function ObsPanel({ channel, backendUrl }: Props) {
   const [copied, setCopied] = useState<string | null>(null);
   const [socialExpanded, setSocialExpanded] = useState(false);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(DEFAULT_SOCIAL_LINKS);
-  const baseUrl = backendUrl || 'http://localhost:3000';
+  // En modo dev (Vite) el overlay lo sirve el frontend en :5173
+  const overlayBaseUrl = import.meta.env.DEV ? 'http://localhost:5173' : (backendUrl || 'http://localhost:3000');
 
   const [customGame, setCustomGame] = useState('');
 
   function buildUrl(mode: string, supportsTheme: boolean): string {
-    let url = `${baseUrl}/overlay.html?mode=${mode}`;
+    let url = `${overlayBaseUrl}/overlay.html?mode=${mode}`;
     if (channel) url += `&channel=${channel}`;
     if (supportsTheme && selectedTheme) url += `&theme=${selectedTheme}`;
     if (mode === 'custom' && customGame) url += `&game=${encodeURIComponent(customGame)}`;
@@ -136,7 +137,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
 
   function buildSocialUrl(): string {
     const active = socialLinks.filter((l) => l.url.trim());
-    const base = `${baseUrl}/overlay.html?mode=social`;
+    const base = `${overlayBaseUrl}/overlay.html?mode=social`;
     const channelParam = channel ? `&channel=${channel}` : '';
     // Encode social links as query params
     const linksParam =

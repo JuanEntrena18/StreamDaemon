@@ -14,7 +14,13 @@ export function HudOverlay({ channel }: Props) {
     showViewers: true, showFollowers: true, showSubs: true,
     showUptime: true, showGame: true, showTitle: false,
   });
-  const { connected } = useSocket();
+  const { socket, connected } = useSocket();
+
+  useEffect(() => {
+    if (channel && connected) {
+      socket.emit('join:channel', channel);
+    }
+  }, [channel, connected, socket]);
 
   useSocketEvent('hud:update', useCallback((data: HudData) => {
     setHud(data);

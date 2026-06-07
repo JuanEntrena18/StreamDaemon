@@ -10,7 +10,13 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 
 export function ScoreboardOverlay({ channel }: Props) {
   const [board, setBoard] = useState<ScoreboardState>({ players: [], title: 'Scoreboard' });
-  const { connected } = useSocket();
+  const { socket, connected } = useSocket();
+
+  useEffect(() => {
+    if (channel && connected) {
+      socket.emit('join:channel', channel);
+    }
+  }, [channel, connected, socket]);
 
   useSocketEvent('scoreboard:update', useCallback((data: ScoreboardState) => {
     setBoard(data);

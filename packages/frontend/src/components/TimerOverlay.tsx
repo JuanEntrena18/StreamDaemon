@@ -19,7 +19,13 @@ function formatTime(totalSeconds: number): string {
 export function TimerOverlay({ channel }: Props) {
   const [timer, setTimer] = useState<TimerState | null>(null);
   const [remaining, setRemaining] = useState(0);
-  const { connected } = useSocket();
+  const { socket, connected } = useSocket();
+
+  useEffect(() => {
+    if (channel && connected) {
+      socket.emit('join:channel', channel);
+    }
+  }, [channel, connected, socket]);
 
   useSocketEvent('timer:state', useCallback((data: TimerState) => {
     setTimer(data);

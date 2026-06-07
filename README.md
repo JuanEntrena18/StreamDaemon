@@ -16,6 +16,9 @@ Disponible en dos modos:
 - **💬 Chat en vivo** — Lectura del chat de Twitch vía IRC con reenvío en tiempo real a los overlays mediante Socket.IO. Incluye envío de mensajes, reply (↩ @usuario), moderación (timeout/ban), badges por rol y selector de sonido de notificación.
 - **🎁 Sorteos interactivos** — Comando `!sorteo` en el chat para participar. Panel de control con ruleta canvas, selector de duración del giro (10/15/20s) e importación masiva de nombres. Overlay dedicado con lista de participantes en vivo y ruleta animada con ganador gigante.
 - **📊 Predicciones** — Integración con la API de Predicciones de Twitch. Creación de encuestas desde el panel de control con resolución automática.
+- **📊 Stream HUD** — Panel de estadísticas en vivo (viewers, followers, subs, uptime, game) con polling automático y overlay informativo.
+- **⏱️ Temporizador** — Cuenta regresiva configurable desde el panel con inicio, pausa, reanudación y reset. Overlay con barra de progreso, alerta visual los últimos 30s y estado "Tiempo cumplido".
+- **🏆 Scoreboard** — Marcador en vivo para torneos y competiciones con jugadores, puntuaciones por incremento/decremento y barra de progreso visual. Panel completo con gestión de jugadores.
 - **🔔 Notificaciones EventSub** — Follows, subs, re-suscripciones, gifts, redemptions y cheers en tiempo real vía EventSub WebSocket, con overlay animado en pantalla.
 - **🌐 Redes sociales** — Overlay animado que muestra las redes del streamer de forma rotativa.
 - **🎮 Control de overlay transparente** — Ventana always-on-top con click-through toggleable (Ctrl+Shift+T), opacidad solo del fondo, redimensionable (Peq/Med/Grande) y barra de arrastre.
@@ -134,7 +137,7 @@ npm run build:desktop
 El panel de control cuenta con un rediseño premium (v0.2.0):
 
 - **Sidebar de navegación** con secciones:
-  - **Herramientas:** Chat en vivo, Sorteos, Predicciones, OBS URLs
+  - **Herramientas:** Chat en vivo, Sorteos, Predicciones, HUD, Temporizador, Scoreboard, OBS URLs
   - **Configuración:** Conexión Twitch, preferencias de ventana, acerca de
 - **Glassmorphism** — cards semitransparentes con blur y bordes sutiles
 - **Animaciones** con Framer Motion en transiciones de tab y estados activos
@@ -181,12 +184,15 @@ El panel de control cuenta con un rediseño premium (v0.2.0):
 Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 
 | Overlay | URL |
-|---|---|
+|---|---|---|
 | Chat | `http://localhost:3000/overlay.html?mode=chat&channel=tucanal` |
 | Sorteos | `http://localhost:3000/overlay.html?mode=giveaway&channel=tucanal` |
 | Predicciones | `http://localhost:3000/overlay.html?mode=prediction&channel=tucanal` |
 | Redes Sociales | `http://localhost:3000/overlay.html?mode=social` |
 | Overlay Personalizado | `http://localhost:3000/overlay.html?mode=custom&channel=tucanal` |
+| Stream HUD | `http://localhost:3000/overlay.html?mode=hud&channel=tucanal` |
+| Temporizador | `http://localhost:3000/overlay.html?mode=timer&channel=tucanal` |
+| Scoreboard | `http://localhost:3000/overlay.html?mode=scoreboard&channel=tucanal` |
 
 Para cambiar el tema visual del chat agrega `&theme=subnautica2`, `&theme=poe2`, `&theme=wow` (Horda) o `&theme=alliance` (Alianza).
 
@@ -207,12 +213,16 @@ StreamForge/
 │   │       ├── socket/    # WebSocket (chat:send, join/leave channel)
 │   │       ├── giveaways/ # Sorteos (crear, entrar, finalizar, entry events)
 │   │       ├── predictions/ # Predicciones Twitch API
-│   │       └── eventsub/  # EventSub WebSocket (follows, subs, cheers, etc.)
+│   │       ├── eventsub/  # EventSub WebSocket (follows, subs, cheers, etc.)
+│   │       ├── hud/       # Stream HUD (polling Twitch API, estadísticas en vivo)
+│   │       ├── timer/     # Temporizador (cuenta regresiva Socket.IO + REST)
+│   │       └── scoreboard/ # Scoreboard (marcador de torneos REST + Socket.IO)
 │   ├── frontend/          # React + Vite + Overlays
 │   │   └── src/
-│   │       ├── components/# ChatPanel, GiveawayPanel, PredictionPanel, ConfigPanel,
-│   │       │              # ObsPanel, ChannelNotifications, Overlays (Chat, Giveaway,
-│   │       │              # Prediction, Social, Custom, Subnautica2, Wow, Alliance)
+│   │       ├── components/# ChatPanel, GiveawayPanel, PredictionPanel, HudPanel,
+│   │       │              # TimerPanel, ScoreboardPanel, ConfigPanel, ObsPanel,
+│   │       │              # ChannelNotifications, Overlays (Chat, Giveaway, Prediction,
+│   │       │              # Social, Custom, HUD, Timer, Scoreboard, Subnautica2, Wow, Alliance)
 │   │       ├── hooks/     # useSocket, useTheme, useAuthStatus
 │   │       └── utils/     # sounds.ts (Web Audio API)
 │   ├── desktop/           # Electron + SQLite
@@ -231,6 +241,24 @@ StreamForge/
 ---
 
 ## 🐛 Fixes conocidos
+
+### v0.2.0 — Overlays nuevos no reciben eventos Socket.IO en OBS
+
+**Causa:** Los componentes HudOverlay, TimerOverlay y ScoreboardOverlay no emitían `join:channel` al conectarse, por lo que no se unían a la sala Socket.IO del canal y nunca recibían eventos en tiempo real.
+
+**Solución:** Añadido `useEffect` con `socket.emit('join:channel', channel)` en los tres overlays, replicando el patrón de ChatOverlay, GiveawayOverlay y PredictionOverlay.
+
+### v0.2.0 — POST endpoints bloqueados en modo desarrollo
+
+**Causa:** `requireLocalAuth` rechazaba todas las peticiones POST cuando `LOCAL_API_TOKEN` no estaba configurado (modo standalone sin Electron).
+
+**Solución:** `requireLocalAuth` ahora permite peticiones cuando no hay token configurado (`!process.env.LOCAL_API_TOKEN`). En producción/desktop el token sigue siendo obligatorio.
+
+### v0.2.0 — URLs de OBS apuntaban a backend en modo desarrollo
+
+**Causa:** `ObsPanel` usaba `backendUrl` (`:3000`) para construir las URLs de overlay, pero en modo dev el frontend lo sirve Vite en `:5173`.
+
+**Solución:** Separada la URL del overlay (`overlayBaseUrl`) que en modo dev (`import.meta.env.DEV`) usa `localhost:5173` y en producción usa `backendUrl`.
 
 ### v0.1.0 — Ventana Electron invisible al iniciar
 
