@@ -62,6 +62,33 @@ const OBS_URLS: OBSUrl[] = [
     supportsTheme: false,
     color: '#06b6d4',
   },
+  {
+    id: 'hud',
+    icon: '📊',
+    label: 'Stream HUD',
+    description: 'Estadísticas en vivo: viewers, followers, subs y tiempo de stream',
+    mode: 'hud',
+    supportsTheme: false,
+    color: '#a855f7',
+  },
+  {
+    id: 'timer',
+    icon: '⏱️',
+    label: 'Temporizador',
+    description: 'Cuenta regresiva en pantalla configurable desde el panel',
+    mode: 'timer',
+    supportsTheme: false,
+    color: '#f59e0b',
+  },
+  {
+    id: 'scoreboard',
+    icon: '🏆',
+    label: 'Scoreboard',
+    description: 'Marcador en vivo para torneos y competiciones',
+    mode: 'scoreboard',
+    supportsTheme: false,
+    color: '#10b981',
+  },
 ];
 
 const THEMES = [

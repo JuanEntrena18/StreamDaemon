@@ -1,8 +1,10 @@
-// dotenv/config eliminado intencionalmente:
-// En modo desktop (Electron), las variables de entorno las inyecta
-// loadBackendEnv() en main.ts ANTES del import dinámico del backend.
-// Usar dotenv/config aquí causaba que buscara .env en process.cwd()
-// (directorio del instalador) en lugar de leer lo ya inyectado en process.env.
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Cargar .env desde el directorio del package (funciona tanto en dev como en producción)
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 export const config = {
   PORT: process.env.PORT ?? '3000',

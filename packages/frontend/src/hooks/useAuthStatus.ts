@@ -122,12 +122,12 @@ export function useAuthStatus() {
   }, []);
 
   const login = useCallback(() => {
-    if (window.streamforger?.isDesktop) {
-      startDeviceLogin();
-    } else {
-      window.open(`${BACKEND_URL}/auth/login`, '_blank');
-    }
+    startDeviceLogin();
   }, [startDeviceLogin]);
+
+  const loginBrowser = useCallback(() => {
+    window.open(`${BACKEND_URL}/auth/login`, '_blank');
+  }, []);
 
   const logout = useCallback(async () => {
     try {
@@ -136,5 +136,5 @@ export function useAuthStatus() {
     setStatus({ authenticated: false, user: null });
   }, []);
 
-  return { ...status, loading, login, logout, deviceState, cancelDeviceLogin, refresh };
+  return { ...status, loading, login, loginBrowser, logout, deviceState, cancelDeviceLogin, refresh };
 }

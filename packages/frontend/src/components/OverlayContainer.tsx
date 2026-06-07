@@ -4,6 +4,9 @@ import { CustomOverlay } from './CustomOverlay';
 import { GiveawayOverlay } from './GiveawayOverlay';
 import { PredictionOverlay } from './PredictionOverlay';
 import { SocialOverlay } from './SocialOverlay';
+import { HudOverlay } from './HudOverlay';
+import { TimerOverlay } from './TimerOverlay';
+import { ScoreboardOverlay } from './ScoreboardOverlay';
 import { Subnautica2ChatOverlay } from './Subnautica2ChatOverlay';
 import { WowChatOverlay } from './WowChatOverlay';
 import { AllianceChatOverlay } from './AllianceChatOverlay';
@@ -26,6 +29,12 @@ function OverlayContent({ mode, theme, channel }: { mode: string; theme: string 
       return <PredictionOverlay channel={channel} />;
     case 'social':
       return <SocialOverlay />;
+    case 'hud':
+      return <HudOverlay channel={channel} />;
+    case 'timer':
+      return <TimerOverlay channel={channel} />;
+    case 'scoreboard':
+      return <ScoreboardOverlay channel={channel} />;
     case 'custom':
       return <CustomOverlay channel={channel} />;
     case 'chat':

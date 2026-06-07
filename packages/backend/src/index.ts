@@ -13,6 +13,9 @@ import { setupGiveaways, enterGiveaway } from './giveaways/index.js';
 import { setupPredictions } from './predictions/index.js';
 import { setupEventSub, stopEventSub } from './eventsub/index.js';
 import { setupTracker } from './tracker/index.js';
+import { setupHud } from './hud/index.js';
+import { setupTimer } from './timer/index.js';
+import { setupScoreboard } from './scoreboard/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -79,6 +82,9 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   onAuth(() => { setupChat(); setupEventSub(); });
   setupPredictions(app);
   setupTracker(app);
+  setupHud(app);
+  setupTimer(app);
+  setupScoreboard(app);
 
   app.get('/health', async () => ({ status: 'ok', timestamp: Date.now() }));
 

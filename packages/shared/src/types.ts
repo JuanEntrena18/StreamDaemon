@@ -111,6 +111,44 @@ export interface ChannelCheerEvent {
   timestamp: number;
 }
 
+export interface HudData {
+  viewers: number;
+  followers: number;
+  subscribers: number;
+  uptimeSeconds: number;
+  streamTitle: string;
+  gameName: string;
+  startedAt: string | null;
+  isLive: boolean;
+}
+
+export interface HudConfig {
+  showViewers: boolean;
+  showFollowers: boolean;
+  showSubs: boolean;
+  showUptime: boolean;
+  showGame: boolean;
+  showTitle: boolean;
+}
+
+export interface TimerState {
+  status: 'stopped' | 'running' | 'paused' | 'finished';
+  remaining: number;
+  duration: number;
+  label: string;
+}
+
+export interface ScoreboardPlayer {
+  id: string;
+  name: string;
+  score: number;
+}
+
+export interface ScoreboardState {
+  players: ScoreboardPlayer[];
+  title: string;
+}
+
 export type ServerEvent =
   | { type: 'chat:message'; data: ChatMessage }
   | { type: 'channel:follow'; data: ChannelFollowEvent }
@@ -125,4 +163,8 @@ export type ServerEvent =
   | { type: 'giveaway:winner'; data: { winner: string; prize: string } }
   | { type: 'prediction:create'; data: PredictionData }
   | { type: 'prediction:update'; data: PredictionData }
-  | { type: 'social:update'; data: SocialLink[] };
+  | { type: 'social:update'; data: SocialLink[] }
+  | { type: 'hud:update'; data: HudData }
+  | { type: 'timer:state'; data: TimerState }
+  | { type: 'timer:tick'; data: { remaining: number } }
+  | { type: 'scoreboard:update'; data: ScoreboardState };

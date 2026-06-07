@@ -31,3 +31,31 @@ export const ChannelConfigSchema = z.object({
   overlaySettings: z.record(z.string(), z.unknown()).optional(),
   socialLinks: z.array(SocialLinkSchema).optional(),
 });
+
+export const TimerStartSchema = z.object({
+  duration: z.number().min(1).max(86400),
+  label: z.string().max(100).default(''),
+});
+
+export const ScoreboardPlayerSchema = z.object({
+  name: z.string().min(1).max(50),
+});
+
+export const ScoreboardScoreSchema = z.object({
+  playerId: z.string().min(1),
+  score: z.number().int(),
+});
+
+export const ScoreboardIncrementSchema = z.object({
+  playerId: z.string().min(1),
+  amount: z.number().int().default(1),
+});
+
+export const HudConfigSchema = z.object({
+  showViewers: z.boolean().default(true),
+  showFollowers: z.boolean().default(true),
+  showSubs: z.boolean().default(true),
+  showUptime: z.boolean().default(true),
+  showGame: z.boolean().default(true),
+  showTitle: z.boolean().default(false),
+});

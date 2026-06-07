@@ -1,0 +1,115 @@
+import { useState, useCallback, useEffect } from 'react';
+import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import type { HudData, HudConfig } from '@streamforger/shared';
+
+interface Props {
+  channel: string;
+}
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
+
+export function HudOverlay({ channel }: Props) {
+  const [hud, setHud] = useState<HudData | null>(null);
+  const [config] = useState<HudConfig>({
+    showViewers: true, showFollowers: true, showSubs: true,
+    showUptime: true, showGame: true, showTitle: false,
+  });
+  const { connected } = useSocket();
+
+  useSocketEvent('hud:update', useCallback((data: HudData) => {
+    setHud(data);
+  }, []));
+
+  useEffect(() => {
+    if (!channel || !connected) return;
+    fetch(`${BACKEND_URL}/hud/${channel}`)
+      .then((r) => r.json())
+      .then((data) => { if (data && data.viewers !== undefined) setHud(data); })
+      .catch(() => {});
+    fetch(`${BACKEND_URL}/hud/start-poll`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ channel, interval: 15 }),
+    }).catch(() => {});
+    return () => {
+      fetch(`${BACKEND_URL}/hud/stop-poll`, { method: 'POST' }).catch(() => {});
+    };
+  }, [channel, connected]);
+
+  if (!hud) {
+    return (
+      <div style={{
+        position: 'absolute', bottom: 20, left: 20,
+        fontFamily: "'Inter', sans-serif", fontSize: '0.85rem',
+        color: 'rgba(255,255,255,0.4)',
+      }}>
+        Esperando datos...
+      </div>
+    );
+  }
+
+  const formatUptime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return `${h}h ${m.toString().padStart(2, '0')}m`;
+  };
+
+  const items = [
+    { key: 'viewers', show: config.showViewers, icon: '👁️', label: 'Viewers', value: hud.viewers.toString() },
+    { key: 'followers', show: config.showFollowers, icon: '❤️', label: 'Followers', value: hud.followers.toLocaleString() },
+    { key: 'subs', show: config.showSubs, icon: '⭐', label: 'Subs', value: hud.subscribers.toLocaleString() },
+    { key: 'uptime', show: config.showUptime, icon: '⏱️', label: 'Uptime', value: formatUptime(hud.uptimeSeconds) },
+  ];
+
+  const visibleItems = items.filter((i) => i.show);
+  if (visibleItems.length === 0) return null;
+
+  return (
+    <div style={{
+      position: 'absolute', bottom: 20, left: 20,
+      display: 'flex', gap: 12, alignItems: 'center',
+      fontFamily: "'Inter', sans-serif",
+      background: 'rgba(0,0,0,0.55)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
+      borderRadius: 10,
+      padding: '8px 16px',
+      border: '1px solid rgba(255,255,255,0.08)',
+    }}>
+      {!hud.isLive && (
+        <span style={{
+          fontSize: '0.7rem', color: '#f87171', fontWeight: 600,
+          textTransform: 'uppercase', letterSpacing: '0.05em',
+        }}>
+          Offline
+        </span>
+      )}
+      {visibleItems.map((item) => (
+        <div key={item.key} style={{
+          display: 'flex', alignItems: 'center', gap: 4,
+          fontSize: '0.78rem', color: 'rgba(255,255,255,0.85)',
+        }}>
+          <span style={{ fontSize: '0.7rem' }}>{item.icon}</span>
+          <span style={{ fontWeight: 600 }}>{item.value}</span>
+        </div>
+      ))}
+      {config.showGame && hud.gameName && (
+        <span style={{
+          fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)',
+          borderLeft: '1px solid rgba(255,255,255,0.12)', paddingLeft: 10,
+        }}>
+          {hud.gameName}
+        </span>
+      )}
+      {config.showTitle && hud.streamTitle && (
+        <span style={{
+          fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)',
+          borderLeft: '1px solid rgba(255,255,255,0.12)', paddingLeft: 10,
+          maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>
+          {hud.streamTitle}
+        </span>
+      )}
+    </div>
+  );
+}
