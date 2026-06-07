@@ -24,6 +24,32 @@ Disponible en dos modos:
 
 ---
 
+## 🔒 Seguridad
+
+StreamForger implementa múltiples capas de seguridad para proteger las credenciales de Twitch y la cuenta del streamer:
+
+| ID | Medida | Estado |
+|---|---|---|
+| **C-1** | Base de datos SQLite excluida del repositorio Git (`*.db` en `.gitignore`) | ✅ |
+| **C-2** | Tokens OAuth cifrados con **AES-256-GCM** antes de persistir en SQLite | ✅ |
+| **C-3** | Servidor vinculado exclusivamente a `127.0.0.1` (sin exposición en red) | ✅ |
+| **A-1** | Token de API local (128 bits) requerido en toda petición POST (<code>X-Local-Token</code>) | ✅ |
+| **A-2** | Parámetro `state` OAuth generado con `crypto.randomBytes(16)` y verificado con expiración de 10 min | ✅ |
+| **M-1** | Rate limiting global (100 req/min) + límites específicos por ruta (5/min sorteos, 12/min device poll) + throttle Socket.IO (1 msg/1.5s) | ✅ |
+| **M-2** | Validación de entrada con **Zod** en todas las rutas de API | ✅ |
+| **M-3** | CORS restringido a `localhost:3000` y `localhost:5173` (HTTP + Socket.IO) | ✅ |
+| **M-4** | Errores internos de Twitch logueados en servidor; el cliente recibe mensajes genéricos | ✅ |
+| **M-5** | URLs de overlay validadas contra orígenes de confianza antes de abrir la ventana Electron | ✅ |
+| **B-1** | Todos los generadores de estado OAuth usan `crypto.randomBytes` en lugar de `Math.random()` | ✅ |
+| **B-2** | Cabeceras de seguridad: `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` | ✅ |
+| **B-3** | Docker Compose con credenciales vía variables de entorno (`${VAR:-default}`) | ✅ |
+| **B-4** | Protección `will-navigate` en ambas ventanas Electron contra navegación a orígenes no confiados | ✅ |
+| **B-5** | Variable `SESSION_SECRET` eliminada de toda la configuración | ✅ |
+
+> **Nota:** Las credenciales de Twitch (`TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`) se configuran localmente en `packages/desktop/extra/backend.env` (excluido de Git). Consulta `backend.env.example` para la plantilla.
+
+---
+
 ## 🚀 Stack Tecnológico
 
 | Capa | Servidor Linux | Escritorio Windows |
@@ -176,7 +202,7 @@ StreamForge/
 │   ├── backend/           # Servidor (SQLite compartida, schema unificado)
 │   │   ├── prisma/        # Schema SQLite (provider: sqlite)
 │   │   └── src/
-│   │       ├── auth/      # OAuth Twitch (Code Grant + Device Code)
+│   │       ├── auth/      # OAuth Twitch + token-crypto (AES-256-GCM) + api-auth (X-Local-Token)
 │   │       ├── chat/      # IRC + comandos (!sorteo)
 │   │       ├── socket/    # WebSocket (chat:send, join/leave channel)
 │   │       ├── giveaways/ # Sorteos (crear, entrar, finalizar, entry events)
@@ -190,13 +216,15 @@ StreamForge/
 │   │       ├── hooks/     # useSocket, useTheme, useAuthStatus
 │   │       └── utils/     # sounds.ts (Web Audio API)
 │   ├── desktop/           # Electron + SQLite
-│   │   ├── prisma/        # Schema SQLite + streamforger.db
+│   │   ├── extra/         # Frontend dist + backend.env (gitignored) + backend.env.example
+│   │   ├── prisma/        # Schema SQLite
 │   │   └── src/
-│   │       ├── main.ts    # Proceso principal (overlay opacity/resize/position por IPC)
-│   │       └── preload.ts # Bridge IPC seguro (overlay.setOpacity, .resize, etc.)
+│   │       ├── main.ts    # Proceso principal (overlay IPC + will-navigate + local API token)
+│   │       └── preload.ts # Bridge IPC seguro (localApiToken, overlay, auth, window)
 │   └── shared/            # Tipos compartidos (ChatMessage, GiveawayData, ServerEvent, etc.)
 ├── docker-compose.yml     # PostgreSQL + Redis (opcional, para producción)
 ├── STACK_TECNOLOGICO.md
+├── SECURITY_AUDIT.md      # Auditoría de seguridad v1
 └── README.md
 ```
 
