@@ -16,6 +16,7 @@ import { setupTracker } from './tracker/index.js';
 import { setupHud } from './hud/index.js';
 import { setupTimer } from './timer/index.js';
 import { setupScoreboard } from './scoreboard/index.js';
+import { setupMod } from './mod/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -85,6 +86,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupHud(app);
   setupTimer(app);
   setupScoreboard(app);
+  setupMod(app);
 
   app.get('/health', async () => ({ status: 'ok', timestamp: Date.now() }));
 

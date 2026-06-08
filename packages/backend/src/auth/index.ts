@@ -25,6 +25,9 @@ const SCOPES = [
   'moderator:read:followers',
   'channel:read:subscriptions',
   'bits:read',
+  'channel:moderate',
+  'moderator:read:chatters',
+  'moderator:manage:banned_users',
 ];
 
 export let authProvider: RefreshingAuthProvider | null = null;

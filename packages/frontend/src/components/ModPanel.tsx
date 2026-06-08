@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { apiPost } from '../utils/api';
 
 interface Props {
@@ -15,6 +15,34 @@ export function ModPanel({ channel }: Props) {
   const [action, setAction] = useState<ModAction>('timeout');
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [chatters, setChatters] = useState<{ userName: string; userDisplayName: string }[]>([]);
+  const [chattersLoading, setChattersLoading] = useState(true);
+  const [chattersError, setChattersError] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      setChattersLoading(true);
+      setChattersError('');
+      try {
+        const r = await fetch(`/mod/chatters/${encodeURIComponent(channel)}`);
+        if (!r.ok) {
+          const d = await r.json();
+          setChattersError(d.error || 'Error al obtener usuarios');
+          return;
+        }
+        const d = await r.json();
+        setChatters(d.chatters || []);
+      } catch {
+        setChattersError('Error de conexión');
+      } finally {
+        setChattersLoading(false);
+      }
+    })();
+  }, [channel]);
+
+  const filteredChatters = chatters.filter((c) =>
+    c.userName.toLowerCase().includes(userName.toLowerCase())
+  );
 
   const execute = async () => {
     if (!userName.trim()) return;
@@ -105,6 +133,44 @@ export function ModPanel({ channel }: Props) {
             className="sf-input"
             style={{ width: '100%' }}
           />
+
+          {/* Chatters list */}
+          {chattersLoading ? (
+            <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginTop: '0.4rem' }}>
+              Cargando usuarios en el canal...
+            </div>
+          ) : chattersError ? (
+            <div style={{ fontSize: '0.75rem', color: '#f87171', marginTop: '0.4rem' }}>
+              {chattersError}
+            </div>
+          ) : filteredChatters.length > 0 ? (
+            <div style={{
+              marginTop: '0.4rem', maxHeight: 200, overflowY: 'auto',
+              background: 'var(--sf-surface)', borderRadius: 6,
+              border: '1px solid var(--sf-border)',
+            }}>
+              {filteredChatters.map((c) => (
+                <div
+                  key={c.userName}
+                  onClick={() => setUserName(c.userName)}
+                  style={{
+                    padding: '0.35rem 0.6rem', cursor: 'pointer',
+                    fontSize: '0.82rem', color: 'var(--sf-text)',
+                    borderBottom: '1px solid var(--sf-border)',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--sf-surface-hover)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  {c.userDisplayName}
+                </div>
+              ))}
+            </div>
+          ) : userName && filteredChatters.length === 0 ? (
+            <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginTop: '0.4rem' }}>
+              No se encontraron usuarios con ese nombre
+            </div>
+          ) : null}
         </div>
 
         {/* Duration (timeout only) */}
