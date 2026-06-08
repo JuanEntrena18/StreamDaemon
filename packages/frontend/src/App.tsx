@@ -8,13 +8,11 @@ import { ObsPanel } from './components/ObsPanel';
 import { Logo } from './components/Logo';
 import { ChatPanel } from './components/ChatPanel';
 import { ConfigPanel } from './components/ConfigPanel';
-import { PreviewPanel } from './components/PreviewPanel';
 import { TrackerPanel } from './components/TrackerPanel';
 import { HudPanel } from './components/HudPanel';
 import { TimerPanel } from './components/TimerPanel';
 import { ScoreboardPanel } from './components/ScoreboardPanel';
-import { StreamActivityFeed } from './components/StreamActivityFeed';
-import { StreamInfoEditor } from './components/StreamInfoEditor';
+import { StreamDashboard } from './components/StreamDashboard';
 import { ModPanel } from './components/ModPanel';
 import { CommandsPanel } from './components/CommandsPanel';
 import { SplashScreen } from './components/SplashScreen';
@@ -22,16 +20,14 @@ import { SplashScreen } from './components/SplashScreen';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-type Tab = 'activity' | 'stream-info' | 'preview' | 'chat' | 'mod' | 'commands' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'tracker' | 'obs' | 'config';
+type Tab = 'dashboard' | 'chat' | 'mod' | 'commands' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'tracker' | 'obs' | 'config';
 
 const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string; label: string }[] }[] = [
   {
     id: 'gestor',
     label: 'GESTOR DEL STREAM',
     items: [
-      { id: 'activity',    icon: '🔴', label: 'Actividad' },
-      { id: 'stream-info', icon: '✏️',  label: 'Info del Stream' },
-      { id: 'preview',     icon: '📺', label: 'Vista previa' },
+      { id: 'dashboard', icon: '📡', label: 'Gestor del Stream' },
     ],
   },
   {
@@ -78,9 +74,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string;
 ];
 
 const TAB_LABELS: Record<Tab, string> = {
-  activity: 'Actividad',
-  'stream-info': 'Info del Stream',
-  preview: 'Vista previa',
+  dashboard: 'Gestor del Stream',
   chat: 'Chat',
   mod: 'Moderación',
   commands: 'Comandos',
@@ -438,10 +432,8 @@ export function App() {
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
             >
-              {activeTab === 'activity'    && <StreamActivityFeed channel={channel} backendUrl={BACKEND_URL} />}
-              {activeTab === 'stream-info' && <StreamInfoEditor channel={channel} backendUrl={BACKEND_URL} />}
-              {activeTab === 'preview'     && <PreviewPanel channel={channel} />}
-              {activeTab === 'chat'        && <ChatPanel channel={channel} />}
+              {activeTab === 'dashboard' && <StreamDashboard channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'chat'     && <ChatPanel channel={channel} />}
               {activeTab === 'mod'         && <ModPanel channel={channel} backendUrl={BACKEND_URL} />}
               {activeTab === 'commands'    && <CommandsPanel channel={channel} backendUrl={BACKEND_URL} />}
               {activeTab === 'giveaway'    && <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />}
