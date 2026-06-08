@@ -14,3 +14,4 @@ packages/desktop/extra/backend.env
 *.docx
 *.pdf
 REVISION_SEGURIDAD.md
+overlayIAfeature.md
