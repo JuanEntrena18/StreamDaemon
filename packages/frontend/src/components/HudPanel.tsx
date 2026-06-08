@@ -11,7 +11,13 @@ interface Props {
 export function HudPanel({ channel, backendUrl }: Props) {
   const [hud, setHud] = useState<HudData | null>(null);
   const [polling, setPolling] = useState(false);
-  useSocket();
+  const { socket, connected } = useSocket();
+
+  useEffect(() => {
+    if (channel && connected) {
+      socket.emit('join:channel', channel);
+    }
+  }, [channel, connected, socket]);
 
   useSocketEvent('hud:update', useCallback((data: HudData) => {
     setHud(data);

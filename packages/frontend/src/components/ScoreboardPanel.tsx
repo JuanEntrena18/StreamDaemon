@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSocketEvent } from '../hooks/useSocket';
+import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiPost } from '../utils/api';
 import type { ScoreboardState } from '@streamforger/shared';
 
@@ -12,6 +12,14 @@ export function ScoreboardPanel({ channel, backendUrl }: Props) {
   const [board, setBoard] = useState<ScoreboardState>({ players: [], title: 'Scoreboard' });
   const [playerName, setPlayerName] = useState('');
   const [boardTitle, setBoardTitle] = useState('Scoreboard');
+
+  const { socket, connected } = useSocket();
+
+  useEffect(() => {
+    if (channel && connected) {
+      socket.emit('join:channel', channel);
+    }
+  }, [channel, connected, socket]);
 
   useSocketEvent('scoreboard:update', useCallback((data: ScoreboardState) => {
     setBoard(data);

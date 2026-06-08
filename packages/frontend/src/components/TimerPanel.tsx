@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSocketEvent } from '../hooks/useSocket';
+import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiPost } from '../utils/api';
 import type { TimerState } from '@streamforger/shared';
 
@@ -32,6 +32,14 @@ export function TimerPanel({ channel, backendUrl }: Props) {
   const [duration, setDuration] = useState(300);
   const [label, setLabel] = useState('');
   const [customMinutes, setCustomMinutes] = useState('');
+
+  const { socket, connected } = useSocket();
+
+  useEffect(() => {
+    if (channel && connected) {
+      socket.emit('join:channel', channel);
+    }
+  }, [channel, connected, socket]);
 
   useSocketEvent('timer:state', useCallback((data: TimerState) => {
     setTimer(data);

@@ -69,7 +69,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   // Protect all POST endpoints except auth routes and health check
   app.addHook('onRequest', async (req, reply) => {
     if (req.method === 'POST' && !req.url.startsWith('/auth/') && req.url !== '/health') {
-      await requireLocalAuth(req, reply);
+      return requireLocalAuth(req, reply);
     }
   });
 
