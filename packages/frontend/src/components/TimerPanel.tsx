@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
-import { apiPost } from '../utils/api';
+import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import type { TimerState } from '@streamforger/shared';
 
 interface Props {
@@ -222,7 +222,7 @@ export function TimerPanel({ channel, backendUrl }: Props) {
           fontSize: '0.78rem', fontFamily: 'monospace', color: '#a78bfa',
           wordBreak: 'break-all',
         }}>
-          {backendUrl}/overlay.html?mode=timer&amp;channel={channel}
+          {OVERLAY_BASE_URL}/overlay.html?mode=timer&amp;channel={channel}
         </div>
       </div>
     </div>

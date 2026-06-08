@@ -1,4 +1,5 @@
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
+export const OVERLAY_BASE_URL = import.meta.env.DEV ? 'http://localhost:5173' : BACKEND_URL;
 
 function getAuthToken(): string | undefined {
   if (typeof window !== 'undefined' && (window as any).streamforger?.localApiToken) {

@@ -183,8 +183,10 @@ El panel de control cuenta con un rediseño premium (v0.2.0):
 
 Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 
+> En desarrollo (`npm run dev`), reemplazá `localhost:3000` por `localhost:5173`.
+
 | Overlay | URL |
-|---|---|---|
+|---|---|
 | Chat | `http://localhost:3000/overlay.html?mode=chat&channel=tucanal` |
 | Sorteos | `http://localhost:3000/overlay.html?mode=giveaway&channel=tucanal` |
 | Predicciones | `http://localhost:3000/overlay.html?mode=prediction&channel=tucanal` |
@@ -197,6 +199,7 @@ Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 Para cambiar el tema visual del chat agrega `&theme=subnautica2`, `&theme=poe2`, `&theme=wow` (Horda) o `&theme=alliance` (Alianza).
 
 > Si usás el modo servidor, reemplazá `localhost:3000` por la IP o dominio del servidor.
+> En **modo desarrollo** (`npm run dev`), usá `localhost:5173` en lugar de `localhost:3000` (el overlay lo sirve Vite).
 
 ---
 
