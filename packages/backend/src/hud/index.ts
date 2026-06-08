@@ -7,27 +7,45 @@ import type { HudData } from '@streamforger/shared';
 let pollInterval: ReturnType<typeof setInterval> | null = null;
 
 async function fetchHud(channelName: string): Promise<HudData | null> {
-  if (!authProvider) return null;
-  const api = new ApiClient({ authProvider });
-  const user = await api.users.getUserByName(channelName);
-  if (!user) return null;
+  try {
+    if (!authProvider) return null;
+    const api = new ApiClient({ authProvider });
+    const user = await api.users.getUserByName(channelName);
+    if (!user) return null;
 
-  const stream = await api.streams.getStreamByUserId(user.id);
-  const followInfo = await api.channels.getChannelFollowers(user.id);
-  const subs = await api.subscriptions.getSubscriptions(user.id);
+    const stream = await api.streams.getStreamByUserId(user.id);
 
-  return {
-    viewers: stream?.viewers ?? 0,
-    followers: followInfo.total,
-    subscribers: subs.total,
-    uptimeSeconds: stream?.startDate
-      ? Math.floor((Date.now() - stream.startDate.getTime()) / 1000)
-      : 0,
-    streamTitle: stream?.title ?? user.displayName,
-    gameName: stream?.gameName ?? '',
-    startedAt: stream?.startDate?.toISOString() ?? null,
-    isLive: !!stream,
-  };
+    let totalFollowers = 0;
+    try {
+      const followInfo = await api.channels.getChannelFollowers(user.id);
+      totalFollowers = followInfo.total;
+    } catch {
+      // Scope moderator:read:followers no concedido
+    }
+
+    let totalSubs = 0;
+    try {
+      const subs = await api.subscriptions.getSubscriptions(user.id);
+      totalSubs = subs.total;
+    } catch {
+      // Scope channel:read:subscriptions no concedido
+    }
+
+    return {
+      viewers: stream?.viewers ?? 0,
+      followers: totalFollowers,
+      subscribers: totalSubs,
+      uptimeSeconds: stream?.startDate
+        ? Math.floor((Date.now() - stream.startDate.getTime()) / 1000)
+        : 0,
+      streamTitle: stream?.title ?? user.displayName,
+      gameName: stream?.gameName ?? '',
+      startedAt: stream?.startDate?.toISOString() ?? null,
+      isLive: !!stream,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export function setupHud(app: FastifyInstance) {

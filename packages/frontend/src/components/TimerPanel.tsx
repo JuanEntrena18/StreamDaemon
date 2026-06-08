@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSocketEvent } from '../hooks/useSocket';
+import { apiPost } from '../utils/api';
 import type { TimerState } from '@streamforger/shared';
 
 interface Props {
@@ -49,25 +50,14 @@ export function TimerPanel({ channel, backendUrl }: Props) {
       .catch(() => {});
   }, [channel, backendUrl]);
 
-  const apiCall = async (path: string, extra: Record<string, unknown> = {}) => {
-    try {
-      const r = await fetch(`${backendUrl}${path}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channel, ...extra }),
-      });
-      return await r.json();
-    } catch {}
-  };
-
   const start = () => {
     const dur = customMinutes ? parseInt(customMinutes) * 60 : duration;
-    apiCall('/timer/start', { duration: dur, label });
+    apiPost('/timer/start', { channel, duration: dur, label });
   };
 
-  const pause = () => apiCall('/timer/pause');
-  const resume = () => apiCall('/timer/resume');
-  const reset = () => apiCall('/timer/reset');
+  const pause = () => apiPost('/timer/pause', { channel });
+  const resume = () => apiPost('/timer/resume', { channel });
+  const reset = () => apiPost('/timer/reset', { channel });
 
   const isRunning = timer.status === 'running';
   const isPaused = timer.status === 'paused';

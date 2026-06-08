@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { apiPost } from '../utils/api';
 import type { HudData } from '@streamforger/shared';
 
 interface Props {
@@ -27,14 +28,10 @@ export function HudPanel({ channel, backendUrl }: Props) {
   const togglePolling = async () => {
     try {
       if (polling) {
-        await fetch(`${backendUrl}/hud/stop-poll`, { method: 'POST' });
+        await apiPost('/hud/stop-poll', {});
         setPolling(false);
       } else {
-        await fetch(`${backendUrl}/hud/start-poll`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ channel, interval: 10 }),
-        });
+        await apiPost('/hud/start-poll', { channel, interval: 10 });
         setPolling(true);
       }
     } catch {}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSocketEvent } from '../hooks/useSocket';
+import { apiPost } from '../utils/api';
 import type { ScoreboardState } from '@streamforger/shared';
 
 interface Props {
@@ -25,49 +26,38 @@ export function ScoreboardPanel({ channel, backendUrl }: Props) {
       .catch(() => {});
   }, [channel, backendUrl]);
 
-  const api = async (path: string, body: Record<string, unknown> = {}) => {
-    try {
-      const r = await fetch(`${backendUrl}${path}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channel, ...body }),
-      });
-      return await r.json();
-    } catch {}
-  };
-
   const addPlayer = () => {
     if (!playerName.trim()) return;
-    api('/scoreboard/player/add', { name: playerName.trim() });
+    apiPost('/scoreboard/player/add', { channel, name: playerName.trim() });
     setPlayerName('');
   };
 
   const removePlayer = (playerId: string) => {
-    api('/scoreboard/player/remove', { playerId });
+    apiPost('/scoreboard/player/remove', { channel, playerId });
   };
 
   const setScore = (playerId: string, score: number) => {
-    api('/scoreboard/score/set', { playerId, score });
+    apiPost('/scoreboard/score/set', { channel, playerId, score });
   };
 
   const increment = (playerId: string) => {
-    api('/scoreboard/score/increment', { playerId, amount: 1 });
+    apiPost('/scoreboard/score/increment', { channel, playerId, amount: 1 });
   };
 
   const decrement = (playerId: string) => {
-    api('/scoreboard/score/decrement', { playerId, amount: 1 });
+    apiPost('/scoreboard/score/decrement', { channel, playerId, amount: 1 });
   };
 
   const updateTitle = () => {
-    api('/scoreboard/title', { title: boardTitle });
+    apiPost('/scoreboard/title', { channel, title: boardTitle });
   };
 
   const resetScores = () => {
-    api('/scoreboard/reset');
+    apiPost('/scoreboard/reset', { channel });
   };
 
   const clearBoard = () => {
-    api('/scoreboard/clear');
+    apiPost('/scoreboard/clear', { channel });
   };
 
   return (
