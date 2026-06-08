@@ -21,3 +21,10 @@ export async function apiGet(path: string): Promise<Response> {
   if (token) headers['x-local-token'] = token;
   return fetch(`${BACKEND_URL}${path}`, { headers });
 }
+
+export async function apiPut(path: string, body: unknown): Promise<Response> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const token = getAuthToken();
+  if (token) headers['x-local-token'] = token;
+  return fetch(`${BACKEND_URL}${path}`, { method: 'PUT', headers, body: JSON.stringify(body) });
+}

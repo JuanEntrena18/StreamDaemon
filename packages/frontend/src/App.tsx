@@ -13,19 +13,52 @@ import { TrackerPanel } from './components/TrackerPanel';
 import { HudPanel } from './components/HudPanel';
 import { TimerPanel } from './components/TimerPanel';
 import { ScoreboardPanel } from './components/ScoreboardPanel';
+import { StreamActivityFeed } from './components/StreamActivityFeed';
+import { StreamInfoEditor } from './components/StreamInfoEditor';
+import { ModPanel } from './components/ModPanel';
+import { CommandsPanel } from './components/CommandsPanel';
 import { SplashScreen } from './components/SplashScreen';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-type Tab = 'chat' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'preview' | 'tracker' | 'config';
+type Tab = 'activity' | 'stream-info' | 'preview' | 'chat' | 'mod' | 'commands' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'tracker' | 'obs' | 'config';
 
 const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string; label: string }[] }[] = [
+  {
+    id: 'gestor',
+    label: 'GESTOR DEL STREAM',
+    items: [
+      { id: 'activity',    icon: '🔴', label: 'Actividad' },
+      { id: 'stream-info', icon: '✏️',  label: 'Info del Stream' },
+      { id: 'preview',     icon: '📺', label: 'Vista previa' },
+    ],
+  },
+  {
+    id: 'chat-section',
+    label: 'Chat',
+    items: [
+      { id: 'chat', icon: '💬', label: 'Chat' },
+    ],
+  },
+  {
+    id: 'mod-section',
+    label: 'MOD',
+    items: [
+      { id: 'mod', icon: '🛡️', label: 'Moderación' },
+    ],
+  },
+  {
+    id: 'commands-section',
+    label: 'COMANDOS',
+    items: [
+      { id: 'commands', icon: '🤖', label: 'Comandos' },
+    ],
+  },
   {
     id: 'tools',
     label: 'Herramientas',
     items: [
-      { id: 'chat',       icon: '💬', label: 'Chat' },
       { id: 'giveaway',   icon: '🎁', label: 'Sorteos' },
       { id: 'prediction', icon: '📊', label: 'Predicciones' },
       { id: 'tracker',    icon: '📈', label: 'Twitch Tracker' },
@@ -33,7 +66,6 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string;
       { id: 'timer',      icon: '⏱️', label: 'Temporizador' },
       { id: 'scoreboard', icon: '🏆', label: 'Scoreboard' },
       { id: 'obs',        icon: '🔌', label: 'OBS URLs' },
-      { id: 'preview',    icon: '📺', label: 'Vista previa' },
     ],
   },
   {
@@ -46,7 +78,12 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string;
 ];
 
 const TAB_LABELS: Record<Tab, string> = {
+  activity: 'Actividad',
+  'stream-info': 'Info del Stream',
+  preview: 'Vista previa',
   chat: 'Chat',
+  mod: 'Moderación',
+  commands: 'Comandos',
   giveaway: 'Sorteos',
   prediction: 'Predicciones',
   tracker: 'Twitch Tracker',
@@ -54,7 +91,6 @@ const TAB_LABELS: Record<Tab, string> = {
   timer: 'Temporizador',
   scoreboard: 'Scoreboard',
   obs: 'OBS URLs',
-  preview: 'Vista previa',
   config: 'Configuración',
 };
 
@@ -402,16 +438,20 @@ export function App() {
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
             >
-              {activeTab === 'chat'       && <ChatPanel channel={channel} />}
-              {activeTab === 'giveaway'   && <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />}
-              {activeTab === 'prediction' && <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />}
-              {activeTab === 'tracker'    && <TrackerPanel channel={channel} backendUrl={BACKEND_URL} />}
-              {activeTab === 'hud'        && <HudPanel channel={channel} backendUrl={BACKEND_URL} />}
-              {activeTab === 'timer'      && <TimerPanel channel={channel} backendUrl={BACKEND_URL} />}
-              {activeTab === 'scoreboard' && <ScoreboardPanel channel={channel} backendUrl={BACKEND_URL} />}
-              {activeTab === 'obs'        && <ObsPanel channel={channel} backendUrl={BACKEND_URL} />}
-              {activeTab === 'preview'    && <PreviewPanel channel={channel} />}
-              {activeTab === 'config'     && <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />}
+              {activeTab === 'activity'    && <StreamActivityFeed channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'stream-info' && <StreamInfoEditor channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'preview'     && <PreviewPanel channel={channel} />}
+              {activeTab === 'chat'        && <ChatPanel channel={channel} />}
+              {activeTab === 'mod'         && <ModPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'commands'    && <CommandsPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'giveaway'    && <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'prediction'  && <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'tracker'     && <TrackerPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'hud'         && <HudPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'timer'       && <TimerPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'scoreboard'  && <ScoreboardPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'obs'         && <ObsPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'config'      && <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />}
             </motion.div>
           </AnimatePresence>
         </div>
