@@ -21,6 +21,9 @@ Disponible en dos modos:
 - **🏆 Scoreboard** — Marcador en vivo para torneos y competiciones con jugadores, puntuaciones por incremento/decremento y barra de progreso visual. Panel completo con gestión de jugadores.
 - **🔔 Notificaciones EventSub** — Follows, subs, re-suscripciones, gifts, redemptions y cheers en tiempo real vía EventSub WebSocket, con overlay animado en pantalla.
 - **🌐 Redes sociales** — Overlay animado que muestra las redes del streamer de forma rotativa.
+- **🔴 Gestor del Stream** — Sección con feed de actividad del canal (follows, subs, raids, bits, redemptions), editor de título/juego del stream y vista previa de overlays.
+- **🛡️ Moderación** — Panel de moderación con timeout, ban y unban. Incluye lista de usuarios conectados al canal en ese momento con selección clickeable.
+- **🤖 Comandos** — Gestión de comandos personalizados del chat: crear, editar, habilitar/deshabilitar, con alias y cooldown configurable.
 - **🎮 Control de overlay transparente** — Ventana always-on-top con click-through toggleable (Ctrl+Shift+T), opacidad solo del fondo, redimensionable (Peq/Med/Grande) y barra de arrastre.
 - **🔐 Autenticación OAuth** — Login con Twitch. En navegador: flujo Authorization Code Grant con redirect. En escritorio: flujo **Device Code Grant** (el usuario ve un código en la app y lo ingresa en twitch.tv/activate). Tokens persistidos con refresco automático. Logout completo.
 - **🖥️ Dashboard premium** — Interfaz con sidebar de navegación, glassmorphism, animaciones Framer Motion, paleta violeta/índigo, badge de usuario Twitch y estado de conexión en tiempo real.
@@ -43,6 +46,7 @@ StreamForger implementa múltiples capas de seguridad para proteger las credenci
 | **M-3** | CORS restringido a `localhost:3000` y `localhost:5173` (HTTP + Socket.IO) | ✅ |
 | **M-4** | Errores internos de Twitch logueados en servidor; el cliente recibe mensajes genéricos | ✅ |
 | **M-5** | URLs de overlay validadas contra orígenes de confianza antes de abrir la ventana Electron | ✅ |
+| **M-6** | Hook `onRequest` con `return` para evitar doble ejecución de handlers después de 401 | ✅ |
 | **B-1** | Todos los generadores de estado OAuth usan `crypto.randomBytes` en lugar de `Math.random()` | ✅ |
 | **B-2** | Cabeceras de seguridad: `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` | ✅ |
 | **B-3** | Docker Compose con credenciales vía variables de entorno (`${VAR:-default}`) | ✅ |
@@ -137,13 +141,44 @@ npm run build:desktop
 El panel de control cuenta con un rediseño premium (v0.2.0):
 
 - **Sidebar de navegación** con secciones:
-  - **Herramientas:** Chat en vivo, Sorteos, Predicciones, HUD, Temporizador, Scoreboard, OBS URLs
+  - **GESTOR DEL STREAM:** Actividad del canal, Info del Stream, Vista previa
+  - **Chat:** Chat en vivo
+  - **MOD:** Moderación (con timeout, ban, unban + lista de usuarios)
+  - **COMANDOS:** Comandos personalizados del chat
+  - **Herramientas:** Sorteos, Predicciones, Twitch Tracker, HUD, Temporizador, Scoreboard, OBS URLs
   - **Configuración:** Conexión Twitch, preferencias de ventana, acerca de
 - **Glassmorphism** — cards semitransparentes con blur y bordes sutiles
 - **Animaciones** con Framer Motion en transiciones de tab y estados activos
 - **Tipografía Inter** (Google Fonts) con sistema de tokens CSS
 - **Indicador de conexión** animado (pulso) en la barra superior
 - **Badge de estado** con color temático por sección
+
+### Panel de Actividad
+
+- Feed de eventos en vivo del canal: follows, subs, raids, bits, redemptions
+- Filtros por tipo de evento
+- Diseño tipo timeline con glassmorphism
+
+### Panel de Info del Stream
+
+- Edición del título del stream y nombre del juego/categoría
+- Muestra el estado actual: título, juego, viewers, uptime
+- Envío vía API de Twitch (PUT /stream/info)
+
+### Panel de Moderación
+
+- Timeout con duración predefinida (30s/1m/5m/10m/1h/24h) y razón opcional
+- Ban con razón opcional
+- Unban
+- **Lista de usuarios conectados** al canal en ese momento, filtrable, seleccionable con un click
+- Resultado visible con feedback visual
+
+### Panel de Comandos
+
+- Crear comandos personalizados con nombre, respuesta y alias
+- Editar, habilitar/deshabilitar y eliminar comandos existentes
+- Cooldown configurable y toggle modo solo-mods
+- Listado tipo acordeón con estado activo/inactivo
 
 ### Panel de Chat
 
@@ -219,15 +254,18 @@ StreamForge/
 │   │       ├── eventsub/  # EventSub WebSocket (follows, subs, cheers, etc.)
 │   │       ├── hud/       # Stream HUD (polling Twitch API, estadísticas en vivo)
 │   │       ├── timer/     # Temporizador (cuenta regresiva Socket.IO + REST)
-│   │       └── scoreboard/ # Scoreboard (marcador de torneos REST + Socket.IO)
+│   │       ├── scoreboard/ # Scoreboard (marcador de torneos REST + Socket.IO)
+│   │       └── mod/       # Moderación (chatters, timeout, ban, unban vía Twitch API)
 │   ├── frontend/          # React + Vite + Overlays
 │   │   └── src/
-│   │       ├── components/# ChatPanel, GiveawayPanel, PredictionPanel, HudPanel,
-│   │       │              # TimerPanel, ScoreboardPanel, ConfigPanel, ObsPanel,
-│   │       │              # ChannelNotifications, Overlays (Chat, Giveaway, Prediction,
-│   │       │              # Social, Custom, HUD, Timer, Scoreboard, Subnautica2, Wow, Alliance)
+│   │       ├── components/# App, ChatPanel, GiveawayPanel, PredictionPanel,
+│   │       │              # HudPanel, TimerPanel, ScoreboardPanel, TrackerPanel,
+│   │       │              # StreamActivityFeed, StreamInfoEditor, ModPanel, CommandsPanel,
+│   │       │              # ConfigPanel, ObsPanel, ChannelNotifications,
+│   │       │              # Overlays (Chat, Giveaway, Prediction, Social, Custom,
+│   │       │              # HUD, Timer, Scoreboard, Subnautica2, Wow, Alliance)
 │   │       ├── hooks/     # useSocket, useTheme, useAuthStatus
-│   │       └── utils/     # sounds.ts (Web Audio API)
+│   │       └── utils/     # sounds.ts, api.ts (apiPost/apiGet/apiPut + OVERLAY_BASE_URL)
 │   ├── desktop/           # Electron + SQLite
 │   │   ├── extra/         # Frontend dist + backend.env (gitignored) + backend.env.example
 │   │   ├── prisma/        # Schema SQLite
@@ -316,6 +354,30 @@ StreamForge/
 **Causa:** `chatClient.say()` devuelve una Promise que no se await-eaba, por lo que errores (permisos, rate limit) se tragaban en silencio.
 
 **Solución:** `sendMessage()` ahora es `async` con `try/catch` que registra errores en consola, y el handler `chat:send` hace `await`.
+
+### v0.2.0 — POST endpoints devolvían 401 aunque requireLocalAuth devolvía la respuesta
+
+**Causa:** El hook `onRequest` en `packages/backend/src/index.ts` llamaba a `requireLocalAuth(req, reply)` sin `return`, por lo que Fastify continuaba ejecutando el handler después del 401.
+
+**Solución:** Agregado `return` antes de `requireLocalAuth(req, reply)` para detener la ejecución cuando falla la autenticación.
+
+### v0.2.0 — Paneles no se conectaban al socket ni enviaban join:channel
+
+**Causa:** HudPanel, TimerPanel y ScoreboardPanel solo importaban `useSocketEvent` sin llamar a `useSocket()` ni emitir `join:channel`. El overlay tampoco emitía el join.
+
+**Solución:** Agregado `useSocket()` + `useEffect` con `socket.emit('join:channel', channel)` en los tres paneles y los tres overlays. Creado `utils/api.ts` con `apiPost`/`apiGet`/`apiPut` que usan `X-Local-Token` desde `window.streamforger?.localApiToken`.
+
+### v0.2.0 — Tracker y HUD devolvían 500 silencioso
+
+**Causa:** Los handlers de `/tracker/stats` y `fetchHud()` no tenían try/catch, por lo que errores de la API de Twitch (followers no disponibles, rate limit) explotaban como 500 sin mensaje.
+
+**Solución:** Envuelto ambos en try/catch; cada llamada individual a la API de Twitch tiene su propio try/catch con fallback a 0/null.
+
+### v0.2.0 — URLs de overlay en paneles apuntaban a backend en modo dev
+
+**Causa:** HudPanel, TimerPanel y ScoreboardPanel usaban `backendUrl` para mostrar la URL del overlay en el panel, pero en modo dev el overlay lo sirve Vite (`:5173`), no el backend (`:3000`).
+
+**Solución:** Creada constante `OVERLAY_BASE_URL` en `utils/api.ts` que usa `localhost:5173` en dev y `localhost:3000` en producción. Los tres paneles ahora importan `OVERLAY_BASE_URL`.
 
 ---
 

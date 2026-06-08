@@ -59,17 +59,22 @@ Los temas se definen en `useTheme.ts` y se aplican mediante variables CSS en el 
 
 | Componente | Descripción |
 |---|---|
-| `App.tsx` | Layout principal con sidebar + header (input #canal, badge usuario, conexión) + tab transitions |
+| `App.tsx` | Layout principal con sidebar (6 secciones: GESTOR, Chat, MOD, COMANDOS, Herramientas, Config) + header (input #canal, badge usuario, conexión) + tab transitions |
 | `Logo.tsx` | SVG hexagonal con gradiente violeta-índigo y rayo (ícono de "forja") |
 | `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación (timeout/ban), selector de sonido, overlay controls (tamaño, opacidad) |
 | `GiveawayPanel.tsx` | Panel sorteos con badge pulsante, counter + ruleta canvas con selector duración giro (10/15/20s) e importación masiva de nombres |
 | `PredictionPanel.tsx` | Panel de predicciones con opciones A/B/C y feedback animado |
-| `HudPanel.tsx` | Panel de Stream HUD: botones iniciar/detener polling, muestra estadísticas en vivo |
-| `TimerPanel.tsx` | Panel de temporizador: configurar duración, iniciar, pausar, reanudar, reset |
-| `ScoreboardPanel.tsx` | Panel de scoreboard: añadir/remover jugadores, ajustar puntuaciones, cambiar título, reset |
-| `ConfigPanel.tsx` | Configuración: conexión Twitch OAuth con Device Code Grant, logout, aviso re-autenticación, acerca de |
-| `ObsPanel.tsx` | Panel de URLs para OBS Browser Source con cards, copiar al portapapeles y selector de temas |
+| `TrackerPanel.tsx` | Panel Twitch Tracker: estadísticas históricas del canal con try/catch para datos no disponibles |
+| `HudPanel.tsx` | Panel de Stream HUD: botones iniciar/detener polling, muestra estadísticas en vivo con try/catch en cada métrica |
+| `TimerPanel.tsx` | Panel de temporizador: configurar duración, iniciar, pausar, reanudar, reset, con socket join:channel |
+| `ScoreboardPanel.tsx` | Panel de scoreboard: añadir/remover jugadores, ajustar puntuaciones, cambiar título, reset, con socket join:channel |
+| `ConfigPanel.tsx` | Configuración: conexión Twitch OAuth con Device Code Grant + "Login en navegador" (browser flow), logout, aviso re-autenticación, acerca de |
+| `ObsPanel.tsx` | Panel de URLs para OBS Browser Source con cards, copiar al portapapeles, overlayBaseUrl para dev mode y selector de temas |
 | `ChannelNotifications.tsx` | Notificaciones animadas (follows, subs, gifts, redemptions, cheers) en overlay |
+| `StreamActivityFeed.tsx` | Feed de actividad del canal: follows, subs, raids, bits, redemptions en tiempo real con filtros por tipo |
+| `StreamInfoEditor.tsx` | Editor de título y juego del stream con fetch y PUT vía API |
+| `ModPanel.tsx` | Moderación: timeout/ban/unban + lista de chatters conectados filtrable y seleccionable |
+| `CommandsPanel.tsx` | Gestión de comandos personalizados: crear, editar, toggle, eliminar, con alias, cooldown y modo solo-mods |
 
 ### Overlays (OBS Browser Source)
 
@@ -112,10 +117,12 @@ Los temas se definen en `useTheme.ts` y se aplican mediante variables CSS en el 
 | **Socket** | `src/socket/index.ts` | Socket.IO server, eventos `join:channel`, `leave:channel`, `chat:send` |
 | **Giveaways** | `src/giveaways/index.ts` | Sorteos: crear, finalizar, entrada vía chat, selección aleatoria, emisión `giveaway:entry` con lista de participantes |
 | **Predictions** | `src/predictions/index.ts` | Predicciones Twitch: crear, resolver |
-| **HUD** | `src/hud/index.ts` | Stream HUD: polling Twitch API cada 10-15s, emisión `hud:update` con statistics en vivo |
+| **HUD** | `src/hud/index.ts` | Stream HUD: polling Twitch API cada 10-15s, emisión `hud:update` con statistics en vivo. Try/catch por métrica |
 | **Timer** | `src/timer/index.ts` | Temporizador: cuenta regresiva in-memory con tick cada 1s vía Socket.IO, endpoints REST start/pause/resume/reset |
 | **Scoreboard** | `src/scoreboard/index.ts` | Scoreboard: gestión de jugadores y puntuaciones in-memory, emisión `scoreboard:update` |
 | **EventSub** | `src/eventsub/index.ts` | EventSub WebSocket listener: follows, subs, resubs, gifts, redemptions, cheers |
+| **Mod** | `src/mod/index.ts` | Moderación: chatters (GET /mod/chatters/:channel), timeout, ban, unban vía Twitch Helix API. Scopes: moderator:read:chatters, moderator:manage:banned_users, channel:moderate |
+| **Tracker** | `src/tracker/index.ts` | Twitch Tracker: estadísticas del canal con try/catch por endpoint (followers, subs, videos) |
 
 ---
 
@@ -237,6 +244,12 @@ Scopes solicitados:
 - `channel:manage:predictions` / `channel:read:predictions`
 - `channel:manage:raids`
 - `channel:manage:moderators`
+- `moderator:read:followers`
+- `channel:read:subscriptions`
+- `bits:read`
+- `channel:moderate`
+- `moderator:read:chatters`
+- `moderator:manage:banned_users`
 
 ### Device Code Grant (Electron / escritorio Windows)
 
@@ -277,6 +290,7 @@ OBS (Browser Source) ←→ Frontend (React SPA)
 - El Stream HUD consulta la API de Twitch cada 10-15s y emite estadísticas vía Socket.IO al overlay.
 - El Temporizador corre en memoria del backend con un `setInterval` de 1s que emite `timer:tick` a la sala del canal.
 - El Scoreboard mantiene el estado en memoria y emite `scoreboard:update` ante cualquier cambio.
+- La Moderación consulta la API de Twitch para obtener la lista de chatters conectados y ejecutar timeout/ban/unban.
 
 ---
 
@@ -304,15 +318,20 @@ twitch_overlay/
 │   ├── frontend/          # Vite + React + Dashboard + Overlays
 │   │   └── src/
 │   │       ├── components/
-│   │       │   ├── App.tsx              # Layout sidebar + tabs
+│   │       │   ├── App.tsx              # Layout sidebar (6 secciones) + tabs
 │   │       │   ├── Logo.tsx             # SVG hexagonal
 │   │       │   ├── ChatPanel.tsx        # Visor chat en vivo
-│   │       │   ├── ConfigPanel.tsx      # Login Twitch + device code + always-on-top
+│   │       │   ├── ConfigPanel.tsx      # Login Twitch + device code + "Login en navegador"
 │   │       │   ├── GiveawayPanel.tsx    # Panel sorteos + ruleta canvas
 │   │       │   ├── PredictionPanel.tsx  # Panel predicciones
+│   │       │   ├── TrackerPanel.tsx     # Panel Twitch Tracker
 │   │       │   ├── HudPanel.tsx         # Panel Stream HUD
 │   │       │   ├── TimerPanel.tsx       # Panel temporizador
 │   │       │   ├── ScoreboardPanel.tsx  # Panel scoreboard
+│   │       │   ├── StreamActivityFeed.tsx # Feed de actividad del canal
+│   │       │   ├── StreamInfoEditor.tsx  # Editor título/juego del stream
+│   │       │   ├── ModPanel.tsx         # Moderación + lista de chatters
+│   │       │   ├── CommandsPanel.tsx    # Comandos personalizados
 │   │       │   ├── ObsPanel.tsx         # URLs OBS con copiar
 │   │       │   ├── TransparentOverlay.tsx # Control overlay transparente
 │   │       │   ├── ChatOverlay.tsx      # Overlay chat (OBS)
@@ -321,7 +340,7 @@ twitch_overlay/
 │   │       │   ├── SocialOverlay.tsx    # Overlay redes (OBS)
 │   │       │   ├── HudOverlay.tsx       # Overlay Stream HUD (OBS)
 │   │       │   ├── TimerOverlay.tsx     # Overlay temporizador (OBS)
-│   │       │   └── ScoreboardOverlay.tsx # Overlay scoreboard (OBS)
+│   │       │   ├── ScoreboardOverlay.tsx # Overlay scoreboard (OBS)
 │   │       ├── hooks/
 │   │       │   ├── useAuthStatus.ts     # Estado OAuth + Device Code Grant polling
 │   │       │   ├── useSocket.ts         # Conexión Socket.IO
@@ -365,3 +384,7 @@ twitch_overlay/
 | 11. Stream HUD | Panel y overlay de estadísticas en vivo con polling a Twitch API | ✅ |
 | 12. Temporizador | Cuenta regresiva configurable con REST + Socket.IO tick por segundo | ✅ |
 | 13. Scoreboard | Marcador de torneos con jugadores, puntuaciones y ranking visual | ✅ |
+| 14. Sidebar restructurada | Nuevas secciones GESTOR DEL STREAM, Chat, MOD, COMANDOS, Herramientas, Configuración | ✅ |
+| 15. Backend moderación | Endpoints REST para chatters, timeout, ban, unban + scopes channel:moderate, moderator:read:chatters, moderator:manage:banned_users | ✅ |
+| 16. Componentes nuevos | StreamActivityFeed, StreamInfoEditor, ModPanel (con lista de usuarios), CommandsPanel | ✅ |
+| 17. Fixes conexión | POST 401 return fix, panel/overlay socket join:channel, api.ts con X-Local-Token + OVERLAY_BASE_URL para dev mode | ✅ |
