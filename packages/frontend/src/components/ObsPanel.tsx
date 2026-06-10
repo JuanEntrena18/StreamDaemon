@@ -167,21 +167,22 @@ export function ObsPanel({ channel, backendUrl }: Props) {
 
   // Fortnite config
   const [fnApiKey, setFnApiKey] = useState('');
+  const [fnHasKey, setFnHasKey] = useState(false);
+  const [fnEditingKey, setFnEditingKey] = useState(false);
   const [showFnApiKey, setShowFnApiKey] = useState(false);
   const [fnEpicUsername, setFnEpicUsername] = useState('');
   const [fnStatsMode, setFnStatsMode] = useState('overall');
   const [fnLayout, setFnLayout] = useState('stats');
   const [fnSaved, setFnSaved] = useState(false);
-  const [fnConfigLoaded, setFnConfigLoaded] = useState(false);
 
   useEffect(() => {
     apiGet('/fortnite/config').then(async (r) => {
       if (!r.ok) return;
       const data = await r.json();
+      if (data.apiKey) setFnHasKey(true);
       if (data.epicUsername) setFnEpicUsername(data.epicUsername);
       if (data.statsMode) setFnStatsMode(data.statsMode);
       if (data.layout) setFnLayout(data.layout);
-      setFnConfigLoaded(true);
     });
   }, []);
 
@@ -190,6 +191,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     if (fnApiKey) body.apiKey = fnApiKey;
     await apiPut('/fortnite/config', body);
     setFnSaved(true);
+    if (fnApiKey) { setFnHasKey(true); setFnApiKey(''); setFnEditingKey(false); }
     setTimeout(() => setFnSaved(false), 3000);
   };
 
@@ -526,15 +528,23 @@ export function ObsPanel({ channel, backendUrl }: Props) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {/* API Key */}
             <div>
-              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
+              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 API Key de Fortnite-API.com
+                <span style={{
+                  fontSize: '0.6rem', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
+                  color: fnHasKey ? '#34d399' : '#ef4444',
+                  background: fnHasKey ? 'rgba(52,211,153,0.12)' : 'rgba(239,68,68,0.12)',
+                  border: `1px solid ${fnHasKey ? 'rgba(52,211,153,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                }}>
+                  {fnHasKey ? '✓ Configurada' : '✗ Sin key'}
+                </span>
               </label>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <input
                   type={showFnApiKey ? 'text' : 'password'}
-                  value={fnApiKey}
-                  onChange={(e) => setFnApiKey(e.target.value)}
-                  placeholder={fnConfigLoaded ? '•••••••• (ya configurada)' : 'Ingresá tu API key...'}
+                  value={fnEditingKey ? fnApiKey : (fnHasKey ? '••••••••' : '')}
+                  onChange={(e) => { setFnEditingKey(true); setFnApiKey(e.target.value); }}
+                  placeholder={fnHasKey ? 'Escribí para cambiar la key...' : 'Ingresá tu API key...'}
                   className="sf-input"
                   style={{ flex: 1, fontSize: '0.78rem' }}
                 />
