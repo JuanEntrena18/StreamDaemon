@@ -230,6 +230,7 @@ Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 | Stream HUD | `http://localhost:3000/overlay.html?mode=hud&channel=tucanal` |
 | Temporizador | `http://localhost:3000/overlay.html?mode=timer&channel=tucanal` |
 | Scoreboard | `http://localhost:3000/overlay.html?mode=scoreboard&channel=tucanal` |
+| Subathon | `http://localhost:3000/overlays/subathon.html?channel=tucanal` |
 | Subnautica 2 (completo) | `http://localhost:3000/overlays/subnautica2.html?channel=tucanal` |
 | Fortnite (completo) | `http://localhost:3000/overlays/fortnite.html?channel=tucanal` |
 | Alertas animadas | `http://localhost:3000/overlays/alerts.html?channel=tucanal` |

@@ -167,4 +167,29 @@ export type ServerEvent =
   | { type: 'hud:update'; data: HudData }
   | { type: 'timer:state'; data: TimerState }
   | { type: 'timer:tick'; data: { remaining: number } }
-  | { type: 'scoreboard:update'; data: ScoreboardState };
+  | { type: 'scoreboard:update'; data: ScoreboardState }
+  | { type: 'subathon:tick'; data: { remaining: number; maxLimit: number } }
+  | { type: 'subathon:time-added'; data: { amount: number; reason: string; user: string; remaining: number } }
+  | { type: 'subathon:state'; data: SubathonState };
+
+export interface SubathonState {
+  status: 'stopped' | 'running' | 'paused' | 'finished';
+  remaining: number;
+  totalAdded: number;
+  maxLimit: number;
+  subTime: number;
+  bitTime: number;
+  bitsPerUnit: number;
+  startTime: number | null;
+  actions: SubathonAction[];
+}
+
+export interface SubathonAction {
+  id: string;
+  type: 'sub' | 'bits' | 'redeem' | 'manual';
+  user: string;
+  amount: number;
+  timeAdded: number;
+  note: string;
+  timestamp: number;
+}

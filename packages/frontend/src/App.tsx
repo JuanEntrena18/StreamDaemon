@@ -15,12 +15,13 @@ import { ScoreboardPanel } from './components/ScoreboardPanel';
 import { StreamDashboard } from './components/StreamDashboard';
 import { ModPanel } from './components/ModPanel';
 import { CommandsPanel } from './components/CommandsPanel';
+import { SubathonPanel } from './components/SubathonPanel';
 import { SplashScreen } from './components/SplashScreen';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-type Tab = 'dashboard' | 'chat' | 'mod' | 'commands' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'tracker' | 'obs' | 'config';
+type Tab = 'dashboard' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'tracker' | 'obs' | 'config';
 
 const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string; label: string }[] }[] = [
   {
@@ -55,6 +56,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string;
     id: 'tools',
     label: 'Herramientas',
     items: [
+      { id: 'subathon',   icon: '🔴', label: 'Subathon' },
       { id: 'giveaway',   icon: '🎁', label: 'Sorteos' },
       { id: 'prediction', icon: '📊', label: 'Predicciones' },
       { id: 'tracker',    icon: '📈', label: 'Twitch Tracker' },
@@ -78,6 +80,7 @@ const TAB_LABELS: Record<Tab, string> = {
   chat: 'Chat',
   mod: 'Moderación',
   commands: 'Comandos',
+  subathon: 'Subathon',
   giveaway: 'Sorteos',
   prediction: 'Predicciones',
   tracker: 'Twitch Tracker',
@@ -436,6 +439,7 @@ export function App() {
               {activeTab === 'chat'     && <ChatPanel channel={channel} />}
               {activeTab === 'mod'         && <ModPanel channel={channel} backendUrl={BACKEND_URL} />}
               {activeTab === 'commands'    && <CommandsPanel channel={channel} backendUrl={BACKEND_URL} />}
+              {activeTab === 'subathon'    && <SubathonPanel channel={channel} backendUrl={BACKEND_URL} />}
               {activeTab === 'giveaway'    && <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />}
               {activeTab === 'prediction'  && <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />}
               {activeTab === 'tracker'     && <TrackerPanel channel={channel} backendUrl={BACKEND_URL} />}

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subathon Overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 1920px; height: 1080px;
+  overflow: hidden;
+  background: transparent;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #fff;
+  user-select: none;
+}
+
+#app {
+  width: 100%; height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 80px;
+}
+
+/* ── Background glow ── */
+.bg-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 800px; height: 800px;
+  transform: translate(-50%, -60%);
+  background: radial-gradient(circle, rgba(239,68,68,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Timer ── */
+.timer-container {
+  position: relative;
+  text-align: center;
+  z-index: 1;
+}
+
+.timer-label {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 12px;
+}
+
+.timer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7rem;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(180deg, #fff 20%, rgba(255,255,255,0.6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 0 40px rgba(239,68,68,0.3));
+  transition: filter 0.3s;
+}
+
+.timer.warning { filter: drop-shadow(0 0 40px rgba(239,68,68,0.6)); }
+.timer.critical { filter: drop-shadow(0 0 60px rgba(239,68,68,0.8)); animation: pulse-glow 1s ease-in-out infinite; }
+
+@keyframes pulse-glow {
+  0%, 100% { filter: drop-shadow(0 0 60px rgba(239,68,68,0.8)); }
+  50% { filter: drop-shadow(0 0 80px rgba(239,68,68,1)); }
+}
+
+.timer-sub {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.35);
+  margin-top: 8px;
+  font-family: 'Inter', monospace;
+  letter-spacing: 0.05em;
+}
+
+/* ── Progress bar ── */
+.progress-container {
+  width: 700px;
+  margin-top: 32px;
+  position: relative;
+  z-index: 1;
+}
+
+.progress-track {
+  width: 100%; height: 6px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 1s linear, background 1s;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.4);
+}
+
+/* ── Status badge ── */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 99px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 24px;
+  z-index: 1;
+  position: relative;
+}
+
+.status-badge.live {
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #ef4444;
+}
+
+.status-badge.paused {
+  background: rgba(245,158,11,0.15);
+  border: 1px solid rgba(245,158,11,0.3);
+  color: #fbbf24;
+}
+
+.status-badge.finished {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.5);
+}
+
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.live { background: #ef4444; animation: dot-pulse 1.5s ease-in-out infinite; }
+.status-dot.paused { background: #fbbf24; animation: dot-pulse 1.5s ease-in-out infinite; }
+.status-dot.finished { background: rgba(255,255,255,0.3); }
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+/* ── Stats bar ── */
+.stats-bar {
+  display: flex;
+  gap: 40px;
+  margin-top: 32px;
+  z-index: 1;
+  position: relative;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+
+/* ── Recent activity feed ── */
+.feed-container {
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 380px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+  max-height: 500px;
+}
+
+.feed-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+
+.feed-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  animation: slide-in 0.4s ease-out;
+  transform-origin: top;
+  font-size: 0.82rem;
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(20px) scale(0.95); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.feed-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.feed-user {
+  font-weight: 700;
+  color: #fff;
+  min-width: 80px;
+}
+
+.feed-time {
+  color: #ef4444;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+}
+
+.feed-note {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.75rem;
+  margin-left: auto;
+}
+
+/* ── Lower info bar ── */
+.info-bar {
+  position: absolute;
+  bottom: 40px;
+  left: 60px;
+  right: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 1;
+}
+
+.info-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info-stream-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+}
+
+.info-channel {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.4);
+}
+
+.info-right {
+  text-align: right;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.3);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Config badge (hover hint) ── */
+.config-hint {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.15);
+  z-index: 1;
+  letter-spacing: 0.05em;
+}
+
+/* ── Scanning line ── */
+.scan-line {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(239,68,68,0.15), transparent);
+  animation: scan 8s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* ── Corner accents ── */
+.corner { position: absolute; width: 40px; height: 40px; border-color: rgba(239,68,68,0.2); border-style: solid; pointer-events: none; z-index: 0; }
+.corner-tl { top: 20px; left: 20px; border-width: 2px 0 0 2px; }
+.corner-tr { top: 20px; right: 20px; border-width: 2px 2px 0 0; }
+.corner-bl { bottom: 20px; left: 20px; border-width: 0 0 2px 2px; }
+.corner-br { bottom: 20px; right: 20px; border-width: 0 2px 2px 0; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="bg-glow"></div>
+  <div class="scan-line"></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <!-- Timer -->
+  <div class="timer-container">
+    <div class="timer-label">Tiempo restante</div>
+    <div class="timer" id="timerDisplay">00:00:00</div>
+    <div class="timer-sub" id="timerSub">Límite: 24h</div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-container">
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%; background:#a78bfa;"></div>
+    </div>
+    <div class="progress-labels">
+      <span id="progressLabel">0% completado</span>
+      <span id="maxLimitLabel">24h</span>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-badge finished" id="statusBadge">
+    <span class="status-dot finished" id="statusDot"></span>
+    <span id="statusText">Esperando inicio...</span>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-value" id="statTotalAdded">0</div>
+      <div class="stat-label">Tiempo añadido</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="statActions">0</div>
+      <div class="stat-label">Acciones</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="statSubs">0</div>
+      <div class="stat-label">Subs</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="statBits">0</div>
+      <div class="stat-label">Bits</div>
+    </div>
+  </div>
+
+  <!-- Feed -->
+  <div class="feed-container">
+    <div class="feed-title">✱ Actividad reciente</div>
+    <div id="feedList"></div>
+  </div>
+
+  <!-- Info bar -->
+  <div class="info-bar">
+    <div class="info-left">
+      <div class="info-stream-title" id="streamTitle">StreamForge Subathon</div>
+      <div class="info-channel" id="channelName">cargando...</div>
+    </div>
+    <div class="info-right" id="uptime">00:00:00</div>
+  </div>
+
+  <div class="config-hint" id="configHint">Subathon · StreamForger</div>
+</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const channel = params.get('channel') || 'streamforger';
+const SOCKET_URL = params.get('socket') || location.origin;
+
+let state = {
+  status: 'stopped',
+  remaining: 0,
+  totalAdded: 0,
+  maxLimit: 86400,
+  subTime: 300,
+  bitTime: 60,
+  bitsPerUnit: 100,
+  startTime: null,
+  actions: [],
+};
+
+let actionsCount = 0;
+let subsCount = 0;
+let bitsCount = 0;
+let startTimestamp = Date.now();
+
+// ── DOM refs ──
+const timerEl = document.getElementById('timerDisplay');
+const timerSubEl = document.getElementById('timerSub');
+const progressFill = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+const maxLimitLabel = document.getElementById('maxLimitLabel');
+const statusBadge = document.getElementById('statusBadge');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+const statTotalAdded = document.getElementById('statTotalAdded');
+const statActions = document.getElementById('statActions');
+const statSubs = document.getElementById('statSubs');
+const statBits = document.getElementById('statBits');
+const feedList = document.getElementById('feedList');
+const channelName = document.getElementById('channelName');
+const streamTitle = document.getElementById('streamTitle');
+const uptimeEl = document.getElementById('uptime');
+
+channelName.textContent = '#' + channel;
+
+// ── Format time ──
+function fmtTime(s) {
+  s = Math.max(0, Math.floor(s));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function fmtDuration(s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+// ── Colors ──
+function progressColor(ratio) {
+  if (ratio > 0.75) return '#ef4444';
+  if (ratio > 0.5) return '#f59e0b';
+  return '#a78bfa';
+}
+
+function typeColor(type) {
+  const colors = { sub: '#9147ff', bits: '#f59e0b', redeem: '#10b981', manual: '#6366f1' };
+  return colors[type] || '#6366f1';
+}
+
+function typeLabel(type) {
+  const labels = { sub: 'Sub', bits: 'Bits', redeem: 'Canjeo', manual: 'Manual' };
+  return labels[type] || type;
+}
+
+// ── Update display ──
+function updateDisplay() {
+  timerEl.textContent = fmtTime(state.remaining);
+  timerEl.className = 'timer' + (state.remaining < 300 ? ' critical' : state.remaining < 1800 ? ' warning' : '');
+  timerSubEl.textContent = `Límite: ${fmtDuration(state.maxLimit)}`;
+
+  const ratio = state.maxLimit > 0 ? state.remaining / state.maxLimit : 0;
+  const pct = Math.min(ratio * 100, 100);
+  progressFill.style.width = pct + '%';
+  progressFill.style.background = progressColor(ratio);
+  progressLabel.textContent = `${Math.round(pct)}% completado`;
+  maxLimitLabel.textContent = fmtDuration(state.maxLimit);
+
+  statusBadge.className = 'status-badge ' + (state.status === 'running' ? 'live' : state.status === 'paused' ? 'paused' : 'finished');
+  statusDot.className = 'status-dot ' + (state.status === 'running' ? 'live' : state.status === 'paused' ? 'paused' : 'finished');
+  statusText.textContent = state.status === 'running' ? 'En vivo'
+    : state.status === 'paused' ? 'Pausado'
+    : state.status === 'finished' ? 'Finalizado'
+    : state.totalAdded > 0 ? 'Detenido' : 'Esperando inicio...';
+
+  statTotalAdded.textContent = fmtDuration(state.totalAdded);
+}
+
+// ── Uptime ──
+function updateUptime() {
+  if (state.status === 'running' && state.startTime) {
+    const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+    uptimeEl.textContent = fmtTime(elapsed);
+  }
+}
+
+// ── Add feed item ──
+function addFeedItem(action) {
+  const item = document.createElement('div');
+  item.className = 'feed-item';
+  const dotColor = typeColor(action.type);
+  item.innerHTML = `
+    <span class="feed-dot" style="background:${dotColor}"></span>
+    <span class="feed-user">${action.user}</span>
+    <span class="feed-time" style="color:${dotColor}">+${fmtDuration(action.timeAdded)}</span>
+    <span class="feed-note">${typeLabel(action.type)}${action.note ? ' · ' + action.note : ''}</span>
+  `;
+  feedList.insertBefore(item, feedList.firstChild);
+  if (feedList.children.length > 50) feedList.removeChild(feedList.lastChild);
+}
+
+// ── Socket.IO ──
+function connectSocket() {
+  const script = document.createElement('script');
+  script.src = SOCKET_URL + '/socket.io/socket.io.js';
+  script.onload = () => {
+    const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
+    socket.on('connect', () => {
+      socket.emit('join:channel', channel);
+      socket.on('subathon:state', (data) => {
+        state = data;
+        actionsCount = data.actions.length;
+        subsCount = data.actions.filter(a => a.type === 'sub').length;
+        bitsCount = data.actions.filter(a => a.type === 'bits').length;
+        statActions.textContent = actionsCount;
+        statSubs.textContent = subsCount;
+        statBits.textContent = bitsCount;
+        feedList.innerHTML = '';
+        data.actions.slice(0, 20).reverse().forEach(addFeedItem);
+        updateDisplay();
+      });
+      socket.on('subathon:tick', (data) => {
+        state.remaining = data.remaining;
+        state.maxLimit = data.maxLimit;
+        updateDisplay();
+        updateUptime();
+      });
+      socket.on('subathon:time-added', (data) => {
+        addFeedItem({ user: data.user, timeAdded: data.amount, note: data.reason, type: 'manual' });
+        actionsCount++;
+        statActions.textContent = actionsCount;
+      });
+    });
+  };
+  document.head.appendChild(script);
+}
+
+// ── Demo mode ──
+const demoUsers = ['LunaStream', 'MegaViewer99', 'xX_Puma_Xx', 'CyberHacker', 'PixelQueen', 'DarkKnight', 'StarDust', 'NeoVortex', 'CrystalWing', 'ThunderBolt'];
+const demoNotes = ['¡Sub!', '100 bits', '500 bits', 'Recompensa canjeada', 'Suscripción regalada'];
+
+function demoAction() {
+  const user = demoUsers[Math.floor(Math.random() * demoUsers.length)];
+  const type = Math.random() < 0.3 ? 'sub' : 'bits';
+  const isSub = type === 'sub';
+  const amount = isSub ? 1 : Math.floor(Math.random() * 5) * 100 + 100;
+  const timeAdded = isSub ? state.subTime : Math.floor(amount / state.bitsPerUnit) * state.bitTime;
+
+  if (isSub) subsCount++;
+  else bitsCount++;
+  actionsCount++;
+
+  state.remaining = Math.min(state.remaining + timeAdded, state.maxLimit);
+  state.totalAdded += timeAdded;
+  state.status = 'running';
+  state.startTime = state.startTime || Date.now();
+
+  const action = { user, type, timeAdded, note: isSub ? 'Nuevo sub' : `${amount} bits`, amount };
+  state.actions.unshift(action);
+  if (state.actions.length > 100) state.actions.pop();
+
+  statActions.textContent = actionsCount;
+  statSubs.textContent = subsCount;
+  statBits.textContent = bitsCount;
+  addFeedItem(action);
+  updateDisplay();
+}
+
+function initDemo() {
+  state.remaining = 36000;
+  state.totalAdded = 36000;
+  state.maxLimit = 86400;
+  state.startTime = Date.now();
+  state.subTime = 300;
+  state.bitTime = 60;
+  state.bitsPerUnit = 100;
+
+  statActions.textContent = '0';
+  statSubs.textContent = '0';
+  statBits.textContent = '0';
+  streamTitle.textContent = '🔴 Subathon Demo - StreamForger';
+
+  updateDisplay();
+  setInterval(demoAction, 4000 + Math.random() * 6000);
+  setInterval(updateUptime, 1000);
+}
+
+// ── Boot ──
+connectSocket();
+setTimeout(() => {
+  if (state.status === 'stopped' && state.remaining === 0) {
+    initDemo();
+  }
+}, 3000);
+</script>
+</body>
+</html>

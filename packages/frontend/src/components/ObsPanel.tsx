@@ -90,6 +90,15 @@ const OBS_URLS: OBSUrl[] = [
     color: '#10b981',
   },
   {
+    id: 'subathon',
+    icon: '🔴',
+    label: 'Subathon',
+    description: 'Temporizador ampliable con suscripciones, bits y recompensas',
+    mode: 'subathon',
+    supportsTheme: false,
+    color: '#ef4444',
+  },
+  {
     id: 'subnautica2_standalone',
     icon: '🌊',
     label: 'Subnautica 2 (Completo)',
@@ -158,6 +167,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     subnautica2_standalone: 'subnautica2.html',
     fortnite: 'fortnite.html',
     alerts: 'alerts.html',
+    subathon: 'subathon.html',
   };
 
   function buildUrl(mode: string, supportsTheme: boolean): string {
