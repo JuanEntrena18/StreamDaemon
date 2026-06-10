@@ -20,6 +20,7 @@ import { setupMod } from './mod/index.js';
 import { setupSubathon } from './subathon/index.js';
 import { setupActivity } from './activity/index.js';
 import { setupCommands } from './commands/index.js';
+import { setupFortnite } from './fortnite/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -93,6 +94,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupSubathon(app);
   setupActivity(app);
   setupCommands(app);
+  setupFortnite(app);
 
   app.get('/health', async () => ({ status: 'ok', timestamp: Date.now() }));
 

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { apiGet, apiPut } from '../utils/api';
 
 interface Props {
   channel: string;
@@ -164,6 +165,29 @@ export function ObsPanel({ channel, backendUrl }: Props) {
 
   const [customGame, setCustomGame] = useState('');
 
+  // Fortnite config
+  const [fnApiKey, setFnApiKey] = useState('');
+  const [fnEpicUsername, setFnEpicUsername] = useState('');
+  const [fnStatsMode, setFnStatsMode] = useState('solo');
+  const [fnSaved, setFnSaved] = useState(false);
+  const [fnConfigLoaded, setFnConfigLoaded] = useState(false);
+
+  useEffect(() => {
+    apiGet('/fortnite/config').then(async (r) => {
+      if (!r.ok) return;
+      const data = await r.json();
+      if (data.epicUsername) setFnEpicUsername(data.epicUsername);
+      if (data.statsMode) setFnStatsMode(data.statsMode);
+      setFnConfigLoaded(true);
+    });
+  }, []);
+
+  const saveFnConfig = async () => {
+    await apiPut('/fortnite/config', { apiKey: fnApiKey, epicUsername: fnEpicUsername, statsMode: fnStatsMode });
+    setFnSaved(true);
+    setTimeout(() => setFnSaved(false), 3000);
+  };
+
   const STANDALONE_OVERLAYS: Record<string, string> = {
     subnautica2_standalone: 'subnautica2.html',
     fortnite: 'fortnite.html',
@@ -176,6 +200,9 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     if (standalone) {
       let url = `${overlayBaseUrl}/overlays/${standalone}`;
       if (channel) url += `?channel=${channel}`;
+      if (mode === 'fortnite' && fnEpicUsername) url += `&epic=${encodeURIComponent(fnEpicUsername)}&mode=${fnStatsMode}`;
+      const be = backendUrl || 'http://localhost:3000';
+      if (be !== location.origin) url += `${channel ? '&' : '?'}backend=${encodeURIComponent(be)}`;
       return url;
     }
     let url = `${overlayBaseUrl}/overlay.html?mode=${mode}`;
@@ -485,6 +512,79 @@ export function ObsPanel({ channel, backendUrl }: Props) {
           );
         })}
       </div>
+
+      {/* Fortnite config */}
+      {selectedTheme === 'fortnite' && (
+        <div className="glass-card" style={{ marginTop: '1.5rem', padding: '1.25rem' }}>
+          <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            🔫 Estadísticas de Fortnite
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {/* API Key */}
+            <div>
+              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
+                API Key de Fortnite-API.com
+              </label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  type="text"
+                  value={fnApiKey}
+                  onChange={(e) => setFnApiKey(e.target.value)}
+                  placeholder={fnConfigLoaded ? '•••••••• (ya configurada)' : 'Ingresá tu API key...'}
+                  className="sf-input"
+                  style={{ flex: 1, fontSize: '0.78rem' }}
+                />
+                <a href="https://dash.fortnite-api.com" target="_blank" rel="noreferrer" className="sf-btn" style={{ fontSize: '0.72rem', padding: '0.3rem 0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                  🌐 Obtener key
+                </a>
+              </div>
+            </div>
+            {/* Epic Username */}
+            <div>
+              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
+                Usuario de Epic Games
+              </label>
+              <input
+                type="text"
+                value={fnEpicUsername}
+                onChange={(e) => setFnEpicUsername(e.target.value)}
+                placeholder="Ej: jentrena"
+                className="sf-input"
+                style={{ width: '100%', fontSize: '0.78rem' }}
+              />
+            </div>
+            {/* Mode selector */}
+            <div>
+              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
+                Modo de estadísticas
+              </label>
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                {['solo', 'duo', 'trio', 'squad'].map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setFnStatsMode(m)}
+                    style={{
+                      padding: '0.25rem 0.75rem', borderRadius: 99, border: '1px solid',
+                      borderColor: fnStatsMode === m ? 'var(--sf-primary)' : 'var(--sf-border)',
+                      background: fnStatsMode === m ? 'rgba(124,58,237,0.2)' : 'transparent',
+                      color: fnStatsMode === m ? '#a78bfa' : 'var(--sf-text-3)',
+                      fontSize: '0.75rem', fontWeight: fnStatsMode === m ? 600 : 400,
+                      cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase',
+                    }}
+                  >{m}</button>
+                ))}
+              </div>
+            </div>
+            {/* Save */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <button onClick={saveFnConfig} className="sf-btn sf-btn-primary" style={{ fontSize: '0.78rem', padding: '0.4rem 1rem' }}>
+                Guardar Configuración
+              </button>
+              {fnSaved && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>✓ Guardado</span>}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Help note */}
       <div style={{

@@ -306,6 +306,48 @@
   .corner.bl { bottom: 0; left: 0; transform: scaleY(-1); }
   .corner.br { bottom: 60px; right: 0; transform: scale(-1,-1); }
 
+  /* ──────────────────────────────────── FORTNITE STATS */
+  #fn-stats {
+    position: absolute;
+    top: 120px; right: 28px;
+    display: flex; flex-direction: column;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  #fn-stats.visible { opacity: 1; }
+
+  .fn-stat-group {
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    padding: 8px 16px;
+    clip-path: polygon(4% 0, 100% 0, 100% 82%, 96% 100%, 0 100%, 0 18%);
+    min-width: 180px;
+  }
+
+  .fn-stat-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 2px 0;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+
+  .fn-stat-label { color: rgba(255,255,255,0.55); font-weight: 600; }
+  .fn-stat-value { color: var(--blue); font-weight: 900; font-size: 16px; }
+  .fn-stat-value.yellow { color: var(--yellow); }
+  .fn-stat-value.purple { color: var(--purple); }
+
+  .fn-stat-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(0,212,255,0.2);
+  }
+
   /* ──────────────────────────────────── DEMO BADGE */
   #demo-badge {
     position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
@@ -417,6 +459,18 @@
   <div class="uptime-value" id="val-uptime">00:00:00</div>
 </div>
 
+<!-- Estadísticas de Fortnite -->
+<div id="fn-stats">
+  <div class="fn-stat-group">
+    <div class="fn-stat-title">📊 Stats</div>
+    <div class="fn-stat-row"><span class="fn-stat-label">Kills</span><span class="fn-stat-value" id="fn-kills">—</span></div>
+    <div class="fn-stat-row"><span class="fn-stat-label">Wins</span><span class="fn-stat-value yellow" id="fn-wins">—</span></div>
+    <div class="fn-stat-row"><span class="fn-stat-label">Partidas</span><span class="fn-stat-value" id="fn-matches">—</span></div>
+    <div class="fn-stat-row"><span class="fn-stat-label">K/D</span><span class="fn-stat-value purple" id="fn-kd">—</span></div>
+    <div class="fn-stat-row"><span class="fn-stat-label">Win Rate</span><span class="fn-stat-value" id="fn-winrate">—</span></div>
+  </div>
+</div>
+
 <!-- Último follow – esquina inferior derecha -->
 <div id="recent-follow">
   <div class="rf-label">Último follow</div>
@@ -448,6 +502,8 @@
 const CHANNEL     = new URLSearchParams(location.search).get('channel') || '';
 const DEMO_MODE   = new URLSearchParams(location.search).get('demo') === 'true';
 const BACKEND_URL = new URLSearchParams(location.search).get('backend') || location.origin;
+const EPIC_USER   = new URLSearchParams(location.search).get('epic') || '';
+const STATS_MODE  = new URLSearchParams(location.search).get('mode') || 'solo';
 
 /* ──────────────────────────────────────────────────────────
    ESTADO LOCAL
@@ -556,6 +612,24 @@ function showLastFollow(name) {
   const el = document.getElementById('recent-follow');
   document.getElementById('last-follow-name').textContent = name;
   el.classList.add('visible');
+}
+
+/* ──────────────────────────────────────────────────────────
+   FORTNITE STATS
+────────────────────────────────────────────────────────── */
+async function fetchFnStats() {
+  if (!EPIC_USER) return;
+  try {
+    const r = await fetch(`${BACKEND_URL}/fortnite/stats/${encodeURIComponent(EPIC_USER)}?mode=${STATS_MODE}`);
+    if (!r.ok) return;
+    const data = await r.json();
+    document.getElementById('fn-kills').textContent    = fmtNum(data.kills ?? 0);
+    document.getElementById('fn-wins').textContent     = fmtNum(data.wins ?? 0);
+    document.getElementById('fn-matches').textContent   = fmtNum(data.matches ?? 0);
+    document.getElementById('fn-kd').textContent        = (data.kd ?? 0).toFixed(2);
+    document.getElementById('fn-winrate').textContent   = (data.winRate ?? 0).toFixed(1) + '%';
+    document.getElementById('fn-stats').classList.add('visible');
+  } catch {}
 }
 
 /* ──────────────────────────────────────────────────────────
@@ -722,6 +796,9 @@ loadSocketIO(function(err) {
     document.getElementById('offline-notice').classList.add('show');
     document.getElementById('offline-notice').textContent = '👁 Sin backend';
   }
+  // Fortnite stats (runs regardless of socket)
+  fetchFnStats();
+  setInterval(fetchFnStats, 5 * 60 * 1000);
 });
 
 function startDemo() {
@@ -732,6 +809,15 @@ function startDemo() {
     gameName: 'Fortnite',
     isLive: true,
   });
+
+  // Demo Fortnite stats
+  const demoStats = { kills: 15842, wins: 423, matches: 2310, kd: 3.28, winRate: 18.3 };
+  document.getElementById('fn-kills').textContent    = fmtNum(demoStats.kills);
+  document.getElementById('fn-wins').textContent     = fmtNum(demoStats.wins);
+  document.getElementById('fn-matches').textContent   = fmtNum(demoStats.matches);
+  document.getElementById('fn-kd').textContent        = demoStats.kd.toFixed(2);
+  document.getElementById('fn-winrate').textContent   = demoStats.winRate.toFixed(1) + '%';
+  document.getElementById('fn-stats').classList.add('visible');
 
   setTimeout(() => enqueueAlert({ type: 'follow', user: 'QuantumSniper99' }), 2500);
   setTimeout(() => enqueueAlert({ type: 'sub', user: 'NoRecoilKing', detail: 'Tier 1' }), 8000);

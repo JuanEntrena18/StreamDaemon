@@ -13,4 +13,5 @@ export const config = {
   TWITCH_CLIENT_SECRET: process.env.TWITCH_CLIENT_SECRET ?? '',
   TWITCH_REDIRECT_URI: process.env.TWITCH_REDIRECT_URI ?? 'http://localhost:3000/auth/callback',
   FRONTEND_URL: process.env.FRONTEND_URL ?? 'http://localhost:5173',
+  FORTNITE_API_KEY: process.env.FORTNITE_API_KEY ?? '',
 };
