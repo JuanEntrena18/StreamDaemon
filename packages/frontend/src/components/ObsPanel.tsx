@@ -89,6 +89,33 @@ const OBS_URLS: OBSUrl[] = [
     supportsTheme: false,
     color: '#10b981',
   },
+  {
+    id: 'subnautica2_standalone',
+    icon: '🌊',
+    label: 'Subnautica 2 (Completo)',
+    description: 'Overlay completo de Subnautica 2 con HUD, partículas, sonar, chat y alertas en vivo',
+    mode: 'subnautica2_standalone',
+    supportsTheme: false,
+    color: '#00d4ff',
+  },
+  {
+    id: 'fortnite',
+    icon: '🔫',
+    label: 'Fortnite Overlay',
+    description: 'Overlay temático de Fortnite con HUD, stats, alertas y chat en vivo',
+    mode: 'fortnite',
+    supportsTheme: false,
+    color: '#00D4FF',
+  },
+  {
+    id: 'alerts',
+    icon: '🔔',
+    label: 'Alertas',
+    description: 'Alertas animadas con confetti: follows, subs, bits, raids y canjeos',
+    mode: 'alerts',
+    supportsTheme: false,
+    color: '#c84bff',
+  },
 ];
 
 const THEMES = [
@@ -127,7 +154,19 @@ export function ObsPanel({ channel, backendUrl }: Props) {
 
   const [customGame, setCustomGame] = useState('');
 
+  const STANDALONE_OVERLAYS: Record<string, string> = {
+    subnautica2_standalone: 'subnautica2.html',
+    fortnite: 'fortnite.html',
+    alerts: 'alerts.html',
+  };
+
   function buildUrl(mode: string, supportsTheme: boolean): string {
+    const standalone = STANDALONE_OVERLAYS[mode];
+    if (standalone) {
+      let url = `${overlayBaseUrl}/overlays/${standalone}`;
+      if (channel) url += `?channel=${channel}`;
+      return url;
+    }
     let url = `${overlayBaseUrl}/overlay.html?mode=${mode}`;
     if (channel) url += `&channel=${channel}`;
     if (supportsTheme && selectedTheme) url += `&theme=${selectedTheme}`;

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – Alertas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+
+  #alert-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+    pointer-events: none;
+    z-index: 10;
+    min-width: 500px;
+  }
+
+  /* ───────── BASE CARD ───────── */
+  .alert-card {
+    position: absolute;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 28px 56px;
+    border-radius: 16px;
+    text-align: center;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    overflow: hidden;
+    min-width: 460px;
+    opacity: 0;
+    transform: scale(0.5) translateY(20px);
+    transition: none;
+  }
+
+  .alert-card.visible {
+    animation: alert-appear 0.6s cubic-bezier(0.175,0.885,0.32,1.4) forwards;
+  }
+  .alert-card.hiding {
+    animation: alert-hide 0.5s ease-in forwards;
+  }
+
+  @keyframes alert-appear {
+    0%   { opacity: 0; transform: scale(0.5) translateY(20px); }
+    60%  { opacity: 1; transform: scale(1.08) translateY(-5px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes alert-hide {
+    0%   { opacity: 1; transform: scale(1) translateY(0); }
+    100% { opacity: 0; transform: scale(0.8) translateY(-40px); }
+  }
+
+  /* ───────── THEMES ───────── */
+  .alert-theme-dark {
+    background: rgba(10,14,26,0.88);
+    border: 2px solid rgba(255,255,255,0.15);
+  }
+  .alert-theme-dark .alert-icon { filter: drop-shadow(0 0 20px currentColor); }
+
+  .alert-theme-dark.follow    { border-color: #00d4ff; box-shadow: 0 0 40px rgba(0,212,255,0.15), inset 0 0 40px rgba(0,212,255,0.05); }
+  .alert-theme-dark.sub       { border-color: #c84bff; box-shadow: 0 0 40px rgba(200,75,255,0.15), inset 0 0 40px rgba(200,75,255,0.05); }
+  .alert-theme-dark.resub     { border-color: #c84bff; box-shadow: 0 0 40px rgba(200,75,255,0.15), inset 0 0 40px rgba(200,75,255,0.05); }
+  .alert-theme-dark.subgift   { border-color: #ff6b9d; box-shadow: 0 0 40px rgba(255,107,157,0.15), inset 0 0 40px rgba(255,107,157,0.05); }
+  .alert-theme-dark.bits      { border-color: #ffd700; box-shadow: 0 0 40px rgba(255,215,0,0.15), inset 0 0 40px rgba(255,215,0,0.05); }
+  .alert-theme-dark.raid      { border-color: #ff4444; box-shadow: 0 0 40px rgba(255,68,68,0.15), inset 0 0 40px rgba(255,68,68,0.05); }
+  .alert-theme-dark.redemption{ border-color: #22d3ee; box-shadow: 0 0 40px rgba(34,211,238,0.15), inset 0 0 40px rgba(34,211,238,0.05); }
+
+  /* ───────── SHIMMER OVERLAY ───────── */
+  .alert-shimmer {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer-slide 2.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes shimmer-slide {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ───────── GLOW RING ───────── */
+  .alert-glow {
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    top: -60px; right: -60px;
+    opacity: 0.15;
+    filter: blur(60px);
+    pointer-events: none;
+  }
+  .follow  .alert-glow { background: #00d4ff; }
+  .sub     .alert-glow,
+  .resub   .alert-glow { background: #c84bff; }
+  .subgift .alert-glow { background: #ff6b9d; }
+  .bits    .alert-glow { background: #ffd700; }
+  .raid    .alert-glow { background: #ff4444; }
+  .redemption .alert-glow { background: #22d3ee; }
+
+  /* ───────── CONTENT ───────── */
+  .alert-icon {
+    font-size: 52px;
+    margin-bottom: 6px;
+    animation: icon-bounce 0.8s cubic-bezier(0.175,0.885,0.32,1.4) both;
+  }
+  @keyframes icon-bounce {
+    0%   { transform: scale(0) rotate(-15deg); }
+    60%  { transform: scale(1.2) rotate(5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  .alert-type {
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 5px; text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .alert-theme-dark.follow    .alert-type { color: #00d4ff; }
+  .alert-theme-dark.sub       .alert-type,
+  .alert-theme-dark.resub     .alert-type { color: #c84bff; }
+  .alert-theme-dark.subgift   .alert-type { color: #ff6b9d; }
+  .alert-theme-dark.bits      .alert-type { color: #ffd700; }
+  .alert-theme-dark.raid      .alert-type { color: #ff4444; }
+  .alert-theme-dark.redemption.alert-type { color: #22d3ee; }
+
+  .alert-user {
+    font-size: 44px; font-weight: 900;
+    color: #fff;
+    line-height: 1;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    text-shadow: 0 0 30px rgba(255,255,255,0.1);
+  }
+
+  .alert-detail {
+    font-family: 'Barlow', sans-serif;
+    font-size: 16px; font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .alert-msg {
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px; font-weight: 400;
+    color: rgba(255,255,255,0.45);
+    margin-top: 6px;
+    font-style: italic;
+    max-width: 500px;
+    line-height: 1.4;
+  }
+
+  /* ───────── CONFETTI CANVAS ───────── */
+  #confetti {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  /* ───────── TEST BUTTONS ───────── */
+  #controls {
+    position: absolute; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 6px;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  #controls:hover { opacity: 1; }
+
+  #controls button {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.6);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  #controls button:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div id="alert-center"></div>
+
+<div id="controls">
+  <button data-type="follow">❤️ Follow</button>
+  <button data-type="sub">⭐ Sub</button>
+  <button data-type="resub">🔄 Resub</button>
+  <button data-type="subgift">🎁 Gift</button>
+  <button data-type="bits">💎 Bits</button>
+  <button data-type="raid">⚔️ Raid</button>
+  <button data-type="redemption">⚡ Canjeo</button>
+</div>
+
+<script>
+/* ──────────────────────────────────────────────
+   CONFIG
+─────────────────────────────────────────────── */
+const CHANNEL = new URLSearchParams(location.search).get('channel') || '';
+const BACKEND_URL = 'http://localhost:3000';
+
+/* ──────────────────────────────────────────────
+   ALERT QUEUE
+─────────────────────────────────────────────── */
+const queue = [];
+let busy = false;
+const SHOW_DURATION = 5000;
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function trigger(type, user, detail, msg) {
+  queue.push({ type, user, detail, msg });
+  if (!busy) next();
+}
+
+function next() {
+  if (!queue.length) { busy = false; return; }
+  busy = true;
+  const cfg = queue.shift();
+  render(cfg);
+  setTimeout(() => {
+    const card = document.querySelector('.alert-card');
+    if (card) { card.classList.remove('visible'); card.classList.add('hiding'); }
+    setTimeout(next, 400);
+  }, SHOW_DURATION);
+}
+
+function render({ type, user, detail, msg }) {
+  const zone = document.getElementById('alert-center');
+  zone.innerHTML = '';
+
+  const typeLabels = {
+    follow: 'Nuevo seguidor', sub: 'Nuevo suscriptor',
+    resub: 'Re-suscripción', subgift: 'Sub regalado',
+    bits: 'Bits recibidos', cheer: 'Cheer recibido',
+    raid: 'Raid entrante', redemption: 'Canjeo realizado',
+  };
+  const typeIcons = {
+    follow: '❤️', sub: '⭐', resub: '🔄',
+    subgift: '🎁', bits: '💎', cheer: '💎',
+    raid: '⚔️', redemption: '⚡',
+  };
+
+  const card = document.createElement('div');
+  card.className = `alert-card alert-theme-dark visible ${type}`;
+  card.innerHTML = `
+    <div class="alert-shimmer"></div>
+    <div class="alert-glow"></div>
+    <div class="alert-icon">${typeIcons[type] || '📌'}</div>
+    <div class="alert-type">${typeLabels[type] || type}</div>
+    <div class="alert-user">${escHtml(user)}</div>
+    ${detail ? `<div class="alert-detail">${escHtml(detail)}</div>` : ''}
+    ${msg    ? `<div class="alert-msg">"${escHtml(msg)}"</div>` : ''}
+  `;
+  zone.appendChild(card);
+
+  // Confetti burst
+  confettiBurst(type);
+}
+
+/* ──────────────────────────────────────────────
+   CONFETTI
+─────────────────────────────────────────────── */
+const canvas = document.getElementById('confetti');
+const ctx = canvas.getContext('2d');
+canvas.width = 1920; canvas.height = 1080;
+
+let confettiPieces = [];
+let confettiRunning = false;
+
+function confettiBurst(type) {
+  const colors = type === 'follow' ? ['#00d4ff','#00ff88','#0066ff','#fff'] :
+                 type === 'sub' || type === 'resub' ? ['#c84bff','#ff6bff','#fff','#ffd700'] :
+                 type === 'bits' ? ['#ffd700','#ffaa00','#fff','#ff6b00'] :
+                 type === 'raid' ? ['#ff4444','#ff6b6b','#fff','#ffd700'] :
+                 ['#22d3ee','#00d4ff','#fff','#c84bff'];
+
+  for (let i = 0; i < 80; i++) {
+    confettiPieces.push({
+      x: 960 + (Math.random() - 0.5) * 300,
+      y: 500,
+      w: Math.random() * 8 + 4,
+      h: Math.random() * 4 + 2,
+      vx: (Math.random() - 0.5) * 12,
+      vy: -(Math.random() * 10 + 5),
+      g: 0.35 + Math.random() * 0.15,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * 360,
+      rv: (Math.random() - 0.5) * 10,
+      alpha: 1,
+    });
+  }
+  if (!confettiRunning) { confettiRunning = true; animateConfetti(); }
+}
+
+function animateConfetti() {
+  ctx.clearRect(0, 0, 1920, 1080);
+  let alive = false;
+  confettiPieces.forEach(p => {
+    p.x += p.vx;
+    p.vy += p.g;
+    p.y += p.vy;
+    p.rot += p.rv;
+    p.alpha -= 0.004;
+    if (p.alpha > 0) {
+      alive = true;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.globalAlpha = Math.max(0, p.alpha);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    }
+  });
+  if (alive) { requestAnimationFrame(animateConfetti); }
+  else { confettiRunning = false; confettiPieces = []; ctx.clearRect(0,0,1920,1080); }
+}
+
+/* ──────────────────────────────────────────────
+   SOCKET.IO
+─────────────────────────────────────────────── */
+function initSocket() {
+  let socket;
+  try { socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] }); }
+  catch(e) { return; }
+
+  socket.on('connect', () => {
+    if (CHANNEL) socket.emit('join:channel', CHANNEL);
+  });
+
+  socket.on('channel:follow', ({ userDisplayName }) => {
+    trigger('follow', userDisplayName);
+  });
+
+  socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+    if (isGift) return;
+    const t = tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3';
+    trigger('sub', userDisplayName, t);
+  });
+
+  socket.on('channel:subscription-message', ({ userDisplayName, tier, cumulativeMonths, messageText }) => {
+    const t = tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3';
+    trigger('resub', userDisplayName, `${cumulativeMonths} meses · ${t}`, messageText || undefined);
+  });
+
+  socket.on('channel:subgift', ({ gifterDisplayName, amount, tier }) => {
+    const t = tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3';
+    trigger('subgift', gifterDisplayName, `× ${amount} subs · ${t}`);
+  });
+
+  socket.on('channel:cheer', ({ userDisplayName, bits, message }) => {
+    trigger('bits', userDisplayName, `${bits.toLocaleString()} bits`, message || undefined);
+  });
+
+  socket.on('channel:raid', ({ fromDisplayName, viewerCount }) => {
+    trigger('raid', fromDisplayName, `${viewerCount} espectadores`);
+  });
+
+  socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+    trigger('redemption', userDisplayName, rewardTitle);
+  });
+}
+
+/* ──────────────────────────────────────────────
+   TEST BUTTONS
+─────────────────────────────────────────────── */
+document.querySelectorAll('#controls button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const names = ['StreamerPro', 'GamerGirl99', 'DarkKnight', 'PixelWizard', 'NeonRider', 'CyberFox'];
+    const user = names[Math.floor(Math.random() * names.length)];
+    const type = btn.dataset.type;
+    const details = {
+      sub: 'Tier 1', resub: '6 meses · Tier 2', subgift: '× 3 subs · Tier 1',
+      bits: '500 bits', raid: '45 espectadores', redemption: '¡Qué emoción!',
+    };
+    trigger(type, user, details[type]);
+  });
+});
+
+/* ──────────────────────────────────────────────
+   DEMO
+─────────────────────────────────────────────── */
+const demoUsers = ['NeonRider', 'PixelWizard', 'CyberFox', 'StreamQueen', 'DarkPhoenix', 'LunarEcho'];
+let di = 0;
+const demoTypes = ['follow', 'follow', 'sub', 'follow', 'bits', 'follow', 'raid', 'resub', 'follow', 'subgift'];
+
+function demoLoop() {
+  const type = demoTypes[di % demoTypes.length];
+  const user = demoUsers[di % demoUsers.length];
+  di++;
+  const details = {
+    sub: 'Tier 1', resub: '3 meses · Tier 1', subgift: '× 2 subs · Tier 1',
+    bits: '300 bits', raid: '27 espectadores', redemption: 'Puntos de canal',
+  };
+  trigger(type, user, details[type] || undefined);
+  setTimeout(demoLoop, 7000 + Math.random() * 4000);
+}
+setTimeout(demoLoop, 1500);
+
+/* Init Socket.IO */
+if (typeof io !== 'undefined') initSocket();
+</script>
+</body>
+</html>

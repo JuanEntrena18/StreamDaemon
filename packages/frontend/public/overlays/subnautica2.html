@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, initial-scale=1.0">
+<title>StreamForge – Subnautica 2 Overlay</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@400;600;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --cyan:    #00d4ff;
+    --green:   #00ff88;
+    --blue:    #0066ff;
+    --dark:    #020d1a;
+    --panel:   rgba(2, 13, 26, 0.82);
+    --stroke:  rgba(0, 212, 255, 0.25);
+  }
+
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Exo 2', sans-serif;
+  }
+
+  #particles { position: absolute; inset: 0; pointer-events: none; }
+
+  /* ──────── SCAN LINE ──────── */
+  .scan-line {
+    position: absolute; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--cyan) 50%, transparent 100%);
+    opacity: 0.08;
+    animation: scan 10s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes scan {
+    from { top: 0; } to { top: 1080px; }
+  }
+
+  /* ──────── CORNER BRACKETS ──────── */
+  .corner { position: absolute; width: 50px; height: 50px; pointer-events: none; }
+  .corner svg { width: 100%; height: 100%; }
+  .corner.tl { top: 15px; left: 15px; }
+  .corner.tr { top: 15px; right: 15px; transform: scaleX(-1); }
+  .corner.bl { bottom: 65px; left: 15px; transform: scaleY(-1); }
+  .corner.br { bottom: 65px; right: 15px; transform: scale(-1,-1); }
+
+  /* ──────── HUD TOP BAR ──────── */
+  #hud-top {
+    position: absolute; top: 22px; left: 75px; right: 75px;
+    display: flex; align-items: center; gap: 12px;
+    pointer-events: none;
+  }
+
+  .hud-tag {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: 4px;
+    padding: 5px 14px;
+    backdrop-filter: blur(6px);
+  }
+
+  .hud-tag .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  .hud-tag .dot.live { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .hud-tag .dot.offline { background: #6b7280; }
+
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .hud-tag .label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--cyan);
+  }
+
+  .hud-sep {
+    flex: 1; height: 1px;
+    background: linear-gradient(to right, rgba(0,212,255,0.3), transparent);
+  }
+
+  .hud-clock {
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: 4px;
+    padding: 5px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px; color: var(--green);
+    letter-spacing: 3px; font-weight: 700;
+  }
+
+  /* ──────── DEPTH METER (left side) ──────── */
+  #depth-meter {
+    position: absolute;
+    left: 22px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; pointer-events: none;
+    opacity: 0.25;
+  }
+
+  .depth-track {
+    width: 2px; height: 280px;
+    background: linear-gradient(to bottom, transparent, var(--cyan), var(--blue));
+    border-radius: 1px;
+    position: relative;
+  }
+
+  .depth-arrow {
+    position: absolute; left: -4px;
+    width: 10px; height: 10px;
+    background: var(--cyan);
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    animation: depth-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes depth-pulse {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(40px); }
+  }
+
+  .depth-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; color: var(--cyan);
+    writing-mode: vertical-lr;
+    letter-spacing: 4px; text-transform: uppercase;
+  }
+
+  /* ──────── STATS (left stack) ──────── */
+  #stats {
+    position: absolute;
+    left: 80px; top: 100px;
+    display: flex; flex-direction: column; gap: 10px;
+    pointer-events: none;
+  }
+
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-left: 3px solid var(--cyan);
+    border-radius: 0 6px 6px 0;
+    padding: 6px 18px 6px 12px;
+    backdrop-filter: blur(6px);
+    min-width: 140px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(transparent 40%, rgba(0,212,255,0.03) 50%, transparent 60%);
+    background-size: 100% 4px;
+    animation: scanline 2s linear infinite;
+  }
+  @keyframes scanline {
+    from { background-position-y: 0; }
+    to { background-position-y: 200px; }
+  }
+
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    line-height: 1;
+  }
+
+  .stat-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 28px; font-weight: 700;
+    color: var(--cyan);
+    line-height: 1.1;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+  }
+
+  .stat-value.green { color: var(--green); }
+  .stat-value.blue { color: var(--cyan); }
+
+  /* ──────── UPTIME (top right) ──────── */
+  #uptime-box {
+    position: absolute;
+    top: 90px; right: 28px;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: 4px;
+    padding: 8px 18px;
+    text-align: center;
+    min-width: 150px;
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+  }
+
+  .uptime-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--cyan);
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+
+  .uptime-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 34px; font-weight: 700;
+    color: #fff;
+    letter-spacing: 3px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ──────── SONAR (bottom-left) ──────── */
+  #sonar {
+    position: absolute;
+    bottom: 80px; left: 28px;
+    width: 70px; height: 70px;
+    pointer-events: none;
+    opacity: 0.2;
+  }
+
+  .sonar-ring {
+    position: absolute; inset: 0;
+    border-radius: 50%; border: 1px solid var(--cyan);
+  }
+
+  /* ──────── CHAT ──────── */
+  #chat-area {
+    position: absolute;
+    bottom: 80px; left: 275px;
+    width: 500px;
+    display: flex; flex-direction: column; gap: 8px;
+    pointer-events: none;
+  }
+
+  .chat-msg {
+    background: var(--panel);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--stroke);
+    border-left: 3px solid var(--cyan);
+    border-radius: 0 8px 8px 0;
+    padding: 8px 14px;
+    box-shadow: 0 0 20px rgba(0,212,255,0.08), inset 0 0 20px rgba(0,50,80,0.2);
+    position: relative;
+    overflow: hidden;
+    animation: msg-in 0.35s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+    transition: opacity 0.3s;
+  }
+
+  .chat-msg.exit { opacity: 0; transform: translateX(-30px); }
+
+  @keyframes msg-in {
+    from { opacity: 0; transform: translateX(-30px) scale(0.95); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+
+  .chat-msg .shimmer {
+    position: absolute; inset: 0;
+    background: linear-gradient(transparent 40%, rgba(0,212,255,0.04) 50%, transparent 60%);
+    background-size: 100% 4px;
+    animation: msg-shimmer 2s linear infinite;
+  }
+
+  @keyframes msg-shimmer {
+    from { background-position-y: 0; }
+    to { background-position-y: 200px; }
+  }
+
+  .chat-user {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--cyan);
+    text-shadow: 0 0 8px var(--cyan);
+    margin-bottom: 3px;
+  }
+
+  .chat-text {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 14px;
+    color: rgba(200, 240, 255, 0.92);
+    line-height: 1.45;
+    word-break: break-word;
+  }
+
+  .chat-bar {
+    margin-top: 4px;
+    display: flex; align-items: center; gap: 6px;
+    opacity: 0.35;
+  }
+
+  .chat-bar-line {
+    height: 1px; flex: 1;
+    background: linear-gradient(to right, var(--cyan), transparent);
+  }
+
+  .chat-bar-sys {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; color: var(--green);
+    letter-spacing: 2px;
+  }
+
+  /* ──────── ALERTS ──────── */
+  #alert-zone {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; align-items: center;
+    gap: 16px;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .alert-card {
+    background: var(--panel);
+    backdrop-filter: blur(12px);
+    border: 2px solid var(--cyan);
+    border-radius: 8px;
+    padding: 20px 48px;
+    text-align: center;
+    min-width: 380px;
+    animation: alert-in 0.45s cubic-bezier(0.175,0.885,0.32,1.275) forwards,
+               alert-out 0.4s ease-in 4.4s forwards;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .alert-card::before {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent);
+    animation: alert-shimmer 2s 0.5s ease-in-out infinite;
+  }
+
+  .alert-card.sub { border-color: #c84bff; }
+  .alert-card.sub::before { background: linear-gradient(90deg, transparent, rgba(200,75,255,0.12), transparent); }
+  .alert-card.bits { border-color: var(--green); }
+  .alert-card.bits::before { background: linear-gradient(90deg, transparent, rgba(0,255,136,0.12), transparent); }
+  .alert-card.raid { border-color: #ff6b6b; }
+  .alert-card.raid::before { background: linear-gradient(90deg, transparent, rgba(255,107,107,0.12), transparent); }
+
+  @keyframes alert-shimmer { 0%{left:-60%} 100%{left:160%} }
+
+  @keyframes alert-in {
+    from { opacity: 0; transform: scale(0.6) translateY(40px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes alert-out {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to { opacity: 0; transform: scale(0.8) translateY(-30px); }
+  }
+
+  .alert-type {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 4px;
+  }
+  .alert-card.sub .alert-type { color: #c84bff; }
+  .alert-card.bits .alert-type { color: var(--green); }
+  .alert-card.raid .alert-type { color: #ff6b6b; }
+
+  .alert-user {
+    font-size: 34px; font-weight: 900;
+    color: #fff; line-height: 1;
+    letter-spacing: 1px;
+  }
+
+  .alert-detail {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px; font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    margin-top: 6px; letter-spacing: 1px;
+  }
+
+  .alert-msg {
+    font-size: 12px; font-weight: 400;
+    color: rgba(255,255,255,0.45);
+    margin-top: 4px; font-style: italic;
+  }
+
+  /* ──────── OFFLINE NOTICE ──────── */
+  #offline-notice {
+    position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
+    background: rgba(255,59,59,0.12);
+    border: 1px solid rgba(255,59,59,0.3);
+    padding: 5px 18px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,120,120,0.8);
+    display: none;
+    z-index: 50;
+  }
+  #offline-notice.show { display: block; }
+
+  /* ──────── BOTTOM STREAM INFO BAR ──────── */
+  #bottom-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 55px;
+    background: linear-gradient(90deg, var(--dark) 0%, rgba(2,13,26,0.92) 50%, transparent 100%);
+    border-top: 2px solid var(--cyan);
+    display: flex; align-items: center; gap: 14px;
+    padding: 0 28px;
+    pointer-events: none;
+  }
+
+  #live-badge {
+    background: #ff3b3b;
+    padding: 3px 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; font-weight: 900;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #fff;
+    clip-path: polygon(0 0, 90% 0, 100% 50%, 90% 100%, 0 100%);
+    animation: pulse-live 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse-live { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  #game-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; font-weight: 700;
+    color: var(--cyan); text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  #title-sep { color: rgba(255,255,255,0.2); font-size: 14px; }
+
+  #title-text {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    letter-spacing: 0.5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  #title-deco {
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, rgba(0,212,255,0.3), transparent);
+  }
+
+  /* ──────── RECENT ACTIVITY (bottom-right) ──────── */
+  #recent-activity {
+    position: absolute;
+    bottom: 68px; right: 28px;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: 4px;
+    padding: 6px 14px;
+    min-width: 200px;
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    opacity: 0;
+  }
+  #recent-activity.show { opacity: 1; }
+
+  .ra-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 2px;
+  }
+
+  .ra-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 20px; font-weight: 700;
+    color: #fff;
+  }
+
+  .ra-event {
+    font-size: 11px; color: rgba(255,255,255,0.5);
+  }
+</style>
+</head>
+<body>
+
+<!-- Canvas partículas -->
+<canvas id="particles"></canvas>
+
+<!-- Línea de escaneo -->
+<div class="scan-line"></div>
+
+<!-- Esquinas decorativas -->
+<div class="corner tl"><svg viewBox="0 0 50 50" fill="none"><polyline points="0,50 0,0 50,0" stroke="#00d4ff" stroke-width="2" opacity="0.5"/><polyline points="0,40 0,0 40,0" stroke="#00d4ff" stroke-width="1" opacity="0.2"/></svg></div>
+<div class="corner tr"><svg viewBox="0 0 50 50" fill="none"><polyline points="0,50 0,0 50,0" stroke="#00d4ff" stroke-width="2" opacity="0.5"/><polyline points="0,40 0,0 40,0" stroke="#00d4ff" stroke-width="1" opacity="0.2"/></svg></div>
+<div class="corner bl"><svg viewBox="0 0 50 50" fill="none"><polyline points="0,50 0,0 50,0" stroke="#00d4ff" stroke-width="2" opacity="0.5"/><polyline points="0,40 0,0 40,0" stroke="#00d4ff" stroke-width="1" opacity="0.2"/></svg></div>
+<div class="corner br"><svg viewBox="0 0 50 50" fill="none"><polyline points="0,50 0,0 50,0" stroke="#00d4ff" stroke-width="2" opacity="0.5"/><polyline points="0,40 0,0 40,0" stroke="#00d4ff" stroke-width="1" opacity="0.2"/></svg></div>
+
+<!-- HUD Top Bar -->
+<div id="hud-top">
+  <div class="hud-tag">
+    <span class="dot live" id="live-dot"></span>
+    <span class="label" id="hud-status">SUBNAUTICA II · STREAM</span>
+  </div>
+  <div class="hud-sep"></div>
+  <div class="hud-clock" id="hud-clock">00:00:00</div>
+</div>
+
+<!-- Depth Meter -->
+<div id="depth-meter">
+  <span class="depth-label">PROFUNDIDAD</span>
+  <div class="depth-track">
+    <div class="depth-arrow"></div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div id="stats">
+  <div class="stat-card">
+    <div class="stat-label">Viewers</div>
+    <div class="stat-value green" id="val-viewers">--</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Followers</div>
+    <div class="stat-value green" id="val-followers">--</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Subs</div>
+    <div class="stat-value green" id="val-subs">--</div>
+  </div>
+</div>
+
+<!-- Uptime -->
+<div id="uptime-box">
+  <div class="uptime-label">Señal en vivo</div>
+  <div class="uptime-value" id="val-uptime">00:00:00</div>
+</div>
+
+<!-- Sonar -->
+<div id="sonar">
+  <div class="sonar-ring" id="sr1"></div>
+  <div class="sonar-ring" id="sr2"></div>
+  <div class="sonar-ring" id="sr3"></div>
+</div>
+
+<!-- Chat -->
+<div id="chat-area"></div>
+
+<!-- Alert Zone -->
+<div id="alert-zone"></div>
+
+<!-- Recent Activity -->
+<div id="recent-activity">
+  <div class="ra-label" id="ra-label">▶ Último evento</div>
+  <div class="ra-name" id="ra-name">--</div>
+  <div class="ra-event" id="ra-event"></div>
+</div>
+
+<!-- Bottom Bar -->
+<div id="bottom-bar">
+  <div id="live-badge">Live</div>
+  <div id="game-label" id="game-display">Subnautica 2</div>
+  <div id="title-sep">◆</div>
+  <div id="title-text" id="stream-title">Conectando...</div>
+  <div id="title-deco"></div>
+</div>
+
+<!-- Offline notice -->
+<div id="offline-notice">⚡ Sin conexión con StreamForge</div>
+
+<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+
+<script>
+/* ──────────────────────────────────────────────
+   CONFIG
+─────────────────────────────────────────────── */
+const CHANNEL = new URLSearchParams(location.search).get('channel') || 'TU_CANAL';
+const BACKEND_URL = 'http://localhost:3000';
+
+/* ──────────────────────────────────────────────
+   STATE
+─────────────────────────────────────────────── */
+let uptimeSeconds = 0;
+let uptimeInterval = null;
+
+function fmtNum(n) {
+  if (n == null) return '--';
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+  return String(n);
+}
+
+function fmtTime(s) {
+  if (s == null) return '00:00:00';
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  return [h, m, sec].map(v => String(v).padStart(2, '0')).join(':');
+}
+
+/* ──────────────────────────────────────────────
+   CLOCK
+─────────────────────────────────────────────── */
+function updateClock() {
+  document.getElementById('hud-clock').textContent =
+    new Date().toLocaleTimeString('es-ES', { hour12: false });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ──────────────────────────────────────────────
+   HUD APPLY
+─────────────────────────────────────────────── */
+function applyHud(data) {
+  document.getElementById('val-viewers').textContent   = fmtNum(data.viewers);
+  document.getElementById('val-followers').textContent = fmtNum(data.followers);
+  document.getElementById('val-subs').textContent      = fmtNum(data.subscribers);
+
+  const tt = document.getElementById('stream-title');
+  if (data.streamTitle) tt.textContent = data.streamTitle;
+  const gl = document.getElementById('game-display');
+  if (data.gameName) gl.textContent = data.gameName;
+
+  if (data.uptimeSeconds != null) {
+    uptimeSeconds = data.uptimeSeconds;
+    document.getElementById('val-uptime').textContent = fmtTime(uptimeSeconds);
+  }
+
+  if (!uptimeInterval && data.isLive) {
+    uptimeInterval = setInterval(() => {
+      uptimeSeconds++;
+      document.getElementById('val-uptime').textContent = fmtTime(uptimeSeconds);
+    }, 1000);
+  }
+}
+
+/* ──────────────────────────────────────────────
+   CHAT
+─────────────────────────────────────────────── */
+const chatArea = document.getElementById('chat-area');
+const MAX_CHAT = 20;
+
+function addChat(msg) {
+  const el = document.createElement('div');
+  el.className = 'chat-msg';
+  el.innerHTML = `
+    <div class="shimmer"></div>
+    <div class="chat-user" style="color:${msg.user?.color || '#00d4ff'};text-shadow:0 0 8px ${msg.user?.color || '#00d4ff'}">
+      ▶ ${escHtml(msg.user?.displayName || 'Anónimo')}
+    </div>
+    <div class="chat-text">${escHtml(msg.text)}</div>
+    <div class="chat-bar">
+      <div class="chat-bar-line"></div>
+      <span class="chat-bar-sys">SYS:OK</span>
+    </div>
+  `;
+  chatArea.appendChild(el);
+  while (chatArea.children.length > MAX_CHAT) {
+    const old = chatArea.firstChild;
+    old.classList.add('exit');
+    setTimeout(() => { if (old.parentNode) old.parentNode.removeChild(old); }, 300);
+  }
+}
+
+/* ──────────────────────────────────────────────
+   ALERTS
+─────────────────────────────────────────────── */
+const alertQueue = [];
+let alertBusy = false;
+const ALERT_DURATION = 5000;
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function enqueueAlert(cfg) {
+  alertQueue.push(cfg);
+  if (!alertBusy) processQueue();
+}
+
+function processQueue() {
+  if (!alertQueue.length) { alertBusy = false; return; }
+  alertBusy = true;
+  const cfg = alertQueue.shift();
+  showAlert(cfg);
+  setTimeout(processQueue, ALERT_DURATION + 300);
+}
+
+function showAlert({ type, user, detail, msg }) {
+  const zone = document.getElementById('alert-zone');
+  const card = document.createElement('div');
+  card.className = 'alert-card ' + (type === 'sub' || type === 'resub' || type === 'subgift' ? 'sub' : type === 'bits' || type === 'cheer' ? 'bits' : type === 'raid' ? 'raid' : '');
+
+  const typeLabels = {
+    follow: '✦ NUEVO SEGUIDOR ✦', sub: '★ NUEVO SUSCRIPTOR ★',
+    resub: '★ RE-SUSCRIPCIÓN ★', subgift: '★ SUB REGALADO ★',
+    bits: '💎 BITS 💎', cheer: '💎 CHEER 💎',
+    raid: '⚔️ RAIDS ENTRANTE ⚔️', redemption: '⚡ CANJEO ⚡',
+  };
+
+  card.innerHTML = `
+    <div class="alert-type">${typeLabels[type] || type.toUpperCase()}</div>
+    <div class="alert-user">${escHtml(user)}</div>
+    ${detail ? `<div class="alert-detail">${escHtml(detail)}</div>` : ''}
+    ${msg ? `<div class="alert-msg">${escHtml(msg)}</div>` : ''}
+  `;
+  zone.appendChild(card);
+  setTimeout(() => { if (card.parentNode) card.parentNode.removeChild(card); }, ALERT_DURATION + 100);
+}
+
+/* ──────────────────────────────────────────────
+   RECENT ACTIVITY
+─────────────────────────────────────────────── */
+function showRecent(label, name, event) {
+  const el = document.getElementById('recent-activity');
+  document.getElementById('ra-label').textContent = label;
+  document.getElementById('ra-name').textContent = name;
+  document.getElementById('ra-event').textContent = event || '';
+  el.classList.add('show');
+  clearTimeout(el._hide);
+  el._hide = setTimeout(() => el.classList.remove('show'), 10000);
+}
+
+/* ──────────────────────────────────────────────
+   SOCKET.IO
+─────────────────────────────────────────────── */
+function initSocket() {
+  let socket;
+  try {
+    socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+  } catch(e) {
+    document.getElementById('offline-notice').classList.add('show');
+    return;
+  }
+
+  socket.on('connect', () => {
+    document.getElementById('offline-notice').classList.remove('show');
+    socket.emit('join:channel', CHANNEL);
+    socket.emit('hud:start-poll', { channel: CHANNEL, interval: 10 });
+    fetch(`${BACKEND_URL}/hud/${CHANNEL}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) applyHud(d); })
+      .catch(() => {});
+  });
+
+  socket.on('disconnect', () => {
+    document.getElementById('offline-notice').classList.add('show');
+  });
+
+  socket.on('hud:update', applyHud);
+
+  socket.on('chat:message', (msg) => { addChat(msg); });
+
+  socket.on('channel:follow', ({ userDisplayName }) => {
+    showRecent('▶ Último seguidor', userDisplayName);
+    enqueueAlert({ type: 'follow', user: userDisplayName });
+  });
+
+  socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+    if (isGift) return;
+    const t = tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3';
+    enqueueAlert({ type: 'sub', user: userDisplayName, detail: t });
+  });
+
+  socket.on('channel:subscription-message', ({ userDisplayName, tier, cumulativeMonths, messageText }) => {
+    const t = tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3';
+    enqueueAlert({ type: 'resub', user: userDisplayName, detail: `${cumulativeMonths} meses · ${t}`, msg: messageText || undefined });
+  });
+
+  socket.on('channel:subgift', ({ gifterDisplayName, amount, tier }) => {
+    const t = tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3';
+    enqueueAlert({ type: 'subgift', user: gifterDisplayName, detail: `× ${amount} subs · ${t}` });
+  });
+
+  socket.on('channel:cheer', ({ userDisplayName, bits, message }) => {
+    enqueueAlert({ type: 'bits', user: userDisplayName, detail: `${bits.toLocaleString()} bits`, msg: message || undefined });
+  });
+
+  socket.on('channel:raid', ({ fromDisplayName, viewerCount }) => {
+    showRecent('⚔️ Raid entrante', fromDisplayName, `${viewerCount} espectadores`);
+    enqueueAlert({ type: 'raid', user: fromDisplayName, detail: `${viewerCount} espectadores` });
+  });
+
+  socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+    enqueueAlert({ type: 'redemption', user: userDisplayName, detail: rewardTitle });
+  });
+}
+
+/* ──────────────────────────────────────────────
+   PARTÍCULAS
+─────────────────────────────────────────────── */
+(function initParticles() {
+  const c = document.getElementById('particles');
+  const ctx = c.getContext('2d');
+  c.width = 1920; c.height = 1080;
+
+  const COUNT = 60;
+  const colors = ['#00d4ff', '#00ff88', '#0066ff'];
+
+  const particles = Array.from({ length: COUNT }, () => ({
+    x: Math.random() * 1920, y: Math.random() * 1080,
+    r: Math.random() * 1.8 + 0.3,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    alpha: Math.random() * 0.5 + 0.1,
+  }));
+
+  function drawGrid() {
+    ctx.strokeStyle = 'rgba(0,212,255,0.025)';
+    ctx.lineWidth = 0.5;
+    for (let x = 0; x <= 1920; x += 80) {
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,1080); ctx.stroke();
+    }
+    for (let y = 0; y <= 1080; y += 80) {
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(1920,y); ctx.stroke();
+    }
+  }
+
+  let bubbles = [];
+  for (let i = 0; i < 15; i++) {
+    bubbles.push({
+      x: Math.random() * 1920, y: Math.random() * 1080 + 1080,
+      r: Math.random() * 4 + 2,
+      vy: -(Math.random() * 0.6 + 0.3),
+      alpha: Math.random() * 0.3 + 0.1,
+    });
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, 1920, 1080);
+    drawGrid();
+
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = 1920; if (p.x > 1920) p.x = 0;
+      if (p.y < 0) p.y = 1080; if (p.y > 1080) p.y = 0;
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    });
+
+    ctx.globalAlpha = 1;
+
+    bubbles.forEach(b => {
+      b.y += b.vy;
+      if (b.y < -20) { b.y = 1100; b.x = Math.random() * 1920; }
+      ctx.globalAlpha = b.alpha;
+      ctx.strokeStyle = 'rgba(0,212,255,0.3)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(b.x + 1, b.y - 1, b.r * 0.3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fill();
+    });
+
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ──────────────────────────────────────────────
+   SONAR ANIM
+─────────────────────────────────────────────── */
+(function initSonar() {
+  const rings = [
+    document.getElementById('sr1'),
+    document.getElementById('sr2'),
+    document.getElementById('sr3'),
+  ];
+  rings.forEach((el, i) => {
+    let start = null;
+    function anim(t) {
+      if (!start) start = t;
+      const p = ((t - start) / 3000 + i / 3) % 1;
+      const scale = 1 + p * 2;
+      const opacity = 0.6 * (1 - p);
+      el.style.transform = `scale(${scale})`;
+      el.style.opacity = opacity;
+      requestAnimationFrame(anim);
+    }
+    requestAnimationFrame(anim);
+  });
+})();
+
+/* ──────────────────────────────────────────────
+   DEMO (fallback si no hay backend)
+─────────────────────────────────────────────── */
+let demoActive = true;
+
+function startDemo() {
+  applyHud({ viewers: 156, followers: 3420, subscribers: 89, uptimeSeconds: 2840, streamTitle: 'EXPLORANDO LAS PROFUNDIDADES · VOD', gameName: 'Subnautica 2', isLive: true });
+
+  const demoChats = [
+    { user: { displayName: 'DeepDiver99', color: '#00d4ff' }, text: '¡Qué juegazo! Las criaturas bioluminiscentes son una locura' },
+    { user: { displayName: 'OceanExplorer', color: '#00ff88' }, text: 'Cuidado con los leviatanes en el sector sur!' },
+    { user: { displayName: 'SubnauticaFan', color: '#ff6b6b' }, text: 'Ese bioma azul profundo es el mejor del juego' },
+    { user: { displayName: 'AquaLunar', color: '#c84bff' }, text: 'La banda sonora en esta zona es increíble' },
+  ];
+
+  let ci = 0;
+  setInterval(() => {
+    if (!demoActive) return;
+    addChat(demoChats[ci % demoChats.length]);
+    ci++;
+  }, 5000);
+
+  setTimeout(() => { if (demoActive) enqueueAlert({ type: 'follow', user: 'DeepDiver99' }); }, 2000);
+  setTimeout(() => { if (demoActive) enqueueAlert({ type: 'sub', user: 'OceanExplorer', detail: 'Tier 1' }); }, 7000);
+  setTimeout(() => { if (demoActive) enqueueAlert({ type: 'bits', user: 'SubnauticaFan', detail: '500 bits', msg: '¡Qué buen momento!' }); }, 13000);
+  setTimeout(() => { if (demoActive) enqueueAlert({ type: 'raid', user: 'AquaLunar', detail: '42 espectadores' }); }, 19000);
+  setTimeout(() => { if (demoActive) enqueueAlert({ type: 'resub', user: 'CoralReefer', detail: '12 meses · Tier 2' }); }, 25000);
+}
+
+startDemo();
+
+if (typeof io !== 'undefined') {
+  initSocket();
+  demoActive = false;
+}
+</script>
+</body>
+</html>
