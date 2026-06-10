@@ -221,7 +221,7 @@ Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 > En desarrollo (`npm run dev`), reemplazá `localhost:3000` por `localhost:5173`.
 
 | Overlay | URL |
-|---|---|
+|---|---|---|
 | Chat | `http://localhost:3000/overlay.html?mode=chat&channel=tucanal` |
 | Sorteos | `http://localhost:3000/overlay.html?mode=giveaway&channel=tucanal` |
 | Predicciones | `http://localhost:3000/overlay.html?mode=prediction&channel=tucanal` |
@@ -230,6 +230,9 @@ Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 | Stream HUD | `http://localhost:3000/overlay.html?mode=hud&channel=tucanal` |
 | Temporizador | `http://localhost:3000/overlay.html?mode=timer&channel=tucanal` |
 | Scoreboard | `http://localhost:3000/overlay.html?mode=scoreboard&channel=tucanal` |
+| Subnautica 2 (completo) | `http://localhost:3000/overlays/subnautica2.html?channel=tucanal` |
+| Fortnite (completo) | `http://localhost:3000/overlays/fortnite.html?channel=tucanal` |
+| Alertas animadas | `http://localhost:3000/overlays/alerts.html?channel=tucanal` |
 
 Para cambiar el tema visual del chat agrega `&theme=subnautica2`, `&theme=poe2`, `&theme=wow` (Horda) o `&theme=alliance` (Alianza).
 
