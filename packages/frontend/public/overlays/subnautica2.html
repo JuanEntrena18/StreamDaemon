@@ -385,9 +385,25 @@
     margin-top: 4px; font-style: italic;
   }
 
+  /* ──────── DEMO BADGE ──────── */
+  #demo-badge {
+    position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.4);
+    padding: 4px 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 2px;
+    color: #fbbf24;
+    display: none;
+    z-index: 55;
+    border-radius: 4px;
+  }
+  #demo-badge.show { display: block; }
+
   /* ──────── OFFLINE NOTICE ──────── */
   #offline-notice {
-    position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
+    position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
     background: rgba(255,59,59,0.12);
     border: 1px solid rgba(255,59,59,0.3);
     padding: 5px 18px;
@@ -557,24 +573,27 @@
 <!-- Bottom Bar -->
 <div id="bottom-bar">
   <div id="live-badge">Live</div>
-  <div id="game-label" id="game-display">Subnautica 2</div>
+  <div id="game-display">Subnautica 2</div>
   <div id="title-sep">◆</div>
-  <div id="title-text" id="stream-title">Conectando...</div>
+  <div id="stream-title">Conectando...</div>
   <div id="title-deco"></div>
 </div>
 
 <!-- Offline notice -->
 <div id="offline-notice">⚡ Sin conexión con StreamForge</div>
 
-<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+<!-- Demo badge -->
+<div id="demo-badge">🧪 MODO PRUEBA</div>
 
 <script>
-/* ──────────────────────────────────────────────
-   CONFIG
-─────────────────────────────────────────────── */
-const CHANNEL = new URLSearchParams(location.search).get('channel') || 'TU_CANAL';
-const BACKEND_URL = 'http://localhost:3000';
+const CHANNEL = new URLSearchParams(location.search).get('channel') || '';
+const DEMO_MODE = new URLSearchParams(location.search).get('demo') === 'true';
+const BACKEND_URL = new URLSearchParams(location.search).get('backend') || location.origin;
 
+document.getElementById('channel-name').textContent = CHANNEL || '---';
+</script>
+
+<script>
 /* ──────────────────────────────────────────────
    STATE
 ─────────────────────────────────────────────── */
@@ -720,16 +739,21 @@ function showRecent(label, name, event) {
 /* ──────────────────────────────────────────────
    SOCKET.IO
 ─────────────────────────────────────────────── */
+let socketConnected = false;
+
+function loadSocketIO(cb) {
+  const script = document.createElement('script');
+  script.src = BACKEND_URL + '/socket.io/socket.io.js';
+  script.onload = cb;
+  script.onerror = () => { console.warn('Socket.IO not available'); cb(new Error('load failed')); };
+  document.head.appendChild(script);
+}
+
 function initSocket() {
-  let socket;
-  try {
-    socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
-  } catch(e) {
-    document.getElementById('offline-notice').classList.add('show');
-    return;
-  }
+  const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
 
   socket.on('connect', () => {
+    socketConnected = true;
     document.getElementById('offline-notice').classList.remove('show');
     socket.emit('join:channel', CHANNEL);
     socket.emit('hud:start-poll', { channel: CHANNEL, interval: 10 });
@@ -880,9 +904,17 @@ function initSocket() {
 })();
 
 /* ──────────────────────────────────────────────
-   DEMO (fallback si no hay backend)
+   BOOT
 ─────────────────────────────────────────────── */
-let demoActive = true;
+loadSocketIO(function(err) {
+  if (!err) {
+    initSocket();
+  }
+  if (DEMO_MODE) {
+    document.getElementById('demo-badge').classList.add('show');
+    startDemo();
+  }
+});
 
 function startDemo() {
   applyHud({ viewers: 156, followers: 3420, subscribers: 89, uptimeSeconds: 2840, streamTitle: 'EXPLORANDO LAS PROFUNDIDADES · VOD', gameName: 'Subnautica 2', isLive: true });
@@ -896,23 +928,15 @@ function startDemo() {
 
   let ci = 0;
   setInterval(() => {
-    if (!demoActive) return;
     addChat(demoChats[ci % demoChats.length]);
     ci++;
   }, 5000);
 
-  setTimeout(() => { if (demoActive) enqueueAlert({ type: 'follow', user: 'DeepDiver99' }); }, 2000);
-  setTimeout(() => { if (demoActive) enqueueAlert({ type: 'sub', user: 'OceanExplorer', detail: 'Tier 1' }); }, 7000);
-  setTimeout(() => { if (demoActive) enqueueAlert({ type: 'bits', user: 'SubnauticaFan', detail: '500 bits', msg: '¡Qué buen momento!' }); }, 13000);
-  setTimeout(() => { if (demoActive) enqueueAlert({ type: 'raid', user: 'AquaLunar', detail: '42 espectadores' }); }, 19000);
-  setTimeout(() => { if (demoActive) enqueueAlert({ type: 'resub', user: 'CoralReefer', detail: '12 meses · Tier 2' }); }, 25000);
-}
-
-startDemo();
-
-if (typeof io !== 'undefined') {
-  initSocket();
-  demoActive = false;
+  setTimeout(() => enqueueAlert({ type: 'follow', user: 'DeepDiver99' }), 2000);
+  setTimeout(() => enqueueAlert({ type: 'sub', user: 'OceanExplorer', detail: 'Tier 1' }), 7000);
+  setTimeout(() => enqueueAlert({ type: 'bits', user: 'SubnauticaFan', detail: '500 bits', msg: '¡Qué buen momento!' }), 13000);
+  setTimeout(() => enqueueAlert({ type: 'raid', user: 'AquaLunar', detail: '42 espectadores' }), 19000);
+  setTimeout(() => enqueueAlert({ type: 'resub', user: 'CoralReefer', detail: '12 meses · Tier 2' }), 25000);
 }
 </script>
 </body>

@@ -339,6 +339,21 @@ html, body {
 .corner-tr { top: 20px; right: 20px; border-width: 2px 2px 0 0; }
 .corner-bl { bottom: 20px; left: 20px; border-width: 0 0 2px 2px; }
 .corner-br { bottom: 20px; right: 20px; border-width: 0 2px 2px 0; }
+
+#demo-badge {
+  position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(245,158,11,0.15);
+  border: 1px solid rgba(245,158,11,0.4);
+  padding: 4px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2px;
+  color: #fbbf24;
+  display: none;
+  z-index: 100;
+  border-radius: 4px;
+}
+#demo-badge.show { display: block; }
 </style>
 </head>
 <body>
@@ -410,11 +425,13 @@ html, body {
   </div>
 
   <div class="config-hint" id="configHint">Subathon · StreamForger</div>
+  <div id="demo-badge">🧪 MODO PRUEBA</div>
 </div>
 
 <script>
 const params = new URLSearchParams(location.search);
-const channel = params.get('channel') || 'streamforger';
+const channel = params.get('channel') || '';
+const DEMO_MODE = params.get('demo') === 'true';
 const SOCKET_URL = params.get('socket') || location.origin;
 
 let state = {
@@ -621,11 +638,10 @@ function initDemo() {
 
 // ── Boot ──
 connectSocket();
-setTimeout(() => {
-  if (state.status === 'stopped' && state.remaining === 0) {
-    initDemo();
-  }
-}, 3000);
+if (DEMO_MODE) {
+  document.getElementById('demo-badge').classList.add('show');
+  setTimeout(initDemo, 3000);
+}
 </script>
 </body>
 </html>

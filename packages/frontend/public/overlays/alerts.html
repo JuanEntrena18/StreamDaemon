@@ -164,6 +164,20 @@
     z-index: 5;
   }
 
+  /* ───────── DEMO BADGE ───────── */
+  #demo-badge {
+    position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.4);
+    padding: 4px 16px;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px;
+    color: #fbbf24;
+    display: none;
+    z-index: 110;
+  }
+  #demo-badge.show { display: block; }
+
   /* ───────── TEST BUTTONS ───────── */
   #controls {
     position: absolute; bottom: 20px; left: 50%;
@@ -201,6 +215,8 @@
 
 <div id="alert-center"></div>
 
+<div id="demo-badge">🧪 MODO PRUEBA</div>
+
 <div id="controls">
   <button data-type="follow">❤️ Follow</button>
   <button data-type="sub">⭐ Sub</button>
@@ -213,10 +229,11 @@
 
 <script>
 /* ──────────────────────────────────────────────
-   CONFIG
+   CONFIG (desde URL)
 ─────────────────────────────────────────────── */
-const CHANNEL = new URLSearchParams(location.search).get('channel') || '';
-const BACKEND_URL = 'http://localhost:3000';
+const CHANNEL     = new URLSearchParams(location.search).get('channel') || '';
+const DEMO_MODE   = new URLSearchParams(location.search).get('demo') === 'true';
+const BACKEND_URL = new URLSearchParams(location.search).get('backend') || location.origin;
 
 /* ──────────────────────────────────────────────
    ALERT QUEUE
@@ -400,27 +417,43 @@ document.querySelectorAll('#controls button').forEach(btn => {
 });
 
 /* ──────────────────────────────────────────────
-   DEMO
+   BOOT
 ─────────────────────────────────────────────── */
-const demoUsers = ['NeonRider', 'PixelWizard', 'CyberFox', 'StreamQueen', 'DarkPhoenix', 'LunarEcho'];
-let di = 0;
-const demoTypes = ['follow', 'follow', 'sub', 'follow', 'bits', 'follow', 'raid', 'resub', 'follow', 'subgift'];
-
-function demoLoop() {
-  const type = demoTypes[di % demoTypes.length];
-  const user = demoUsers[di % demoUsers.length];
-  di++;
-  const details = {
-    sub: 'Tier 1', resub: '3 meses · Tier 1', subgift: '× 2 subs · Tier 1',
-    bits: '300 bits', raid: '27 espectadores', redemption: 'Puntos de canal',
-  };
-  trigger(type, user, details[type] || undefined);
-  setTimeout(demoLoop, 7000 + Math.random() * 4000);
+function loadSocketIO(cb) {
+  const script = document.createElement('script');
+  script.src = BACKEND_URL + '/socket.io/socket.io.js';
+  script.onload = cb;
+  script.onerror = () => cb(new Error('load failed'));
+  document.head.appendChild(script);
 }
-setTimeout(demoLoop, 1500);
 
-/* Init Socket.IO */
-if (typeof io !== 'undefined') initSocket();
+loadSocketIO(function(err) {
+  if (!err) {
+    initSocket();
+  }
+  if (DEMO_MODE) {
+    startDemo();
+  }
+});
+
+function startDemo() {
+  document.getElementById('demo-badge').classList.add('show');
+  const demoUsers = ['NeonRider', 'PixelWizard', 'CyberFox', 'StreamQueen', 'DarkPhoenix', 'LunarEcho'];
+  let di = 0;
+  const demoTypes = ['follow', 'follow', 'sub', 'follow', 'bits', 'follow', 'raid', 'resub', 'follow', 'subgift'];
+  function loop() {
+    const type = demoTypes[di % demoTypes.length];
+    const user = demoUsers[di % demoUsers.length];
+    di++;
+    const details = {
+      sub: 'Tier 1', resub: '3 meses · Tier 1', subgift: '× 2 subs · Tier 1',
+      bits: '300 bits', raid: '27 espectadores', redemption: 'Puntos de canal',
+    };
+    trigger(type, user, details[type] || undefined);
+    setTimeout(loop, 7000 + Math.random() * 4000);
+  }
+  setTimeout(loop, 1500);
+}
 </script>
 </body>
 </html>

@@ -306,9 +306,24 @@
   .corner.bl { bottom: 0; left: 0; transform: scaleY(-1); }
   .corner.br { bottom: 60px; right: 0; transform: scale(-1,-1); }
 
+  /* ──────────────────────────────────── DEMO BADGE */
+  #demo-badge {
+    position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.4);
+    padding: 4px 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px;
+    color: #fbbf24;
+    display: none;
+    z-index: 55;
+  }
+  #demo-badge.show { display: block; }
+
   /* ──────────────────────────────────── MODO OFFLINE */
   #offline-notice {
-    position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
+    position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
     background: rgba(255,59,59,0.15);
     border: 1px solid rgba(255,59,59,0.4);
     padding: 6px 20px;
@@ -423,16 +438,16 @@
 <!-- Aviso offline -->
 <div id="offline-notice">⚡ Sin conexión con StreamForge</div>
 
-<!-- Socket.IO desde backend local -->
-<script src="http://localhost:3001/socket.io/socket.io.js"></script>
+<!-- Demo badge -->
+<div id="demo-badge">🧪 MODO PRUEBA</div>
 
 <script>
 /* ──────────────────────────────────────────────────────────
-   CONFIGURACIÓN
-   Edita CHANNEL con tu nombre de canal Twitch
+   CONFIG (desde URL)
 ────────────────────────────────────────────────────────── */
-const CHANNEL     = 'TU_CANAL_AQUI';   // ← pon aquí tu canal
-const BACKEND_URL = 'http://localhost:3001';
+const CHANNEL     = new URLSearchParams(location.search).get('channel') || '';
+const DEMO_MODE   = new URLSearchParams(location.search).get('demo') === 'true';
+const BACKEND_URL = new URLSearchParams(location.search).get('backend') || location.origin;
 
 /* ──────────────────────────────────────────────────────────
    ESTADO LOCAL
@@ -686,10 +701,28 @@ function initSocket() {
 })();
 
 /* ──────────────────────────────────────────────────────────
-   DEMO PREVIEW (activo si Socket.IO no carga)
-   Se auto-desactiva cuando llegan datos reales
+   BOOT
 ────────────────────────────────────────────────────────── */
-let demoActive = true;
+function loadSocketIO(cb) {
+  const script = document.createElement('script');
+  script.src = BACKEND_URL + '/socket.io/socket.io.js';
+  script.onload = cb;
+  script.onerror = () => cb(new Error('load failed'));
+  document.head.appendChild(script);
+}
+
+loadSocketIO(function(err) {
+  if (!err) {
+    initSocket();
+  }
+  if (DEMO_MODE) {
+    document.getElementById('demo-badge').classList.add('show');
+    startDemo();
+  } else if (err) {
+    document.getElementById('offline-notice').classList.add('show');
+    document.getElementById('offline-notice').textContent = '👁 Sin backend';
+  }
+});
 
 function startDemo() {
   applyHud({
@@ -700,30 +733,10 @@ function startDemo() {
     isLive: true,
   });
 
-  setTimeout(() => {
-    if (demoActive) enqueueAlert({ type: 'follow', user: 'QuantumSniper99' });
-  }, 2500);
-  setTimeout(() => {
-    if (demoActive) enqueueAlert({ type: 'sub', user: 'NoRecoilKing', detail: 'Tier 1' });
-  }, 8000);
-  setTimeout(() => {
-    if (demoActive) enqueueAlert({ type: 'bits', user: 'StormRider', detail: '500 bits', msg: '¡Vamos que los tiramos!' });
-  }, 14000);
-  setTimeout(() => {
-    if (demoActive) enqueueAlert({ type: 'subgift', user: 'LegendGifter', detail: '× 5 subs · Tier 1' });
-  }, 20000);
-}
-
-/* Inicializar */
-startDemo();
-
-/* Intentar conectar al backend */
-if (typeof io !== 'undefined') {
-  initSocket();
-} else {
-  /* Socket.IO no disponible → sólo demo */
-  document.getElementById('offline-notice').classList.add('show');
-  document.getElementById('offline-notice').textContent = '👁 Vista previa — sin backend';
+  setTimeout(() => enqueueAlert({ type: 'follow', user: 'QuantumSniper99' }), 2500);
+  setTimeout(() => enqueueAlert({ type: 'sub', user: 'NoRecoilKing', detail: 'Tier 1' }), 8000);
+  setTimeout(() => enqueueAlert({ type: 'bits', user: 'StormRider', detail: '500 bits', msg: '¡Vamos que los tiramos!' }), 14000);
+  setTimeout(() => enqueueAlert({ type: 'subgift', user: 'LegendGifter', detail: '× 5 subs · Tier 1' }), 20000);
 }
 </script>
 </body>
