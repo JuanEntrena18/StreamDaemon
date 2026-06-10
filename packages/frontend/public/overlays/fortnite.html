@@ -348,6 +348,46 @@
     border-bottom: 1px solid rgba(0,212,255,0.2);
   }
 
+  /* ──────────────────────────────────── CHAT BOX */
+  .fn-chat {
+    position: absolute;
+    bottom: 72px;
+    width: 380px; max-height: 340px;
+    background: rgba(10,14,26,0.82);
+    border: 1px solid rgba(0,212,255,0.25);
+    clip-path: polygon(2% 0, 100% 0, 100% 94%, 98% 100%, 0 100%, 0 6%);
+    padding: 10px 14px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+    z-index: 20;
+  }
+  .fn-chat.visible { display: flex; }
+  .fn-chat.left  { left: 28px; }
+  .fn-chat.right { right: 28px; }
+  .fn-chat-header {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--blue); margin-bottom: 4px;
+    border-bottom: 1px solid rgba(0,212,255,0.15);
+    padding-bottom: 4px;
+  }
+  .fn-chat-messages {
+    display: flex; flex-direction: column;
+    gap: 3px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .fn-chat-msg {
+    font-size: 12px;
+    line-height: 1.4;
+    padding: 2px 0;
+    word-break: break-word;
+  }
+  .fn-chat-msg .un { font-weight: 700; }
+  .fn-chat-msg .txt { color: rgba(255,255,255,0.8); }
+
   /* ──────────────────────────────────── DEMO BADGE */
   #demo-badge {
     position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
@@ -495,6 +535,12 @@
 <!-- Demo badge -->
 <div id="demo-badge">🧪 MODO PRUEBA</div>
 
+<!-- Chat en vivo -->
+<div class="fn-chat left" id="fn-chat">
+  <div class="fn-chat-header">💬 Chat en vivo</div>
+  <div class="fn-chat-messages" id="fn-chat-msgs"></div>
+</div>
+
 <script>
 /* ──────────────────────────────────────────────────────────
    CONFIG (desde URL)
@@ -503,7 +549,8 @@ const CHANNEL     = new URLSearchParams(location.search).get('channel') || '';
 const DEMO_MODE   = new URLSearchParams(location.search).get('demo') === 'true';
 const BACKEND_URL = new URLSearchParams(location.search).get('backend') || location.origin;
 const EPIC_USER   = new URLSearchParams(location.search).get('epic') || '';
-const STATS_MODE  = new URLSearchParams(location.search).get('mode') || 'solo';
+const STATS_MODE  = new URLSearchParams(location.search).get('mode') || 'overall';
+const LAYOUT      = new URLSearchParams(location.search).get('layout') || 'stats';
 
 /* ──────────────────────────────────────────────────────────
    ESTADO LOCAL
@@ -633,6 +680,34 @@ async function fetchFnStats() {
 }
 
 /* ──────────────────────────────────────────────────────────
+   CHAT EN VIVO
+────────────────────────────────────────────────────────── */
+const MAX_CHAT_MSGS = 50;
+
+function initChatLayout() {
+  const el = document.getElementById('fn-chat');
+  if (!el) return;
+  if (LAYOUT === 'chat-left') {
+    el.classList.add('visible', 'left');
+    el.classList.remove('right');
+  } else if (LAYOUT === 'chat-right') {
+    el.classList.add('visible', 'right');
+    el.classList.remove('left');
+  }
+}
+
+function addChatMessage(displayName, text, color) {
+  const container = document.getElementById('fn-chat-msgs');
+  if (!container) return;
+  const row = document.createElement('div');
+  row.className = 'fn-chat-msg';
+  row.innerHTML = `<span class="un" style="color:${color || '#00D4FF'}">${displayName}</span> <span class="txt">${text}</span>`;
+  container.appendChild(row);
+  if (container.children.length > MAX_CHAT_MSGS) container.removeChild(container.firstChild);
+  container.scrollTop = container.scrollHeight;
+}
+
+/* ──────────────────────────────────────────────────────────
    SOCKET.IO
 ────────────────────────────────────────────────────────── */
 function initSocket() {
@@ -715,6 +790,11 @@ function initSocket() {
   socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
     enqueueAlert({ type: 'redemption', user: userDisplayName, detail: rewardTitle });
   });
+
+  /* Chat messages (for fn-chat box) */
+  socket.on('chat:message', ({ user, text }) => {
+    addChatMessage(user.displayName, text, user.color);
+  });
 }
 
 /* ──────────────────────────────────────────────────────────
@@ -788,13 +868,17 @@ function loadSocketIO(cb) {
 loadSocketIO(function(err) {
   if (!err) {
     initSocket();
+  } else {
+    // Retry socket.io load once after 3s
+    setTimeout(() => loadSocketIO(function(err2) {
+      if (!err2) initSocket();
+    }), 3000);
   }
+  initChatLayout();
+
   if (DEMO_MODE) {
     document.getElementById('demo-badge').classList.add('show');
     startDemo();
-  } else if (err) {
-    document.getElementById('offline-notice').classList.add('show');
-    document.getElementById('offline-notice').textContent = '👁 Sin backend';
   }
   // Fortnite stats (runs regardless of socket)
   fetchFnStats();
@@ -818,6 +902,14 @@ function startDemo() {
   document.getElementById('fn-kd').textContent        = demoStats.kd.toFixed(2);
   document.getElementById('fn-winrate').textContent   = demoStats.winRate.toFixed(1) + '%';
   document.getElementById('fn-stats').classList.add('visible');
+
+  // Demo chat messages (only if chat layout)
+  if (LAYOUT === 'chat-left' || LAYOUT === 'chat-right') {
+    setTimeout(() => addChatMessage('QuantumSniper99', 'Vamos con todo esta rankeds 🔥', '#FFD700'), 3000);
+    setTimeout(() => addChatMessage('NoRecoilKing', 'tira pa\'lante maestro', '#C84BFF'), 7000);
+    setTimeout(() => addChatMessage('StormRider', 'oieee que juegazoooo', '#00D4FF'), 12000);
+    setTimeout(() => addChatMessage('LegendGifter', 'saca la escopeta rey', '#FF6B6B'), 18000);
+  }
 
   setTimeout(() => enqueueAlert({ type: 'follow', user: 'QuantumSniper99' }), 2500);
   setTimeout(() => enqueueAlert({ type: 'sub', user: 'NoRecoilKing', detail: 'Tier 1' }), 8000);

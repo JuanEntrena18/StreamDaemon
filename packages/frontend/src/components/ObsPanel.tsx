@@ -167,8 +167,10 @@ export function ObsPanel({ channel, backendUrl }: Props) {
 
   // Fortnite config
   const [fnApiKey, setFnApiKey] = useState('');
+  const [showFnApiKey, setShowFnApiKey] = useState(false);
   const [fnEpicUsername, setFnEpicUsername] = useState('');
-  const [fnStatsMode, setFnStatsMode] = useState('solo');
+  const [fnStatsMode, setFnStatsMode] = useState('overall');
+  const [fnLayout, setFnLayout] = useState('stats');
   const [fnSaved, setFnSaved] = useState(false);
   const [fnConfigLoaded, setFnConfigLoaded] = useState(false);
 
@@ -178,12 +180,15 @@ export function ObsPanel({ channel, backendUrl }: Props) {
       const data = await r.json();
       if (data.epicUsername) setFnEpicUsername(data.epicUsername);
       if (data.statsMode) setFnStatsMode(data.statsMode);
+      if (data.layout) setFnLayout(data.layout);
       setFnConfigLoaded(true);
     });
   }, []);
 
   const saveFnConfig = async () => {
-    await apiPut('/fortnite/config', { apiKey: fnApiKey, epicUsername: fnEpicUsername, statsMode: fnStatsMode });
+    const body: any = { epicUsername: fnEpicUsername, statsMode: fnStatsMode, layout: fnLayout };
+    if (fnApiKey) body.apiKey = fnApiKey;
+    await apiPut('/fortnite/config', body);
     setFnSaved(true);
     setTimeout(() => setFnSaved(false), 3000);
   };
@@ -200,7 +205,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     if (standalone) {
       let url = `${overlayBaseUrl}/overlays/${standalone}`;
       if (channel) url += `?channel=${channel}`;
-      if (mode === 'fortnite' && fnEpicUsername) url += `&epic=${encodeURIComponent(fnEpicUsername)}&mode=${fnStatsMode}`;
+      if (mode === 'fortnite' && fnEpicUsername) url += `&epic=${encodeURIComponent(fnEpicUsername)}&mode=${fnStatsMode}&layout=${fnLayout}`;
       const be = backendUrl || 'http://localhost:3000';
       if (be !== location.origin) url += `${channel ? '&' : '?'}backend=${encodeURIComponent(be)}`;
       return url;
@@ -352,8 +357,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                     padding: '0.3rem 0.6rem',
                     borderRadius: 6,
                     display: 'block',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
+                    overflowX: 'auto',
                     whiteSpace: 'nowrap',
                     border: '1px solid var(--sf-border)',
                   }}>
@@ -527,13 +531,19 @@ export function ObsPanel({ channel, backendUrl }: Props) {
               </label>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <input
-                  type="text"
+                  type={showFnApiKey ? 'text' : 'password'}
                   value={fnApiKey}
                   onChange={(e) => setFnApiKey(e.target.value)}
                   placeholder={fnConfigLoaded ? '•••••••• (ya configurada)' : 'Ingresá tu API key...'}
                   className="sf-input"
                   style={{ flex: 1, fontSize: '0.78rem' }}
                 />
+                <button
+                  onClick={() => setShowFnApiKey(!showFnApiKey)}
+                  className="sf-btn"
+                  style={{ fontSize: '0.78rem', padding: '0.3rem 0.6rem', cursor: 'pointer' }}
+                  title={showFnApiKey ? 'Ocultar key' : 'Mostrar key'}
+                >{showFnApiKey ? '🙈' : '👁️'}</button>
                 <a href="https://dash.fortnite-api.com" target="_blank" rel="noreferrer" className="sf-btn" style={{ fontSize: '0.72rem', padding: '0.3rem 0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
                   🌐 Obtener key
                 </a>
@@ -559,7 +569,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                 Modo de estadísticas
               </label>
               <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                {['solo', 'duo', 'trio', 'squad'].map((m) => (
+                {['overall', 'solo', 'duo', 'trio', 'squad'].map((m) => (
                   <button
                     key={m}
                     onClick={() => setFnStatsMode(m)}
@@ -572,6 +582,32 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                       cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase',
                     }}
                   >{m}</button>
+                ))}
+              </div>
+            </div>
+            {/* Layout selector */}
+            <div>
+              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
+                Diseño del overlay
+              </label>
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                {[
+                  { value: 'stats', label: '📊 Solo stats' },
+                  { value: 'chat-left', label: '💬 Chat izquierda' },
+                  { value: 'chat-right', label: '💬 Chat derecha' },
+                ].map((o) => (
+                  <button
+                    key={o.value}
+                    onClick={() => setFnLayout(o.value)}
+                    style={{
+                      padding: '0.25rem 0.75rem', borderRadius: 99, border: '1px solid',
+                      borderColor: fnLayout === o.value ? 'var(--sf-primary)' : 'var(--sf-border)',
+                      background: fnLayout === o.value ? 'rgba(124,58,237,0.2)' : 'transparent',
+                      color: fnLayout === o.value ? '#a78bfa' : 'var(--sf-text-3)',
+                      fontSize: '0.75rem', fontWeight: fnLayout === o.value ? 600 : 400,
+                      cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >{o.label}</button>
                 ))}
               </div>
             </div>

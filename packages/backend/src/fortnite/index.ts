@@ -12,9 +12,10 @@ interface FortniteConfig {
   apiKey: string;
   epicUsername: string;
   statsMode: string;
+  layout: string;
 }
 
-const DEFAULT_CONFIG: FortniteConfig = { apiKey: '', epicUsername: '', statsMode: 'solo' };
+const DEFAULT_CONFIG: FortniteConfig = { apiKey: '', epicUsername: '', statsMode: 'overall', layout: 'stats' };
 
 let fortniteConfig: FortniteConfig = { ...DEFAULT_CONFIG };
 const statsCache = new Map<string, { data: any; expiresAt: number }>();
@@ -48,8 +49,15 @@ loadConfig();
 
 function getModeKey(mode: string): string {
   const m = mode.toLowerCase();
-  if (['solo', 'duo', 'trio', 'squad'].includes(m)) return m;
-  return 'solo';
+  if (['overall', 'solo', 'duo', 'trio', 'squad'].includes(m)) return m;
+  return 'overall';
+}
+
+function getStat(v: any): number {
+  if (v == null) return 0;
+  if (typeof v === 'number') return v;
+  if (typeof v?.value === 'number') return v.value;
+  return 0;
 }
 
 async function fetchFortniteStats(username: string, mode: string): Promise<any> {
@@ -75,22 +83,28 @@ async function fetchFortniteStats(username: string, mode: string): Promise<any> 
   if (!statsAll) throw new Error('No stats found for this user');
 
   const modeKey = getModeKey(mode);
-  const modeStats = statsAll[modeKey] || statsAll.overall;
+  let modeStats = statsAll[modeKey] || statsAll.overall;
+  // Fall back to overall when mode-specific stats are all zero
+  if (modeStats && modeKey !== 'overall') {
+    const zero = !(getStat(modeStats?.kills) || getStat(modeStats?.wins) || getStat(modeStats?.matches));
+    if (zero) modeStats = statsAll.overall;
+  }
 
+  const s = (k: string) => getStat(modeStats?.[k as keyof typeof modeStats]);
   const result = {
     account: body.data.account,
     battlePass: body.data.battlePass,
     mode: modeKey,
-    kills: modeStats?.kills?.value ?? 0,
-    wins: modeStats?.wins?.value ?? 0,
-    matches: modeStats?.matches?.value ?? 0,
-    kd: modeStats?.kd?.value ?? 0,
-    winRate: modeStats?.winRate?.value ?? 0,
-    top10: modeStats?.top10?.value ?? 0,
-    top25: modeStats?.top25?.value ?? 0,
-    score: modeStats?.score?.value ?? 0,
-    minutesPlayed: modeStats?.minutesPlayed?.value ?? 0,
-    killsPerMatch: modeStats?.killsPerMatch?.value ?? 0,
+    kills: s('kills'),
+    wins: s('wins'),
+    matches: s('matches'),
+    kd: s('kd'),
+    winRate: s('winRate'),
+    top10: s('top10'),
+    top25: s('top25'),
+    score: s('score'),
+    minutesPlayed: s('minutesPlayed'),
+    killsPerMatch: s('killsPerMatch'),
   };
 
   statsCache.set(cacheKey, { data: result, expiresAt: Date.now() + CACHE_TTL });
@@ -103,14 +117,16 @@ export function setupFortnite(app: FastifyInstance) {
     apiKey: !!fortniteConfig.apiKey,
     epicUsername: fortniteConfig.epicUsername,
     statsMode: fortniteConfig.statsMode,
+    layout: fortniteConfig.layout,
   }));
 
   // Update config
   app.put('/fortnite/config', async (req, reply) => {
-    const { apiKey, epicUsername, statsMode } = req.body as Partial<FortniteConfig>;
-    if (apiKey !== undefined) fortniteConfig.apiKey = apiKey;
+    const { apiKey, epicUsername, statsMode, layout } = req.body as Partial<FortniteConfig>;
+    if (apiKey !== undefined && apiKey !== '') fortniteConfig.apiKey = apiKey;
     if (epicUsername !== undefined) fortniteConfig.epicUsername = epicUsername;
     if (statsMode !== undefined) fortniteConfig.statsMode = statsMode;
+    if (layout !== undefined) fortniteConfig.layout = layout;
     saveConfig();
     reply.send({ ok: true });
   });

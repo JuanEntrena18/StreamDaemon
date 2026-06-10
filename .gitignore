@@ -16,3 +16,5 @@ packages/desktop/extra/backend.env
 REVISION_SEGURIDAD.md
 overlayIAfeature.md
 fortnite-overlay.html
+packages/backend/data/fortnite-config.json
+packages/desktop/extra/
