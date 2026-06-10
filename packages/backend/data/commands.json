@@ -1,24 +1,14 @@
 {
   "jentrena": [
     {
-      "id": "1781100254048-v3fh4v",
-      "name": "!prueba",
-      "response": "Prueba",
-      "enabled": true,
-      "aliases": [],
-      "cooldown": 0,
-      "modOnly": false,
-      "count": 0
-    },
-    {
       "id": "1781100266856-dkvoiv",
       "name": "prueba",
-      "response": "Esto es una respuesta de prueba",
+      "response": "Esto es una respuesta de prueba {name}",
       "enabled": true,
       "aliases": [],
       "cooldown": 0,
       "modOnly": false,
-      "count": 1
+      "count": 3
     }
   ]
 }

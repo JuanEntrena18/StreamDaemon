@@ -16,6 +16,7 @@ const THEMES = [
   { id: 'subnautica2', label: 'Subnautica 2', icon: '🌊', color: '#00d4ff' },
   { id: 'poe2', label: 'Path of Exile 2', icon: '⚔️', color: '#c9a04a' },
   { id: 'wow', label: 'World of Warcraft', icon: '🛡️', color: '#ffd100' },
+  { id: 'fortnite', label: 'Fortnite', icon: '🔫', color: '#ff007f' },
 ];
 
 export function TransparentOverlay({ channel }: Props) {

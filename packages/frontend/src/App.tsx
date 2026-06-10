@@ -63,7 +63,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string;
       { id: 'hud',        icon: '📊', label: 'Stream HUD' },
       { id: 'timer',      icon: '⏱️', label: 'Temporizador' },
       { id: 'scoreboard', icon: '🏆', label: 'Scoreboard' },
-      { id: 'obs',        icon: '🔌', label: 'OBS URLs' },
+      { id: 'obs',        icon: '🎮', label: 'Game Overlays' },
     ],
   },
   {
@@ -87,7 +87,7 @@ const TAB_LABELS: Record<Tab, string> = {
   hud: 'Stream HUD',
   timer: 'Temporizador',
   scoreboard: 'Scoreboard',
-  obs: 'OBS URLs',
+  obs: 'Game Overlays',
   config: 'Configuración',
 };
 

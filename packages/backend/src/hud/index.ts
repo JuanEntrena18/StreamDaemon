@@ -75,4 +75,106 @@ export function setupHud(app: FastifyInstance) {
     }
     reply.send({ ok: true });
   });
+
+  // Update stream title / game / tags
+  app.put('/hud/stream/info', async (req, reply) => {
+    const { channel, title, gameName, tags } = req.body as { channel: string; title?: string; gameName?: string; tags?: string[] };
+    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
+
+    try {
+      if (!authProvider) return reply.status(503).send({ error: 'Not authenticated' });
+      const api = new ApiClient({ authProvider });
+      const user = await api.users.getUserByName(channel);
+      if (!user) return reply.status(404).send({ error: 'User not found' });
+
+      const update: Record<string, any> = {};
+      if (title !== undefined) update.title = title;
+      if (gameName !== undefined && gameName) {
+        const result = await api.search.searchCategories(gameName);
+        const found = result.data?.[0];
+        if (found) update.gameId = found.id;
+      }
+      if (tags !== undefined) update.tags = tags;
+
+      if (Object.keys(update).length > 0) {
+        await api.channels.updateChannelInfo(user.id, update as any);
+      }
+
+      reply.send({ ok: true });
+    } catch (err: any) {
+      reply.status(500).send({ error: err?.message ?? 'Failed to update stream info' });
+    }
+  });
+
+  // Search games / categories
+  app.get('/hud/games/search', async (req, reply) => {
+    const { query } = req.query as { query?: string };
+    if (!query) return reply.status(400).send({ error: 'Missing query' });
+
+    try {
+      if (!authProvider) return reply.status(503).send({ error: 'Not authenticated' });
+      const api = new ApiClient({ authProvider });
+      const result = await api.search.searchCategories(query);
+      reply.send(result.data.map((g) => ({ id: g.id, name: g.name, boxArtUrl: g.boxArtUrl })));
+    } catch (err: any) {
+      reply.status(500).send({ error: err?.message ?? 'Search failed' });
+    }
+  });
+
+  // Get current channel tags and stream info
+  app.get('/hud/tags/:channel', async (req, reply) => {
+    const { channel } = req.params as { channel: string };
+    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
+
+    try {
+      if (!authProvider) return reply.status(503).send({ error: 'Not authenticated' });
+      const api = new ApiClient({ authProvider });
+      const user = await api.users.getUserByName(channel);
+      if (!user) return reply.status(404).send({ error: 'User not found' });
+
+      const [channelInfo, stream] = await Promise.all([
+        api.channels.getChannelInfoById(user.id),
+        api.streams.getStreamByUserId(user.id),
+      ]);
+
+      // Fetch all available stream tags from the Twitch API directly
+      let allTags: Array<{ id: string; name: string; isAuto: boolean }> = [];
+      try {
+        const tagsRes = await api.callApi<{
+          data: Array<{ tag_id: string; is_auto: boolean; localization_names: Record<string, string> }>
+        }>({
+          type: 'helix',
+          url: '/tags/streams',
+          query: { first: '100' },
+        });
+        allTags = (tagsRes?.data ?? []).map((t) => ({
+          id: t.tag_id,
+          name: t.localization_names?.['en-us'] ?? t.localization_names?.[Object.keys(t.localization_names ?? {})[0]] ?? t.tag_id,
+          isAuto: t.is_auto,
+        }));
+      } catch (e) {
+        console.warn('Failed to fetch stream tags:', e instanceof Error ? `${e.message} (${e.stack?.split('\n')[1]?.trim() ?? ''})` : e);
+      }
+
+      // Fallback: if the allTags list is empty but the channel has active tags,
+      // create basic entries from the active tag IDs
+      const activeTags: string[] = channelInfo?.tags ?? [];
+      if (allTags.length === 0 && activeTags.length > 0) {
+        allTags = activeTags.map((tagId) => ({
+          id: tagId,
+          name: tagId.slice(0, 20),
+          isAuto: false,
+        }));
+      }
+
+      reply.send({
+        allTags,
+        activeTagIds: activeTags,
+        gameId: stream?.gameId ?? null,
+        gameName: stream?.gameName ?? '',
+      });
+    } catch (err: any) {
+      reply.status(500).send({ error: err?.message ?? 'Failed to fetch tags' });
+    }
+  });
 }

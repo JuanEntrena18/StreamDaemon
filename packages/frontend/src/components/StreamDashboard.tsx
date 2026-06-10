@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { apiPut } from '../utils/api';
+import { apiPut, apiGet } from '../utils/api';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 
 interface Props {
@@ -25,6 +25,18 @@ interface HudStats {
   streamTitle: string;
   gameName: string;
   isLive: boolean;
+}
+
+interface GameResult {
+  id: string;
+  name: string;
+  boxArtUrl: string;
+}
+
+interface TagInfo {
+  id: string;
+  name: string;
+  isAuto: boolean;
 }
 
 const TYPE_CONFIG: Record<string, { icon: string; label: string }> = {
@@ -61,6 +73,17 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState('');
+
+  // Game search
+  const [gameResults, setGameResults] = useState<GameResult[]>([]);
+  const [showGameResults, setShowGameResults] = useState(false);
+  const [searchingGame, setSearchingGame] = useState(false);
+  const gameSearchRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Tags
+  const [allTags, setAllTags] = useState<TagInfo[]>([]);
+  const [activeTagIds, setActiveTagIds] = useState<string[]>([]);
+  const [tagSearch, setTagSearch] = useState('');
 
   // Activity feed state
   const [events, setEvents] = useState<ActivityEvent[]>([]);
@@ -100,6 +123,54 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
       .catch(() => {});
   }, [channel, backendUrl]);
 
+  // Game search with debounce
+  const handleGameInput = (value: string) => {
+    setGame(value);
+    setShowGameResults(true);
+    if (gameSearchRef.current) clearTimeout(gameSearchRef.current);
+    if (!value.trim()) { setGameResults([]); return; }
+    gameSearchRef.current = setTimeout(async () => {
+      setSearchingGame(true);
+      const r = await apiGet(`/hud/games/search?query=${encodeURIComponent(value)}`);
+      if (r.ok) {
+        const data = await r.json();
+        setGameResults(data);
+      }
+      setSearchingGame(false);
+    }, 300);
+  };
+
+  const selectGame = (g: GameResult) => {
+    setGame(g.name);
+    setGameResults([]);
+    setShowGameResults(false);
+  };
+
+  // Fetch tags on mount
+  useEffect(() => {
+    if (!channel) return;
+    apiGet(`/hud/tags/${channel}`).then(async (r) => {
+      if (!r.ok) return;
+      const data = await r.json();
+      setAllTags(data.allTags ?? []);
+      setActiveTagIds(data.activeTagIds ?? []);
+      if (data.gameName) setGame(data.gameName);
+    });
+  }, [channel]);
+
+  const toggleTag = (tagId: string) => {
+    setActiveTagIds((prev) =>
+      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+    );
+  };
+  const [customTagInput, setCustomTagInput] = useState('');
+  const addCustomTag = () => {
+    const name = customTagInput.trim().slice(0, 25);
+    if (!name || activeTagIds.includes(name) || activeTagIds.length >= 10) return;
+    setActiveTagIds((prev) => [...prev, name]);
+    setCustomTagInput('');
+  };
+
   const addEvent = useCallback((e: ActivityEvent) => {
     setEvents((prev) => [e, ...prev].slice(0, 50));
   }, []);
@@ -132,7 +203,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
     setSaveError('');
     setSaved(false);
     try {
-      const r = await apiPut('/stream/info', { channel, title, game });
+      const r = await apiPut('/hud/stream/info', { channel, title, gameName: game || undefined, tags: activeTagIds });
       if (!r.ok) {
         const data = await r.json();
         setSaveError(data.error || 'Error al guardar');
@@ -167,12 +238,67 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-      {/* ── Top section: Preview + Info ── */}
+      {/* ── Activity Feed (top, full-width) ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-card"
+        style={{ padding: '1.25rem', marginBottom: '1.25rem' }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            🔴 Actividad reciente
+          </h3>
+
+          {/* Filters */}
+          <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+            <button onClick={() => setFilter('all')} className="sf-btn" style={{
+              fontSize: '0.68rem', padding: '0.25rem 0.5rem',
+              background: filter === 'all' ? 'var(--sf-primary)' : 'var(--sf-surface-hover)',
+              color: filter === 'all' ? '#fff' : 'var(--sf-text-2)',
+              border: 'none', borderRadius: 6, cursor: 'pointer',
+            }}>Todos</button>
+            {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
+              <button key={key} onClick={() => setFilter(key)} className="sf-btn" style={{
+                fontSize: '0.68rem', padding: '0.25rem 0.5rem',
+                background: filter === key ? 'var(--sf-primary)' : 'var(--sf-surface-hover)',
+                color: filter === key ? '#fff' : 'var(--sf-text-2)',
+                border: 'none', borderRadius: 6, cursor: 'pointer',
+              }}>{cfg.icon} {cfg.label}</button>
+            ))}
+          </div>
+        </div>
+
+        {filteredEvents.length === 0 ? (
+          <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-3)', textAlign: 'center', padding: '1.5rem 0' }}>
+            {channel ? 'Esperando actividad del canal...' : 'Conectá un canal para ver la actividad.'}
+          </p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {filteredEvents.slice(0, 20).map((event) => (
+              <div key={event.id} style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.4rem 0.625rem',
+                background: 'rgba(255,255,255,0.02)', borderRadius: 6,
+                fontSize: '0.8rem',
+              }}>
+                <span style={{ fontSize: '1rem' }}>{TYPE_CONFIG[event.type]?.icon ?? '📌'}</span>
+                <strong style={{ color: 'var(--sf-text)', minWidth: 80, fontSize: '0.78rem' }}>{event.user}</strong>
+                <span style={{ color: 'var(--sf-text-2)', flex: 1, fontSize: '0.78rem' }}>{event.message}</span>
+                <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', whiteSpace: 'nowrap' }}>
+                  {new Date(event.timestamp).toLocaleTimeString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+
+      {/* ── Bottom section: Preview + Info ── */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1.6fr 1fr',
         gap: '1.25rem',
-        marginBottom: '1.5rem',
       }}>
         {/* Preview */}
         <motion.div
@@ -245,22 +371,120 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
               style={{ width: '100%', fontSize: '0.82rem' }}
             />
           </div>
-          <div>
+          <div style={{ position: 'relative' }}>
             <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
               Juego / Categoría
             </label>
             <input
               type="text"
               value={game}
-              onChange={(e) => setGame(e.target.value)}
+              onChange={(e) => handleGameInput(e.target.value)}
+              onFocus={() => setShowGameResults(true)}
+              onBlur={() => setTimeout(() => setShowGameResults(false), 200)}
               placeholder="Ej: Just Chatting, Valorant..."
               className="sf-input"
               style={{ width: '100%', fontSize: '0.82rem' }}
             />
+            {searchingGame && <span style={{ position: 'absolute', right: 8, top: 28, fontSize: '0.65rem', color: 'var(--sf-text-3)' }}>Buscando...</span>}
+            {showGameResults && gameResults.length > 0 && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10,
+                background: 'var(--sf-surface)', border: '1px solid var(--sf-border)',
+                borderRadius: 8, maxHeight: 180, overflowY: 'auto', marginTop: 4,
+              }}>
+                {gameResults.map((g) => (
+                  <div key={g.id} onClick={() => selectGame(g)} style={{
+                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    padding: '0.4rem 0.625rem', cursor: 'pointer', fontSize: '0.8rem',
+                    borderBottom: '1px solid var(--sf-border)', color: 'var(--sf-text)',
+                  }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--sf-surface-hover)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    {g.boxArtUrl && <img src={g.boxArtUrl} alt="" style={{ width: 28, height: 38, borderRadius: 4, objectFit: 'cover' }} />}
+                    <span>{g.name}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+
+          {/* Tags */}
+          <div>
+            <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.35rem', display: 'block' }}>
+              Tags del stream {activeTagIds.length > 0 && <span style={{ color: 'var(--sf-text-3)', fontSize: '0.65rem' }}>({activeTagIds.length}/10)</span>}
+            </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              {/* Active tag chips */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', minHeight: 24 }}>
+                {activeTagIds.map((tagId) => {
+                  const tagInfo = allTags.find((t) => t.id === tagId);
+                  return (
+                    <span key={tagId} style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
+                      fontSize: '0.68rem', padding: '0.15rem 0.5rem', borderRadius: 12,
+                      background: 'var(--sf-primary)', color: '#fff',
+                    }}>
+                      {tagInfo?.name ?? tagId}
+                      <span onClick={() => toggleTag(tagId)} style={{ cursor: 'pointer', marginLeft: 2, opacity: 0.7 }}>×</span>
+                    </span>
+                  );
+                })}
+                {activeTagIds.length === 0 && (
+                  <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)' }}>Sin tags</span>
+                )}
+              </div>
+              {/* Custom tag input */}
+              <div style={{ display: 'flex', gap: '0.3rem' }}>
+                <input
+                  type="text"
+                  value={customTagInput}
+                  onChange={(e) => setCustomTagInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addCustomTag()}
+                  placeholder="Tag personalizado (max 25 chars)"
+                  className="sf-input"
+                  style={{ flex: 1, fontSize: '0.75rem' }}
+                  maxLength={25}
+                />
+                <button onClick={addCustomTag} disabled={activeTagIds.length >= 10} className="sf-btn" style={{ fontSize: '0.68rem', padding: '0.2rem 0.5rem' }}>
+                  + Tag
+                </button>
+              </div>
+              {/* Filter/search available tags */}
+              <input
+                type="text"
+                value={tagSearch}
+                onChange={(e) => setTagSearch(e.target.value)}
+                placeholder={allTags.length > 0 ? 'Buscar tags disponibles...' : ''}
+                className="sf-input"
+                style={{ width: '100%', fontSize: '0.75rem', display: allTags.length > 0 ? '' : 'none' }}
+              />
+              {/* Available tags list */}
+              {tagSearch && allTags.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', maxHeight: 80, overflowY: 'auto' }}>
+                  {allTags
+                    .filter((t) => t.name.toLowerCase().includes(tagSearch.toLowerCase()) && !activeTagIds.includes(t.id))
+                    .slice(0, 15)
+                    .map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => toggleTag(t.id)}
+                        style={{
+                          fontSize: '0.68rem', padding: '0.2rem 0.5rem', borderRadius: 12, border: 'none',
+                          cursor: 'pointer', whiteSpace: 'nowrap',
+                          background: 'var(--sf-surface-hover)', color: 'var(--sf-text-2)',
+                          opacity: t.isAuto ? 0.5 : 1,
+                        }}
+                      >{t.name}{t.isAuto ? ' (auto)' : ''}</button>
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingTop: '0.25rem' }}>
             <button onClick={saveInfo} disabled={saving} className="sf-btn sf-btn-primary" style={{ fontSize: '0.78rem', padding: '0.4rem 1rem' }}>
-              {saving ? 'Guardando...' : 'Guardar'}
+              {saving ? 'Guardando...' : 'Guardar Cambios'}
             </button>
             {saved && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>✓ Guardado</span>}
             {saveError && <span style={{ fontSize: '0.72rem', color: '#f87171' }}>{saveError}</span>}
@@ -278,63 +502,6 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
           </div>
         </motion.div>
       </div>
-
-      {/* ── Activity Feed ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="glass-card"
-        style={{ padding: '1.25rem' }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            🔴 Actividad reciente
-          </h3>
-
-          {/* Filters */}
-          <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-            <button onClick={() => setFilter('all')} className="sf-btn" style={{
-              fontSize: '0.68rem', padding: '0.25rem 0.5rem',
-              background: filter === 'all' ? 'var(--sf-primary)' : 'var(--sf-surface-hover)',
-              color: filter === 'all' ? '#fff' : 'var(--sf-text-2)',
-              border: 'none', borderRadius: 6, cursor: 'pointer',
-            }}>Todos</button>
-            {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
-              <button key={key} onClick={() => setFilter(key)} className="sf-btn" style={{
-                fontSize: '0.68rem', padding: '0.25rem 0.5rem',
-                background: filter === key ? 'var(--sf-primary)' : 'var(--sf-surface-hover)',
-                color: filter === key ? '#fff' : 'var(--sf-text-2)',
-                border: 'none', borderRadius: 6, cursor: 'pointer',
-              }}>{cfg.icon} {cfg.label}</button>
-            ))}
-          </div>
-        </div>
-
-        {filteredEvents.length === 0 ? (
-          <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-3)', textAlign: 'center', padding: '1.5rem 0' }}>
-            {channel ? 'Esperando actividad del canal...' : 'Conectá un canal para ver la actividad.'}
-          </p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {filteredEvents.slice(0, 20).map((event) => (
-              <div key={event.id} style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.4rem 0.625rem',
-                background: 'rgba(255,255,255,0.02)', borderRadius: 6,
-                fontSize: '0.8rem',
-              }}>
-                <span style={{ fontSize: '1rem' }}>{TYPE_CONFIG[event.type]?.icon ?? '📌'}</span>
-                <strong style={{ color: 'var(--sf-text)', minWidth: 80, fontSize: '0.78rem' }}>{event.user}</strong>
-                <span style={{ color: 'var(--sf-text-2)', flex: 1, fontSize: '0.78rem' }}>{event.message}</span>
-                <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', whiteSpace: 'nowrap' }}>
-                  {new Date(event.timestamp).toLocaleTimeString()}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </motion.div>
     </div>
   );
 }
