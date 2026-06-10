@@ -82,7 +82,7 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
       .catch(() => {});
   }, [channel, backendUrl]);
 
-  const start = () => apiPost('/subathon/start', { channel, subTime, bitTime, bitsPerUnit, maxLimit });
+  const start = () => apiPost('/subathon/start', { channel, subTime, bitTime, bitsPerUnit, maxLimit, initialTime: 3600 });
   const pause = () => apiPost('/subathon/pause', { channel });
   const resume = () => apiPost('/subathon/resume', { channel });
   const stop = () => apiPost('/subathon/stop', { channel });

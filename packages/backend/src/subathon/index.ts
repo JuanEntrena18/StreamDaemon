@@ -48,7 +48,7 @@ function addTime(channel: string, inst: SubathonInstance, action: SubathonAction
   inst.state.actions.unshift(action);
   if (inst.state.actions.length > 100) inst.state.actions.pop();
 
-  if (inst.state.status === 'stopped') {
+  if (inst.state.status === 'stopped' || inst.state.status === 'finished') {
     inst.state.status = 'running';
     inst.startedAt = Date.now();
     inst.pausedAt = null;
@@ -92,39 +92,56 @@ export function setupSubathon(app: FastifyInstance) {
   });
 
   app.post('/subathon/start', async (req, reply) => {
-    const { channel, subTime, bitTime, bitsPerUnit, maxLimit } = req.body as {
+    const { channel, subTime, bitTime, bitsPerUnit, maxLimit, initialTime } = req.body as {
       channel: string;
       subTime?: number;
       bitTime?: number;
       bitsPerUnit?: number;
       maxLimit?: number;
+      initialTime?: number;
     };
     if (!channel) return reply.status(400).send({ error: 'Missing channel' });
 
     const existing = subathons.get(channel);
     if (existing?.tickInterval) clearInterval(existing.tickInterval);
 
+    const remaining = Math.min(initialTime ?? 0, maxLimit ?? DEFAULT_CONFIG.maxLimit);
+
     const state: SubathonState = {
-      status: 'running',
-      remaining: 0,
-      totalAdded: 0,
+      status: remaining > 0 ? 'running' : 'paused',
+      remaining,
+      totalAdded: remaining,
       maxLimit: maxLimit ?? DEFAULT_CONFIG.maxLimit,
       subTime: subTime ?? DEFAULT_CONFIG.subTime,
       bitTime: bitTime ?? DEFAULT_CONFIG.bitTime,
       bitsPerUnit: bitsPerUnit ?? DEFAULT_CONFIG.bitsPerUnit,
-      startTime: Date.now(),
+      startTime: remaining > 0 ? Date.now() : null,
       actions: [],
     };
+
+    if (remaining > 0) {
+      state.actions.push({
+        id: crypto.randomUUID(),
+        type: 'manual',
+        user: 'StreamForge',
+        amount: remaining,
+        timeAdded: remaining,
+        note: 'Tiempo inicial',
+        timestamp: Date.now(),
+      });
+    }
 
     const inst: SubathonInstance = {
       state,
       startedAt: Date.now(),
-      pausedAt: Date.now(),
-      pausedRemaining: 0,
+      pausedAt: remaining > 0 ? Date.now() : null,
+      pausedRemaining: remaining,
       tickInterval: null,
     };
 
-    inst.tickInterval = setInterval(() => tick(channel, inst), 1000);
+    if (remaining > 0) {
+      inst.tickInterval = setInterval(() => tick(channel, inst), 1000);
+    }
     subathons.set(channel, inst);
     broadcast(channel, inst);
     reply.send(state);
