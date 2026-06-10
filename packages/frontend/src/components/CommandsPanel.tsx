@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { apiPost, apiPut } from '../utils/api';
+import { useSocket } from '../hooks/useSocket';
 
 interface Props {
   channel: string;
@@ -24,6 +25,14 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
   const [newResponse, setNewResponse] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [importResult, setImportResult] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const { socket: sock } = useSocket();
+
+  useEffect(() => {
+    if (!channel) return;
+    sock.emit('join:channel', channel);
+  }, [sock, channel]);
 
   useEffect(() => {
     if (!channel) return;
@@ -79,6 +88,48 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
     }
   };
 
+  const exportCommands = () => {
+    if (commands.length === 0) return;
+    const data = { channel, commands, exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `comandos-${channel}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importCommands = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportResult(null);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      const cmds = data.commands ?? data;
+      if (!Array.isArray(cmds)) throw new Error('Formato inválido');
+      const r = await fetch(`${backendUrl}/commands/${channel}/import`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commands: cmds }),
+      });
+      if (r.ok) {
+        const result = await r.json();
+        setImportResult(`✅ ${result.imported} importados, ${result.skipped} omitidos`);
+        const r2 = await fetch(`${backendUrl}/commands/${channel}`);
+        const updated = await r2.json();
+        if (Array.isArray(updated)) setCommands(updated);
+      } else {
+        const err = await r.json();
+        setImportResult(`❌ ${err.error || 'Error al importar'}`);
+      }
+    } catch (e: any) {
+      setImportResult(`❌ ${e.message || 'Error al leer archivo'}`);
+    }
+    e.target.value = '';
+  };
+
   return (
     <div style={{ maxWidth: 700 }}>
       <div style={{ marginBottom: '1.75rem' }}>
@@ -92,7 +143,20 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
 
       {/* Add new command */}
       <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
-        <p className="sf-section-title">➕ Nuevo comando</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+          <p className="sf-section-title" style={{ margin: 0 }}>➕ Nuevo comando</p>
+          <div style={{ display: 'flex', gap: '0.375rem' }}>
+            <button onClick={exportCommands} disabled={commands.length === 0}
+              className="sf-btn" style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem' }}>
+              📤 Exportar
+            </button>
+            <button onClick={() => fileRef.current?.click()}
+              className="sf-btn" style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem' }}>
+              📥 Importar
+            </button>
+            <input ref={fileRef} type="file" accept=".json" onChange={importCommands} style={{ display: 'none' }} />
+          </div>
+        </div>
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
           <input
             type="text" value={newName}
@@ -115,6 +179,7 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
             {saving ? '...' : 'Crear comando'}
           </button>
           {error && <span style={{ fontSize: '0.78rem', color: '#f87171' }}>{error}</span>}
+          {importResult && <span style={{ fontSize: '0.78rem', color: importResult.startsWith('✅') ? '#34d399' : '#f87171' }}>{importResult}</span>}
         </div>
       </div>
 

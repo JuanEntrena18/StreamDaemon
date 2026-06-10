@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { apiPut } from '../utils/api';
+import { useSocket, useSocketEvent } from '../hooks/useSocket';
 
 interface Props {
   channel: string;
@@ -9,10 +10,10 @@ interface Props {
 
 interface ActivityEvent {
   id: string;
-  type: 'follow' | 'sub' | 'resub' | 'gift' | 'raid' | 'cheer' | 'redemption';
+  type: string;
   user: string;
   message: string;
-  timestamp: Date;
+  timestamp: number;
   amount?: number;
 }
 
@@ -52,6 +53,7 @@ function formatNumber(n: number): string {
 export function StreamDashboard({ channel, backendUrl }: Props) {
   const [previewLoading, setPreviewLoading] = useState(true);
   const [stats, setStats] = useState<HudStats | null>(null);
+  const { socket: sock } = useSocket();
 
   // Stream info editor state
   const [title, setTitle] = useState('');
@@ -83,7 +85,13 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
     return () => clearInterval(interval);
   }, [channel, backendUrl]);
 
-  // Fetch activity events
+  // Join socket room for real-time events
+  useEffect(() => {
+    if (!channel) return;
+    sock.emit('join:channel', channel);
+  }, [sock, channel]);
+
+  // Fetch historical activity events on mount
   useEffect(() => {
     if (!channel) return;
     fetch(`${backendUrl}/activity/${channel}`)
@@ -91,6 +99,32 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
       .then((data) => { if (Array.isArray(data)) setEvents(data); })
       .catch(() => {});
   }, [channel, backendUrl]);
+
+  const addEvent = useCallback((e: ActivityEvent) => {
+    setEvents((prev) => [e, ...prev].slice(0, 50));
+  }, []);
+
+  useSocketEvent('channel:follow', (data: { userDisplayName: string }) => {
+    addEvent({ id: `${Date.now()}-follow`, type: 'follow', user: data.userDisplayName, message: 'siguió el canal', timestamp: Date.now() });
+  });
+  useSocketEvent('channel:subscribe', (data: { userDisplayName: string; tier: string }) => {
+    const tierLabel = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }[data.tier] ?? data.tier;
+    addEvent({ id: `${Date.now()}-sub`, type: 'sub', user: data.userDisplayName, message: `se suscribió (${tierLabel})`, timestamp: Date.now() });
+  });
+  useSocketEvent('channel:subscription-message', (data: { userDisplayName: string; tier: string; cumulativeMonths: number }) => {
+    const tierLabel = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }[data.tier] ?? data.tier;
+    addEvent({ id: `${Date.now()}-resub`, type: 'resub', user: data.userDisplayName, message: `renovó suscripción (${tierLabel}, ${data.cumulativeMonths} meses)`, timestamp: Date.now() });
+  });
+  useSocketEvent('channel:subgift', (data: { gifterDisplayName: string; amount: number; tier: string }) => {
+    const tierLabel = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }[data.tier] ?? data.tier;
+    addEvent({ id: `${Date.now()}-gift`, type: 'gift', user: data.gifterDisplayName, message: `regaló ${data.amount} suscripción(es) (${tierLabel})`, timestamp: Date.now(), amount: data.amount });
+  });
+  useSocketEvent('channel:redemption', (data: { userDisplayName: string; rewardTitle: string; rewardCost: number }) => {
+    addEvent({ id: `${Date.now()}-redeem`, type: 'redemption', user: data.userDisplayName, message: `canjeó ${data.rewardTitle} (${data.rewardCost} pts)`, timestamp: Date.now() });
+  });
+  useSocketEvent('channel:cheer', (data: { userDisplayName: string; bits: number }) => {
+    addEvent({ id: `${Date.now()}-cheer`, type: 'cheer', user: data.userDisplayName, message: `donó ${data.bits} bits`, timestamp: Date.now(), amount: data.bits });
+  });
 
   // Save stream info
   const saveInfo = async () => {
@@ -142,8 +176,8 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
       }}>
         {/* Preview */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ y: 10 }}
+          animate={{ y: 0 }}
           className="glass-card"
           style={{ padding: '0.25rem', overflow: 'hidden' }}
         >
@@ -152,7 +186,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
             borderRadius: 'var(--sf-radius-sm)', overflow: 'hidden', background: '#0a0a1a',
           }}>
             <iframe
-              src={`https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}`}
+              src={`https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&muted=true`}
               onLoad={() => setPreviewLoading(false)}
               style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
               allowFullScreen
@@ -160,7 +194,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
             {previewLoading && (
               <div style={{
                 position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: '#0a0a1a', fontSize: '0.85rem', color: 'var(--sf-text-3)',
+                fontSize: '0.85rem', color: 'var(--sf-text-3)', pointerEvents: 'none',
               }}>
                 Cargando stream...
               </div>

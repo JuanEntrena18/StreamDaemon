@@ -58,7 +58,7 @@ html {
 
 body {
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  background: var(--sf-bg);
+  background: transparent;
   color: var(--sf-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -76,6 +76,30 @@ body {
   height: 1080px;
   position: relative;
   overflow: hidden;
+  background: transparent;
+}
+
+/* Overlay floating control bar */
+.overlay-controls {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 0 6px;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 999999;
+  pointer-events: auto;
+}
+.overlay-controls:hover {
+  opacity: 1 !important;
 }
 
 /* ── Glassmorphism card ── */

@@ -8,7 +8,7 @@ interface Props {
 
 type ModAction = 'timeout' | 'ban' | 'unban' | 'delete';
 
-export function ModPanel({ channel }: Props) {
+export function ModPanel({ channel, backendUrl }: Props) {
   const [userName, setUserName] = useState('');
   const [duration, setDuration] = useState(300);
   const [reason, setReason] = useState('');
@@ -24,7 +24,7 @@ export function ModPanel({ channel }: Props) {
       setChattersLoading(true);
       setChattersError('');
       try {
-        const r = await fetch(`/mod/chatters/${encodeURIComponent(channel)}`);
+        const r = await fetch(`${backendUrl}/mod/chatters/${encodeURIComponent(channel)}`);
         if (!r.ok) {
           const d = await r.json();
           setChattersError(d.error || 'Error al obtener usuarios');

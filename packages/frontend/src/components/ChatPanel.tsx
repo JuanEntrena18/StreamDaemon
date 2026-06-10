@@ -117,14 +117,17 @@ export function ChatPanel({ channel }: Props) {
     if (window.streamforger) {
       window.streamforger.overlay.open(channel, false, '');
       setOverlayOpen(true);
+    } else {
+      const url = `${window.location.origin}/overlay.html?channel=${channel}&mode=chat`;
+      window.open(url, 'streamforger-chat-overlay', 'width=400,height=600,menubar=no,toolbar=no,location=no,status=no');
     }
   }
 
   function closeOverlayWindow() {
     if (window.streamforger) {
       window.streamforger.overlay.close();
-      setOverlayOpen(false);
     }
+    setOverlayOpen(false);
   }
 
   function changeOverlaySize(size: 'sm' | 'md' | 'lg') {
@@ -154,31 +157,29 @@ export function ChatPanel({ channel }: Props) {
             Mensajes del chat en tiempo real
           </p>
         </div>
-        {window.streamforger && (
-          <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
-            {!overlayOpen ? (
-              <button
-                onClick={openOverlayWindow}
-                disabled={!channel}
-                className="sf-btn sf-btn-primary"
-                style={{ fontSize: '0.78rem', padding: '0.4rem 0.875rem' }}
-              >
-                🪟 Abrir ventana transparente
-              </button>
-            ) : (
-              <button
-                onClick={closeOverlayWindow}
-                className="sf-btn sf-btn-danger"
-                style={{ fontSize: '0.78rem', padding: '0.4rem 0.875rem' }}
-              >
-                ✕ Cerrar overlay
-              </button>
-            )}
-          </div>
-        )}
+        <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+          {!overlayOpen ? (
+            <button
+              onClick={openOverlayWindow}
+              disabled={!channel}
+              className="sf-btn sf-btn-primary"
+              style={{ fontSize: '0.78rem', padding: '0.4rem 0.875rem' }}
+            >
+              🪟 Abrir ventana transparente
+            </button>
+          ) : (
+            <button
+              onClick={closeOverlayWindow}
+              className="sf-btn sf-btn-danger"
+              style={{ fontSize: '0.78rem', padding: '0.4rem 0.875rem' }}
+            >
+              ✕ Cerrar overlay
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Overlay controls */}
+      {/* Overlay controls (Electron only) */}
       {overlayOpen && window.streamforger && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}

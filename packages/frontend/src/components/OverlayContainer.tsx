@@ -1,4 +1,5 @@
 import { useTheme } from '../hooks/useTheme';
+import { OverlayControls } from './OverlayControls';
 import { ChatOverlay } from './ChatOverlay';
 import { CustomOverlay } from './CustomOverlay';
 import { GiveawayOverlay } from './GiveawayOverlay';
@@ -54,6 +55,7 @@ export function OverlayContainer() {
     <>
       <OverlayContent mode={mode} theme={theme} channel={channel} />
       {channel && <ChannelNotifications />}
+      <OverlayControls />
     </>
   );
 }

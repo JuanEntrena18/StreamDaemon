@@ -48,8 +48,8 @@ export function PreviewPanel({ channel }: Props) {
           </div>
 
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ y: 10 }}
+            animate={{ y: 0 }}
             className="glass-card"
             style={{ padding: '0.25rem', overflow: 'hidden' }}
           >
@@ -62,7 +62,7 @@ export function PreviewPanel({ channel }: Props) {
               background: '#0a0a1a',
             }}>
               <iframe
-                src={`https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}`}
+                src={`https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&muted=true`}
                 onLoad={() => setLoading(false)}
                 style={{
                   position: 'absolute', top: 0, left: 0,

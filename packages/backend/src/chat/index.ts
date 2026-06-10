@@ -1,6 +1,7 @@
 import { ChatClient } from '@twurple/chat';
 import { getIO } from '../socket/index.js';
 import { authProvider, currentUser } from '../auth/index.js';
+import { checkCustomCommand } from '../commands/index.js';
 import type { enterGiveaway } from '../giveaways/index.js';
 
 let chatClient: ChatClient | null = null;
@@ -55,6 +56,13 @@ function handleCommands(channel: string, user: string, text: string) {
     case '!votar':
       break;
   }
+
+  // Check custom commands — respond if matched
+  checkCustomCommand(channel, text).then((response) => {
+    if (response) {
+      sendMessage(channel, response);
+    }
+  });
 }
 
 export function setEnterGiveaway(fn: typeof enterGiveaway) {
@@ -86,6 +94,18 @@ export async function sendMessage(channel: string, message: string) {
   }
   try {
     await chatClient.say(channel, message);
+    const io = getIO();
+    io.to(`channel:${channel}`).emit('chat:message', {
+      id: `send-${Date.now()}`,
+      user: {
+        id: currentUser?.id ?? 'self',
+        displayName: currentUser?.displayName ?? 'StreamForger',
+        color: '#7c3aed',
+        badges: ['broadcaster'],
+      },
+      text: message,
+      timestamp: Date.now(),
+    });
     console.log(`📤 Message sent to #${channel}: ${message.substring(0, 50)}`);
   } catch (err) {
     console.error(`❌ Failed to send message to #${channel}:`, err);

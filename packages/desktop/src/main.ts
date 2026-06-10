@@ -193,17 +193,10 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
 
   overlayWindow.webContents.on('did-finish-load', () => {
     overlayWindow?.webContents.insertCSS(`
-      body { margin: 0; overflow: hidden; }
-      #overlay-root { width: 100%; height: 100%; }
-      :root { --bg-alpha: 0.1; }
-    `);
-    overlayWindow?.webContents.executeJavaScript(`
-      (function() {
-        const bar = document.createElement('div');
-        bar.id = 'overlay-drag-bar';
-        bar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:20px;z-index:99999;cursor:move;-webkit-app-region:drag;background:transparent;';
-        document.body.appendChild(bar);
-      })();
+      body { background: transparent !important; margin: 0; overflow: hidden; }
+      html { background: transparent !important; }
+      #overlay-root { background: transparent !important; width: 100vw; height: 100vh; }
+      :root { --bg-alpha: 0.6; }
     `);
   });
 
@@ -245,7 +238,7 @@ ipcMain.handle('overlay:getClickThrough', () => overlayIgnoreMouse);
 ipcMain.on('overlay:setOpacity', (_e, v: number) => {
   if (!overlayWindow) return;
   const alpha = Math.max(0.1, Math.min(1, v));
-  overlayWindow?.webContents.insertCSS(`:root { --bg-alpha: ${1 - alpha}; }`);
+  overlayWindow?.webContents.insertCSS(`:root { --bg-alpha: ${alpha}; }`);
 });
 ipcMain.on('overlay:resize', (_e, w: number, h: number) => {
   if (!overlayWindow) return;
@@ -305,9 +298,13 @@ ipcMain.on('window:setAlwaysOnTop', (_e, value: boolean) => {
   mainWindow?.setAlwaysOnTop(value, 'screen-saver');
 });
 
-// Main window — opacity (0.1 – 1.0)
+// Main window — background opacity via CSS (text stays opaque)
 ipcMain.on('window:setOpacity', (_e, value: number) => {
-  mainWindow?.setOpacity(Math.max(0.1, Math.min(1, value)));
+  if (!mainWindow) return;
+  const alpha = Math.max(0.1, Math.min(1, value));
+  mainWindow.webContents.insertCSS(`
+    body > div:first-child { background: rgba(10,10,26,${alpha}) !important; }
+  `);
 });
 
 // Main window drag / minimize / close

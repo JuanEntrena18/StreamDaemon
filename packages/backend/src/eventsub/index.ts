@@ -2,6 +2,7 @@ import { EventSubWsListener } from '@twurple/eventsub-ws';
 import { ApiClient } from '@twurple/api';
 import { authProvider, currentUser } from '../auth/index.js';
 import { getIO } from '../socket/index.js';
+import { recordEvent } from '../activity/index.js';
 
 let listener: EventSubWsListener | null = null;
 
@@ -46,11 +47,13 @@ export async function setupEventSub() {
         userId: e.userId,
         timestamp: Date.now(),
       });
+      recordEvent(channelName, 'follow', e.userDisplayName, 'siguió el canal');
     });
   });
 
   trySubscribe('channel.subscription', () => {
     listener!.onChannelSubscription(userId, (e) => {
+      const tierLabel = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }[e.tier] ?? e.tier;
       emit(channelName, 'channel:subscribe', {
         userDisplayName: e.userDisplayName,
         userName: e.userName,
@@ -58,11 +61,13 @@ export async function setupEventSub() {
         isGift: e.isGift,
         timestamp: Date.now(),
       });
+      recordEvent(channelName, 'sub', e.userDisplayName, `se suscribió (${tierLabel})`);
     });
   });
 
   trySubscribe('channel.subscription.message', () => {
     listener!.onChannelSubscriptionMessage(userId, (e) => {
+      const tierLabel = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }[e.tier] ?? e.tier;
       emit(channelName, 'channel:subscription-message', {
         userDisplayName: e.userDisplayName,
         userName: e.userName,
@@ -72,12 +77,14 @@ export async function setupEventSub() {
         messageText: e.messageText,
         timestamp: Date.now(),
       });
+      recordEvent(channelName, 'resub', e.userDisplayName, `renovó suscripción (${tierLabel}, ${e.cumulativeMonths} meses)`);
     });
   });
 
   trySubscribe('channel.subscription.gift', () => {
     listener!.onChannelSubscriptionGift(userId, (e) => {
       const gifter = e.isAnonymous ? 'Anónimo' : e.gifterDisplayName;
+      const tierLabel = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }[e.tier] ?? e.tier;
       emit(channelName, 'channel:subgift', {
         gifterDisplayName: gifter,
         gifterName: e.isAnonymous ? 'anonymous' : e.gifterName,
@@ -86,6 +93,7 @@ export async function setupEventSub() {
         cumulativeAmount: e.cumulativeAmount,
         timestamp: Date.now(),
       });
+      recordEvent(channelName, 'gift', gifter, `regaló ${e.amount} suscripción(es) (${tierLabel})`, e.amount);
     });
   });
 
@@ -99,18 +107,21 @@ export async function setupEventSub() {
         input: e.input,
         timestamp: Date.now(),
       });
+      recordEvent(channelName, 'redemption', e.userDisplayName, `canjeó ${e.rewardTitle} (${e.rewardCost} pts)`);
     });
   });
 
   trySubscribe('channel.cheer', () => {
     listener!.onChannelCheer(userId, (e) => {
+      const user = e.userDisplayName ?? 'Anónimo';
       emit(channelName, 'channel:cheer', {
-        userDisplayName: e.userDisplayName ?? 'Anónimo',
+        userDisplayName: user,
         userName: e.userName ?? 'anonymous',
         bits: e.bits,
         message: e.message,
         timestamp: Date.now(),
       });
+      recordEvent(channelName, 'cheer', user, `donó ${e.bits} bits`, e.bits);
     });
   });
 
