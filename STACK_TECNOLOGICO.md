@@ -26,7 +26,7 @@ Cuatro overlays standalone en `public/overlays/` que se sirven como archivos est
 | Overlay | Archivo | Descripción |
 |---|---|---|
 | **Subnautica 2** | `subnautica2.html` | HUD completo: Canvas partículas bioluminiscentes, scan-line, esquinas decorativas, medidor de profundidad, sonar pulsante, cards de stats, chat en vivo, cola de alertas con animación por tipo, barra inferior con título/juego, reloj, badge de actividad reciente. Demo con `?demo=true` |
-| **Fortnite** | `fortnite.html` | HUD hexagonal: stat-rows con iconos SVG, partículas, cuadrícula, cola de alertas, uptime, badge de último follow, barra inferior. Demo con `?demo=true` |
+| **Fortnite** | `fortnite.html` | HUD hexagonal: stat-rows con iconos SVG, partículas, cuadrícula, cola de alertas, uptime, badge de último follow, barra inferior. **Panel de stats** configurabl (kills, wins, partidas, K/D, win rate) desde fortnite-api.com con API key propia y selector de modo (SOLO/DUO/TRIO/SQUAD). Refresh cada 5 min independiente del socket. Demo con `?demo=true` |
 | **Alertas** | `alerts.html` | Alertas dedicadas: 7 tipos (follow/sub/resub/gift/bits/raid/canjeo), cola con animación bounce+shimmer+glow, Canvas confetti burst por tipo, colores específicos, botones de test. Demo con `?demo=true` |
 | **Subathon** | `subathon.html` | Temporizador ampliable: cuenta atrás de 7rem con glow rojo y pulso crítico, barra de progreso con shimmer, indicador de estado, stats (tiempo añadido, acciones, subs, bits), feed lateral de actividad, uptime, barra inferior. Demo con `?demo=true` |
 
@@ -96,6 +96,9 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 | **Mod** | `src/mod/index.ts` | Moderación: chatters (GET /mod/chatters/:channel), timeout, ban, unban vía Twitch Helix API |
 | **Tracker** | `src/tracker/index.ts` | Twitch Tracker: estadísticas del canal con try/catch por endpoint |
 | **Subathon** | `src/subathon/index.ts` | Subathon: temporizador ampliable con subs, bits y recompensas. Tick cada 1s. REST: start (con initialTime), add-time, pause, resume, stop, config. Socket.IO: `subathon:tick`, `subathon:time-added`, `subathon:state` |
+| **Activity** | `src/activity/index.ts` | Feed de actividad del canal: follows, subs, bits, raids. Almacenamiento in-memory + persistencia a archivo. Socket.IO: `activity:new`, `activity:list` |
+| **Commands** | `src/commands/index.ts` | Comandos personalizados del chat: CRUD, persistencia a archivo, exportación/importación, auto-respuesta vía chat handler |
+| **Fortnite** | `src/fortnite/index.ts` | Estadísticas de Fortnite desde fortnite-api.com: `GET /fortnite/config`, `PUT /fortnite/config`, `GET /fortnite/stats/:username?mode=solo|duo|trio|squad`. Cache en memoria de 5 min. Soporta `FORTNITE_API_KEY` desde `.env` o config persistida |
 
 ---
 
@@ -114,7 +117,7 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 | Juego | Estilo visual | Archivo overlay |
 |---|---|---|
 | **Subnautica 2** | Azul profundo, neón bioluminiscente, interfaz HUD de PDA. Canvas partículas, sonar, chat, alertas por tipo | `subnautica2.html` |
-| **Fortnite** | Hexágonos, azul/dorado/púrpura, estilo battle royale. Partículas, cuadrícula, alertas, uptime | `fortnite.html` |
+| **Fortnite** | Hexágonos, azul/dorado/púrpura, estilo battle royale. Partículas, cuadrícula, alertas, uptime, **panel de stats** (kills, wins, partidas, K/D, win rate) con fetch directo a backend cada 5 min | `fortnite.html` |
 | **Alertas genéricas** | Oscuro con bordes de color por tipo. Confetti Canvas, shimmer, glow ring. 7 tipos de evento | `alerts.html` |
 | **Subathon** | Rojo/gradiente, timer grande con pulso crítico. Barra progreso, feed actividad, stats | `subathon.html` |
 
@@ -187,7 +190,10 @@ twitch_overlay/
 │   │   ├── scoreboard/    # Scoreboard
 │   │   ├── mod/           # Moderación
 │   │   ├── tracker/       # Twitch Tracker
-│   │   └── subathon/      # Subathon
+│   │   ├── subathon/      # Subathon
+│   │   ├── activity/      # Feed actividad
+│   │   ├── commands/      # Comandos personalizados
+│   │   └── fortnite/      # Stats Fortnite
 │   ├── frontend/
 │   │   ├── src/components/  # Dashboard React
 │   │   └── public/overlays/ # Overlays HTML standalone
@@ -214,3 +220,9 @@ twitch_overlay/
 | 20 | **Subathon** — Backend (tick 1s, add-time, pause/resume/stop, config), panel (timer, progreso, añadir tiempo, historial), overlay standalone con badge demo | ✅ |
 | 21 | **Demo mode** — Todos los overlays requieren `?demo=true` para datos simulados; sin él muestran cero/`--`. Badge 🧪 MODO PRUEBA visible en demo | ✅ |
 | 22 | **Overlay Fortnite** — Integrado desde `fortnite-overlay.html` a `public/overlays/`, duplicados `id` corregidos | ✅ |
+| 23 | **Activity Feed** — Backend `GET /activity/:channel` con persistencia a archivo, feed en StreamDashboard con filtros y socket events | ✅ |
+| 24 | **Comandos personalizados** — Módulo backend CRUD con persistencia a archivo, export/import, auto-respuesta en chat. Panel en dashboard | ✅ |
+| 25 | **Editor de stream** — Cambiar título, juego (buscador) y tags desde StreamDashboard. `PUT /hud/stream/info` con scope `channel:manage:broadcast` | ✅ |
+| 26 | **Fortnite config UI** — API key, epic username y modo (SOLO/DUO/TRIO/SQUAD) configurables desde ObsPanel. `GET/PUT /fortnite/config` con persistencia a archivo | ✅ |
+| 27 | **Fortnite stats panel en overlay** — Panel superior derecho con kills, wins, partidas, K/D, win rate. Fetch directo al backend cada 5 min (independiente del socket). Demo mode con stats de ejemplo | ✅ |
+| 28 | **Backend param en URL** — `&backend=` auto-agregado al copiar URL en dev para que el overlay sepa dónde está el backend | ✅ |

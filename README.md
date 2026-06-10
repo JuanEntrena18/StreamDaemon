@@ -28,6 +28,9 @@ Disponible en dos modos:
 - **🎮 Control de overlay transparente** — Ventana always-on-top con click-through toggleable (Ctrl+Shift+T), opacidad solo del fondo, redimensionable (Peq/Med/Grande) y barra de arrastre.
 - **🔐 Autenticación OAuth** — Login con Twitch. En navegador: flujo Authorization Code Grant con redirect. En escritorio: flujo **Device Code Grant** (el usuario ve un código en la app y lo ingresa en twitch.tv/activate). Tokens persistidos con refresco automático. Logout completo.
 - **🖥️ Dashboard premium** — Interfaz con sidebar de navegación, glassmorphism, animaciones Framer Motion, paleta violeta/índigo, badge de usuario Twitch y estado de conexión en tiempo real.
+- **📊 Fortnite Stats Overlay** — Panel configurable en el overlay de Fortnite que muestra kills, wins, partidas, K/D y win rate desde la API de [fortnite-api.com](https://fortnite-api.com). Cada usuario registra su propia API Key desde el panel. Cache de 5 min.
+- **📋 Feed de actividad** — Registro cronológico de follows, subs, bits y raids en el canal con filtros y persistencia en archivo.
+- **🎮 Editor de stream integrado** — Cambiá título, juego y tags del directo desde el dashboard con buscador de juegos y selector de tags.
 
 ---
 
@@ -107,14 +110,14 @@ Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 | Scoreboard | `http://localhost:3000/overlay.html?mode=scoreboard&channel=tucanal` |
 | **Subathon** | `http://localhost:3000/overlays/subathon.html?channel=tucanal` |
 | **Subnautica 2 (completo)** | `http://localhost:3000/overlays/subnautica2.html?channel=tucanal` |
-| **Fortnite (completo)** | `http://localhost:3000/overlays/fortnite.html?channel=tucanal` |
+| **Fortnite (completo)** | `http://localhost:3000/overlays/fortnite.html?channel=tucanal&epic=tuEpic&mode=solo` |
 | **Alertas animadas** | `http://localhost:3000/overlays/alerts.html?channel=tucanal` |
 
 > Los overlays HTML independientes solo muestran datos reales del backend. Para vista previa con datos simulados añade `&demo=true` a la URL. Cuando el modo demo está activo se muestra un badge **🧪 MODO PRUEBA** permanente en pantalla.
 
 Para cambiar el tema visual del chat agrega `&theme=subnautica2`, `&theme=poe2`, `&theme=wow` o `&theme=alliance`.
 
-> En **modo desarrollo** (`npm run dev`), usá `localhost:5173` en lugar de `localhost:3000`.
+> En **modo desarrollo** (`npm run dev`), usá `localhost:5173` en lugar de `localhost:3000`. El overlay de Fortnite necesita el parámetro `&backend=http://localhost:3000` en ese caso (se agrega automáticamente al copiar la URL desde el panel).
 
 ---
 
@@ -134,7 +137,10 @@ StreamForge/
 │   │   ├── timer/         # Temporizador (cuenta regresiva)
 │   │   ├── scoreboard/    # Scoreboard (marcador torneos)
 │   │   ├── mod/           # Moderación (chatters, timeout, ban)
-│   │   └── subathon/      # Subathon (temporizador ampliable)
+│   │   ├── subathon/      # Subathon (temporizador ampliable)
+│   │   ├── activity/      # Feed de actividad del canal
+│   │   ├── commands/      # Comandos personalizados del chat
+│   │   └── fortnite/      # Fortnite stats (config + API)
 │   ├── frontend/
 │   │   ├── src/components/  # Dashboard (App, Chat, Giveaway, etc.)
 │   │   └── public/overlays/ # Overlays HTML independientes

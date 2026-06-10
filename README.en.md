@@ -28,6 +28,9 @@ Available in two modes:
 - **🎮 Transparent Overlay Control** — Always-on-top window with toggleable click-through (Ctrl+Shift+T), background-only opacity, resizable (S/M/L), and drag bar.
 - **🔐 Twitch OAuth** — Login with Twitch. Browser: Authorization Code Grant flow. Desktop: **Device Code Grant** (user sees a code in the app and enters it at twitch.tv/activate). Tokens persisted with auto-refresh. Full logout.
 - **🖥️ Premium Dashboard** — Glassmorphism sidebar navigation, Framer Motion animations, violet/indigo palette, Twitch user badge, and real-time connection status.
+- **📊 Fortnite Stats Overlay** — Configurable Fortnite overlay panel showing kills, wins, matches, K/D, and win rate from [fortnite-api.com](https://fortnite-api.com). Each user registers their own API Key from the panel. 5-min cache.
+- **📋 Activity Feed** — Chronological log of follows, subs, bits, and raids with filters and file persistence.
+- **🎮 Integrated Stream Editor** — Change title, game, and tags from the dashboard with game search and tag selector.
 
 ---
 
@@ -107,14 +110,14 @@ Add a **Browser Source** in OBS and use the following URLs:
 | Scoreboard | `http://localhost:3000/overlay.html?mode=scoreboard&channel=yourchannel` |
 | **Subathon** | `http://localhost:3000/overlays/subathon.html?channel=yourchannel` |
 | **Subnautica 2 (full)** | `http://localhost:3000/overlays/subnautica2.html?channel=yourchannel` |
-| **Fortnite (full)** | `http://localhost:3000/overlays/fortnite.html?channel=yourchannel` |
+| **Fortnite (full)** | `http://localhost:3000/overlays/fortnite.html?channel=yourchannel&epic=yourEpic&mode=solo` |
 | **Animated Alerts** | `http://localhost:3000/overlays/alerts.html?channel=yourchannel` |
 
 > Standalone HTML overlays only show real data from the backend. For a preview with simulated data add `&demo=true` to the URL. When demo mode is active, a permanent **🧪 TEST MODE** badge is shown on screen.
 
 For themed chat add `&theme=subnautica2`, `&theme=poe2`, `&theme=wow`, or `&theme=alliance`.
 
-> In **development mode** (`npm run dev`), use `localhost:5173` instead of `localhost:3000`.
+> In **development mode** (`npm run dev`), use `localhost:5173` instead of `localhost:3000`. The Fortnite overlay needs the `&backend=http://localhost:3000` parameter in that case (added automatically when copying the URL from the panel).
 
 ---
 
@@ -134,7 +137,10 @@ StreamForge/
 │   │   ├── timer/         # Countdown timer
 │   │   ├── scoreboard/    # Tournament scoreboard
 │   │   ├── mod/           # Moderation (chatters, timeout, ban)
-│   │   └── subathon/      # Subathon (extendable timer)
+│   │   ├── subathon/      # Subathon (extendable timer)
+│   │   ├── activity/      # Channel activity feed
+│   │   ├── commands/      # Custom chat commands
+│   │   └── fortnite/      # Fortnite stats (config + API)
 │   ├── frontend/
 │   │   ├── src/components/  # Dashboard (App, Chat, Giveaway, etc.)
 │   │   └── public/overlays/ # Standalone HTML overlays
