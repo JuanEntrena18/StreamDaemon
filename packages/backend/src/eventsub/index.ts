@@ -3,6 +3,8 @@ import { ApiClient } from '@twurple/api';
 import { authProvider, currentUser } from '../auth/index.js';
 import { getIO } from '../socket/index.js';
 import { recordEvent } from '../activity/index.js';
+import { getActiveGiveaway } from '../giveaways/index.js';
+import { getAddTicketsFn } from '../chat/index.js';
 
 let listener: EventSubWsListener | null = null;
 
@@ -108,6 +110,25 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
       recordEvent(channelName, 'redemption', e.userDisplayName, `canjeó ${e.rewardTitle} (${e.rewardCost} pts)`);
+
+      // If there's an active giveaway and this reward matches its ticket reward, add tickets
+      const active = getActiveGiveaway(channelName);
+      console.log(`[Sorteo] Redención de "${e.rewardTitle}" (${e.rewardCost} pts) por ${e.userName}`);
+      console.log(`[Sorteo] Sorteo activo:`, active ? `ticketCost=${active.ticketCost}, rewardTitle="${active.ticketRewardTitle}"` : 'ninguno');
+      if (active && active.ticketCost > 0 && e.rewardTitle.trim().toLowerCase() === active.ticketRewardTitle.trim().toLowerCase()) {
+        const tickets = Math.floor(e.rewardCost / active.ticketCost);
+        console.log(`[Sorteo] Coincide! Añadiendo ${tickets} boletos a ${e.userName}`);
+        if (tickets > 0) {
+          const addTicketsFn = getAddTicketsFn();
+          if (addTicketsFn) {
+            addTicketsFn(channelName, e.userName, tickets);
+          } else {
+            console.log('[Sorteo] ERROR: addTicketsFn es null');
+          }
+        }
+      } else if (active) {
+        console.log(`[Sorteo] No coincide: "${e.rewardTitle}" !== "${active.ticketRewardTitle}" o ticketCost=${active.ticketCost}`);
+      }
     });
   });
 

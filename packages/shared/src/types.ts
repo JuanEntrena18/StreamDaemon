@@ -17,6 +17,11 @@ export interface ChatMessage {
   timestamp: number;
 }
 
+export interface TicketInfo {
+  user: string;
+  tickets: number;
+}
+
 export interface GiveawayData {
   id: string;
   prize: string;
@@ -24,12 +29,18 @@ export interface GiveawayData {
   winnerId: string | null;
   entries: number;
   participants: string[];
+  tickets: TicketInfo[];
+  totalTickets: number;
+  ticketCost: number;
+  ticketRewardTitle: string;
 }
 
 export interface GiveawayEntryData {
   user: string;
   participants: string[];
+  tickets: TicketInfo[];
   count: number;
+  totalTickets: number;
 }
 
 export interface PredictionData {

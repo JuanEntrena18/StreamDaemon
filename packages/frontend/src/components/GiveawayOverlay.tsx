@@ -7,6 +7,11 @@ interface Props {
   channel: string;
 }
 
+interface TicketInfo {
+  user: string;
+  tickets: number;
+}
+
 const WHEEL_COLORS = [
   '#7c3aed', '#6366f1', '#8b5cf6', '#a78bfa',
   '#06b6d4', '#10b981', '#f59e0b', '#ef4444',
@@ -16,6 +21,8 @@ const WHEEL_COLORS = [
 export function GiveawayOverlay({ channel }: Props) {
   const [giveaway, setGiveaway] = useState<GiveawayData | null>(null);
   const [participants, setParticipants] = useState<string[]>([]);
+  const [tickets, setTickets] = useState<TicketInfo[]>([]);
+  const [totalTickets, setTotalTickets] = useState(0);
   const [winner, setWinner] = useState<{ winner: string; prize: string } | null>(null);
   const [spinning, setSpinning] = useState(false);
   const [spinDuration, setSpinDuration] = useState(15);
@@ -26,6 +33,8 @@ export function GiveawayOverlay({ channel }: Props) {
   useSocketEvent('giveaway:start', useCallback((data: GiveawayData) => {
     setGiveaway(data);
     setParticipants(data.participants);
+    setTickets(data.tickets || []);
+    setTotalTickets(data.totalTickets || 0);
     setWinner(null);
     setSpinning(false);
     setRotation(0);
@@ -33,10 +42,14 @@ export function GiveawayOverlay({ channel }: Props) {
 
   useSocketEvent('giveaway:entry', useCallback((data: GiveawayEntryData) => {
     setParticipants(data.participants);
+    setTickets(data.tickets || []);
+    setTotalTickets(data.totalTickets || 0);
   }, []));
 
   useSocketEvent('giveaway:end', useCallback((data: GiveawayData) => {
     setParticipants(data.participants);
+    setTickets(data.tickets || []);
+    setTotalTickets(data.totalTickets || 0);
     if (data.winnerId) {
       setSpinning(true);
     }
@@ -172,41 +185,60 @@ export function GiveawayOverlay({ channel }: Props) {
               letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)',
               marginBottom: '0.5rem',
             }}>
-              Participantes ({participants.length})
+              Participantes ({participants.length}) · {totalTickets} boletos
             </div>
             {hasGiveaway && (
-              <div style={{
-                fontSize: '1.4rem', fontWeight: 700, color: '#a78bfa',
-                marginBottom: '1rem', lineHeight: 1.2,
-              }}>
-                {giveaway.prize}
-              </div>
+              <>
+                <div style={{
+                  fontSize: '1.4rem', fontWeight: 700, color: '#a78bfa',
+                  marginBottom: '0.5rem', lineHeight: 1.2,
+                }}>
+                  {giveaway.prize}
+                </div>
+                {giveaway.ticketCost > 0 && (
+                  <div style={{
+                    fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)',
+                    marginBottom: '1rem',
+                  }}>
+                    {giveaway.ticketCost} pts/boleto · {giveaway.ticketRewardTitle}
+                  </div>
+                )}
+              </>
             )}
             <div style={{
               flex: 1, overflowY: 'auto', display: 'flex',
               flexDirection: 'column', gap: '0.35rem',
             }}>
               <AnimatePresence>
-                {participants.map((name) => (
-                  <motion.div
-                    key={name}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                    style={{
-                      padding: '0.4rem 0.75rem',
-                      background: 'rgba(255,255,255,0.04)',
-                      borderRadius: 6,
-                      fontSize: '0.85rem',
-                      color: 'rgba(255,255,255,0.8)',
-                      fontWeight: 500,
-                      borderLeft: '3px solid #7c3aed',
-                    }}
-                  >
-                    @{name}
-                  </motion.div>
-                ))}
+                {participants.map((name) => {
+                  const t = tickets.find((t) => t.user === name);
+                  const ticketCount = t?.tickets ?? 1;
+                  const prob = totalTickets > 0 ? ((ticketCount / totalTickets) * 100).toFixed(1) : '0';
+                  return (
+                    <motion.div
+                      key={name}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.2 }}
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        background: 'rgba(255,255,255,0.04)',
+                        borderRadius: 6,
+                        fontSize: '0.85rem',
+                        color: 'rgba(255,255,255,0.8)',
+                        fontWeight: 500,
+                        borderLeft: '3px solid #7c3aed',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      }}
+                    >
+                      <span>@{name}</span>
+                      <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>
+                        {ticketCount} b ({prob}%)
+                      </span>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
           </div>
@@ -217,7 +249,6 @@ export function GiveawayOverlay({ channel }: Props) {
             alignItems: 'center', justifyContent: 'center',
             padding: '2rem',
           }}>
-            {/* Spin duration selector */}
             <div style={{
               display: 'flex', alignItems: 'center', gap: '0.5rem',
               marginBottom: '1rem',
@@ -244,7 +275,6 @@ export function GiveawayOverlay({ channel }: Props) {
               ))}
             </div>
 
-            {/* Wheel container */}
             <div style={{
               position: 'relative',
               width: 'min(280px, 80%)',
@@ -281,7 +311,10 @@ export function GiveawayOverlay({ channel }: Props) {
               )}
             </div>
 
-            {/* Spin button */}
+            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginBottom: '0.75rem' }}>
+              {totalTickets > 0 ? `${totalTickets} boletos en total` : ''}
+            </div>
+
             <button
               onClick={spinWheelManually}
               disabled={participants.length < 2 || spinning}
@@ -302,7 +335,6 @@ export function GiveawayOverlay({ channel }: Props) {
         </div>
       )}
 
-      {/* ── Winner overlay ── */}
       <AnimatePresence>
         {winner && (
           <motion.div

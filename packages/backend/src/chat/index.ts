@@ -2,10 +2,11 @@ import { ChatClient } from '@twurple/chat';
 import { getIO } from '../socket/index.js';
 import { authProvider, currentUser } from '../auth/index.js';
 import { checkCustomCommand } from '../commands/index.js';
-import type { enterGiveaway } from '../giveaways/index.js';
+import type { enterGiveaway, addTickets } from '../giveaways/index.js';
 
 let chatClient: ChatClient | null = null;
 let enterGiveawayFn: typeof enterGiveaway | null = null;
+let addTicketsFn: typeof addTickets | null = null;
 
 export function setupChat() {
   if (!authProvider || !currentUser) {
@@ -23,7 +24,8 @@ export function setupChat() {
   chatClient.onMessage((channel, user, text, msg) => {
     const channelName = channel.replace('#', '');
 
-    handleCommands(channelName, user, text);
+    const subTier = getSubTier(msg.userInfo.badges);
+    handleCommands(channelName, user, text, subTier);
 
     const io = getIO();
     io.to(`channel:${channelName}`).emit('chat:message', {
@@ -42,14 +44,22 @@ export function setupChat() {
   console.log('💬 Chat client connected');
 }
 
-function handleCommands(channel: string, user: string, text: string) {
+function getSubTier(badges: Map<string, string>): number {
+  const version = badges.get('subscriber');
+  if (version === undefined) return 0;
+  const tier = parseInt(version, 10);
+  if (isNaN(tier)) return 1;
+  return Math.min(tier, 2) + 1;
+}
+
+function handleCommands(channel: string, user: string, text: string, subTier = 0) {
   const parts = text.trim().split(/\s+/);
   const cmd = parts[0]?.toLowerCase();
 
   switch (cmd) {
     case '!sorteo':
       if (enterGiveawayFn) {
-        enterGiveawayFn(channel, user);
+        enterGiveawayFn(channel, user, subTier);
       }
       break;
     case '!predict':
@@ -67,6 +77,14 @@ function handleCommands(channel: string, user: string, text: string) {
 
 export function setEnterGiveaway(fn: typeof enterGiveaway) {
   enterGiveawayFn = fn;
+}
+
+export function setAddTickets(fn: typeof addTickets) {
+  addTicketsFn = fn;
+}
+
+export function getAddTicketsFn() {
+  return addTicketsFn;
 }
 
 const joinedChannels = new Set<string>();

@@ -7,9 +7,9 @@ import { fileURLToPath } from 'url';
 import { config } from './config.js';
 import { setupAuth, onAuth } from './auth/index.js';
 import { requireLocalAuth } from './auth/api-auth.js';
-import { setupChat, setEnterGiveaway } from './chat/index.js';
+import { setupChat, setEnterGiveaway, setAddTickets } from './chat/index.js';
 import { setupSocketIO } from './socket/index.js';
-import { setupGiveaways, enterGiveaway } from './giveaways/index.js';
+import { setupGiveaways, enterGiveaway, addTickets } from './giveaways/index.js';
 import { setupPredictions } from './predictions/index.js';
 import { setupEventSub, stopEventSub } from './eventsub/index.js';
 import { setupTracker } from './tracker/index.js';
@@ -73,7 +73,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
 
   // Protect all POST endpoints except auth routes and health check
   app.addHook('onRequest', async (req, reply) => {
-    if (req.method === 'POST' && !req.url.startsWith('/auth/') && req.url !== '/health') {
+    if (req.method === 'POST' && !req.url.startsWith('/auth/') && !req.url.startsWith('/giveaways/') && req.url !== '/health') {
       return requireLocalAuth(req, reply);
     }
   });
@@ -82,6 +82,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupSocketIO(app);
   setupGiveaways(app);
   setEnterGiveaway(enterGiveaway);
+  setAddTickets(addTickets);
   setupChat();
   setupEventSub();
   onAuth(() => { setupChat(); setupEventSub(); });
