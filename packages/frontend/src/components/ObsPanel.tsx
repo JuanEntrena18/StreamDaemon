@@ -290,6 +290,88 @@ const OBS_URLS: OBSUrl[] = [
     supportsTheme: false,
     color: '#2b5fc8',
   },
+  // ── WoW Horda Section ──
+  {
+    id: 'wow-horde-webcam',
+    icon: '🎥',
+    label: 'Horda · Webcam',
+    description: 'Marco Horda para webcam con cresta y espadas decorativas',
+    mode: 'wow-horde-webcam',
+    supportsTheme: false,
+    color: '#cc0000',
+  },
+  {
+    id: 'wow-horde-webcam-labels',
+    icon: '🏷️',
+    label: 'Horda · Webcam + Etiquetas',
+    description: 'Webcam Horda con seguidores, suscriptores, donaciones y bits en vivo',
+    mode: 'wow-horde-webcam-labels',
+    supportsTheme: false,
+    color: '#ffc800',
+  },
+  {
+    id: 'wow-horde-chat',
+    icon: '💬',
+    label: 'Horda · Chat',
+    description: 'Chat independiente de la Horda con cresta decorativa, izquierda o derecha',
+    mode: 'wow-horde-chat',
+    supportsTheme: false,
+    color: '#8b0000',
+  },
+  {
+    id: 'wow-horde-labels',
+    icon: '🔰',
+    label: 'Horda · Etiquetas',
+    description: '4 etiquetas informativas (seguidores, subs, donaciones, cheers) con cresta Horda',
+    mode: 'wow-horde-labels',
+    supportsTheme: false,
+    color: '#cc0000',
+  },
+  {
+    id: 'wow-horde-banner-webcam',
+    icon: '📰',
+    label: 'Horda · Banner + Webcam',
+    description: 'Banner inferior Horda con webcam, nombre y estadísticas en vivo',
+    mode: 'wow-horde-banner-webcam',
+    supportsTheme: false,
+    color: '#ffc800',
+  },
+  {
+    id: 'wow-horde-banner-transparent',
+    icon: '📋',
+    label: 'Horda · Banner Transparente',
+    description: 'Banner inferior Horda con fondo transparente, nombre y estadísticas',
+    mode: 'wow-horde-banner-transparent',
+    supportsTheme: false,
+    color: '#cc0000',
+  },
+  {
+    id: 'wow-horde-fullscreen',
+    icon: '🖥️',
+    label: 'Horda · Pantalla Completa',
+    description: 'Overlay Horda a pantalla completa con cresta, espadas, nombre y 4 etiquetas',
+    mode: 'wow-horde-fullscreen',
+    supportsTheme: false,
+    color: '#a855f7',
+  },
+  {
+    id: 'wow-horde-alerts',
+    icon: '🔔',
+    label: 'Horda · Alertas',
+    description: 'Alertas temáticas Horda: seguidor, sub, donación, cheer, host y raid',
+    mode: 'wow-horde-alerts',
+    supportsTheme: false,
+    color: '#ffc800',
+  },
+  {
+    id: 'wow-horde-transition',
+    icon: '⚔️',
+    label: 'Horda · Transición',
+    description: 'Transición Horda con cresta giratoria, espadas y nombre en vivo',
+    mode: 'wow-horde-transition',
+    supportsTheme: false,
+    color: '#cc0000',
+  },
 ];
 
 const THEMES = [
@@ -383,6 +465,15 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     'wow-alliance-fullscreen': 'wow-alliance-fullscreen.html',
     'wow-alliance-alerts': 'wow-alliance-alerts.html',
     'wow-alliance-transition': 'wow-alliance-transition.html',
+    'wow-horde-webcam': 'wow-horde-webcam.html',
+    'wow-horde-webcam-labels': 'wow-horde-webcam-labels.html',
+    'wow-horde-chat': 'wow-horde-chat.html',
+    'wow-horde-labels': 'wow-horde-labels.html',
+    'wow-horde-banner-webcam': 'wow-horde-banner-webcam.html',
+    'wow-horde-banner-transparent': 'wow-horde-banner-transparent.html',
+    'wow-horde-fullscreen': 'wow-horde-fullscreen.html',
+    'wow-horde-alerts': 'wow-horde-alerts.html',
+    'wow-horde-transition': 'wow-horde-transition.html',
   };
 
   function buildUrl(mode: string, supportsTheme: boolean): string {
@@ -487,9 +578,11 @@ export function ObsPanel({ channel, backendUrl }: Props) {
           if (selectedTheme === 'subnautica2') return item.id === 'subnautica2_standalone';
           if (selectedTheme === 'dj') return item.id.startsWith('dj-');
           if (selectedTheme === 'alliance') return item.id.startsWith('wow-alliance-');
+          if (selectedTheme === 'wow') return item.id.startsWith('wow-horde-');
           // When no theme is selected, hide theme-specific overlays
           if (item.id.startsWith('dj-')) return false;
           if (item.id.startsWith('wow-alliance-')) return false;
+          if (item.id.startsWith('wow-horde-')) return false;
           return true;
         }).map((item) => {
           const isSocial = item.id === 'social';

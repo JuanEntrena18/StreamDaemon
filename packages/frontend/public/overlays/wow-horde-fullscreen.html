@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – WoW Horda Fullscreen</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Cinzel', serif;
+  }
+  :root {
+    --red: #cc0000;
+    --gold: #ffc800;
+    --dred: #700000;
+    --dark: #0a0505;
+  }
+
+  #bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 80%, rgba(204,0,0,0.08), transparent 60%),
+                radial-gradient(ellipse at 50% 20%, rgba(112,0,0,0.05), transparent 50%),
+                linear-gradient(180deg, #0a0505 0%, #120808 50%, #0a0505 100%);
+  }
+  #grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .horde-wm {
+    position: absolute; width: 330px; height: 360px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  .horde-wm svg { width: 100%; height: 100%; }
+
+  .corner-crest {
+    position: absolute; width: 65px; height: 75px; opacity: 0.1;
+  }
+  .corner-crest svg { width: 100%; height: 100%; }
+  .cc-tl { top: 10px; left: 10px; }
+  .cc-tr { top: 10px; right: 10px; transform: scaleX(-1); }
+  .cc-bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
+  .cc-br { bottom: 10px; right: 10px; transform: scale(-1, -1); }
+
+  #center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2;
+  }
+  #war-icon {
+    font-size: 3.2rem;
+    margin-bottom: 10px;
+    display: block;
+    filter: drop-shadow(0 0 30px rgba(204,0,0,0.3));
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  #username-display {
+    font-size: 4rem; font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(204,0,0,0.3), 0 0 80px rgba(204,0,0,0.1), 0 4px 20px rgba(0,0,0,0.5);
+    letter-spacing: 0.08em;
+    line-height: 1;
+  }
+  #tagline {
+    font-size: 0.9rem; font-weight: 400;
+    color: rgba(255,200,0,0.4);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-top: 10px;
+  }
+
+  .corner-label {
+    position: absolute;
+    display: flex; flex-direction: column;
+    gap: 2px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: rgba(10,5,5,0.45);
+    border: 1px solid rgba(204,0,0,0.15);
+    backdrop-filter: blur(6px);
+    min-width: 100px;
+  }
+  .corner-label .ico { font-size: 1.1rem; }
+  .corner-label .val { font-size: 1.4rem; font-weight: 800; letter-spacing: 0.03em; }
+  .corner-label .lbl { font-size: 0.55rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.3); }
+  .corner-label.cl-tl { top: 25px; left: 25px; }
+  .corner-label.cl-tr { top: 25px; right: 25px; }
+  .corner-label.cl-bl { bottom: 25px; left: 25px; }
+  .corner-label.cl-br { bottom: 25px; right: 25px; }
+  .corner-label:nth-child(1) .val { color: var(--red); }
+  .corner-label:nth-child(2) .val { color: var(--gold); }
+  .corner-label:nth-child(3) .val { color: var(--red); }
+  .corner-label:nth-child(4) .val { color: var(--gold); }
+</style>
+</head>
+<body>
+  <div id="bg"></div>
+  <div id="grid"></div>
+
+  <div class="horde-wm">
+    <svg viewBox="0 0 100 110"><path d="M50 0 L95 20 L95 55 Q95 80 50 108 Q5 80 5 55 L5 20 Z" fill="none" stroke="#cc0000" stroke-width="2"/><path d="M50 8 L85 24 L85 52 Q85 74 50 100 Q15 74 15 52 L15 24 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/><path d="M50 22 L65 34 L58 40 L50 54 L42 40 L35 34 Z" fill="none" stroke="#cc0000" stroke-width="1"/></svg>
+  </div>
+
+  <div class="corner-crest cc-tl"><svg viewBox="0 0 100 110"><path d="M50 0 L95 20 L95 55 Q95 80 50 108 Q5 80 5 55 L5 20 Z" fill="none" stroke="#cc0000" stroke-width="2"/><path d="M50 8 L85 24 L85 52 Q85 74 50 100 Q15 74 15 52 L15 24 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg></div>
+  <div class="corner-crest cc-tr"><svg viewBox="0 0 100 110"><path d="M50 0 L95 20 L95 55 Q95 80 50 108 Q5 80 5 55 L5 20 Z" fill="none" stroke="#cc0000" stroke-width="2"/><path d="M50 8 L85 24 L85 52 Q85 74 50 100 Q15 74 15 52 L15 24 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg></div>
+  <div class="corner-crest cc-bl"><svg viewBox="0 0 100 110"><path d="M50 0 L95 20 L95 55 Q95 80 50 108 Q5 80 5 55 L5 20 Z" fill="none" stroke="#cc0000" stroke-width="2"/><path d="M50 8 L85 24 L85 52 Q85 74 50 100 Q15 74 15 52 L15 24 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg></div>
+  <div class="corner-crest cc-br"><svg viewBox="0 0 100 110"><path d="M50 0 L95 20 L95 55 Q95 80 50 108 Q5 80 5 55 L5 20 Z" fill="none" stroke="#cc0000" stroke-width="2"/><path d="M50 8 L85 24 L85 52 Q85 74 50 100 Q15 74 15 52 L15 24 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg></div>
+
+  <div id="center">
+    <span id="war-icon">⚔️</span>
+    <div id="username-display"><span id="name-text">Horda</span></div>
+    <div id="tagline">por la Horda · for the Horde</div>
+  </div>
+
+  <div class="corner-label cl-tl">
+    <span class="ico">📺</span>
+    <span class="val" id="followers">0</span>
+    <span class="lbl">Seguidores</span>
+  </div>
+  <div class="corner-label cl-tr">
+    <span class="ico">⭐</span>
+    <span class="val" id="subs">0</span>
+    <span class="lbl">Suscriptores</span>
+  </div>
+  <div class="corner-label cl-bl">
+    <span class="ico">💰</span>
+    <span class="val" id="donations">$0</span>
+    <span class="lbl">Donaciones</span>
+  </div>
+  <div class="corner-label cl-br">
+    <span class="ico">🎯</span>
+    <span class="val" id="bits">0</span>
+    <span class="lbl">Bits</span>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'Horda';
+    document.getElementById('name-text').textContent = username;
+    document.title = `StreamForge – WoW Horda Fullscreen · ${username}`;
+
+    const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
+    socket.connect();
+    socket.on('connect', () => {
+      const ch = params.get('channel');
+      if (ch) socket.emit('join:channel', ch);
+    });
+    socket.on('hud:update', (d) => {
+      if (d.followers !== undefined) document.getElementById('followers').textContent = d.followers;
+      if (d.subscribers !== undefined) document.getElementById('subs').textContent = d.subscribers;
+    });
+    socket.on('channel:follow', () => {
+      const el = document.getElementById('followers');
+      el.textContent = parseInt(el.textContent) + 1;
+    });
+    socket.on('channel:subscribe', () => {
+      const el = document.getElementById('subs');
+      el.textContent = parseInt(el.textContent) + 1;
+    });
+    socket.on('channel:cheer', (d) => {
+      const el = document.getElementById('bits');
+      el.textContent = parseInt(el.textContent) + (d.bits || 0);
+    });
+    socket.on('channel:redemption', (d) => {
+      if (d.rewardCost) {
+        const el = document.getElementById('donations');
+        const current = parseFloat(el.textContent.replace('$','')) + (d.rewardCost / 100);
+        el.textContent = '$' + current.toFixed(2);
+      }
+    });
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

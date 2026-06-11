@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – WoW Horda Webcam + Labels</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Cinzel', serif;
+  }
+  :root {
+    --red: #cc0000;
+    --dred: #700000;
+    --gold: #ffc800;
+    --dark: #0a0505;
+  }
+
+  .horde-crest {
+    position: absolute; width: 120px; height: 130px; opacity: 0.12;
+  }
+  .horde-crest svg { width: 100%; height: 100%; }
+  .crest-tl { top: -12px; left: -12px; }
+  .crest-br { bottom: -12px; right: -12px; transform: rotate(180deg); }
+
+  #cam-frame {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px; height: 380px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid rgba(204,0,0,0.3);
+    box-shadow: 0 0 30px rgba(204,0,0,0.12), inset 0 0 50px rgba(0,0,0,0.2);
+  }
+  #cam-frame::before {
+    content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--red), var(--gold), var(--dred));
+    background-size: 300% 300%;
+    z-index: -1;
+    animation: gradient-shift 4s ease infinite;
+    opacity: 0.45;
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  #cam-frame video, #cam-frame img {
+    width: 100%; height: 100%;
+    object-fit: cover; border-radius: 10px;
+    display: block;
+  }
+
+  #username {
+    position: absolute; top: 12px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 1rem; font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 15px rgba(204,0,0,0.5), 0 2px 6px rgba(0,0,0,0.8);
+    letter-spacing: 0.1em;
+    padding: 4px 18px;
+    border-radius: 99px;
+    background: rgba(10,5,5,0.5);
+    border: 1px solid rgba(255,200,0,0.2);
+    backdrop-filter: blur(6px);
+    z-index: 5;
+  }
+
+  .labels {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    background: linear-gradient(to top, rgba(10,5,5,0.88), transparent);
+  }
+  .label-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    min-width: 75px;
+  }
+  .label-icon { font-size: 0.9rem; }
+  .label-value { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.05em; }
+  .label-title { font-size: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.35); }
+  .label-item:nth-child(1) .label-value { color: var(--red); }
+  .label-item:nth-child(2) .label-value { color: var(--gold); }
+  .label-item:nth-child(3) .label-value { color: var(--red); }
+  .label-item:nth-child(4) .label-value { color: var(--gold); }
+</style>
+</head>
+<body>
+  <div class="horde-crest crest-tl">
+    <svg viewBox="0 0 100 110"><path d="M50 0 L95 20 L95 55 Q95 80 50 108 Q5 80 5 55 L5 20 Z" fill="none" stroke="#cc0000" stroke-width="2"/><path d="M50 8 L85 24 L85 52 Q85 74 50 100 Q15 74 15 52 L15 24 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
+  </div>
+  <div class="horde-crest crest-br">
+    <svg viewBox="0 0 100 110"><path d="M50 0 L95 20 L95 55 Q95 80 50 108 Q5 80 5 55 L5 20 Z" fill="none" stroke="#cc0000" stroke-width="2"/><path d="M50 8 L85 24 L85 52 Q85 74 50 100 Q15 74 15 52 L15 24 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
+  </div>
+
+  <div id="cam-frame">
+    <div id="username"><span id="name-text">Horda</span></div>
+    <video id="webcam" autoplay muted playsinline></video>
+    <div class="labels">
+      <div class="label-item">
+        <span class="label-icon">📺</span>
+        <span class="label-value" id="followers">0</span>
+        <span class="label-title">Seguidores</span>
+      </div>
+      <div class="label-item">
+        <span class="label-icon">⭐</span>
+        <span class="label-value" id="subs">0</span>
+        <span class="label-title">Suscriptores</span>
+      </div>
+      <div class="label-item">
+        <span class="label-icon">💰</span>
+        <span class="label-value" id="donations">$0</span>
+        <span class="label-title">Donaciones</span>
+      </div>
+      <div class="label-item">
+        <span class="label-icon">🎯</span>
+        <span class="label-value" id="bits">0</span>
+        <span class="label-title">Bits</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'Horda';
+    document.getElementById('name-text').textContent = username;
+    document.title = `StreamForge – WoW Horda Webcam+Labels · ${username}`;
+
+    if (navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+        document.getElementById('webcam').srcObject = s;
+      }).catch(() => {});
+    }
+
+    const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
+    socket.connect();
+    socket.on('connect', () => {
+      const ch = params.get('channel');
+      if (ch) socket.emit('join:channel', ch);
+    });
+    socket.on('hud:update', (d) => {
+      if (d.followers !== undefined) document.getElementById('followers').textContent = d.followers;
+      if (d.subscribers !== undefined) document.getElementById('subs').textContent = d.subscribers;
+    });
+    socket.on('channel:follow', () => {
+      const el = document.getElementById('followers');
+      el.textContent = parseInt(el.textContent) + 1;
+    });
+    socket.on('channel:subscribe', () => {
+      const el = document.getElementById('subs');
+      el.textContent = parseInt(el.textContent) + 1;
+    });
+    socket.on('channel:cheer', (d) => {
+      const el = document.getElementById('bits');
+      el.textContent = parseInt(el.textContent) + (d.bits || 0);
+    });
+    socket.on('channel:redemption', (d) => {
+      if (d.rewardCost) {
+        const el = document.getElementById('donations');
+        const current = parseFloat(el.textContent.replace('$','')) + (d.rewardCost / 100);
+        el.textContent = '$' + current.toFixed(2);
+      }
+    });
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

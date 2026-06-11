@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – WoW Horda Banner Webcam</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Cinzel', serif;
+  }
+  :root {
+    --red: #cc0000;
+    --dred: #700000;
+    --gold: #ffc800;
+    --dark: #0a0505;
+  }
+
+  .horde-crest {
+    position: absolute; width: 85px; height: 95px; opacity: 0.18;
+  }
+  .horde-crest svg { width: 100%; height: 100%; }
+  .crest-l { bottom: 0; left: -18px; }
+  .crest-r { bottom: 0; right: -18px; transform: scaleX(-1); }
+
+  #banner {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 150px;
+    background: linear-gradient(to right,
+      rgba(10,5,5,0.93), rgba(30,10,10,0.95), rgba(10,5,5,0.93));
+    border-top: 3px solid;
+    border-image: linear-gradient(to right, var(--red), var(--gold), var(--dred)) 1;
+    display: flex;
+    align-items: center;
+    padding: 0 220px 0 25px;
+    overflow: hidden;
+  }
+
+  #cam-thumb {
+    width: 110px; height: 110px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid rgba(255,200,0,0.3);
+    flex-shrink: 0;
+    margin-right: 18px;
+    box-shadow: 0 0 20px rgba(204,0,0,0.15);
+  }
+  #cam-thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .info-label { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em; color: var(--gold); text-shadow: 0 0 10px rgba(255,200,0,0.2); }
+  .info-name { font-size: 2rem; font-weight: 900; color: #fff; text-shadow: 0 0 30px rgba(204,0,0,0.3), 0 2px 10px rgba(0,0,0,0.5); letter-spacing: 0.05em; line-height: 1; }
+
+  .labels { display: flex; gap: 14px; margin-top: 4px; }
+  .label-item { display: flex; align-items: center; gap: 5px; font-size: 0.7rem; font-weight: 600; color: rgba(255,255,255,0.45); }
+  .label-item .val { font-weight: 700; }
+  .label-item:nth-child(1) .val { color: var(--red); }
+  .label-item:nth-child(2) .val { color: var(--gold); }
+  .label-item:nth-child(3) .val { color: var(--red); }
+  .label-item:nth-child(4) .val { color: var(--gold); }
+  .label-item .ico { font-size: 0.75rem; }
+
+  #crest { margin-left: auto; font-size: 2.2rem; opacity: 0.2; flex-shrink: 0; }
+</style>
+</head>
+<body>
+  <div class="horde-crest crest-l">
+    <svg viewBox="0 0 100 110"><path d="M50 0 L95 20 L95 55 Q95 80 50 108 Q5 80 5 55 L5 20 Z" fill="none" stroke="#cc0000" stroke-width="2"/><path d="M50 8 L85 24 L85 52 Q85 74 50 100 Q15 74 15 52 L15 24 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
+  </div>
+  <div class="horde-crest crest-r">
+    <svg viewBox="0 0 100 110"><path d="M50 0 L95 20 L95 55 Q95 80 50 108 Q5 80 5 55 L5 20 Z" fill="none" stroke="#cc0000" stroke-width="2"/><path d="M50 8 L85 24 L85 52 Q85 74 50 100 Q15 74 15 52 L15 24 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
+  </div>
+
+  <div id="banner">
+    <div id="cam-thumb">
+      <video id="webcam" autoplay muted playsinline></video>
+    </div>
+    <div class="info">
+      <div class="info-label">⚔️ ahora al aire</div>
+      <div class="info-name" id="name-text">Horda</div>
+      <div class="labels">
+        <div class="label-item"><span class="ico">📺</span><span class="val" id="followers">0</span> seguidores</div>
+        <div class="label-item"><span class="ico">⭐</span><span class="val" id="subs">0</span> suscriptores</div>
+        <div class="label-item"><span class="ico">💰</span><span class="val" id="donations">$0</span> donado</div>
+        <div class="label-item"><span class="ico">🎯</span><span class="val" id="bits">0</span> bits</div>
+      </div>
+    </div>
+    <div id="crest">💀</div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'Horda';
+    document.getElementById('name-text').textContent = username;
+    document.title = `StreamForge – WoW Horda Banner Webcam · ${username}`;
+
+    if (navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+        document.getElementById('webcam').srcObject = s;
+      }).catch(() => {});
+    }
+
+    const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
+    socket.connect();
+    socket.on('connect', () => {
+      const ch = params.get('channel');
+      if (ch) socket.emit('join:channel', ch);
+    });
+    socket.on('hud:update', (d) => {
+      if (d.followers !== undefined) document.getElementById('followers').textContent = d.followers;
+      if (d.subscribers !== undefined) document.getElementById('subs').textContent = d.subscribers;
+    });
+    socket.on('channel:follow', () => {
+      const el = document.getElementById('followers');
+      el.textContent = parseInt(el.textContent) + 1;
+    });
+    socket.on('channel:subscribe', () => {
+      const el = document.getElementById('subs');
+      el.textContent = parseInt(el.textContent) + 1;
+    });
+    socket.on('channel:cheer', (d) => {
+      const el = document.getElementById('bits');
+      el.textContent = parseInt(el.textContent) + (d.bits || 0);
+    });
+    socket.on('channel:redemption', (d) => {
+      if (d.rewardCost) {
+        const el = document.getElementById('donations');
+        const current = parseFloat(el.textContent.replace('$','')) + (d.rewardCost / 100);
+        el.textContent = '$' + current.toFixed(2);
+      }
+    });
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

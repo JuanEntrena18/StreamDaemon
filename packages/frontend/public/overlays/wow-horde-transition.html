@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – WoW Horda Transición</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Cinzel', serif;
+  }
+  :root {
+    --red: #cc0000;
+    --gold: #ffc800;
+    --dred: #700000;
+    --dark: #0a0505;
+  }
+
+  #stage {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, rgba(204,0,0,0.15), transparent 70%),
+                linear-gradient(180deg, #0a0505 0%, #120808 50%, #0a0505 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  #stage.active { opacity: 1; }
+
+  #grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 80px 80px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  #stage.active #grid { opacity: 1; }
+
+  #crest-container {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 380px; height: 420px;
+  }
+  #crest {
+    width: 100%; height: 100%;
+    transform: scale(0);
+    opacity: 0;
+  }
+  #stage.active #crest {
+    animation: crest-in 0.8s cubic-bezier(0.175,0.885,0.32,1.4) forwards;
+  }
+  @keyframes crest-in {
+    0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+    60%  { transform: scale(1.06) rotate(3deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  #crest svg { width: 100%; height: 100%; }
+  #crest .crest-fill { fill: rgba(10,5,5,0.6); stroke: #cc0000; stroke-width: 3; }
+  #crest .crest-gold { stroke: #ffc800; stroke-width: 2; fill: none; }
+  #crest .crest-inner { stroke: #cc0000; stroke-width: 1.5; fill: none; }
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+  }
+  #stage.active #crest .crest-glow { animation: glow-pulse 2s ease-in-out infinite; }
+
+  #war-above {
+    position: absolute;
+    top: -25px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.5rem;
+    opacity: 0;
+    filter: drop-shadow(0 0 30px rgba(204,0,0,0.4));
+  }
+  #stage.active #war-above {
+    animation: war-in 0.5s ease 0.3s forwards;
+  }
+  @keyframes war-in {
+    to { opacity: 0.6; }
+  }
+
+  #text-container {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 5;
+    opacity: 0;
+  }
+  #stage.active #text-container {
+    animation: text-in 0.6s ease 0.6s forwards;
+  }
+  @keyframes text-in {
+    to { opacity: 1; }
+  }
+
+  #text-label {
+    font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(255,200,0,0.3);
+    margin-bottom: 6px;
+  }
+  #text-name {
+    font-size: 3rem; font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(204,0,0,0.3), 0 4px 20px rgba(0,0,0,0.5);
+    letter-spacing: 0.1em;
+    line-height: 1;
+  }
+
+  .particle {
+    position: absolute;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 6px var(--gold);
+    animation: particle-fade 1.5s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes particle-fade {
+    0%   { opacity: 1; transform: scale(1) translateY(0); }
+    100% { opacity: 0; transform: scale(0) translateY(-40px); }
+  }
+  .particle-red {
+    background: var(--red);
+    box-shadow: 0 0 6px var(--red);
+  }
+
+  #bottom-banner {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(to right, var(--red), var(--gold), var(--dred));
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  #stage.active #bottom-banner {
+    animation: banner-in 0.8s ease 0.5s forwards;
+  }
+  @keyframes banner-in {
+    to { opacity: 1; transform: scaleX(1); }
+  }
+
+  #trigger {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 28px;
+    background: rgba(204,0,0,0.15);
+    border: 1px solid rgba(204,0,0,0.3);
+    border-radius: 99px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.2s;
+    letter-spacing: 0.1em;
+    backdrop-filter: blur(8px);
+  }
+  #trigger:hover { background: rgba(204,0,0,0.25); box-shadow: 0 0 20px rgba(204,0,0,0.2); }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <div id="grid"></div>
+    <div id="war-above">⚔️</div>
+    <div id="crest-container">
+      <div id="crest">
+        <svg viewBox="0 0 100 110">
+          <path class="crest-fill" d="M50 0 L95 20 L95 55 Q95 80 50 108 Q5 80 5 55 L5 20 Z"/>
+          <path class="crest-gold crest-glow" d="M50 0 L95 20 L95 55 Q95 80 50 108 Q5 80 5 55 L5 20 Z"/>
+          <path class="crest-gold" d="M50 8 L85 24 L85 52 Q85 74 50 100 Q15 74 15 52 L15 24 Z"/>
+          <path class="crest-inner" d="M50 20 L65 32 L58 38 L50 52 L42 38 L35 32 Z"/>
+          <line class="crest-gold" x1="50" y1="52" x2="50" y2="80" stroke-width="1.5"/>
+          <line class="crest-gold" x1="35" y1="62" x2="65" y2="62" stroke-width="1.5"/>
+          <line class="crest-gold" x1="30" y1="72" x2="70" y2="72" stroke-width="1.5"/>
+        </svg>
+      </div>
+    </div>
+    <div id="text-container">
+      <div id="text-label">⚔️ por la Horda</div>
+      <div id="text-name"><span id="name-text">Horda</span></div>
+    </div>
+    <div id="bottom-banner"></div>
+  </div>
+
+  <button id="trigger">▶ Probar transición</button>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'Horda';
+    document.getElementById('name-text').textContent = username;
+    document.title = `StreamForge – WoW Horda Transición · ${username}`;
+
+    function createParticles() {
+      const stage = document.getElementById('stage');
+      for (let i = 0; i < 40; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        if (i % 3 === 0) p.classList.add('particle-red');
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = (30 + Math.random() * 50) + '%';
+        p.style.animationDelay = (Math.random() * 2) + 's';
+        p.style.background = i % 3 === 0 ? '#cc0000' : '#ffc800';
+        p.style.boxShadow = `0 0 6px ${p.style.background}`;
+        stage.appendChild(p);
+        setTimeout(() => p.remove(), 3000);
+      }
+    }
+
+    function triggerTransition() {
+      const stage = document.getElementById('stage');
+      stage.classList.add('active');
+      createParticles();
+      setTimeout(() => createParticles(), 600);
+    }
+
+    document.getElementById('trigger').addEventListener('click', triggerTransition);
+
+    if (params.get('auto') === '1') {
+      setTimeout(triggerTransition, 500);
+    }
+  </script>
+</body>
+</html>
