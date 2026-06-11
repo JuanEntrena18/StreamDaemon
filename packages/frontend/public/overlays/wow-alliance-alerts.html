@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StreamForge – WoW Alianza Alertas</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Uncial+Antiqua&family=Inter:wght@400;600&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     width: 1920px; height: 1080px;
@@ -17,10 +17,12 @@
     --blue: #2b5fc8;
     --gold: #ffc800;
     --lblue: #8ab4ff;
+    --silver: #c8d4e8;
     --navy: #0a0e27;
+    --glow: rgba(43,95,200,0.6);
+    --glow-gold: rgba(255,200,0,0.4);
     --green: #34d399;
     --orange: #fb923c;
-    --pink: #f472b6;
   }
 
   #alert-center {
@@ -33,19 +35,67 @@
     min-width: 500px;
   }
 
-  /* ── Card base ── */
+  /* ── Divine light effect behind card ── */
+  #divine-light {
+    position: absolute;
+    width: 600px; height: 600px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  #divine-light.active {
+    opacity: 1;
+  }
+  #divine-light::before {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,200,0,0.12) 0%, rgba(43,95,200,0.06) 40%, transparent 70%);
+    border-radius: 50%;
+    animation: divine-pulse 2s ease-in-out infinite alternate;
+  }
+  @keyframes divine-pulse {
+    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.9; }
+  }
+
+  /* ── Particles container ── */
+  #particles-container {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .alert-particle {
+    position: absolute;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    animation: particle-rise linear forwards;
+  }
+  @keyframes particle-rise {
+    0% { transform: translateY(0) scale(0); opacity: 0; }
+    20% { opacity: 0.8; transform: scale(1); }
+    80% { opacity: 0.6; }
+    100% { transform: translateY(-200px) scale(0); opacity: 0; }
+  }
+
   .alert-card {
     position: absolute;
     display: flex; flex-direction: column; align-items: center;
-    padding: 30px 60px;
-    border-radius: 14px;
+    padding: 35px 65px;
+    border-radius: 16px;
     text-align: center;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    backdrop-filter: blur(24px);
+    box-shadow: 0 20px 80px rgba(0,0,0,0.6), 0 0 40px rgba(43,95,200,0.1);
     overflow: hidden;
-    min-width: 460px;
+    min-width: 480px;
     opacity: 0;
     transform: scale(0.4) translateY(30px);
+    z-index: 2;
   }
   .alert-card.visible {
     animation: alert-appear 0.7s cubic-bezier(0.175,0.885,0.32,1.4) forwards;
@@ -63,36 +113,35 @@
     100% { opacity: 0; transform: scale(0.7) translateY(-60px); }
   }
 
-  /* ── Shield decoration ── */
-  .alert-shield {
-    position: absolute;
-    width: 100px; height: 110px;
-    opacity: 0.12;
-  }
-  .alert-shield svg { width: 100%; height: 100%; }
-  .alert-shield-tl { top: -20px; left: -20px; }
-  .alert-shield-br { bottom: -20px; right: -20px; transform: rotate(180deg); }
-
   .alert-card {
-    border: 2px solid rgba(43,95,200,0.15);
-    background: rgba(10,14,39,0.85);
+    border: 2px solid rgba(200,212,232,0.08);
+    background: linear-gradient(135deg, rgba(10,14,39,0.88), rgba(10,14,39,0.78));
   }
   .alert-card::before {
     content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, var(--blue), var(--gold), var(--lblue));
-    background-size: 300% 300%;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--blue), var(--gold), var(--silver), var(--lblue));
+    background-size: 400% 400%;
     z-index: -1;
-    animation: gradient-shift 4s ease infinite;
-    opacity: 0.5;
+    animation: border-shimmer 5s ease infinite;
+    opacity: 0.6;
   }
-  @keyframes gradient-shift {
+  @keyframes border-shimmer {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
 
-  /* ── Type header ── */
+  /* ── Shield corner inside card ── */
+  .alert-shield {
+    position: absolute;
+    width: 70px; height: 78px;
+    opacity: 0.08;
+  }
+  .alert-shield svg { width: 100%; height: 100%; }
+  .alert-shield-tl { top: -12px; left: -12px; }
+  .alert-shield-br { bottom: -12px; right: -12px; transform: rotate(180deg); }
+
   .alert-type {
     font-size: 0.7rem; font-weight: 700;
     text-transform: uppercase;
@@ -102,40 +151,40 @@
   .alert-type.follow  { color: var(--lblue); }
   .alert-type.sub     { color: var(--gold); }
   .alert-type.donate  { color: var(--blue); }
-  .alert-type.cheer   { color: var(--gold); }
+  .alert-type.cheer   { color: var(--silver); }
   .alert-type.host    { color: var(--green); }
   .alert-type.raid    { color: var(--orange); }
 
-  .alert-icon { font-size: 2rem; margin-bottom: 4px; }
+  .alert-icon { font-size: 1.8rem; margin-bottom: 4px; filter: drop-shadow(0 0 15px var(--glow)); }
 
   .alert-user {
     font-size: 2.2rem; font-weight: 900;
     color: #fff;
-    text-shadow: 0 0 30px rgba(43,95,200,0.3), 0 2px 10px rgba(0,0,0,0.5);
+    text-shadow: 0 0 40px var(--glow), 0 2px 10px rgba(0,0,0,0.6);
     line-height: 1.1;
   }
   .alert-msg {
     font-size: 1rem; font-weight: 500;
-    color: rgba(255,255,255,0.6);
+    color: var(--silver);
     margin-top: 4px;
     font-family: 'Inter', sans-serif;
+    text-shadow: 0 0 20px rgba(200,212,232,0.1);
   }
   .alert-detail {
     font-size: 0.8rem; font-weight: 400;
-    color: rgba(255,255,255,0.35);
+    color: rgba(200,212,232,0.35);
     margin-top: 2px;
     font-family: 'Inter', sans-serif;
   }
 
-  /* ── Crown ── */
   .alert-crown {
     position: absolute;
-    top: -10px;
-    font-size: 1.5rem;
-    opacity: 0.3;
+    top: -8px;
+    font-size: 1.3rem;
+    opacity: 0.25;
+    filter: drop-shadow(0 0 15px var(--glow-gold));
   }
 
-  /* ── Tier badge ── */
   .tier-badge {
     display: inline-block;
     font-size: 0.6rem; font-weight: 700;
@@ -148,10 +197,27 @@
   .tier-badge.t1 { background: rgba(43,95,200,0.2); color: var(--lblue); border: 1px solid rgba(43,95,200,0.3); }
   .tier-badge.t2 { background: rgba(255,200,0,0.2); color: var(--gold); border: 1px solid rgba(255,200,0,0.3); }
   .tier-badge.t3 { background: rgba(139,180,255,0.2); color: var(--lblue); border: 1px solid rgba(139,180,255,0.3); }
+
+  /* ── Shimmer overlay on card ── */
+  .card-shimmer {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(200,212,232,0.03) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: card-shimmer-sweep 4s ease-in-out infinite;
+    pointer-events: none;
+    border-radius: 14px;
+  }
+  @keyframes card-shimmer-sweep {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
 </style>
 </head>
 <body>
-  <div id="alert-center"></div>
+  <div id="alert-center">
+    <div id="divine-light"></div>
+    <div id="particles-container"></div>
+  </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
@@ -170,6 +236,26 @@
 
     let isShowing = false;
     const queue = [];
+    let particleInterval = null;
+
+    function spawnParticles(count) {
+      const container = document.getElementById('particles-container');
+      const colors = ['#ffc800', '#c8d4e8', '#8ab4ff', '#ffc800'];
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'alert-particle';
+        p.style.left = (20 + Math.random() * 60) + '%';
+        p.style.bottom = '0';
+        p.style.width = (2 + Math.random() * 4) + 'px';
+        p.style.height = p.style.width;
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.boxShadow = `0 0 8px ${p.style.background}`;
+        p.style.animationDuration = (2 + Math.random() * 3) + 's';
+        p.style.animationDelay = (Math.random() * 0.5) + 's';
+        container.appendChild(p);
+        setTimeout(() => p.remove(), 5000);
+      }
+    }
 
     function showAlert(type, data) {
       queue.push({ type, data });
@@ -187,6 +273,24 @@
       const info = TYPES[type] || TYPES.follow;
       const container = document.getElementById('alert-center');
       container.innerHTML = '';
+
+      // Divine light
+      const divine = document.createElement('div');
+      divine.id = 'divine-light';
+      container.appendChild(divine);
+
+      // Particles container
+      const particles = document.createElement('div');
+      particles.id = 'particles-container';
+      container.appendChild(particles);
+
+      // Spawn particles
+      spawnParticles(30);
+      particleInterval = setInterval(() => {
+        spawnParticles(8);
+      }, 600);
+
+      requestAnimationFrame(() => divine.classList.add('active'));
 
       const card = document.createElement('div');
       card.className = 'alert-card';
@@ -223,12 +327,13 @@
       }
 
       card.innerHTML = `
+        <div class="card-shimmer"></div>
         <div class="alert-crown">👑</div>
         <div class="alert-shield alert-shield-tl">
-          <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
+          <svg viewBox="0 0 100 110"><defs><linearGradient id="as1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2b5fc8"/><stop offset="50%" stop-color="#8ab4ff"/><stop offset="100%" stop-color="#c8d4e8"/></linearGradient></defs><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="url(#as1)" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
         </div>
         <div class="alert-shield alert-shield-br">
-          <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
+          <svg viewBox="0 0 100 110"><defs><linearGradient id="as2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#c8d4e8"/><stop offset="50%" stop-color="#ffc800"/><stop offset="100%" stop-color="#2b5fc8"/></linearGradient></defs><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="url(#as2)" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
         </div>
         <div class="alert-icon">${info.icon}</div>
         <div class="alert-type ${info.cls}">${info.label}</div>
@@ -242,8 +347,10 @@
       requestAnimationFrame(() => card.classList.add('visible'));
 
       setTimeout(() => {
+        if (particleInterval) clearInterval(particleInterval);
         card.classList.remove('visible');
         card.classList.add('hiding');
+        divine.classList.remove('active');
         setTimeout(() => {
           isShowing = false;
           processQueue();
@@ -251,7 +358,6 @@
       }, DURATION);
     }
 
-    // ── Socket connection ──
     const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
     socket.connect();
     socket.on('connect', () => {
@@ -263,16 +369,9 @@
     socket.on('channel:subscribe', (d) => showAlert('sub', d));
     socket.on('channel:subscription-message', (d) => showAlert('sub', d));
     socket.on('channel:cheer', (d) => showAlert('cheer', d));
+    socket.on('channel:redemption', (d) => { showAlert('donate', { ...d, amount: d.rewardCost }); });
+    socket.on('channel:raid', (d) => { if (d) showAlert('raid', d); });
 
-    socket.on('channel:redemption', (d) => {
-      showAlert('donate', { ...d, amount: d.rewardCost });
-    });
-
-    socket.on('channel:raid', (d) => {
-      if (d) showAlert('raid', d);
-    });
-
-    // Demo mode
     document.addEventListener('click', () => {
       const demos = [
         { type: 'follow', data: { userDisplayName: username } },

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StreamForge – WoW Alianza Banner Transparente</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Uncial+Antiqua&family=Inter:wght@400;600&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     width: 1920px; height: 1080px;
@@ -17,55 +17,58 @@
     --blue: #2b5fc8;
     --gold: #ffc800;
     --lblue: #8ab4ff;
+    --silver: #c8d4e8;
     --navy: #0a0e27;
+    --glow: rgba(43,95,200,0.6);
+    --glow-gold: rgba(255,200,0,0.3);
   }
-
-  .shield {
-    position: absolute; width: 80px; height: 90px; opacity: 0.12;
-  }
-  .shield svg { width: 100%; height: 100%; }
-  .shield-l { bottom: 0; left: -15px; }
-  .shield-r { bottom: 0; right: -15px; transform: scaleX(-1); }
 
   #banner {
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 120px;
     background: linear-gradient(to right,
-      rgba(10,14,39,0.88), rgba(20,30,70,0.92), rgba(10,14,39,0.88));
+      rgba(10,14,39,0.9), rgba(20,30,60,0.93), rgba(10,14,39,0.9));
     border-top: 2px solid;
     border-image: linear-gradient(to right, var(--blue), var(--gold), var(--lblue)) 1;
     display: flex;
     align-items: center;
-    padding: 0 180px 0 25px;
+    padding: 0 200px 0 25px;
     overflow: hidden;
+    box-shadow: 0 -8px 30px rgba(0,0,0,0.25);
+  }
+  #banner::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(200,212,232,0.006) 30px, rgba(200,212,232,0.006) 31px);
+    pointer-events: none;
   }
 
-  .info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-  .info-label { font-size: 0.55rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em; color: var(--gold); text-shadow: 0 0 10px rgba(255,200,0,0.2); }
-  .info-name { font-size: 1.7rem; font-weight: 900; color: #fff; text-shadow: 0 0 25px rgba(43,95,200,0.3), 0 2px 8px rgba(0,0,0,0.5); letter-spacing: 0.05em; line-height: 1; }
+  .info { flex: 1; display: flex; flex-direction: column; gap: 2px; position: relative; z-index: 1; }
+  .info-label { font-size: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold); text-shadow: 0 0 12px var(--glow-gold); }
+  .info-name { font-size: 1.7rem; font-weight: 900; color: #fff; text-shadow: 0 0 30px var(--glow), 0 2px 8px rgba(0,0,0,0.6); letter-spacing: 0.05em; line-height: 1; }
 
   .labels { display: flex; gap: 12px; margin-top: 3px; }
-  .label-item { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.4); }
+  .label-item { display: flex; align-items: center; gap: 4px; font-size: 0.62rem; font-weight: 600; color: rgba(200,212,232,0.38); }
   .label-item .val { font-weight: 700; }
   .label-item:nth-child(1) .val { color: var(--lblue); }
   .label-item:nth-child(2) .val { color: var(--gold); }
   .label-item:nth-child(3) .val { color: var(--blue); }
-  .label-item:nth-child(4) .val { color: var(--gold); }
-  .label-item .ico { font-size: 0.7rem; }
+  .label-item:nth-child(4) .val { color: var(--silver); }
+  .label-item .ico { font-size: 0.68rem; }
 
-  #crest { margin-left: auto; font-size: 2rem; opacity: 0.15; flex-shrink: 0; }
+  #crest-side { margin-left: auto; font-size: 1.8rem; opacity: 0.1; flex-shrink: 0; filter: drop-shadow(0 0 12px var(--glow-gold)); }
+
+  .rune-accent { font-family: 'Uncial Antiqua', serif; font-size: 0.55rem; color: var(--gold); opacity: 0.06; position: absolute; bottom: 5px; }
+  .rune-accent-l { left: 12px; }
+  .rune-accent-r { right: 12px; }
 </style>
 </head>
 <body>
-  <div class="shield shield-l">
-    <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
-  </div>
-  <div class="shield shield-r">
-    <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
-  </div>
-
   <div id="banner">
+    <span class="rune-accent rune-accent-l">ᚨ ᛚ ᛁ ᚨ ᚾ ᛉ</span>
+    <span class="rune-accent rune-accent-r">ᛗ ᛟ ᚱ ᛏ ᛖ</span>
     <div class="info">
       <div class="info-label">👑 ahora al aire</div>
       <div class="info-name" id="name-text">Alianza</div>
@@ -76,7 +79,7 @@
         <div class="label-item"><span class="ico">🎯</span><span class="val" id="bits">0</span> bits</div>
       </div>
     </div>
-    <div id="crest">🦁</div>
+    <div id="crest-side">🦁</div>
   </div>
 
   <script>

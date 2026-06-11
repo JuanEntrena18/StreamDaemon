@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StreamForge – WoW Alianza Webcam</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Uncial+Antiqua&family=Inter:wght@400;600&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     width: 1920px; height: 1080px;
@@ -17,130 +17,163 @@
     --blue: #2b5fc8;
     --gold: #ffc800;
     --lblue: #8ab4ff;
+    --silver: #c8d4e8;
     --navy: #0a0e27;
-    --glow-blue: 0 0 25px rgba(43,95,200,0.5);
-    --glow-gold: 0 0 20px rgba(255,200,0,0.3);
+    --glow: rgba(43,95,200,0.6);
+    --glow-gold: rgba(255,200,0,0.4);
   }
 
-  /* ── Shield decoration ── */
-  .shield {
-    position: absolute;
-    width: 160px; height: 180px;
-    opacity: 0.12;
-  }
-  .shield svg { width: 100%; height: 100%; }
-  .shield-tl { top: -20px; left: -20px; }
-  .shield-br { bottom: -20px; right: -20px; transform: rotate(180deg); }
-
-  /* ── Webcam frame ── */
   #cam-frame {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 640px; height: 480px;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
-    border: 3px solid rgba(43,95,200,0.35);
-    box-shadow: 0 0 50px rgba(43,95,200,0.15), inset 0 0 80px rgba(0,0,0,0.3);
+    border: 3px solid rgba(200,212,232,0.2);
+    box-shadow: 0 0 60px rgba(43,95,200,0.2), inset 0 0 80px rgba(0,0,0,0.4);
+    background: var(--navy);
   }
   #cam-frame::before {
     content: '';
-    position: absolute; top: -3px; left: -3px;
-    right: -3px; bottom: -3px;
-    border-radius: 15px;
-    background: linear-gradient(135deg, var(--blue), var(--gold), var(--lblue), var(--blue));
-    background-size: 300% 300%;
-    z-index: -1;
-    animation: gradient-shift 5s ease infinite;
-    opacity: 0.5;
+    position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px;
+    border-radius: 19px;
+    background: linear-gradient(135deg, var(--blue), var(--gold), var(--silver), var(--lblue), var(--blue));
+    background-size: 400% 400%;
+    z-index: 0;
+    animation: border-shimmer 6s ease infinite;
+    opacity: 0.7;
   }
-  @keyframes gradient-shift {
+  @keyframes border-shimmer {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
-  #cam-frame video, #cam-frame img {
+
+  #cam-frame video {
+    position: relative;
+    z-index: 1;
     width: 100%; height: 100%;
     object-fit: cover;
-    border-radius: 10px;
     display: block;
   }
 
-  /* ── Crown top ── */
+  /* ── Inner glow overlay ── */
+  #inner-glow {
+    position: absolute; inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(43,95,200,0.15) 100%);
+    mix-blend-mode: screen;
+  }
+
+  /* ── Shield decorations INSIDE frame ── */
+  .shield-inner {
+    position: absolute;
+    z-index: 3;
+    width: 70px; height: 78px;
+    opacity: 0.20;
+    filter: drop-shadow(0 0 8px var(--glow));
+  }
+  .shield-inner svg { width: 100%; height: 100%; }
+  .shield-inner-tl { top: 6px; left: 6px; }
+  .shield-inner-tr { top: 6px; right: 6px; transform: scaleX(-1); }
+  .shield-inner-bl { bottom: 6px; left: 6px; transform: scaleY(-1); }
+  .shield-inner-br { bottom: 6px; right: 6px; transform: scale(-1, -1); }
+
+  /* ── Corner runes inside frame ── */
+  .rune {
+    position: absolute;
+    z-index: 3;
+    font-family: 'Uncial Antiqua', serif;
+    font-size: 1.2rem;
+    color: var(--gold);
+    opacity: 0.15;
+    text-shadow: 0 0 12px var(--glow-gold);
+  }
+  .rune-tl { top: 50px; left: 14px; transform: rotate(-15deg); }
+  .rune-tr { top: 50px; right: 14px; transform: rotate(15deg); }
+  .rune-bl { bottom: 50px; left: 14px; transform: rotate(15deg); }
+  .rune-br { bottom: 50px; right: 14px; transform: rotate(-15deg); }
+
+  /* ── Crown ── */
   #crown {
     position: absolute;
-    top: 12px; left: 50%;
+    top: 10px; left: 50%;
     transform: translateX(-50%);
-    font-size: 2rem;
-    filter: drop-shadow(0 0 15px rgba(255,200,0,0.4));
-    z-index: 2;
-    opacity: 0.6;
+    z-index: 5;
+    font-size: 1.6rem;
+    filter: drop-shadow(0 0 20px var(--glow-gold));
+    animation: crown-glow 2s ease-in-out infinite alternate;
+  }
+  @keyframes crown-glow {
+    0% { filter: drop-shadow(0 0 15px var(--glow-gold)); opacity: 0.5; }
+    100% { filter: drop-shadow(0 0 30px var(--glow-gold)); opacity: 0.9; }
   }
 
   /* ── Username ── */
   #username {
     position: absolute;
-    top: 16px; left: 50%;
+    bottom: 14px; left: 50%;
     transform: translateX(-50%);
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #fff;
-    text-shadow: 0 0 20px rgba(43,95,200,0.6), 0 2px 8px rgba(0,0,0,0.8);
-    letter-spacing: 0.12em;
-    white-space: nowrap;
-    padding: 6px 24px;
-    border-radius: 99px;
-    background: linear-gradient(135deg, rgba(43,95,200,0.2), rgba(139,180,255,0.15));
-    border: 1px solid rgba(255,200,0,0.2);
-    backdrop-filter: blur(8px);
     z-index: 5;
-  }
-  #username .crown-icon {
-    display: inline-block;
-    margin-right: 8px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--silver);
+    text-shadow: 0 0 25px var(--glow), 0 2px 8px rgba(0,0,0,0.9);
+    letter-spacing: 0.15em;
+    white-space: nowrap;
+    padding: 5px 22px;
+    border-radius: 99px;
+    background: linear-gradient(135deg, rgba(10,14,39,0.7), rgba(43,95,200,0.2));
+    border: 1px solid rgba(200,212,232,0.15);
+    backdrop-filter: blur(8px);
   }
 
-  /* ── Corner decorations ── */
-  .corner {
+  /* ── Divine light streak (animated) ── */
+  #light-streak {
     position: absolute;
-    width: 45px; height: 45px;
-  }
-  .corner svg { width: 100%; height: 100%; }
-  .corner-tl { top: 8px; left: 8px; }
-  .corner-tr { top: 8px; right: 8px; transform: scaleX(-1); }
-  .corner-bl { bottom: 8px; left: 8px; transform: scaleY(-1); }
-  .corner-br { bottom: 8px; right: 8px; transform: scale(-1, -1); }
-
-  /* ── Lion silhouette ── */
-  .lion {
-    position: absolute;
-    font-size: 3rem;
-    opacity: 0.08;
+    top: -50%; left: -20%;
+    width: 40%; height: 200%;
+    z-index: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(200,212,232,0.04) 40%, rgba(255,200,0,0.06) 50%, rgba(200,212,232,0.04) 60%, transparent 100%);
+    transform: rotate(25deg);
+    animation: streak-sweep 8s ease-in-out infinite;
     pointer-events: none;
   }
-  .lion-tl { top: 40px; left: 30px; }
-  .lion-br { bottom: 40px; right: 30px; }
+  @keyframes streak-sweep {
+    0% { left: -30%; }
+    50% { left: 110%; }
+    100% { left: -30%; }
+  }
 </style>
 </head>
 <body>
-  <div class="shield shield-tl">
-    <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/><path d="M50 20 L65 35 L55 40 L50 55 L45 40 L35 35 Z" fill="none" stroke="#8ab4ff" stroke-width="1"/></svg>
-  </div>
-  <div class="shield shield-br">
-    <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/><path d="M50 20 L65 35 L55 40 L50 55 L45 40 L35 35 Z" fill="none" stroke="#8ab4ff" stroke-width="1"/></svg>
-  </div>
-
-  <div class="lion lion-tl">🦁</div>
-  <div class="lion lion-br">🦁</div>
-
   <div id="cam-frame">
+    <div id="light-streak"></div>
+    <div class="shield-inner shield-inner-tl">
+      <svg viewBox="0 0 100 110"><defs><linearGradient id="sg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2b5fc8"/><stop offset="50%" stop-color="#8ab4ff"/><stop offset="100%" stop-color="#c8d4e8"/></linearGradient></defs><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="url(#sg1)" stroke-width="2.5"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.8"/><path d="M50 22 L63 37 L55 42 L50 55 L45 42 L37 37 Z" fill="none" stroke="url(#sg1)" stroke-width="1.2"/></svg>
+    </div>
+    <div class="shield-inner shield-inner-tr">
+      <svg viewBox="0 0 100 110"><defs><linearGradient id="sg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#c8d4e8"/><stop offset="50%" stop-color="#ffc800"/><stop offset="100%" stop-color="#2b5fc8"/></linearGradient></defs><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="url(#sg2)" stroke-width="2.5"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.8"/><path d="M50 22 L63 37 L55 42 L50 55 L45 42 L37 37 Z" fill="none" stroke="url(#sg2)" stroke-width="1.2"/></svg>
+    </div>
+    <div class="shield-inner shield-inner-bl">
+      <svg viewBox="0 0 100 110"><defs><linearGradient id="sg3" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2b5fc8"/><stop offset="50%" stop-color="#8ab4ff"/><stop offset="100%" stop-color="#c8d4e8"/></linearGradient></defs><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="url(#sg3)" stroke-width="2.5"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.8"/></svg>
+    </div>
+    <div class="shield-inner shield-inner-br">
+      <svg viewBox="0 0 100 110"><defs><linearGradient id="sg4" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#c8d4e8"/><stop offset="50%" stop-color="#ffc800"/><stop offset="100%" stop-color="#2b5fc8"/></linearGradient></defs><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="url(#sg4)" stroke-width="2.5"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.8"/></svg>
+    </div>
+
+    <div class="rune rune-tl">ᚱ</div>
+    <div class="rune rune-tr">ᚨ</div>
+    <div class="rune rune-bl">ᛚ</div>
+    <div class="rune rune-br">ᛖ</div>
+
     <div id="crown">👑</div>
-    <div id="username"><span class="crown-icon">👑</span><span id="name-text">Alianza</span></div>
+    <div id="username"><span id="name-text">Alianza</span></div>
+
     <video id="webcam" autoplay muted playsinline></video>
-    <svg class="corner corner-tl" viewBox="0 0 50 50"><path d="M2 2h46" stroke="#2b5fc8" stroke-width="3" fill="none"/><path d="M2 2v46" stroke="#2b5fc8" stroke-width="3" fill="none"/></svg>
-    <svg class="corner corner-tr" viewBox="0 0 50 50"><path d="M2 2h46" stroke="#ffc800" stroke-width="3" fill="none"/><path d="M2 2v46" stroke="#ffc800" stroke-width="3" fill="none"/></svg>
-    <svg class="corner corner-bl" viewBox="0 0 50 50"><path d="M2 2h46" stroke="#8ab4ff" stroke-width="3" fill="none"/><path d="M2 2v46" stroke="#8ab4ff" stroke-width="3" fill="none"/></svg>
-    <svg class="corner corner-br" viewBox="0 0 50 50"><path d="M2 2h46" stroke="#2b5fc8" stroke-width="3" fill="none"/><path d="M2 2v46" stroke="#2b5fc8" stroke-width="3" fill="none"/></svg>
+    <div id="inner-glow"></div>
   </div>
 
   <script>

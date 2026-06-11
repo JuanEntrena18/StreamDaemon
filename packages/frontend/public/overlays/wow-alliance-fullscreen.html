@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StreamForge – WoW Alianza Fullscreen</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Uncial+Antiqua&family=Inter:wght@400;600&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     width: 1920px; height: 1080px;
@@ -17,43 +17,70 @@
     --blue: #2b5fc8;
     --gold: #ffc800;
     --lblue: #8ab4ff;
+    --silver: #c8d4e8;
     --navy: #0a0e27;
+    --glow: rgba(43,95,200,0.6);
+    --glow-gold: rgba(255,200,0,0.3);
   }
 
-  /* ── Background ── */
   #bg {
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse at 50% 80%, rgba(43,95,200,0.08), transparent 60%),
-                radial-gradient(ellipse at 50% 20%, rgba(139,180,255,0.05), transparent 50%),
-                linear-gradient(180deg, #0a0e27 0%, #0d1530 50%, #0a0e27 100%);
+    background: radial-gradient(ellipse at 50% 80%, rgba(43,95,200,0.1), transparent 65%),
+                radial-gradient(ellipse at 50% 20%, rgba(139,180,255,0.06), transparent 50%),
+                linear-gradient(180deg, rgba(10,14,39,0.85) 0%, rgba(13,21,48,0.9) 50%, rgba(10,14,39,0.85) 100%);
+    pointer-events: none;
   }
+
   #grid {
     position: absolute; inset: 0;
     background-image:
-      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-    background-size: 60px 60px;
+      linear-gradient(rgba(200,212,232,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,212,232,0.02) 1px, transparent 1px);
+    background-size: 80px 80px;
+    pointer-events: none;
+  }
+
+  /* ── Divine light shafts ── */
+  #light-shafts {
+    position: absolute; inset: 0;
+    pointer-events: none; overflow: hidden;
+  }
+  .shaft {
+    position: absolute; top: -10%; width: 6px; height: 120%;
+    background: linear-gradient(to bottom, transparent, rgba(200,212,232,0.04), rgba(255,200,0,0.03), transparent);
+    transform: rotate(var(--rot, 10deg));
+    animation: shaft-sway 6s ease-in-out infinite alternate;
+  }
+  .shaft:nth-child(1) { left: 15%; --rot: 8deg; animation-delay: 0s; }
+  .shaft:nth-child(2) { left: 35%; --rot: -5deg; animation-delay: 1s; }
+  .shaft:nth-child(3) { left: 55%; --rot: 12deg; animation-delay: 2s; }
+  .shaft:nth-child(4) { left: 75%; --rot: -8deg; animation-delay: 0.5s; }
+  .shaft:nth-child(5) { left: 92%; --rot: 6deg; animation-delay: 1.5s; }
+  @keyframes shaft-sway {
+    0% { opacity: 0.3; }
+    100% { opacity: 0.8; }
   }
 
   /* ── Shield watermark ── */
-  .shield-wm {
-    position: absolute; width: 350px; height: 390px;
+  #watermark {
+    position: absolute; width: 400px; height: 440px;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     opacity: 0.04;
     pointer-events: none;
   }
-  .shield-wm svg { width: 100%; height: 100%; }
+  #watermark svg { width: 100%; height: 100%; }
 
   /* ── Corner shields ── */
   .corner-shield {
-    position: absolute; width: 70px; height: 80px; opacity: 0.08;
+    position: absolute; width: 55px; height: 62px; opacity: 0.1;
+    filter: drop-shadow(0 0 8px var(--glow));
   }
   .corner-shield svg { width: 100%; height: 100%; }
-  .cs-tl { top: 10px; left: 10px; }
-  .cs-tr { top: 10px; right: 10px; transform: scaleX(-1); }
-  .cs-bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
-  .cs-br { bottom: 10px; right: 10px; transform: scale(-1, -1); }
+  .cs-tl { top: 12px; left: 12px; }
+  .cs-tr { top: 12px; right: 12px; transform: scaleX(-1); }
+  .cs-bl { bottom: 12px; left: 12px; transform: scaleY(-1); }
+  .cs-br { bottom: 12px; right: 12px; transform: scale(-1, -1); }
 
   /* ── Center ── */
   #center {
@@ -64,29 +91,32 @@
     z-index: 2;
   }
   #crown-icon {
-    font-size: 3.5rem;
-    margin-bottom: 10px;
+    font-size: 3rem;
+    margin-bottom: 8px;
     display: block;
-    filter: drop-shadow(0 0 30px rgba(255,200,0,0.3));
+    filter: drop-shadow(0 0 40px var(--glow-gold));
     animation: float 3s ease-in-out infinite;
   }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    50% { transform: translateY(-10px); }
   }
   #username-display {
-    font-size: 4rem; font-weight: 900;
+    font-size: 3.8rem;
+    font-weight: 900;
     color: #fff;
-    text-shadow: 0 0 40px rgba(43,95,200,0.3), 0 0 80px rgba(43,95,200,0.1), 0 4px 20px rgba(0,0,0,0.5);
+    text-shadow: 0 0 60px var(--glow), 0 0 120px rgba(43,95,200,0.15), 0 4px 20px rgba(0,0,0,0.6);
     letter-spacing: 0.08em;
     line-height: 1;
   }
   #tagline {
-    font-size: 0.9rem; font-weight: 400;
-    color: rgba(255,200,0,0.4);
-    letter-spacing: 0.3em;
+    font-family: 'Uncial Antiqua', serif;
+    font-size: 0.85rem;
+    color: rgba(255,200,0,0.35);
+    letter-spacing: 0.25em;
     text-transform: uppercase;
-    margin-top: 10px;
+    margin-top: 8px;
+    text-shadow: 0 0 20px var(--glow-gold);
   }
 
   /* ── Corner labels ── */
@@ -94,32 +124,70 @@
     position: absolute;
     display: flex; flex-direction: column;
     gap: 2px;
-    padding: 12px 20px;
+    padding: 12px 22px;
     border-radius: 10px;
-    background: rgba(10,14,39,0.45);
-    border: 1px solid rgba(43,95,200,0.15);
-    backdrop-filter: blur(6px);
-    min-width: 100px;
+    background: linear-gradient(135deg, rgba(10,14,39,0.5), rgba(10,14,39,0.3));
+    border: 1px solid rgba(200,212,232,0.08);
+    box-shadow: inset 0 1px 0 rgba(200,212,232,0.04), 0 4px 20px rgba(0,0,0,0.3);
+    backdrop-filter: blur(8px);
+    min-width: 110px;
+  }
+  .corner-label::before {
+    content: '';
+    position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--blue), transparent 50%, var(--gold));
+    opacity: 0.2;
+    z-index: -1;
   }
   .corner-label .ico { font-size: 1.1rem; }
-  .corner-label .val { font-size: 1.4rem; font-weight: 800; letter-spacing: 0.03em; }
-  .corner-label .lbl { font-size: 0.55rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.3); }
-  .corner-label.cl-tl { top: 25px; left: 25px; }
-  .corner-label.cl-tr { top: 25px; right: 25px; }
-  .corner-label.cl-bl { bottom: 25px; left: 25px; }
-  .corner-label.cl-br { bottom: 25px; right: 25px; }
+  .corner-label .val { font-size: 1.5rem; font-weight: 800; letter-spacing: 0.03em; text-shadow: 0 0 15px currentColor; }
+  .corner-label .lbl { font-size: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(200,212,232,0.3); font-family: 'Cinzel', serif; }
+  .corner-label.cl-tl { top: 30px; left: 30px; }
+  .corner-label.cl-tr { top: 30px; right: 30px; }
+  .corner-label.cl-bl { bottom: 30px; left: 30px; }
+  .corner-label.cl-br { bottom: 30px; right: 30px; }
   .corner-label:nth-child(1) .val { color: var(--lblue); }
   .corner-label:nth-child(2) .val { color: var(--gold); }
   .corner-label:nth-child(3) .val { color: var(--blue); }
-  .corner-label:nth-child(4) .val { color: var(--gold); }
+  .corner-label:nth-child(4) .val { color: var(--silver); }
+
+  /* ── Particles ── */
+  #particles {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 6px var(--gold);
+    animation: particle-drift linear infinite;
+  }
+  @keyframes particle-drift {
+    0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-100px) translateX(50px); opacity: 0; }
+  }
 </style>
 </head>
 <body>
   <div id="bg"></div>
   <div id="grid"></div>
 
-  <div class="shield-wm">
-    <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/><path d="M50 25 L62 38 L55 42 L50 55 L45 42 L38 38 Z" fill="none" stroke="#8ab4ff" stroke-width="1"/></svg>
+  <div id="light-shafts">
+    <div class="shaft"></div>
+    <div class="shaft"></div>
+    <div class="shaft"></div>
+    <div class="shaft"></div>
+    <div class="shaft"></div>
+  </div>
+
+  <div id="watermark">
+    <svg viewBox="0 0 100 110"><defs><linearGradient id="wg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2b5fc8"/><stop offset="50%" stop-color="#ffc800"/><stop offset="100%" stop-color="#c8d4e8"/></linearGradient></defs><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="url(#wg)" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
   </div>
 
   <div class="corner-shield cs-tl"><svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg></div>
@@ -130,7 +198,7 @@
   <div id="center">
     <span id="crown-icon">👑</span>
     <div id="username-display"><span id="name-text">Alianza</span></div>
-    <div id="tagline">por la Alianza · for the Alliance</div>
+    <div id="tagline">Por la Alianza · For the Alliance</div>
   </div>
 
   <div class="corner-label cl-tl">
@@ -154,11 +222,28 @@
     <span class="lbl">Bits</span>
   </div>
 
+  <div id="particles"></div>
+
   <script>
     const params = new URLSearchParams(window.location.search);
     const username = params.get('username') || 'Alianza';
     document.getElementById('name-text').textContent = username;
     document.title = `StreamForge – WoW Alianza Fullscreen · ${username}`;
+
+    // Create floating particles
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 25; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.animationDuration = (10 + Math.random() * 20) + 's';
+      p.style.animationDelay = (Math.random() * 15) + 's';
+      p.style.width = (2 + Math.random() * 3) + 'px';
+      p.style.height = p.style.width;
+      p.style.background = ['#ffc800', '#c8d4e8', '#8ab4ff'][Math.floor(Math.random() * 3)];
+      p.style.boxShadow = `0 0 6px ${p.style.background}`;
+      particlesContainer.appendChild(p);
+    }
 
     const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
     socket.connect();

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StreamForge – WoW Alianza Banner Webcam</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Uncial+Antiqua&family=Inter:wght@400;600&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     width: 1920px; height: 1080px;
@@ -17,94 +17,107 @@
     --blue: #2b5fc8;
     --gold: #ffc800;
     --lblue: #8ab4ff;
+    --silver: #c8d4e8;
     --navy: #0a0e27;
+    --glow: rgba(43,95,200,0.6);
+    --glow-gold: rgba(255,200,0,0.3);
   }
 
-  /* ── Shield decoration ── */
-  .shield {
-    position: absolute; width: 90px; height: 100px; opacity: 0.15;
-  }
-  .shield svg { width: 100%; height: 100%; }
-  .shield-l { bottom: 0; left: -20px; }
-  .shield-r { bottom: 0; right: -20px; transform: scaleX(-1); }
-
-  /* ── Banner bar ── */
   #banner {
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 150px;
     background: linear-gradient(to right,
-      rgba(10,14,39,0.93), rgba(20,30,70,0.95), rgba(10,14,39,0.93));
+      rgba(10,14,39,0.95), rgba(20,30,60,0.96), rgba(10,14,39,0.95));
     border-top: 3px solid;
-    border-image: linear-gradient(to right, var(--blue), var(--gold), var(--lblue)) 1;
+    border-image: linear-gradient(to right, var(--blue), var(--gold), var(--lblue), var(--silver)) 1;
     display: flex;
     align-items: center;
-    padding: 0 220px 0 25px;
+    padding: 0 240px 0 25px;
     overflow: hidden;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+  }
+  #banner::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(200,212,232,0.008) 30px, rgba(200,212,232,0.008) 31px);
+    pointer-events: none;
   }
 
-  /* ── Webcam thumbnail ── */
   #cam-thumb {
     width: 110px; height: 110px;
     border-radius: 10px;
     overflow: hidden;
-    border: 2px solid rgba(255,200,0,0.3);
+    border: 2px solid rgba(200,212,232,0.2);
     flex-shrink: 0;
     margin-right: 18px;
-    box-shadow: 0 0 20px rgba(43,95,200,0.15);
+    box-shadow: 0 0 25px rgba(43,95,200,0.15), inset 0 0 30px rgba(0,0,0,0.2);
   }
   #cam-thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  /* ── Info ── */
-  .info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .info { flex: 1; display: flex; flex-direction: column; gap: 2px; position: relative; z-index: 1; }
   .info-label {
-    font-size: 0.6rem; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.18em;
+    font-size: 0.55rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.2em;
     color: var(--gold);
-    text-shadow: 0 0 10px rgba(255,200,0,0.2);
+    text-shadow: 0 0 15px var(--glow-gold);
   }
   .info-name {
     font-size: 2rem; font-weight: 900;
     color: #fff;
-    text-shadow: 0 0 30px rgba(43,95,200,0.3), 0 2px 10px rgba(0,0,0,0.5);
+    text-shadow: 0 0 40px var(--glow), 0 2px 10px rgba(0,0,0,0.6);
     letter-spacing: 0.05em; line-height: 1;
   }
 
-  /* ── Labels row ── */
   .labels {
     display: flex; gap: 14px;
-    margin-top: 4px;
+    margin-top: 3px;
   }
   .label-item {
     display: flex; align-items: center; gap: 5px;
-    font-size: 0.7rem; font-weight: 600;
-    color: rgba(255,255,255,0.45);
+    font-size: 0.68rem; font-weight: 600;
+    color: rgba(200,212,232,0.4);
   }
   .label-item .val { font-weight: 700; }
   .label-item:nth-child(1) .val { color: var(--lblue); }
   .label-item:nth-child(2) .val { color: var(--gold); }
   .label-item:nth-child(3) .val { color: var(--blue); }
-  .label-item:nth-child(4) .val { color: var(--gold); }
-  .label-item .ico { font-size: 0.75rem; }
+  .label-item:nth-child(4) .val { color: var(--silver); }
+  .label-item .ico { font-size: 0.72rem; }
 
-  /* ── Decorative crest ── */
-  #crest {
+  /* ── Crest ── */
+  #crest-side {
     margin-left: auto;
-    font-size: 2.5rem;
-    opacity: 0.2;
+    font-size: 2.2rem;
+    opacity: 0.12;
     flex-shrink: 0;
+    filter: drop-shadow(0 0 15px var(--glow-gold));
+    animation: crest-pulse 3s ease-in-out infinite alternate;
   }
+  @keyframes crest-pulse {
+    0% { opacity: 0.08; filter: drop-shadow(0 0 10px var(--glow-gold)); }
+    100% { opacity: 0.18; filter: drop-shadow(0 0 25px var(--glow-gold)); }
+  }
+
+  /* ── Rune accent ── */
+  .rune-accent {
+    font-family: 'Uncial Antiqua', serif;
+    font-size: 0.6rem;
+    color: var(--gold);
+    opacity: 0.08;
+    position: absolute;
+    bottom: 6px;
+  }
+  .rune-accent-l { left: 15px; }
+  .rune-accent-r { right: 15px; }
 </style>
 </head>
 <body>
-  <div class="shield shield-l">
-    <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
-  </div>
-  <div class="shield shield-r">
-    <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
-  </div>
-
   <div id="banner">
+    <span class="rune-accent rune-accent-l">ᚨ ᛚ ᛁ ᚨ ᚾ ᛉ</span>
+    <span class="rune-accent rune-accent-r">ᛗ ᛟ ᚱ ᛏ ᛖ</span>
+
     <div id="cam-thumb">
       <video id="webcam" autoplay muted playsinline></video>
     </div>
@@ -118,7 +131,7 @@
         <div class="label-item"><span class="ico">🎯</span><span class="val" id="bits">0</span> bits</div>
       </div>
     </div>
-    <div id="crest">🦁</div>
+    <div id="crest-side">🦁</div>
   </div>
 
   <script>
