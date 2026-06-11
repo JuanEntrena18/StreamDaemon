@@ -14,6 +14,11 @@ interface StreamforgerAPI {
     resize: (w: number, h: number) => void;
     setPosition: (x: number, y: number) => void;
     getBounds: () => Promise<{ x: number; y: number; width: number; height: number } | null>;
+    setAlwaysOnTop: (v: boolean) => void;
+    getAlwaysOnTop: () => Promise<boolean>;
+    setFont: (fontFamily: string) => void;
+    setFontSize: (size: number) => void;
+    setBgMode: (mode: string) => void;
   };
   backend: {
     isReady: () => Promise<boolean>;

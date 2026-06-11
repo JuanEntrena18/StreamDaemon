@@ -16,6 +16,11 @@ contextBridge.exposeInMainWorld('streamforger', {
     resize: (w: number, h: number) => ipcRenderer.send('overlay:resize', w, h),
     setPosition: (x: number, y: number) => ipcRenderer.send('overlay:setPosition', x, y),
     getBounds: () => ipcRenderer.invoke('overlay:getBounds'),
+    setAlwaysOnTop: (v: boolean) => ipcRenderer.send('overlay:setAlwaysOnTop', v),
+    getAlwaysOnTop: () => ipcRenderer.invoke('overlay:getAlwaysOnTop'),
+    setFont: (fontFamily: string) => ipcRenderer.send('overlay:setFont', fontFamily),
+    setFontSize: (size: number) => ipcRenderer.send('overlay:setFontSize', size),
+    setBgMode: (mode: string) => ipcRenderer.send('overlay:setBgMode', mode),
   },
 
   auth: {

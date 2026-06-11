@@ -32,6 +32,16 @@ Cuatro overlays standalone en `public/overlays/` que se sirven como archivos est
 
 > Todos los overlays standalone solo muestran datos reales del backend. El modo demo (`?demo=true`) activa un badge **🧪 MODO PRUEBA** permanente en pantalla y datos simulados. Sin `?demo=true` y sin backend, todo se muestra en cero/`--`.
 
+### Componentes del Overlay
+
+| Componente | Descripción |
+|---|---|
+| `OverlayContainer.tsx` | Punto de entrada del overlay React. Lee parámetros URL (`mode`, `theme`, `channel`), gestiona ajustes de usuario (tipografía, tamaño, fondo) con persistencia en localStorage y los pasa a los componentes hijos |
+| `OverlayControls.tsx` | Barra de control siempre visible en la parte superior del overlay: asa de arrastre, panel de ajustes (tipografía, tamaño), bloqueo/desbloqueo de clics (click-through), modo fondo negro/transparente, toggle siempre encima y botón cerrar |
+| `OverlayErrorBoundary.tsx` | Captura errores de React en el overlay y muestra un mensaje visible en lugar de dejar la ventana transparente invisible |
+| `ChatOverlay.tsx` | Overlay de chat con soporte para tipografía personalizada, tamaño de texto y modo de fondo (negro/transparente) |
+| `ChannelNotifications.tsx` | Notificaciones animadas de EventSub (follows, subs, gifts, redemptions, cheers) en el overlay |
+
 ### Sistema de Diseño
 
 El dashboard usa un sistema de tokens CSS definidos en `index.css`:
@@ -51,7 +61,7 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 |---|---|
 | `App.tsx` | Layout principal con sidebar (6 secciones: GESTOR, Chat, MOD, COMANDOS, Herramientas, Config) + header + tab transitions |
 | `StreamDashboard.tsx` | Gestor unificado: preview embed, editor título/juego, stats en vivo, feed actividad con filtros |
-| `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación, selector sonido, overlay controls |
+| `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación, selector sonido, overlay controls (tamaño, opacidad, tipografía, fondo negro/transparente) |
 | `GiveawayPanel.tsx` | Panel sorteos con ruleta canvas e importación masiva |
 | `PredictionPanel.tsx` | Panel de predicciones con opciones A/B/C |
 | `TrackerPanel.tsx` | Twitch Tracker: estadísticas históricas del canal |
@@ -109,6 +119,22 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 | **SQLite** | Base de datos única compartida entre backend y desktop. Sin servidor externo. |
 | **Prisma 5** | ORM para ambos packages. |
 | **PostgreSQL 16** | Opcional — disponible vía `docker-compose.yml` para producción multi-usuario. |
+
+---
+
+## Overlay React (Chat Transparente)
+
+El overlay de chat se renderiza con React en una ventana Electron separada (o como Browser Source en OBS). A diferencia de los overlays HTML standalone, este overlay tiene acceso completo al ecosistema React y se comunica con el proceso principal de Electron vía IPC:
+
+| Característica | Descripción |
+|---|---|
+| **Barra de control** | Siempre visible en la parte superior con asa de arrastre, ajustes, bloqueo de clics, modo fondo, siempre encima y cerrar |
+| **Ajustes de tipografía** | Selector de 6 fuentes (Inter, Arial, Monospace, Georgia, Verdana, Impact) con slider de tamaño (10-24px) |
+| **Modo de fondo** | Alternar entre fondo negro sólido o fondo completamente transparente |
+| **Click-through** | Botón 🔓/🔒 para bloquear o permitir que los clics pasen a la ventana/juego detrás. También accesible con `Ctrl+Shift+T` |
+| **Siempre encima** | Toggle para mantener la ventana sobre todas las demás aplicaciones |
+| **Persistencia** | Todos los ajustes se guardan en localStorage y se restauran al abrir la ventana |
+| **IPC bridge** | Los cambios realizados desde el panel de Chat de la app principal se sincronizan con la ventana overlay vía `executeJavaScript` + eventos personalizados |
 
 ---
 

@@ -25,7 +25,7 @@ Disponible en dos modos:
 - **🌐 Redes sociales** — Overlay animado que muestra las redes del streamer de forma rotativa.
 - **🛡️ Moderación** — Panel de moderación con timeout, ban y unban. Incluye lista de usuarios conectados al canal en ese momento con selección clickeable.
 - **🤖 Comandos** — Gestión de comandos personalizados del chat: crear, editar, habilitar/deshabilitar, con alias y cooldown configurable.
-- **🎮 Control de overlay transparente** — Ventana always-on-top con click-through toggleable (Ctrl+Shift+T), opacidad solo del fondo, redimensionable (Peq/Med/Grande) y barra de arrastre.
+- **🎮 Control de overlay transparente** — Ventana always-on-top con click-through toggleable (Ctrl+Shift+T), opacidad solo del fondo, redimensionable (Peq/Med/Grande), fondo negro/transparente, selector de tipografía (6 fuentes), ajuste de tamaño de texto (10-24px) y barra de control siempre visible con zona de arrastre, bloqueo/desbloqueo de clics y panel de ajustes integrado. Los cambios persisten en localStorage.
 - **🔐 Autenticación OAuth** — Login con Twitch. En navegador: flujo Authorization Code Grant con redirect. En escritorio: flujo **Device Code Grant** (el usuario ve un código en la app y lo ingresa en twitch.tv/activate). Tokens persistidos con refresco automático. Logout completo.
 - **🖥️ Dashboard premium** — Interfaz con sidebar de navegación, glassmorphism, animaciones Framer Motion, paleta violeta/índigo, badge de usuario Twitch y estado de conexión en tiempo real.
 - **📊 Fortnite Stats Overlay** — Panel configurable en el overlay de Fortnite que muestra kills, wins, partidas, K/D y win rate desde la API de [fortnite-api.com](https://fortnite-api.com). Cada usuario registra su propia API Key desde el panel. Cache de 5 min.
@@ -116,6 +116,8 @@ Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 > Los overlays HTML independientes solo muestran datos reales del backend. Para vista previa con datos simulados añade `&demo=true` a la URL. Cuando el modo demo está activo se muestra un badge **🧪 MODO PRUEBA** permanente en pantalla.
 
 Para cambiar el tema visual del chat agrega `&theme=subnautica2`, `&theme=poe2`, `&theme=wow` o `&theme=alliance`.
+
+> En la ventana transparente de escritorio, los ajustes de tipografía, tamaño y modo de fondo se pueden modificar desde la barra de control superior (⚙) o desde el panel de Chat en la aplicación. La configuración persiste entre sesiones.
 
 > En **modo desarrollo** (`npm run dev`), usá `localhost:5173` en lugar de `localhost:3000`. El overlay de Fortnite necesita el parámetro `&backend=http://localhost:3000` en ese caso (se agrega automáticamente al copiar la URL desde el panel).
 

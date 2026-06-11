@@ -165,17 +165,22 @@ function createMainWindow() {
 function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: string) {
   if (overlayWindow) overlayWindow.close();
 
+  const overlayBaseUrl = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
+  const overlayUrl = isUrl
+    ? urlOrChannel
+    : `${overlayBaseUrl}/overlay.html?mode=chat&channel=${encodeURIComponent(urlOrChannel)}${theme ? `&theme=${encodeURIComponent(theme)}` : ''}`;
+
   overlayWindow = new BrowserWindow({
     width: 400,
     height: 600,
-    x: 0,
-    y: 0,
     transparent: true,
+    backgroundColor: '#00000000',
     alwaysOnTop: true,
     frame: false,
     resizable: true,
     skipTaskbar: true,
     hasShadow: false,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -183,13 +188,25 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
     },
   });
 
-  const overlayBaseUrl = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
-  const overlayUrl = isUrl
-    ? urlOrChannel
-    : `${overlayBaseUrl}/overlay.html?mode=chat&channel=${urlOrChannel}${theme ? `&theme=${theme}` : ''}`;
-  overlayWindow.loadURL(overlayUrl);
+  // Posicionar la ventana a la derecha de la principal para que sea visible
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    const bounds = mainWindow.getBounds();
+    overlayWindow.setPosition(bounds.x + bounds.width + 10, bounds.y);
+  } else {
+    overlayWindow.setPosition(100, 100);
+  }
 
-  overlayWindow.setIgnoreMouseEvents(true, { forward: true });
+  overlayWindow.loadURL(overlayUrl).then(() => {
+    overlayWindow?.show();
+  }).catch((err) => {
+    console.error('[overlay] Failed to load overlay URL:', err);
+    // Mostrar la ventana aunque falle la carga para que no quede invisible
+    overlayWindow?.show();
+  });
+
+  // Arranca con click-through desactivado para que el usuario pueda ver los controles e interactuar.
+  // Puede bloquearlo con el botón 🔓 en la barra o con Ctrl+Shift+T.
+  overlayWindow.setIgnoreMouseEvents(false);
 
   overlayWindow.webContents.on('did-finish-load', () => {
     overlayWindow?.webContents.insertCSS(`
@@ -249,6 +266,46 @@ ipcMain.on('overlay:setPosition', (_e, x: number, y: number) => {
   overlayWindow?.setPosition(x, y);
 });
 ipcMain.handle('overlay:getBounds', () => overlayWindow?.getBounds() ?? null);
+ipcMain.on('overlay:setAlwaysOnTop', (_e, value: boolean) => {
+  overlayWindow?.setAlwaysOnTop(value, 'screen-saver');
+});
+ipcMain.handle('overlay:getAlwaysOnTop', () => overlayWindow?.isAlwaysOnTop() ?? false);
+ipcMain.on('overlay:setFontSize', (_e, size: number) => {
+  if (!overlayWindow) return;
+  overlayWindow.webContents.executeJavaScript(`
+    try {
+      const raw = localStorage.getItem('streamforger-overlay-settings') || '{}';
+      const s = JSON.parse(raw);
+      s.fontSize = ${size};
+      localStorage.setItem('streamforger-overlay-settings', JSON.stringify(s));
+      window.dispatchEvent(new CustomEvent('overlay:settings', { detail: { fontSize: ${size} } }));
+    } catch (e) { console.error('[overlay] setFontSize error:', e); }
+  `).catch(() => {});
+});
+ipcMain.on('overlay:setFont', (_e, fontFamily: string) => {
+  if (!overlayWindow) return;
+  overlayWindow.webContents.executeJavaScript(`
+    try {
+      const raw = localStorage.getItem('streamforger-overlay-settings') || '{}';
+      const s = JSON.parse(raw);
+      s.fontFamily = ${JSON.stringify(fontFamily)};
+      localStorage.setItem('streamforger-overlay-settings', JSON.stringify(s));
+      window.dispatchEvent(new CustomEvent('overlay:settings', { detail: { fontFamily: ${JSON.stringify(fontFamily)} } }));
+    } catch (e) { console.error('[overlay] setFont error:', e); }
+  `).catch(() => {});
+});
+ipcMain.on('overlay:setBgMode', (_e, mode: string) => {
+  if (!overlayWindow) return;
+  overlayWindow.webContents.executeJavaScript(`
+    try {
+      const raw = localStorage.getItem('streamforger-overlay-settings') || '{}';
+      const s = JSON.parse(raw);
+      s.bgMode = ${JSON.stringify(mode)};
+      localStorage.setItem('streamforger-overlay-settings', JSON.stringify(s));
+      window.dispatchEvent(new CustomEvent('overlay:settings', { detail: { bgMode: ${JSON.stringify(mode)} } }));
+    } catch (e) { console.error('[overlay] setBgMode error:', e); }
+  `).catch(() => {});
+});
 
 // Auth: construct OAuth URL from env vars and open in default browser
 ipcMain.on('auth:login', () => {

@@ -111,6 +111,18 @@ export function ChatPanel({ channel }: Props) {
 
   const [overlayOpacity, setOverlayOpacity] = useState(0.9);
   const [overlaySize, setOverlaySize] = useState<'sm' | 'md' | 'lg'>('md');
+  const [overlayBgMode, setOverlayBgMode] = useState<'transparent' | 'black'>('black');
+  const [overlayFont, setOverlayFont] = useState("'Inter', sans-serif");
+  const [overlayFontSize, setOverlayFontSize] = useState(14);
+
+  const FONT_OPTIONS = [
+    { label: 'Inter', value: "'Inter', sans-serif" },
+    { label: 'Arial', value: 'Arial, sans-serif' },
+    { label: 'Monospace', value: "'Courier New', monospace" },
+    { label: 'Georgia', value: 'Georgia, serif' },
+    { label: 'Verdana', value: 'Verdana, sans-serif' },
+    { label: 'Impact', value: "'Arial Black', Impact, sans-serif" },
+  ];
 
   function openOverlayWindow() {
     if (!channel) return;
@@ -228,6 +240,62 @@ export function ChatPanel({ channel }: Props) {
                 onChange={(e) => changeOverlayOpacity(parseFloat(e.target.value))}
                 style={{ flex: 1, accentColor: '#7c3aed' }}
               />
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+            {/* Background mode */}
+            <button
+              onClick={() => {
+                const next = overlayBgMode === 'transparent' ? 'black' : 'transparent';
+                setOverlayBgMode(next);
+                window.streamforger?.overlay.setBgMode?.(next);
+              }}
+              style={{
+                padding: '0.25rem 0.6rem', borderRadius: 4, border: '1px solid',
+                borderColor: 'var(--sf-border)',
+                background: 'transparent',
+                color: 'var(--sf-text-3)',
+                fontSize: '0.68rem', cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              {overlayBgMode === 'transparent' ? '◻ Fondo transp.' : '◼ Fondo negro'}
+            </button>
+
+            {/* Font selector */}
+            <select
+              value={overlayFont}
+              onChange={(e) => {
+                setOverlayFont(e.target.value);
+                window.streamforger?.overlay.setFont?.(e.target.value);
+              }}
+              style={{
+                padding: '0.25rem 0.5rem', borderRadius: 4, border: '1px solid var(--sf-border)',
+                background: 'transparent', color: 'var(--sf-text-3)',
+                fontSize: '0.68rem', cursor: 'pointer', fontFamily: 'inherit', outline: 'none',
+              }}
+            >
+              {FONT_OPTIONS.map((f) => (
+                <option key={f.value} value={f.value}>{f.label}</option>
+              ))}
+            </select>
+
+            {/* Font size */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <span style={{ fontSize: '0.6rem', color: 'var(--sf-text-3)' }}>A</span>
+              <input
+                type="range"
+                min={10}
+                max={24}
+                value={overlayFontSize}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value);
+                  setOverlayFontSize(v);
+                  window.streamforger?.overlay.setFontSize?.(v);
+                }}
+                style={{ width: 60, accentColor: '#7c3aed', cursor: 'pointer' }}
+              />
+              <span style={{ fontSize: '0.9rem', color: 'var(--sf-text-3)' }}>A</span>
+              <span style={{ fontSize: '0.6rem', color: 'var(--sf-text-3)', minWidth: 16 }}>{overlayFontSize}</span>
             </div>
           </div>
         </motion.div>
