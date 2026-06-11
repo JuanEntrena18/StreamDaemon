@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – WoW Alianza Webcam</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Cinzel', serif;
+  }
+  :root {
+    --blue: #2b5fc8;
+    --gold: #ffc800;
+    --lblue: #8ab4ff;
+    --navy: #0a0e27;
+    --glow-blue: 0 0 25px rgba(43,95,200,0.5);
+    --glow-gold: 0 0 20px rgba(255,200,0,0.3);
+  }
+
+  /* ── Shield decoration ── */
+  .shield {
+    position: absolute;
+    width: 160px; height: 180px;
+    opacity: 0.12;
+  }
+  .shield svg { width: 100%; height: 100%; }
+  .shield-tl { top: -20px; left: -20px; }
+  .shield-br { bottom: -20px; right: -20px; transform: rotate(180deg); }
+
+  /* ── Webcam frame ── */
+  #cam-frame {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 640px; height: 480px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid rgba(43,95,200,0.35);
+    box-shadow: 0 0 50px rgba(43,95,200,0.15), inset 0 0 80px rgba(0,0,0,0.3);
+  }
+  #cam-frame::before {
+    content: '';
+    position: absolute; top: -3px; left: -3px;
+    right: -3px; bottom: -3px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, var(--blue), var(--gold), var(--lblue), var(--blue));
+    background-size: 300% 300%;
+    z-index: -1;
+    animation: gradient-shift 5s ease infinite;
+    opacity: 0.5;
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  #cam-frame video, #cam-frame img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+  }
+
+  /* ── Crown top ── */
+  #crown {
+    position: absolute;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    filter: drop-shadow(0 0 15px rgba(255,200,0,0.4));
+    z-index: 2;
+    opacity: 0.6;
+  }
+
+  /* ── Username ── */
+  #username {
+    position: absolute;
+    top: 16px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(43,95,200,0.6), 0 2px 8px rgba(0,0,0,0.8);
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+    padding: 6px 24px;
+    border-radius: 99px;
+    background: linear-gradient(135deg, rgba(43,95,200,0.2), rgba(139,180,255,0.15));
+    border: 1px solid rgba(255,200,0,0.2);
+    backdrop-filter: blur(8px);
+    z-index: 5;
+  }
+  #username .crown-icon {
+    display: inline-block;
+    margin-right: 8px;
+  }
+
+  /* ── Corner decorations ── */
+  .corner {
+    position: absolute;
+    width: 45px; height: 45px;
+  }
+  .corner svg { width: 100%; height: 100%; }
+  .corner-tl { top: 8px; left: 8px; }
+  .corner-tr { top: 8px; right: 8px; transform: scaleX(-1); }
+  .corner-bl { bottom: 8px; left: 8px; transform: scaleY(-1); }
+  .corner-br { bottom: 8px; right: 8px; transform: scale(-1, -1); }
+
+  /* ── Lion silhouette ── */
+  .lion {
+    position: absolute;
+    font-size: 3rem;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+  .lion-tl { top: 40px; left: 30px; }
+  .lion-br { bottom: 40px; right: 30px; }
+</style>
+</head>
+<body>
+  <div class="shield shield-tl">
+    <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/><path d="M50 20 L65 35 L55 40 L50 55 L45 40 L35 35 Z" fill="none" stroke="#8ab4ff" stroke-width="1"/></svg>
+  </div>
+  <div class="shield shield-br">
+    <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/><path d="M50 20 L65 35 L55 40 L50 55 L45 40 L35 35 Z" fill="none" stroke="#8ab4ff" stroke-width="1"/></svg>
+  </div>
+
+  <div class="lion lion-tl">🦁</div>
+  <div class="lion lion-br">🦁</div>
+
+  <div id="cam-frame">
+    <div id="crown">👑</div>
+    <div id="username"><span class="crown-icon">👑</span><span id="name-text">Alianza</span></div>
+    <video id="webcam" autoplay muted playsinline></video>
+    <svg class="corner corner-tl" viewBox="0 0 50 50"><path d="M2 2h46" stroke="#2b5fc8" stroke-width="3" fill="none"/><path d="M2 2v46" stroke="#2b5fc8" stroke-width="3" fill="none"/></svg>
+    <svg class="corner corner-tr" viewBox="0 0 50 50"><path d="M2 2h46" stroke="#ffc800" stroke-width="3" fill="none"/><path d="M2 2v46" stroke="#ffc800" stroke-width="3" fill="none"/></svg>
+    <svg class="corner corner-bl" viewBox="0 0 50 50"><path d="M2 2h46" stroke="#8ab4ff" stroke-width="3" fill="none"/><path d="M2 2v46" stroke="#8ab4ff" stroke-width="3" fill="none"/></svg>
+    <svg class="corner corner-br" viewBox="0 0 50 50"><path d="M2 2h46" stroke="#2b5fc8" stroke-width="3" fill="none"/><path d="M2 2v46" stroke="#2b5fc8" stroke-width="3" fill="none"/></svg>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'Alianza';
+    document.getElementById('name-text').textContent = username;
+    document.title = `StreamForge – WoW Alianza Webcam · ${username}`;
+
+    if (navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        document.getElementById('webcam').srcObject = stream;
+      }).catch(() => {});
+    }
+  </script>
+</body>
+</html>

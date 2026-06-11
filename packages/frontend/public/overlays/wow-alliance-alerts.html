@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – WoW Alianza Alertas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Cinzel', serif;
+  }
+  :root {
+    --blue: #2b5fc8;
+    --gold: #ffc800;
+    --lblue: #8ab4ff;
+    --navy: #0a0e27;
+    --green: #34d399;
+    --orange: #fb923c;
+    --pink: #f472b6;
+  }
+
+  #alert-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; align-items: center;
+    pointer-events: none;
+    z-index: 10;
+    min-width: 500px;
+  }
+
+  /* ── Card base ── */
+  .alert-card {
+    position: absolute;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 30px 60px;
+    border-radius: 14px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    overflow: hidden;
+    min-width: 460px;
+    opacity: 0;
+    transform: scale(0.4) translateY(30px);
+  }
+  .alert-card.visible {
+    animation: alert-appear 0.7s cubic-bezier(0.175,0.885,0.32,1.4) forwards;
+  }
+  .alert-card.hiding {
+    animation: alert-hide 0.5s ease-in forwards;
+  }
+  @keyframes alert-appear {
+    0%   { opacity: 0; transform: scale(0.4) translateY(30px); }
+    60%  { opacity: 1; transform: scale(1.06) translateY(-8px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes alert-hide {
+    0%   { opacity: 1; transform: scale(1) translateY(0); }
+    100% { opacity: 0; transform: scale(0.7) translateY(-60px); }
+  }
+
+  /* ── Shield decoration ── */
+  .alert-shield {
+    position: absolute;
+    width: 100px; height: 110px;
+    opacity: 0.12;
+  }
+  .alert-shield svg { width: 100%; height: 100%; }
+  .alert-shield-tl { top: -20px; left: -20px; }
+  .alert-shield-br { bottom: -20px; right: -20px; transform: rotate(180deg); }
+
+  .alert-card {
+    border: 2px solid rgba(43,95,200,0.15);
+    background: rgba(10,14,39,0.85);
+  }
+  .alert-card::before {
+    content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--blue), var(--gold), var(--lblue));
+    background-size: 300% 300%;
+    z-index: -1;
+    animation: gradient-shift 4s ease infinite;
+    opacity: 0.5;
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ── Type header ── */
+  .alert-type {
+    font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 4px;
+  }
+  .alert-type.follow  { color: var(--lblue); }
+  .alert-type.sub     { color: var(--gold); }
+  .alert-type.donate  { color: var(--blue); }
+  .alert-type.cheer   { color: var(--gold); }
+  .alert-type.host    { color: var(--green); }
+  .alert-type.raid    { color: var(--orange); }
+
+  .alert-icon { font-size: 2rem; margin-bottom: 4px; }
+
+  .alert-user {
+    font-size: 2.2rem; font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 30px rgba(43,95,200,0.3), 0 2px 10px rgba(0,0,0,0.5);
+    line-height: 1.1;
+  }
+  .alert-msg {
+    font-size: 1rem; font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    margin-top: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+  .alert-detail {
+    font-size: 0.8rem; font-weight: 400;
+    color: rgba(255,255,255,0.35);
+    margin-top: 2px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* ── Crown ── */
+  .alert-crown {
+    position: absolute;
+    top: -10px;
+    font-size: 1.5rem;
+    opacity: 0.3;
+  }
+
+  /* ── Tier badge ── */
+  .tier-badge {
+    display: inline-block;
+    font-size: 0.6rem; font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 99px;
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+    font-family: 'Inter', sans-serif;
+  }
+  .tier-badge.t1 { background: rgba(43,95,200,0.2); color: var(--lblue); border: 1px solid rgba(43,95,200,0.3); }
+  .tier-badge.t2 { background: rgba(255,200,0,0.2); color: var(--gold); border: 1px solid rgba(255,200,0,0.3); }
+  .tier-badge.t3 { background: rgba(139,180,255,0.2); color: var(--lblue); border: 1px solid rgba(139,180,255,0.3); }
+</style>
+</head>
+<body>
+  <div id="alert-center"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'Alianza';
+    const DURATION = parseInt(params.get('duration') || '8', 10) * 1000;
+    document.title = `StreamForge – WoW Alianza Alertas · ${username}`;
+
+    const TYPES = {
+      follow:  { icon: '📺', label: 'Nuevo Recluta', cls: 'follow' },
+      sub:     { icon: '⭐', label: 'Nuevo Suscriptor', cls: 'sub' },
+      donate:  { icon: '💰', label: 'Donación', cls: 'donate' },
+      cheer:   { icon: '🎯', label: 'Cheer', cls: 'cheer' },
+      host:    { icon: '🎪', label: 'Host', cls: 'host' },
+      raid:    { icon: '🚀', label: 'Raid', cls: 'raid' },
+    };
+
+    let isShowing = false;
+    const queue = [];
+
+    function showAlert(type, data) {
+      queue.push({ type, data });
+      processQueue();
+    }
+
+    function processQueue() {
+      if (isShowing || queue.length === 0) return;
+      isShowing = true;
+      const { type, data } = queue.shift();
+      renderAlert(type, data);
+    }
+
+    function renderAlert(type, data) {
+      const info = TYPES[type] || TYPES.follow;
+      const container = document.getElementById('alert-center');
+      container.innerHTML = '';
+
+      const card = document.createElement('div');
+      card.className = 'alert-card';
+
+      let msgHtml = '';
+      let detailHtml = '';
+      let tierHtml = '';
+
+      if (type === 'follow') {
+        msgHtml = '¡Bienvenido a la Alianza!';
+      } else if (type === 'sub') {
+        const months = data.cumulativeMonths || 1;
+        msgHtml = `¡${months} ${months === 1 ? 'mes' : 'meses'} de lealtad!`;
+        const tierVal = data.tier || '1000';
+        const tierNum = tierVal === '3000' ? 3 : tierVal === '2000' ? 2 : 1;
+        const tierLabel = {1:'Tier 1',2:'Tier 2',3:'Tier 3'}[tierNum];
+        const tierClass = {1:'t1',2:'t2',3:'t3'}[tierNum];
+        tierHtml = `<div class="tier-badge ${tierClass}">${tierLabel}</div>`;
+        if (data.isGift) msgHtml = '¡Suscripción regalada!';
+      } else if (type === 'donate') {
+        const amount = data.amount || data.rewardCost || 0;
+        const formatted = typeof amount === 'number' ? '$' + (amount / 100).toFixed(2) : amount;
+        msgHtml = formatted;
+        detailHtml = data.message ? `<div class="alert-detail">"${data.message.substring(0, 100)}"</div>` : '';
+      } else if (type === 'cheer') {
+        const bits = data.bits || 0;
+        msgHtml = `${bits} bits`;
+        detailHtml = data.message ? `<div class="alert-detail">"${data.message.substring(0, 100)}"</div>` : '';
+      } else if (type === 'host') {
+        msgHtml = '¡Gracias por el host!';
+      } else if (type === 'raid') {
+        const viewers = data.viewers || 0;
+        msgHtml = `¡Raid con ${viewers} ${viewers === 1 ? 'espectador' : 'espectadores'}!`;
+      }
+
+      card.innerHTML = `
+        <div class="alert-crown">👑</div>
+        <div class="alert-shield alert-shield-tl">
+          <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
+        </div>
+        <div class="alert-shield alert-shield-br">
+          <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg>
+        </div>
+        <div class="alert-icon">${info.icon}</div>
+        <div class="alert-type ${info.cls}">${info.label}</div>
+        <div class="alert-user">${data.userDisplayName || data.userName || data.user || 'Alguien'}</div>
+        <div class="alert-msg">${msgHtml}</div>
+        ${tierHtml}
+        ${detailHtml}
+      `;
+
+      container.appendChild(card);
+      requestAnimationFrame(() => card.classList.add('visible'));
+
+      setTimeout(() => {
+        card.classList.remove('visible');
+        card.classList.add('hiding');
+        setTimeout(() => {
+          isShowing = false;
+          processQueue();
+        }, 500);
+      }, DURATION);
+    }
+
+    // ── Socket connection ──
+    const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
+    socket.connect();
+    socket.on('connect', () => {
+      const ch = params.get('channel');
+      if (ch) socket.emit('join:channel', ch);
+    });
+
+    socket.on('channel:follow', (d) => showAlert('follow', d));
+    socket.on('channel:subscribe', (d) => showAlert('sub', d));
+    socket.on('channel:subscription-message', (d) => showAlert('sub', d));
+    socket.on('channel:cheer', (d) => showAlert('cheer', d));
+
+    socket.on('channel:redemption', (d) => {
+      showAlert('donate', { ...d, amount: d.rewardCost });
+    });
+
+    socket.on('channel:raid', (d) => {
+      if (d) showAlert('raid', d);
+    });
+
+    // Demo mode
+    document.addEventListener('click', () => {
+      const demos = [
+        { type: 'follow', data: { userDisplayName: username } },
+        { type: 'sub', data: { userDisplayName: username, cumulativeMonths: 6, tier: '1000' } },
+        { type: 'donate', data: { userDisplayName: username, amount: 1500, message: '¡Por la Alianza!' } },
+        { type: 'cheer', data: { userDisplayName: username, bits: 500, message: 'Alianza forever!' } },
+        { type: 'host', data: { userDisplayName: 'OtroCanal' } },
+        { type: 'raid', data: { userDisplayName: 'OtroCanal', viewers: 25 } },
+      ];
+      const idx = Math.floor(Math.random() * demos.length);
+      showAlert(demos[idx].type, demos[idx].data);
+    });
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

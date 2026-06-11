@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – WoW Alianza Fullscreen</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Cinzel', serif;
+  }
+  :root {
+    --blue: #2b5fc8;
+    --gold: #ffc800;
+    --lblue: #8ab4ff;
+    --navy: #0a0e27;
+  }
+
+  /* ── Background ── */
+  #bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 80%, rgba(43,95,200,0.08), transparent 60%),
+                radial-gradient(ellipse at 50% 20%, rgba(139,180,255,0.05), transparent 50%),
+                linear-gradient(180deg, #0a0e27 0%, #0d1530 50%, #0a0e27 100%);
+  }
+  #grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* ── Shield watermark ── */
+  .shield-wm {
+    position: absolute; width: 350px; height: 390px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.04;
+    pointer-events: none;
+  }
+  .shield-wm svg { width: 100%; height: 100%; }
+
+  /* ── Corner shields ── */
+  .corner-shield {
+    position: absolute; width: 70px; height: 80px; opacity: 0.08;
+  }
+  .corner-shield svg { width: 100%; height: 100%; }
+  .cs-tl { top: 10px; left: 10px; }
+  .cs-tr { top: 10px; right: 10px; transform: scaleX(-1); }
+  .cs-bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
+  .cs-br { bottom: 10px; right: 10px; transform: scale(-1, -1); }
+
+  /* ── Center ── */
+  #center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2;
+  }
+  #crown-icon {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+    display: block;
+    filter: drop-shadow(0 0 30px rgba(255,200,0,0.3));
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  #username-display {
+    font-size: 4rem; font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(43,95,200,0.3), 0 0 80px rgba(43,95,200,0.1), 0 4px 20px rgba(0,0,0,0.5);
+    letter-spacing: 0.08em;
+    line-height: 1;
+  }
+  #tagline {
+    font-size: 0.9rem; font-weight: 400;
+    color: rgba(255,200,0,0.4);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-top: 10px;
+  }
+
+  /* ── Corner labels ── */
+  .corner-label {
+    position: absolute;
+    display: flex; flex-direction: column;
+    gap: 2px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: rgba(10,14,39,0.45);
+    border: 1px solid rgba(43,95,200,0.15);
+    backdrop-filter: blur(6px);
+    min-width: 100px;
+  }
+  .corner-label .ico { font-size: 1.1rem; }
+  .corner-label .val { font-size: 1.4rem; font-weight: 800; letter-spacing: 0.03em; }
+  .corner-label .lbl { font-size: 0.55rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.3); }
+  .corner-label.cl-tl { top: 25px; left: 25px; }
+  .corner-label.cl-tr { top: 25px; right: 25px; }
+  .corner-label.cl-bl { bottom: 140px; left: 25px; }
+  .corner-label.cl-br { bottom: 140px; right: 25px; }
+  .corner-label:nth-child(1) .val { color: var(--lblue); }
+  .corner-label:nth-child(2) .val { color: var(--gold); }
+  .corner-label:nth-child(3) .val { color: var(--blue); }
+  .corner-label:nth-child(4) .val { color: var(--gold); }
+
+  /* ── Chat ── */
+  #chat {
+    position: absolute;
+    bottom: 0; width: 100%;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    padding: 0 180px;
+    background: linear-gradient(to top, rgba(10,14,39,0.85), transparent);
+    gap: 12px;
+    overflow-x: auto;
+  }
+  .chat-msg {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 6px;
+    background: rgba(10,14,39,0.6);
+    border: 1px solid rgba(43,95,200,0.12);
+    white-space: nowrap;
+    animation: chat-in 0.4s ease-out;
+  }
+  @keyframes chat-in {
+    0% { opacity: 0; transform: translateX(20px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  .chat-msg-user {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem; font-weight: 600;
+    color: var(--gold);
+  }
+  .chat-msg-text {
+    font-size: 0.72rem; font-weight: 400;
+    color: rgba(255,255,255,0.8);
+  }
+</style>
+</head>
+<body>
+  <div id="bg"></div>
+  <div id="grid"></div>
+
+  <div class="shield-wm">
+    <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/><path d="M50 25 L62 38 L55 42 L50 55 L45 42 L38 38 Z" fill="none" stroke="#8ab4ff" stroke-width="1"/></svg>
+  </div>
+
+  <div class="corner-shield cs-tl"><svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg></div>
+  <div class="corner-shield cs-tr"><svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg></div>
+  <div class="corner-shield cs-bl"><svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg></div>
+  <div class="corner-shield cs-br"><svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/></svg></div>
+
+  <div id="center">
+    <span id="crown-icon">👑</span>
+    <div id="username-display"><span id="name-text">Alianza</span></div>
+    <div id="tagline">por la Alianza · for the Alliance</div>
+  </div>
+
+  <div class="corner-label cl-tl">
+    <span class="ico">📺</span>
+    <span class="val" id="followers">0</span>
+    <span class="lbl">Seguidores</span>
+  </div>
+  <div class="corner-label cl-tr">
+    <span class="ico">⭐</span>
+    <span class="val" id="subs">0</span>
+    <span class="lbl">Suscriptores</span>
+  </div>
+  <div class="corner-label cl-bl">
+    <span class="ico">💰</span>
+    <span class="val" id="donations">$0</span>
+    <span class="lbl">Donaciones</span>
+  </div>
+  <div class="corner-label cl-br">
+    <span class="ico">🎯</span>
+    <span class="val" id="bits">0</span>
+    <span class="lbl">Bits</span>
+  </div>
+
+  <div id="chat"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'Alianza';
+    document.getElementById('name-text').textContent = username;
+    document.title = `StreamForge – WoW Alianza Fullscreen · ${username}`;
+
+    const chatContainer = document.getElementById('chat');
+    const MAX_CHAT = 20;
+
+    function addChat(user, text) {
+      const el = document.createElement('div');
+      el.className = 'chat-msg';
+      el.innerHTML = `<span class="chat-msg-user">${user}:</span> <span class="chat-msg-text">${text}</span>`;
+      chatContainer.appendChild(el);
+      if (chatContainer.children.length > MAX_CHAT) chatContainer.removeChild(chatContainer.firstChild);
+      chatContainer.scrollLeft = chatContainer.scrollWidth;
+    }
+
+    const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
+    socket.connect();
+    socket.on('connect', () => {
+      const ch = params.get('channel');
+      if (ch) socket.emit('join:channel', ch);
+    });
+    socket.on('hud:update', (d) => {
+      if (d.followers !== undefined) document.getElementById('followers').textContent = d.followers;
+      if (d.subscribers !== undefined) document.getElementById('subs').textContent = d.subscribers;
+    });
+    socket.on('channel:follow', () => {
+      const el = document.getElementById('followers');
+      el.textContent = parseInt(el.textContent) + 1;
+    });
+    socket.on('channel:subscribe', () => {
+      const el = document.getElementById('subs');
+      el.textContent = parseInt(el.textContent) + 1;
+    });
+    socket.on('channel:cheer', (d) => {
+      const el = document.getElementById('bits');
+      el.textContent = parseInt(el.textContent) + (d.bits || 0);
+    });
+    socket.on('channel:redemption', (d) => {
+      if (d.rewardCost) {
+        const el = document.getElementById('donations');
+        const current = parseFloat(el.textContent.replace('$','')) + (d.rewardCost / 100);
+        el.textContent = '$' + current.toFixed(2);
+      }
+    });
+    socket.on('chat:message', (d) => {
+      addChat(d.userDisplayName || d.userName || d.user || 'Anónimo', d.text || d.message || '');
+    });
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

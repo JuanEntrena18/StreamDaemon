@@ -208,6 +208,88 @@ const OBS_URLS: OBSUrl[] = [
     supportsTheme: false,
     color: '#00f0ff',
   },
+  // ── WoW Alianza Section ──
+  {
+    id: 'wow-alliance-webcam',
+    icon: '🎥',
+    label: 'Alianza · Webcam',
+    description: 'Marco Alianza para webcam con escudo y corona decorativos',
+    mode: 'wow-alliance-webcam',
+    supportsTheme: false,
+    color: '#2b5fc8',
+  },
+  {
+    id: 'wow-alliance-webcam-labels',
+    icon: '🏷️',
+    label: 'Alianza · Webcam + Etiquetas',
+    description: 'Webcam Alianza con seguidores, suscriptores, donaciones y bits en vivo',
+    mode: 'wow-alliance-webcam-labels',
+    supportsTheme: false,
+    color: '#ffc800',
+  },
+  {
+    id: 'wow-alliance-chat',
+    icon: '💬',
+    label: 'Alianza · Chat',
+    description: 'Chat transparente de la Alianza con escudo decorativo, izquierda o derecha',
+    mode: 'wow-alliance-chat',
+    supportsTheme: false,
+    color: '#8ab4ff',
+  },
+  {
+    id: 'wow-alliance-chat-labels',
+    icon: '🔰',
+    label: 'Alianza · Chat + Etiquetas',
+    description: 'Chat Alianza con 4 etiquetas informativas y escudo decorativo',
+    mode: 'wow-alliance-chat-labels',
+    supportsTheme: false,
+    color: '#6b4ce6',
+  },
+  {
+    id: 'wow-alliance-banner-webcam',
+    icon: '📰',
+    label: 'Alianza · Banner + Webcam',
+    description: 'Banner inferior Alianza con webcam, nombre y estadísticas en vivo',
+    mode: 'wow-alliance-banner-webcam',
+    supportsTheme: false,
+    color: '#ffc800',
+  },
+  {
+    id: 'wow-alliance-banner-transparent',
+    icon: '📋',
+    label: 'Alianza · Banner Transparente',
+    description: 'Banner inferior Alianza con fondo transparente, nombre y estadísticas',
+    mode: 'wow-alliance-banner-transparent',
+    supportsTheme: false,
+    color: '#2b5fc8',
+  },
+  {
+    id: 'wow-alliance-fullscreen',
+    icon: '🖥️',
+    label: 'Alianza · Pantalla Completa',
+    description: 'Overlay Alianza a pantalla completa con escudo, corona, chat y 4 etiquetas',
+    mode: 'wow-alliance-fullscreen',
+    supportsTheme: false,
+    color: '#a855f7',
+  },
+  {
+    id: 'wow-alliance-alerts',
+    icon: '🔔',
+    label: 'Alianza · Alertas',
+    description: 'Alertas temáticas Alianza: seguidor, sub, donación, cheer, host y raid',
+    mode: 'wow-alliance-alerts',
+    supportsTheme: false,
+    color: '#ffc800',
+  },
+  {
+    id: 'wow-alliance-transition',
+    icon: '👑',
+    label: 'Alianza · Transición',
+    description: 'Transición Alianza con escudo giratorio, corona y nombre en vivo',
+    mode: 'wow-alliance-transition',
+    supportsTheme: false,
+    color: '#2b5fc8',
+  },
 ];
 
 const THEMES = [
@@ -292,6 +374,15 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     'dj-fullscreen': 'dj-fullscreen.html',
     'dj-alerts': 'dj-alerts.html',
     'dj-transition': 'dj-transition.html',
+    'wow-alliance-webcam': 'wow-alliance-webcam.html',
+    'wow-alliance-webcam-labels': 'wow-alliance-webcam-labels.html',
+    'wow-alliance-chat': 'wow-alliance-chat.html',
+    'wow-alliance-chat-labels': 'wow-alliance-chat-labels.html',
+    'wow-alliance-banner-webcam': 'wow-alliance-banner-webcam.html',
+    'wow-alliance-banner-transparent': 'wow-alliance-banner-transparent.html',
+    'wow-alliance-fullscreen': 'wow-alliance-fullscreen.html',
+    'wow-alliance-alerts': 'wow-alliance-alerts.html',
+    'wow-alliance-transition': 'wow-alliance-transition.html',
   };
 
   function buildUrl(mode: string, supportsTheme: boolean): string {
@@ -395,8 +486,10 @@ export function ObsPanel({ channel, backendUrl }: Props) {
           if (selectedTheme === 'fortnite') return item.id === 'fortnite';
           if (selectedTheme === 'subnautica2') return item.id === 'subnautica2_standalone';
           if (selectedTheme === 'dj') return item.id.startsWith('dj-');
+          if (selectedTheme === 'alliance') return item.id.startsWith('wow-alliance-');
           // When no theme is selected, hide theme-specific overlays
           if (item.id.startsWith('dj-')) return false;
+          if (item.id.startsWith('wow-alliance-')) return false;
           return true;
         }).map((item) => {
           const isSocial = item.id === 'social';

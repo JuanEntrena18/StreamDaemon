@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – WoW Alianza Chat</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+  }
+  :root {
+    --blue: #2b5fc8;
+    --gold: #ffc800;
+    --lblue: #8ab4ff;
+    --navy: #0a0e27;
+    --side: 200px;
+  }
+
+  /* ── Shield watermark ── */
+  .shield-wm {
+    position: absolute;
+    width: 300px; height: 340px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.04;
+    pointer-events: none;
+  }
+  .shield-wm svg { width: 100%; height: 100%; }
+
+  /* ── Crown decoration top center ── */
+  #crown-deco {
+    position: absolute;
+    top: 20px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.5rem;
+    opacity: 0.15;
+    filter: drop-shadow(0 0 20px rgba(255,200,0,0.2));
+  }
+
+  /* ── Chat container ── */
+  #chat {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 420px;
+    display: flex; flex-direction: column;
+    padding: 20px 16px;
+    gap: 8px;
+    overflow: hidden;
+  }
+  #chat.left { left: 0; align-items: flex-start; }
+  #chat.right { right: 0; align-items: flex-end; }
+
+  /* ── Chat header ── */
+  #chat-header {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    padding: 6px 16px;
+    border-radius: 4px;
+    background: rgba(10,14,39,0.5);
+    border-left: 3px solid var(--gold);
+    margin-bottom: 4px;
+    text-shadow: 0 0 10px rgba(255,200,0,0.2);
+  }
+  #chat.left #chat-header { border-left: 3px solid var(--gold); }
+  #chat.right #chat-header { border-right: 3px solid var(--gold); border-left: none; }
+
+  /* ── Message ── */
+  .msg {
+    display: flex; flex-direction: column;
+    padding: 8px 14px;
+    border-radius: 6px;
+    background: rgba(10,14,39,0.6);
+    border: 1px solid rgba(43,95,200,0.15);
+    backdrop-filter: blur(4px);
+    max-width: 100%;
+    animation: msg-in 0.35s ease-out;
+  }
+  .msg.right { align-items: flex-end; }
+  @keyframes msg-in {
+    0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .msg-user {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem; font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 2px;
+  }
+  .msg-text {
+    font-size: 0.8rem; font-weight: 400;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  /* ── Chat side param ── */
+  body[data-side="left"] #chat.right { display: none; }
+  body[data-side="right"] #chat.left { display: none; }
+</style>
+</head>
+<body>
+  <div class="shield-wm">
+    <svg viewBox="0 0 100 110"><path d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z" fill="none" stroke="#2b5fc8" stroke-width="2"/><path d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/><path d="M50 25 L62 38 L55 42 L50 55 L45 42 L38 38 Z" fill="none" stroke="#8ab4ff" stroke-width="1"/></svg>
+  </div>
+  <div id="crown-deco">👑</div>
+
+  <div id="chat" class="left">
+    <div id="chat-header">💬 Chat de la Alianza</div>
+    <div id="messages"></div>
+  </div>
+  <div id="chat" class="right">
+    <div id="chat-header" style="text-align:right">Chat de la Alianza 💬</div>
+    <div id="messages-right" style="display:flex; flex-direction:column; gap:8px;"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'Alianza';
+    const side = params.get('side') || 'left';
+    document.body.dataset.side = side;
+    document.title = `StreamForge – WoW Alianza Chat · ${username}`;
+
+    const messagesContainer = document.getElementById('messages');
+    const messagesRight = document.getElementById('messages-right');
+    const MAX_MSGS = 50;
+
+    function addMessage(user, text) {
+      const msg = document.createElement('div');
+      msg.className = 'msg';
+      msg.innerHTML = `<div class="msg-user">${user}</div><div class="msg-text">${text}</div>`;
+      messagesContainer.appendChild(msg);
+      const msgR = msg.cloneNode(true);
+      msgR.className = 'msg right';
+      messagesRight.appendChild(msgR);
+      if (messagesContainer.children.length > MAX_MSGS) messagesContainer.removeChild(messagesContainer.firstChild);
+      if (messagesRight.children.length > MAX_MSGS) messagesRight.removeChild(messagesRight.firstChild);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      messagesRight.parentElement.scrollTop = messagesRight.parentElement.scrollHeight;
+    }
+
+    const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
+    socket.connect();
+    socket.on('connect', () => {
+      const ch = params.get('channel');
+      if (ch) socket.emit('join:channel', ch);
+    });
+    socket.on('chat:message', (d) => {
+      addMessage(d.userDisplayName || d.userName || d.user || 'Anónimo', d.text || d.message || '');
+    });
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

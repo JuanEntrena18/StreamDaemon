@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – WoW Alianza Transición</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Cinzel', serif;
+  }
+  :root {
+    --blue: #2b5fc8;
+    --gold: #ffc800;
+    --lblue: #8ab4ff;
+    --navy: #0a0e27;
+  }
+
+  #stage {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, rgba(43,95,200,0.15), transparent 70%),
+                linear-gradient(180deg, #0a0e27 0%, #0d1530 50%, #0a0e27 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  #stage.active { opacity: 1; }
+
+  #grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 80px 80px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  #stage.active #grid { opacity: 1; }
+
+  /* ── Shield emblem ── */
+  #shield-container {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 420px; height: 460px;
+  }
+  #shield {
+    width: 100%; height: 100%;
+    transform: scale(0);
+    opacity: 0;
+  }
+  #stage.active #shield {
+    animation: shield-in 0.8s cubic-bezier(0.175,0.885,0.32,1.4) forwards;
+  }
+  @keyframes shield-in {
+    0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+    60%  { transform: scale(1.06) rotate(3deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  #shield svg { width: 100%; height: 100%; }
+  #shield .shield-fill {
+    fill: rgba(10,14,39,0.6);
+    stroke: #2b5fc8;
+    stroke-width: 3;
+  }
+  #shield .shield-gold {
+    stroke: #ffc800;
+    stroke-width: 2;
+    fill: none;
+  }
+  #shield .shield-inner {
+    stroke: #8ab4ff;
+    stroke-width: 1.5;
+    fill: none;
+  }
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+  }
+  #stage.active #shield .shield-glow {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  /* ── Crown above shield ── */
+  #crown-above {
+    position: absolute;
+    top: -30px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 3rem;
+    opacity: 0;
+    filter: drop-shadow(0 0 30px rgba(255,200,0,0.4));
+  }
+  #stage.active #crown-above {
+    animation: crown-in 0.5s ease 0.3s forwards;
+  }
+  @keyframes crown-in {
+    to { opacity: 0.6; }
+  }
+
+  /* ── Text ── */
+  #text-container {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 5;
+    opacity: 0;
+  }
+  #stage.active #text-container {
+    animation: text-in 0.6s ease 0.6s forwards;
+  }
+  @keyframes text-in {
+    to { opacity: 1; }
+  }
+
+  #text-label {
+    font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(255,200,0,0.3);
+    margin-bottom: 6px;
+  }
+  #text-name {
+    font-size: 3rem; font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(43,95,200,0.3), 0 4px 20px rgba(0,0,0,0.5);
+    letter-spacing: 0.1em;
+    line-height: 1;
+  }
+
+  /* ── Particles ── */
+  .particle {
+    position: absolute;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 6px var(--gold);
+    animation: particle-fade 1.5s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes particle-fade {
+    0%   { opacity: 1; transform: scale(1) translateY(0); }
+    100% { opacity: 0; transform: scale(0) translateY(-40px); }
+  }
+
+  .particle-blue {
+    background: var(--lblue);
+    box-shadow: 0 0 6px var(--lblue);
+  }
+
+  /* ── Banner bottom ── */
+  #bottom-banner {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(to right, var(--blue), var(--gold), var(--lblue));
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  #stage.active #bottom-banner {
+    animation: banner-in 0.8s ease 0.5s forwards;
+  }
+  @keyframes banner-in {
+    to { opacity: 1; transform: scaleX(1); }
+  }
+
+  /* ── Trigger button ── */
+  #trigger {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 28px;
+    background: rgba(43,95,200,0.15);
+    border: 1px solid rgba(43,95,200,0.3);
+    border-radius: 99px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.2s;
+    letter-spacing: 0.1em;
+    backdrop-filter: blur(8px);
+  }
+  #trigger:hover { background: rgba(43,95,200,0.25); box-shadow: 0 0 20px rgba(43,95,200,0.2); }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <div id="grid"></div>
+    <div id="crown-above">👑</div>
+    <div id="shield-container">
+      <div id="shield">
+        <svg viewBox="0 0 100 110">
+          <path class="shield-fill" d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z"/>
+          <path class="shield-gold shield-glow" d="M50 2 L90 25 L90 65 Q90 85 50 108 Q10 85 10 65 L10 25 Z"/>
+          <path class="shield-gold" d="M50 10 L80 28 L80 60 Q80 78 50 100 Q20 78 20 60 L20 28 Z"/>
+          <path class="shield-inner" d="M50 22 L65 38 L57 43 L50 58 L43 43 L35 38 Z"/>
+          <line class="shield-gold" x1="50" y1="58" x2="50" y2="85" stroke-width="1.5"/>
+          <line class="shield-gold" x1="35" y1="68" x2="65" y2="68" stroke-width="1.5"/>
+          <line class="shield-gold" x1="30" y1="78" x2="70" y2="78" stroke-width="1.5"/>
+        </svg>
+      </div>
+    </div>
+    <div id="text-container">
+      <div id="text-label">👑 por la Alianza</div>
+      <div id="text-name"><span id="name-text">Alianza</span></div>
+    </div>
+    <div id="bottom-banner"></div>
+  </div>
+
+  <button id="trigger">▶ Probar transición</button>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'Alianza';
+    document.getElementById('name-text').textContent = username;
+    document.title = `StreamForge – WoW Alianza Transición · ${username}`;
+
+    function createParticles() {
+      const stage = document.getElementById('stage');
+      const colors = ['#ffc800', '#8ab4ff', '#2b5fc8', '#ffc800'];
+      for (let i = 0; i < 40; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        if (i % 3 === 0) p.classList.add('particle-blue');
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = (30 + Math.random() * 50) + '%';
+        p.style.animationDelay = (Math.random() * 2) + 's';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.boxShadow = `0 0 6px ${p.style.background}`;
+        stage.appendChild(p);
+        setTimeout(() => p.remove(), 3000);
+      }
+    }
+
+    function triggerTransition() {
+      const stage = document.getElementById('stage');
+      stage.classList.add('active');
+      createParticles();
+      setTimeout(() => createParticles(), 600);
+    }
+
+    document.getElementById('trigger').addEventListener('click', triggerTransition);
+
+    if (params.get('auto') === '1') {
+      setTimeout(triggerTransition, 500);
+    }
+  </script>
+</body>
+</html>
