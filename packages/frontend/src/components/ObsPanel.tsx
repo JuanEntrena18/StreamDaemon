@@ -212,6 +212,7 @@ const OBS_URLS: OBSUrl[] = [
 
 const THEMES = [
   { id: '', label: 'Sin tema' },
+  { id: 'dj', label: '🎧 DJ' },
   { id: 'subnautica2', label: '🌊 Subnautica 2' },
   { id: 'poe2', label: '⚔️ Path of Exile 2' },
   { id: 'wow', label: '🛡️ WoW - Horda' },
@@ -391,9 +392,11 @@ export function ObsPanel({ channel, backendUrl }: Props) {
       {/* URL Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
         {OBS_URLS.filter((item) => {
-          // When a game theme is selected, only show its matching overlay
           if (selectedTheme === 'fortnite') return item.id === 'fortnite';
           if (selectedTheme === 'subnautica2') return item.id === 'subnautica2_standalone';
+          if (selectedTheme === 'dj') return item.id.startsWith('dj-');
+          // When no theme is selected, hide theme-specific overlays
+          if (item.id.startsWith('dj-')) return false;
           return true;
         }).map((item) => {
           const isSocial = item.id === 'social';
