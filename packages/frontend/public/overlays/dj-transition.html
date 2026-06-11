@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – DJ Transición</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  :root {
+    --cyan: #00f0ff;
+    --magenta: #ff00aa;
+    --purple: #8b5cf6;
+    --dark: #0a0a1a;
+  }
+
+  #stage {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, rgba(139,92,246,0.15), transparent 70%),
+                linear-gradient(180deg, #0a0a1a 0%, #0d0d24 50%, #0a0a1a 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  #stage.active { opacity: 1; }
+
+  #grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 80px 80px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  #stage.active #grid { opacity: 1; }
+
+  /* ── Vinyl record ── */
+  #vinyl-container {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px; height: 500px;
+  }
+  #vinyl {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #1a1a2e, #0a0a1a, #05050f);
+    border: 4px solid rgba(255,255,255,0.04);
+    position: relative;
+    transform: scale(0);
+    opacity: 0;
+  }
+  #stage.active #vinyl {
+    animation: vinyl-in 0.8s cubic-bezier(0.175,0.885,0.32,1.4) forwards,
+               vinyl-spin 2s linear 0.8s infinite;
+  }
+  @keyframes vinyl-in {
+    0%   { transform: scale(0) rotate(-180deg); opacity: 0; }
+    60%  { transform: scale(1.08) rotate(10deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  @keyframes vinyl-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  #vinyl::before {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.02);
+    transform: translate(-50%, -50%);
+  }
+  #vinyl::after {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta));
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 40px rgba(0,240,255,0.4), 0 0 80px rgba(255,0,170,0.2);
+  }
+
+  /* ── Vinyl grooves ── */
+  .groove {
+    position: absolute; top: 50%; left: 50%;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.015);
+    transform: translate(-50%, -50%);
+  }
+  .groove-1 { width: 300px; height: 300px; }
+  .groove-2 { width: 200px; height: 200px; }
+  .groove-3 { width: 140px; height: 140px; }
+
+  /* ── Light reflections ── */
+  #shine {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0,240,255,0.08) 0%, transparent 40%, rgba(139,92,246,0.05) 70%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* ── Text ── */
+  #text-container {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 5;
+    opacity: 0;
+  }
+  #stage.active #text-container {
+    animation: text-in 0.6s ease 0.6s forwards;
+  }
+  @keyframes text-in {
+    to { opacity: 1; }
+  }
+
+  #text-label {
+    font-size: 0.8rem; font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--cyan);
+    text-shadow: 0 0 20px rgba(0,240,255,0.4);
+    margin-bottom: 4px;
+  }
+  #text-name {
+    font-size: 3.5rem; font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(0,240,255,0.3), 0 4px 20px rgba(0,0,0,0.5);
+    letter-spacing: 0.1em;
+    line-height: 1;
+  }
+
+  /* ── Particle sparkles ── */
+  .sparkle {
+    position: absolute;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+    animation: sparkle-fade 1.5s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes sparkle-fade {
+    0%   { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0); }
+  }
+
+  /* ── EQ bars ── */
+  .eq {
+    position: absolute; bottom: 40px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 4px;
+    align-items: flex-end;
+    opacity: 0;
+  }
+  #stage.active .eq {
+    animation: eq-in 0.5s ease 1s forwards;
+  }
+  @keyframes eq-in { to { opacity: 0.6; } }
+  .eq-bar {
+    width: 6px; border-radius: 3px 3px 0 0;
+    background: linear-gradient(to top, var(--cyan), var(--magenta));
+    animation: eq-wave 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes eq-wave {
+    0% { height: 8px; }
+    100% { height: 50px; }
+  }
+  .eq-bar:nth-child(1) { animation-delay: 0s; }
+  .eq-bar:nth-child(2) { animation-delay: 0.08s; }
+  .eq-bar:nth-child(3) { animation-delay: 0.16s; }
+  .eq-bar:nth-child(4) { animation-delay: 0.24s; }
+  .eq-bar:nth-child(5) { animation-delay: 0.12s; }
+  .eq-bar:nth-child(6) { animation-delay: 0.2s; }
+  .eq-bar:nth-child(7) { animation-delay: 0.04s; }
+
+  /* ── Start / trigger button ── */
+  #trigger {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 28px;
+    background: rgba(0,240,255,0.15);
+    border: 1px solid rgba(0,240,255,0.3);
+    border-radius: 99px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.2s;
+    letter-spacing: 0.1em;
+    backdrop-filter: blur(8px);
+  }
+  #trigger:hover { background: rgba(0,240,255,0.25); box-shadow: 0 0 20px rgba(0,240,255,0.2); }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <div id="grid"></div>
+    <div id="vinyl-container">
+      <div id="vinyl">
+        <div class="groove groove-1"></div>
+        <div class="groove groove-2"></div>
+        <div class="groove groove-3"></div>
+        <div id="shine"></div>
+      </div>
+    </div>
+    <div id="text-container">
+      <div id="text-label">🎧 ahora al aire</div>
+      <div id="text-name"><span id="name-text">DJ</span></div>
+    </div>
+    <div class="eq">
+      <div class="eq-bar"></div>
+      <div class="eq-bar"></div>
+      <div class="eq-bar"></div>
+      <div class="eq-bar"></div>
+      <div class="eq-bar"></div>
+      <div class="eq-bar"></div>
+      <div class="eq-bar"></div>
+    </div>
+  </div>
+
+  <button id="trigger">▶ Probar transición</button>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'DJ';
+    document.getElementById('name-text').textContent = username;
+    document.title = `StreamForge – DJ Transición · ${username}`;
+
+    function createSparkles() {
+      const stage = document.getElementById('stage');
+      for (let i = 0; i < 30; i++) {
+        const s = document.createElement('div');
+        s.className = 'sparkle';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.top = Math.random() * 100 + '%';
+        s.style.animationDelay = (Math.random() * 1.5) + 's';
+        s.style.background = [getComputedStyle(document.documentElement).getPropertyValue('--cyan').trim(),
+          getComputedStyle(document.documentElement).getPropertyValue('--magenta').trim(),
+          getComputedStyle(document.documentElement).getPropertyValue('--purple').trim()][Math.floor(Math.random() * 3)];
+        stage.appendChild(s);
+        setTimeout(() => s.remove(), 3000);
+      }
+    }
+
+    function triggerTransition() {
+      const stage = document.getElementById('stage');
+      stage.classList.add('active');
+      createSparkles();
+      setTimeout(() => createSparkles(), 500);
+    }
+
+    document.getElementById('trigger').addEventListener('click', triggerTransition);
+
+    // Auto-trigger for OBS (use URL param &auto=1 or click the button)
+    if (params.get('auto') === '1') {
+      setTimeout(triggerTransition, 500);
+    }
+  </script>
+</body>
+</html>

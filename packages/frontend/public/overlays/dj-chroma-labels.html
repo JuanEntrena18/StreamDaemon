@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – DJ Chroma + Labels</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: #00ff00;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  :root {
+    --cyan: #00f0ff;
+    --magenta: #ff00aa;
+    --purple: #8b5cf6;
+    --yellow: #fbbf24;
+  }
+
+  .edge {
+    position: absolute;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta), var(--purple));
+    background-size: 300% 300%;
+    animation: gradient-shift 4s ease infinite;
+    opacity: 0.25;
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .edge-top { top: 0; left: 0; right: 0; height: 3px; }
+  .edge-bottom { bottom: 0; left: 0; right: 0; height: 3px; }
+  .edge-left { top: 0; left: 0; bottom: 0; width: 3px; }
+  .edge-right { top: 0; right: 0; bottom: 0; width: 3px; }
+
+  .vinyl {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #1a1a2e, #0a0a1a);
+    border: 3px solid rgba(255,255,255,0.08);
+    animation: spin 8s linear infinite;
+    opacity: 0.5;
+  }
+  .vinyl::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--cyan); transform: translate(-50%, -50%);
+    box-shadow: 0 0 12px rgba(0,240,255,0.4);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .vinyl-tl { top: -40px; left: -40px; width: 120px; height: 120px; }
+  .vinyl-tr { top: -40px; right: -40px; width: 120px; height: 120px; animation-direction: reverse; }
+  .vinyl-bl { bottom: -40px; left: -40px; width: 120px; height: 120px; animation-direction: reverse; }
+  .vinyl-br { bottom: -40px; right: -40px; width: 120px; height: 120px; }
+
+  #username {
+    position: absolute; top: 18px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.3rem; font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(0,240,255,0.5), 0 2px 8px rgba(0,0,0,0.8);
+    letter-spacing: 0.15em;
+    padding: 5px 24px;
+    border-radius: 99px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(0,240,255,0.15);
+    backdrop-filter: blur(4px);
+    z-index: 5;
+  }
+
+  .labels {
+    position: absolute;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
+  }
+  .label-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 20px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(8px);
+    min-width: 100px;
+  }
+  .label-icon { font-size: 1.1rem; }
+  .label-value {
+    font-size: 1.2rem; font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .label-title {
+    font-size: 0.6rem; font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.35);
+  }
+  .label-item:nth-child(1) .label-value { color: var(--cyan); }
+  .label-item:nth-child(2) .label-value { color: var(--magenta); }
+  .label-item:nth-child(3) .label-value { color: var(--yellow); }
+  .label-item:nth-child(4) .label-value { color: var(--purple); }
+</style>
+</head>
+<body>
+  <div class="edge edge-top"></div>
+  <div class="edge edge-bottom"></div>
+  <div class="edge edge-left"></div>
+  <div class="edge edge-right"></div>
+
+  <div class="vinyl vinyl-tl"></div>
+  <div class="vinyl vinyl-tr"></div>
+  <div class="vinyl vinyl-bl"></div>
+  <div class="vinyl vinyl-br"></div>
+
+  <div id="username">🎧 <span id="name-text">DJ</span></div>
+
+  <div class="labels">
+    <div class="label-item">
+      <span class="label-icon">📺</span>
+      <span class="label-value" id="followers">0</span>
+      <span class="label-title">Seguidores</span>
+    </div>
+    <div class="label-item">
+      <span class="label-icon">⭐</span>
+      <span class="label-value" id="subs">0</span>
+      <span class="label-title">Suscriptores</span>
+    </div>
+    <div class="label-item">
+      <span class="label-icon">💰</span>
+      <span class="label-value" id="donations">$0</span>
+      <span class="label-title">Donaciones</span>
+    </div>
+    <div class="label-item">
+      <span class="label-icon">🎯</span>
+      <span class="label-value" id="bits">0</span>
+      <span class="label-title">Cheers</span>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'DJ';
+    document.getElementById('name-text').textContent = username;
+    document.title = `StreamForge – DJ Chroma+Labels · ${username}`;
+
+    const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
+    socket.connect();
+    socket.on('connect', () => {
+      const ch = params.get('channel');
+      if (ch) socket.emit('join:channel', ch);
+    });
+    socket.on('hud:update', (d) => {
+      if (d.followers !== undefined) document.getElementById('followers').textContent = d.followers;
+      if (d.subscribers !== undefined) document.getElementById('subs').textContent = d.subscribers;
+    });
+    socket.on('channel:follow', () => {
+      const el = document.getElementById('followers');
+      el.textContent = parseInt(el.textContent) + 1;
+    });
+    socket.on('channel:subscribe', () => {
+      const el = document.getElementById('subs');
+      el.textContent = parseInt(el.textContent) + 1;
+    });
+    socket.on('channel:cheer', (d) => {
+      const el = document.getElementById('bits');
+      el.textContent = parseInt(el.textContent) + (d.bits || 0);
+    });
+    socket.on('channel:redemption', (d) => {
+      if (d.rewardCost) {
+        const el = document.getElementById('donations');
+        const current = parseFloat(el.textContent.replace('$','')) + (d.rewardCost / 100);
+        el.textContent = '$' + current.toFixed(2);
+      }
+    });
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

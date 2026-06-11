@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – DJ Webcam + Labels</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  :root {
+    --cyan: #00f0ff;
+    --magenta: #ff00aa;
+    --purple: #8b5cf6;
+    --yellow: #fbbf24;
+    --dark: #0a0a1a;
+  }
+
+  /* ── Vinyl ── */
+  .vinyl {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #1a1a2e, #0a0a1a);
+    border: 3px solid rgba(255,255,255,0.05);
+    opacity: 0.5;
+    animation: spin 8s linear infinite;
+  }
+  .vinyl::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--cyan); transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px rgba(0,240,255,0.4);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .vinyl-tl { top: -50px; left: -50px; width: 150px; height: 150px; }
+  .vinyl-br { bottom: -50px; right: -50px; width: 150px; height: 150px; animation-direction: reverse; }
+
+  /* ── Webcam ── */
+  #cam-frame {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px; height: 380px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 2px solid rgba(0,240,255,0.25);
+    box-shadow: 0 0 30px rgba(0,240,255,0.1), inset 0 0 40px rgba(0,0,0,0.2);
+  }
+  #cam-frame::before {
+    content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta), var(--purple));
+    background-size: 300% 300%;
+    z-index: -1;
+    animation: gradient-shift 4s ease infinite;
+    opacity: 0.5;
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  #cam-frame video, #cam-frame img {
+    width: 100%; height: 100%;
+    object-fit: cover; border-radius: 12px;
+    display: block;
+  }
+
+  /* ── Username top ── */
+  #username {
+    position: absolute; top: 12px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.1rem; font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 15px rgba(0,240,255,0.5), 0 2px 6px rgba(0,0,0,0.8);
+    letter-spacing: 0.12em;
+    padding: 4px 18px;
+    border-radius: 99px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(0,240,255,0.2);
+    backdrop-filter: blur(6px);
+    z-index: 5;
+  }
+
+  /* ── Labels ── */
+  .labels {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+  }
+  .label-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 16px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    min-width: 80px;
+  }
+  .label-icon { font-size: 1rem; }
+  .label-value {
+    font-size: 1rem; font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .label-title {
+    font-size: 0.55rem; font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.4);
+  }
+  .label-item:nth-child(1) .label-value { color: var(--cyan); }
+  .label-item:nth-child(2) .label-value { color: var(--magenta); }
+  .label-item:nth-child(3) .label-value { color: var(--yellow); }
+  .label-item:nth-child(4) .label-value { color: var(--purple); }
+</style>
+</head>
+<body>
+  <div class="vinyl vinyl-tl"></div>
+  <div class="vinyl vinyl-br"></div>
+
+  <div id="cam-frame">
+    <div id="username"><span id="name-text">DJ</span></div>
+    <video id="webcam" autoplay muted playsinline></video>
+    <div class="labels">
+      <div class="label-item">
+        <span class="label-icon">📺</span>
+        <span class="label-value" id="followers">0</span>
+        <span class="label-title">Seguidores</span>
+      </div>
+      <div class="label-item">
+        <span class="label-icon">⭐</span>
+        <span class="label-value" id="subs">0</span>
+        <span class="label-title">Suscriptores</span>
+      </div>
+      <div class="label-item">
+        <span class="label-icon">💰</span>
+        <span class="label-value" id="donations">$0</span>
+        <span class="label-title">Donaciones</span>
+      </div>
+      <div class="label-item">
+        <span class="label-icon">🎯</span>
+        <span class="label-value" id="bits">0</span>
+        <span class="label-title">Bits</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'DJ';
+    document.getElementById('name-text').textContent = username;
+    document.title = `StreamForge – DJ Webcam+Labels · ${username}`;
+
+    if (navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+        document.getElementById('webcam').srcObject = s;
+      }).catch(() => {});
+    }
+
+    const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
+    socket.connect();
+    socket.on('connect', () => {
+      const ch = params.get('channel');
+      if (ch) socket.emit('join:channel', ch);
+    });
+    socket.on('hud:update', (d) => {
+      if (d.followers !== undefined) document.getElementById('followers').textContent = d.followers;
+      if (d.subscribers !== undefined) document.getElementById('subs').textContent = d.subscribers;
+    });
+    socket.on('channel:follow', () => {
+      const el = document.getElementById('followers');
+      el.textContent = parseInt(el.textContent) + 1;
+    });
+    socket.on('channel:subscribe', () => {
+      const el = document.getElementById('subs');
+      el.textContent = parseInt(el.textContent) + 1;
+    });
+    socket.on('channel:cheer', (d) => {
+      const el = document.getElementById('bits');
+      el.textContent = parseInt(el.textContent) + (d.bits || 0);
+    });
+    socket.on('channel:redemption', (d) => {
+      if (d.rewardCost) {
+        const el = document.getElementById('donations');
+        const current = parseFloat(el.textContent.replace('$','')) + (d.rewardCost / 100);
+        el.textContent = '$' + current.toFixed(2);
+      }
+    });
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – DJ Alertas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  :root {
+    --cyan: #00f0ff;
+    --magenta: #ff00aa;
+    --purple: #8b5cf6;
+    --yellow: #fbbf24;
+    --green: #34d399;
+    --orange: #fb923c;
+    --pink: #f472b6;
+  }
+
+  #alert-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; align-items: center;
+    pointer-events: none;
+    z-index: 10;
+    min-width: 500px;
+  }
+
+  /* ── Card base ── */
+  .alert-card {
+    position: absolute;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 30px 60px;
+    border-radius: 16px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    overflow: hidden;
+    min-width: 480px;
+    opacity: 0;
+    transform: scale(0.4) translateY(30px);
+  }
+  .alert-card.visible {
+    animation: alert-appear 0.7s cubic-bezier(0.175,0.885,0.32,1.4) forwards;
+  }
+  .alert-card.hiding {
+    animation: alert-hide 0.5s ease-in forwards;
+  }
+  @keyframes alert-appear {
+    0%   { opacity: 0; transform: scale(0.4) translateY(30px); }
+    60%  { opacity: 1; transform: scale(1.06) translateY(-8px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes alert-hide {
+    0%   { opacity: 1; transform: scale(1) translateY(0); }
+    100% { opacity: 0; transform: scale(0.7) translateY(-60px); }
+  }
+
+  /* ── Vinyl decoration ── */
+  .alert-vinyl {
+    position: absolute;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #1a1a2e, #0a0a1a);
+    border: 2px solid rgba(255,255,255,0.05);
+    animation: spin 6s linear infinite;
+    opacity: 0.5;
+  }
+  .alert-vinyl::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--cyan); transform: translate(-50%, -50%);
+    box-shadow: 0 0 12px rgba(0,240,255,0.4);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .alert-vinyl-tl { top: -30px; left: -30px; }
+  .alert-vinyl-br { bottom: -30px; right: -30px; animation-direction: reverse; }
+
+  /* ── Border glow by type ── */
+  .alert-card {
+    border: 2px solid rgba(255,255,255,0.08);
+  }
+  .alert-card::before {
+    content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta), var(--purple));
+    background-size: 300% 300%;
+    z-index: -1;
+    animation: gradient-shift 4s ease infinite;
+    opacity: 0.6;
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ── Type header ── */
+  .alert-type {
+    font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 4px;
+  }
+  .alert-type.follow  { color: var(--cyan); }
+  .alert-type.sub     { color: var(--magenta); }
+  .alert-type.donate  { color: var(--yellow); }
+  .alert-type.cheer   { color: var(--purple); }
+  .alert-type.host    { color: var(--green); }
+  .alert-type.raid    { color: var(--orange); }
+
+  .alert-icon { font-size: 2.2rem; margin-bottom: 4px; }
+
+  .alert-user {
+    font-size: 2.4rem; font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 30px rgba(0,240,255,0.3), 0 2px 10px rgba(0,0,0,0.5);
+    line-height: 1.1;
+  }
+  .alert-msg {
+    font-size: 1.1rem; font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    margin-top: 4px;
+  }
+  .alert-detail {
+    font-size: 0.85rem; font-weight: 400;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+  }
+
+  /* ── EQ bars ── */
+  .alert-eq {
+    position: absolute; bottom: 8px;
+    display: flex; gap: 3px;
+    align-items: flex-end;
+  }
+  .alert-eq-bar {
+    width: 4px; border-radius: 2px 2px 0 0;
+    background: var(--cyan);
+    animation: alert-eq 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes alert-eq {
+    0% { height: 4px; }
+    100% { height: 18px; }
+  }
+  .alert-eq-bar:nth-child(1) { animation-delay: 0s; }
+  .alert-eq-bar:nth-child(2) { animation-delay: 0.1s; }
+  .alert-eq-bar:nth-child(3) { animation-delay: 0.2s; }
+  .alert-eq-bar:nth-child(4) { animation-delay: 0.15s; }
+  .alert-eq-bar:nth-child(5) { animation-delay: 0.05s; }
+
+  /* ── Sub tier badge ── */
+  .tier-badge {
+    display: inline-block;
+    font-size: 0.65rem; font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 99px;
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+  }
+  .tier-badge.t1 { background: rgba(0,240,255,0.2); color: var(--cyan); border: 1px solid rgba(0,240,255,0.3); }
+  .tier-badge.t2 { background: rgba(255,0,170,0.2); color: var(--magenta); border: 1px solid rgba(255,0,170,0.3); }
+  .tier-badge.t3 { background: rgba(139,92,246,0.2); color: var(--purple); border: 1px solid rgba(139,92,246,0.3); }
+</style>
+</head>
+<body>
+  <div id="alert-center"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'DJ';
+    const DURATION = parseInt(params.get('duration') || '8', 10) * 1000;
+    document.title = `StreamForge – DJ Alertas · ${username}`;
+
+    const TYPES = {
+      follow:  { icon: '📺', label: 'Nuevo Seguidor', cls: 'follow' },
+      sub:     { icon: '⭐', label: 'Nuevo Suscriptor', cls: 'sub' },
+      donate:  { icon: '💰', label: 'Donación', cls: 'donate' },
+      cheer:   { icon: '🎯', label: 'Cheer', cls: 'cheer' },
+      host:    { icon: '🎪', label: 'Host', cls: 'host' },
+      raid:    { icon: '🚀', label: 'Raid', cls: 'raid' },
+    };
+
+    let isShowing = false;
+    const queue = [];
+
+    function showAlert(type, data) {
+      queue.push({ type, data });
+      processQueue();
+    }
+
+    function processQueue() {
+      if (isShowing || queue.length === 0) return;
+      isShowing = true;
+      const { type, data } = queue.shift();
+      renderAlert(type, data);
+    }
+
+    function renderAlert(type, data) {
+      const info = TYPES[type] || TYPES.follow;
+      const container = document.getElementById('alert-center');
+      container.innerHTML = '';
+
+      const card = document.createElement('div');
+      card.className = 'alert-card';
+
+      let msgHtml = '';
+      let detailHtml = '';
+      let tierHtml = '';
+
+      if (type === 'follow') {
+        msgHtml = '¡Gracias por seguir!';
+      } else if (type === 'sub') {
+        const months = data.cumulativeMonths || 1;
+        msgHtml = `¡${months} ${months === 1 ? 'mes' : 'meses'}!`;
+        const tierVal = data.tier || '1000';
+        const tierNum = tierVal === '3000' ? 3 : tierVal === '2000' ? 2 : 1;
+        const tierLabel = {1:'Tier 1',2:'Tier 2',3:'Tier 3'}[tierNum];
+        const tierClass = {1:'t1',2:'t2',3:'t3'}[tierNum];
+        tierHtml = `<div class="tier-badge ${tierClass}">${tierLabel}</div>`;
+        if (data.isGift) msgHtml = '¡Suscripción regalada!';
+      } else if (type === 'donate') {
+        const amount = data.amount || data.rewardCost || 0;
+        const formatted = typeof amount === 'number' ? '$' + (amount / 100).toFixed(2) : amount;
+        msgHtml = formatted;
+        detailHtml = data.message ? `<div class="alert-detail">"${data.message.substring(0, 100)}"</div>` : '';
+      } else if (type === 'cheer') {
+        const bits = data.bits || 0;
+        msgHtml = `${bits} bits`;
+        detailHtml = data.message ? `<div class="alert-detail">"${data.message.substring(0, 100)}"</div>` : '';
+      } else if (type === 'host') {
+        msgHtml = '¡Gracias por el host!';
+      } else if (type === 'raid') {
+        const viewers = data.viewers || 0;
+        msgHtml = `¡Raid con ${viewers} ${viewers === 1 ? 'espectador' : 'espectadores'}!`;
+      }
+
+      card.innerHTML = `
+        <div class="alert-vinyl alert-vinyl-tl"></div>
+        <div class="alert-vinyl alert-vinyl-br"></div>
+        <div class="alert-icon">${info.icon}</div>
+        <div class="alert-type ${info.cls}">${info.label}</div>
+        <div class="alert-user">${data.userDisplayName || data.userName || data.user || 'Alguien'}</div>
+        <div class="alert-msg">${msgHtml}</div>
+        ${tierHtml}
+        ${detailHtml}
+        <div class="alert-eq">
+          <div class="alert-eq-bar"></div>
+          <div class="alert-eq-bar"></div>
+          <div class="alert-eq-bar"></div>
+          <div class="alert-eq-bar"></div>
+          <div class="alert-eq-bar"></div>
+        </div>
+      `;
+
+      container.appendChild(card);
+      requestAnimationFrame(() => card.classList.add('visible'));
+
+      setTimeout(() => {
+        card.classList.remove('visible');
+        card.classList.add('hiding');
+        setTimeout(() => {
+          isShowing = false;
+          processQueue();
+        }, 500);
+      }, DURATION);
+    }
+
+    // ── Socket connection ──
+    const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
+    socket.connect();
+    socket.on('connect', () => {
+      const ch = params.get('channel');
+      if (ch) socket.emit('join:channel', ch);
+    });
+
+    socket.on('channel:follow', (d) => showAlert('follow', d));
+    socket.on('channel:subscribe', (d) => showAlert('sub', d));
+    socket.on('channel:subscription-message', (d) => showAlert('sub', d));
+    socket.on('channel:cheer', (d) => showAlert('cheer', d));
+
+    // Donations via channel points (custom reward)
+    socket.on('channel:redemption', (d) => {
+      showAlert('donate', { ...d, amount: d.rewardCost });
+    });
+
+    // Raid
+    socket.on('channel:raid', (d) => {
+      if (d) showAlert('raid', d);
+    });
+
+    // Demo mode: click to cycle
+    document.addEventListener('click', () => {
+      const demos = [
+        { type: 'follow', data: { userDisplayName: username } },
+        { type: 'sub', data: { userDisplayName: username, cumulativeMonths: 6, tier: '1000' } },
+        { type: 'donate', data: { userDisplayName: username, amount: 1500, message: '¡Grande!' } },
+        { type: 'cheer', data: { userDisplayName: username, bits: 500, message: 'toma bits!' } },
+        { type: 'host', data: { userDisplayName: 'OtroCanal' } },
+        { type: 'raid', data: { userDisplayName: 'OtroCanal', viewers: 25 } },
+      ];
+      const idx = Math.floor(Math.random() * demos.length);
+      showAlert(demos[idx].type, demos[idx].data);
+    });
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

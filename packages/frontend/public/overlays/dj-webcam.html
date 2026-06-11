@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – DJ Webcam</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  :root {
+    --cyan: #00f0ff;
+    --magenta: #ff00aa;
+    --purple: #8b5cf6;
+    --dark: #0a0a1a;
+    --glow-cyan: 0 0 20px rgba(0,240,255,0.4);
+    --glow-magenta: 0 0 20px rgba(255,0,170,0.4);
+  }
+
+  /* ── Vinyl decoration ── */
+  .vinyl {
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #1a1a2e, #0a0a1a);
+    border: 3px solid rgba(255,255,255,0.05);
+    opacity: 0.6;
+    animation: spin 8s linear infinite;
+  }
+  .vinyl::after {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--cyan);
+    transform: translate(-50%, -50%);
+    box-shadow: var(--glow-cyan);
+  }
+  .vinyl::before {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.03);
+    transform: translate(-50%, -50%);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .vinyl-tl { top: -60px; left: -60px; width: 180px; height: 180px; }
+  .vinyl-br { bottom: -60px; right: -60px; width: 180px; height: 180px; animation-direction: reverse; }
+
+  /* ── Webcam frame ── */
+  #cam-frame {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 640px; height: 480px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid rgba(0,240,255,0.3);
+    box-shadow: 0 0 40px rgba(0,240,255,0.15), inset 0 0 60px rgba(0,0,0,0.3);
+  }
+  #cam-frame::before {
+    content: '';
+    position: absolute; top: -2px; left: -2px;
+    right: -2px; bottom: -2px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta), var(--purple), var(--cyan));
+    background-size: 300% 300%;
+    z-index: -1;
+    animation: gradient-shift 4s ease infinite;
+    opacity: 0.6;
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  #cam-frame video, #cam-frame img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: 14px;
+    display: block;
+  }
+
+  /* ── Equalizer bars ── */
+  .eq {
+    position: absolute;
+    display: flex; gap: 4px;
+    align-items: flex-end;
+  }
+  .eq-bar {
+    width: 6px;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(to top, var(--cyan), var(--magenta));
+    animation: eq-wave 0.8s ease-in-out infinite alternate;
+  }
+  @keyframes eq-wave {
+    0% { height: 8px; }
+    100% { height: 40px; }
+  }
+  .eq-left {
+    top: 50%; left: 20px;
+    transform: translateY(-50%);
+    flex-direction: column-reverse;
+  }
+  .eq-right {
+    top: 50%; right: 20px;
+    transform: translateY(-50%);
+    flex-direction: column-reverse;
+  }
+  .eq-bar:nth-child(1) { animation-delay: 0s; }
+  .eq-bar:nth-child(2) { animation-delay: 0.1s; }
+  .eq-bar:nth-child(3) { animation-delay: 0.2s; }
+  .eq-bar:nth-child(4) { animation-delay: 0.3s; }
+  .eq-bar:nth-child(5) { animation-delay: 0.15s; }
+
+  /* ── Username ── */
+  #username {
+    position: absolute;
+    top: 16px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(0,240,255,0.6), 0 2px 8px rgba(0,0,0,0.8);
+    letter-spacing: 0.15em;
+    white-space: nowrap;
+    padding: 6px 24px;
+    border-radius: 99px;
+    background: linear-gradient(135deg, rgba(0,240,255,0.15), rgba(139,92,246,0.15));
+    border: 1px solid rgba(0,240,255,0.25);
+    backdrop-filter: blur(8px);
+  }
+  #username .dj-icon {
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 1.1rem;
+  }
+
+  /* ── Corner accents ── */
+  .corner {
+    position: absolute;
+    width: 50px; height: 50px;
+  }
+  .corner svg { width: 100%; height: 100%; }
+  .corner-tl { top: 8px; left: 8px; }
+  .corner-tr { top: 8px; right: 8px; transform: scaleX(-1); }
+  .corner-bl { bottom: 8px; left: 8px; transform: scaleY(-1); }
+  .corner-br { bottom: 8px; right: 8px; transform: scale(-1, -1); }
+</style>
+</head>
+<body>
+  <div class="vinyl vinyl-tl"></div>
+  <div class="vinyl vinyl-br"></div>
+
+  <div class="eq eq-left">
+    <div class="eq-bar"></div>
+    <div class="eq-bar" style="animation-delay:0.12s"></div>
+    <div class="eq-bar" style="animation-delay:0.24s"></div>
+    <div class="eq-bar" style="animation-delay:0.36s"></div>
+    <div class="eq-bar" style="animation-delay:0.18s"></div>
+  </div>
+  <div class="eq eq-right">
+    <div class="eq-bar"></div>
+    <div class="eq-bar" style="animation-delay:0.15s"></div>
+    <div class="eq-bar" style="animation-delay:0.3s"></div>
+    <div class="eq-bar" style="animation-delay:0.08s"></div>
+    <div class="eq-bar" style="animation-delay:0.22s"></div>
+  </div>
+
+  <div id="cam-frame">
+    <div id="username"><span class="dj-icon">🎧</span><span id="name-text">DJ</span></div>
+    <video id="webcam" autoplay muted playsinline></video>
+    <svg class="corner corner-tl" viewBox="0 0 50 50"><path d="M2 2h46" stroke="#00f0ff" stroke-width="3" fill="none"/><path d="M2 2v46" stroke="#00f0ff" stroke-width="3" fill="none"/></svg>
+    <svg class="corner corner-tr" viewBox="0 0 50 50"><path d="M2 2h46" stroke="#ff00aa" stroke-width="3" fill="none"/><path d="M2 2v46" stroke="#ff00aa" stroke-width="3" fill="none"/></svg>
+    <svg class="corner corner-bl" viewBox="0 0 50 50"><path d="M2 2h46" stroke="#8b5cf6" stroke-width="3" fill="none"/><path d="M2 2v46" stroke="#8b5cf6" stroke-width="3" fill="none"/></svg>
+    <svg class="corner corner-br" viewBox="0 0 50 50"><path d="M2 2h46" stroke="#00f0ff" stroke-width="3" fill="none"/><path d="M2 2v46" stroke="#00f0ff" stroke-width="3" fill="none"/></svg>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username') || 'DJ';
+    document.getElementById('name-text').textContent = username;
+    document.title = `StreamForge – DJ Webcam · ${username}`;
+
+    if (navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        document.getElementById('webcam').srcObject = stream;
+      }).catch(() => {});
+    }
+  </script>
+</body>
+</html>
