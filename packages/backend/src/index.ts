@@ -42,6 +42,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
     reply.header('Content-Security-Policy',
       "default-src 'self'; " +
       "connect-src 'self' https://id.twitch.tv https://api.twitch.tv wss://eventsub.wss.twitch.tv; " +
+      "frame-src https://player.twitch.tv; " +
       "img-src 'self' https://static-cdn.jtvnw.net data:; " +
       "script-src 'self' 'unsafe-inline'; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +

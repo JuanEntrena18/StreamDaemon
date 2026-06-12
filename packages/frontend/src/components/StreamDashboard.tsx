@@ -312,9 +312,11 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
             borderRadius: 'var(--sf-radius-sm)', overflow: 'hidden', background: '#0a0a1a',
           }}>
             <iframe
-              src={`https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&muted=true`}
+              key={channel}
+              src={`https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&parent=localhost&parent=127.0.0.1&muted=true`}
               onLoad={() => setPreviewLoading(false)}
               style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+              allow="autoplay; fullscreen"
               allowFullScreen
             />
             {previewLoading && (

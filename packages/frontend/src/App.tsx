@@ -21,7 +21,7 @@ import { SplashScreen } from './components/SplashScreen';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-type Tab = 'dashboard' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'tracker' | 'obs' | 'config';
+type Tab = 'dashboard' | 'tracker' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config';
 
 const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string; label: string }[] }[] = [
   {
@@ -29,6 +29,13 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string;
     label: 'GESTOR DEL STREAM',
     items: [
       { id: 'dashboard', icon: '📡', label: 'Gestor del Stream' },
+    ],
+  },
+  {
+    id: 'tracker-section',
+    label: 'ESTADÍSTICAS',
+    items: [
+      { id: 'tracker', icon: '📈', label: 'Twitch Tracker' },
     ],
   },
   {
@@ -59,7 +66,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string;
       { id: 'subathon',   icon: '🔴', label: 'Subathon' },
       { id: 'giveaway',   icon: '🎁', label: 'Sorteos' },
       { id: 'prediction', icon: '📊', label: 'Predicciones' },
-      { id: 'tracker',    icon: '📈', label: 'Twitch Tracker' },
+
       { id: 'hud',        icon: '📊', label: 'Stream HUD' },
       { id: 'timer',      icon: '⏱️', label: 'Temporizador' },
       { id: 'scoreboard', icon: '🏆', label: 'Scoreboard' },
@@ -77,13 +84,14 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string;
 
 const TAB_LABELS: Record<Tab, string> = {
   dashboard: 'Gestor del Stream',
+  tracker: 'Twitch Tracker',
   chat: 'Chat',
   mod: 'Moderación',
   commands: 'Comandos',
   subathon: 'Subathon',
   giveaway: 'Sorteos',
   prediction: 'Predicciones',
-  tracker: 'Twitch Tracker',
+
   hud: 'Stream HUD',
   timer: 'Temporizador',
   scoreboard: 'Scoreboard',
@@ -428,13 +436,13 @@ export function App() {
                 transition={{ duration: 0.18, ease: 'easeOut' }}
               >
                 {activeTab === 'dashboard' && <StreamDashboard channel={channel} backendUrl={BACKEND_URL} />}
+                {activeTab === 'tracker'   && <TrackerPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'chat'     && <ChatPanel channel={channel} />}
                 {activeTab === 'mod'         && <ModPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'commands'    && <CommandsPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'subathon'    && <SubathonPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'giveaway'    && <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'prediction'  && <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />}
-                {activeTab === 'tracker'     && <TrackerPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'hud'         && <HudPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'timer'       && <TimerPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'scoreboard'  && <ScoreboardPanel channel={channel} backendUrl={BACKEND_URL} />}

@@ -62,13 +62,15 @@ export function PreviewPanel({ channel }: Props) {
               background: '#0a0a1a',
             }}>
               <iframe
-                src={`https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&muted=true`}
+                key={channel}
+                src={`https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&parent=localhost&parent=127.0.0.1&muted=true`}
                 onLoad={() => setLoading(false)}
                 style={{
                   position: 'absolute', top: 0, left: 0,
                   width: '100%', height: '100%',
                   border: 'none',
                 }}
+                allow="autoplay; fullscreen"
                 allowFullScreen
               />
             </div>
@@ -84,7 +86,7 @@ export function PreviewPanel({ channel }: Props) {
             lineHeight: 1.5,
           }}>
             💡 Usa el reproductor embebido de Twitch para verificar que tu emisión llega correctamente a OBS.
-            Asegúrate de que <strong style={{ color: 'var(--sf-text-2)' }}>{window.location.hostname}</strong> esté agregado como dominio permitido en el
+            Asegúrate de que <strong style={{ color: 'var(--sf-text-2)' }}>localhost, 127.0.0.1 y {window.location.hostname}</strong> estén agregados como dominios permitidos en el
             {' '}<a href="https://dev.twitch.tv/console" target="_blank" rel="noreferrer" style={{ color: '#22d3ee' }}>Twitch Developer Console</a>.
           </div>
         </>
