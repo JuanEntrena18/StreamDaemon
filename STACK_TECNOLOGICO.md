@@ -264,3 +264,4 @@ twitch_overlay/
 | 34 | **Anti-Bots** — Módulo de seguridad con detección de follow bots, filtro de spam, auto-ban, escaneo manual, lista blanca y estadísticas. Sección SEGURIDAD en el dashboard | ✅ |
 | **35** | **🌍 Traducción multi-idioma** — Frontend traducido a inglés, francés, alemán e italiano con detección automática del idioma del navegador | 🔜 |
 | **36** | **🎮 Integración Stream Deck** — Plugin nativo para Elgato Stream Deck (Node.js + CLI SDK). Acciones: Subathon, Sorteo, Moderación, Stream info, Anti-Bots. Conexión vía HTTP REST a la API local de StreamForger | 🔜 |
+| **37** | **🎬 Gestión y exportación de clips a TikTok** — Creación, edición y exportación automática de clips del stream a TikTok con formato vertical, subtítulos automáticos y programación de publicaciones | 🔜 |

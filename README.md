@@ -171,6 +171,7 @@ StreamForge/
 |---|---|
 | **🌍 Traducción multi-idioma** | Frontend traducido a inglés, francés, alemán e italiano con detección automática del idioma del navegador |
 | **🎮 Integración con Stream Deck** | Plugin nativo para Elgato Stream Deck que permite controlar StreamForger desde los botones físicos: iniciar/detener Subathon, lanzar sorteo, banear usuario, cambiar título del stream y más |
+| **🎬 Gestión y exportación de clips a TikTok** | Creación, edición y exportación automática de clips del stream a TikTok con formato vertical, subtítulos automáticos y programación de publicaciones |
 
 ---
 

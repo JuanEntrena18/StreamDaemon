@@ -170,6 +170,7 @@ StreamForge/
 |---|---|
 | **🌍 Multi-language translation** | Frontend translated to English, French, German, and Italian with automatic browser language detection |
 | **🎮 Stream Deck integration** | Native Elgato Stream Deck plugin to control StreamForger from physical buttons: start/stop Subathon, launch giveaways, ban user, change stream title, and more |
+| **🎬 Clip management & TikTok export** | Create, edit, and auto-export stream clips to TikTok with vertical format, auto-captions, and scheduled posting |
 
 ---
 
