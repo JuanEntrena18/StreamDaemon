@@ -120,8 +120,84 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
+        boxSizing: 'border-box',
+        paddingTop: 36,
       }}
     >
+      {/* TTS bar — always on top so it's never cut off */}
+      {window.speechSynthesis && (
+        <div
+          style={{
+            padding: '6px 10px',
+            background: bgMode === 'black' ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0.55)',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            fontSize: 11,
+            color: '#a0aec0',
+            flexShrink: 0,
+          }}
+        >
+          <button
+            onClick={toggleTts}
+            style={{
+              background: ttsEnabled ? 'rgba(124,58,237,0.3)' : 'transparent',
+              border: `1px solid ${ttsEnabled ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.15)'}`,
+              color: ttsEnabled ? '#a78bfa' : '#718096',
+              borderRadius: 4, padding: '3px 10px', cursor: 'pointer',
+              fontSize: 11, fontFamily: 'inherit', fontWeight: 600, whiteSpace: 'nowrap',
+            }}
+          >
+            TTS {ttsEnabled ? 'ON' : 'OFF'}
+          </button>
+
+          <select
+            value={ttsVoiceURI ?? ''}
+            onChange={(e) => changeVoice(e.target.value)}
+            style={{
+              flex: 1, minWidth: 0, maxWidth: 140, padding: '2px 6px', borderRadius: 4,
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(0,0,0,0.4)', color: '#e2e8f0',
+              fontSize: 10, fontFamily: 'inherit', outline: 'none',
+            }}
+          >
+            <option value="">Voz</option>
+            {voices.map((v) => (
+              <option key={v.voiceURI} value={v.voiceURI}>{v.name}</option>
+            ))}
+          </select>
+
+          <span style={{ fontSize: 9, color: '#718096', whiteSpace: 'nowrap' }}>Vel</span>
+          <input
+            type="range" min={0.5} max={2} step={0.1}
+            value={ttsRate}
+            onChange={(e) => changeRate(parseFloat(e.target.value))}
+            style={{ width: 48, accentColor: '#7c3aed', cursor: 'pointer' }}
+          />
+
+          <span style={{ fontSize: 9, color: '#718096', whiteSpace: 'nowrap' }}>Vol</span>
+          <input
+            type="range" min={0} max={1} step={0.05}
+            value={ttsVolume}
+            onChange={(e) => changeVolume(parseFloat(e.target.value))}
+            style={{ width: 48, accentColor: '#7c3aed', cursor: 'pointer' }}
+          />
+
+          <button
+            onClick={() => window.speechSynthesis.cancel()}
+            style={{
+              background: 'none', border: 'none', color: '#718096',
+              cursor: 'pointer', fontSize: 12, padding: '2px 6px',
+              fontFamily: 'inherit', lineHeight: 1,
+            }}
+            title="Detener"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Messages area */}
       <div
         ref={listRef}
@@ -148,7 +224,7 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
                 gap: 6,
                 padding: '4px 8px',
                 borderRadius: 6,
-                background: `rgba(0,0,0,${bgMode === 'black' ? '0.3' : 'var(--bg-alpha,0.5)'})`,
+                background: `rgba(0,0,0,${bgMode === 'black' ? '0.3' : '0.5'})`,
                 lineHeight: 1.45,
               }}
             >
@@ -175,84 +251,6 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
           ))}
         </AnimatePresence>
       </div>
-
-      {/* TTS bar */}
-      {window.speechSynthesis && (
-        <div
-          style={{
-            padding: '4px 8px',
-            background: bgMode === 'black' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)',
-            borderTop: '1px solid rgba(255,255,255,0.08)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            fontSize: 11,
-            color: '#a0aec0',
-            flexShrink: 0,
-          }}
-        >
-          <button
-            onClick={toggleTts}
-            style={{
-              background: ttsEnabled ? 'rgba(124,58,237,0.3)' : 'transparent',
-              border: `1px solid ${ttsEnabled ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.15)'}`,
-              color: ttsEnabled ? '#a78bfa' : '#718096',
-              borderRadius: 4, padding: '2px 8px', cursor: 'pointer',
-              fontSize: 10, fontFamily: 'inherit', fontWeight: 600,
-            }}
-          >
-            TTS {ttsEnabled ? 'ON' : 'OFF'}
-          </button>
-
-          {ttsEnabled && (
-            <>
-              <select
-                value={ttsVoiceURI ?? ''}
-                onChange={(e) => changeVoice(e.target.value)}
-                style={{
-                  flex: 1, maxWidth: 140, padding: '1px 4px', borderRadius: 4,
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  background: 'rgba(0,0,0,0.4)', color: '#e2e8f0',
-                  fontSize: 10, fontFamily: 'inherit', outline: 'none',
-                }}
-              >
-                <option value="">Voz</option>
-                {voices.map((v) => (
-                  <option key={v.voiceURI} value={v.voiceURI}>{v.name}</option>
-                ))}
-              </select>
-
-              <span style={{ fontSize: 9, color: '#718096' }}>Vel</span>
-              <input
-                type="range" min={0.5} max={2} step={0.1}
-                value={ttsRate}
-                onChange={(e) => changeRate(parseFloat(e.target.value))}
-                style={{ width: 40, accentColor: '#7c3aed', cursor: 'pointer' }}
-              />
-
-              <span style={{ fontSize: 9, color: '#718096' }}>Vol</span>
-              <input
-                type="range" min={0} max={1} step={0.05}
-                value={ttsVolume}
-                onChange={(e) => changeVolume(parseFloat(e.target.value))}
-                style={{ width: 40, accentColor: '#7c3aed', cursor: 'pointer' }}
-              />
-
-              <button
-                onClick={() => window.speechSynthesis.cancel()}
-                style={{
-                  background: 'none', border: 'none', color: '#718096',
-                  cursor: 'pointer', fontSize: 10, padding: '2px 4px',
-                  fontFamily: 'inherit',
-                }}
-                title="Detener"
-              >
-                ✕
-              </button>
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }
