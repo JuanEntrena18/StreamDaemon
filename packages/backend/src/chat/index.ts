@@ -2,6 +2,7 @@ import { ChatClient } from '@twurple/chat';
 import { getIO } from '../socket/index.js';
 import { authProvider, currentUser } from '../auth/index.js';
 import { checkCustomCommand } from '../commands/index.js';
+import { checkMessage } from '../security/index.js';
 import type { enterGiveaway, addTickets } from '../giveaways/index.js';
 
 let chatClient: ChatClient | null = null;
@@ -39,6 +40,8 @@ export function setupChat() {
       text,
       timestamp: Date.now(),
     });
+
+    checkMessage(channelName, user, text);
   });
 
   console.log('💬 Chat client connected');

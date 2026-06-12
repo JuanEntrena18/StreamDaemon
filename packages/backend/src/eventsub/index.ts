@@ -5,6 +5,7 @@ import { getIO } from '../socket/index.js';
 import { recordEvent } from '../activity/index.js';
 import { getActiveGiveaway } from '../giveaways/index.js';
 import { getAddTicketsFn } from '../chat/index.js';
+import { checkFollow } from '../security/index.js';
 
 let listener: EventSubWsListener | null = null;
 
@@ -50,6 +51,7 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
       recordEvent(channelName, 'follow', e.userDisplayName, 'siguió el canal');
+      checkFollow(e.userId, e.userName).catch(() => {});
     });
   });
 

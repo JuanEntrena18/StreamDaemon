@@ -1,8 +1,24 @@
 let audioCtx: AudioContext | null = null;
+let masterGain: GainNode | null = null;
 
 function getCtx(): AudioContext {
-  if (!audioCtx) audioCtx = new AudioContext();
+  if (!audioCtx) {
+    audioCtx = new AudioContext();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 1;
+    masterGain.connect(audioCtx.destination);
+  }
   return audioCtx;
+}
+
+function getMasterGain(): GainNode {
+  getCtx();
+  return masterGain!;
+}
+
+export function setMasterVolume(v: number) {
+  const gain = getMasterGain();
+  gain.gain.setValueAtTime(Math.max(0, Math.min(1, v)), gain.context.currentTime);
 }
 
 function playTone(freq: number, duration: number, type: OscillatorType = 'sine', volume = 0.15) {
@@ -14,7 +30,7 @@ function playTone(freq: number, duration: number, type: OscillatorType = 'sine',
   gain.gain.setValueAtTime(volume, ctx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
   osc.connect(gain);
-  gain.connect(ctx.destination);
+  gain.connect(getMasterGain());
   osc.start();
   osc.stop(ctx.currentTime + duration);
 }

@@ -17,11 +17,12 @@ import { ModPanel } from './components/ModPanel';
 import { CommandsPanel } from './components/CommandsPanel';
 import { SubathonPanel } from './components/SubathonPanel';
 import { SplashScreen } from './components/SplashScreen';
+import { SecurityPanel } from './components/SecurityPanel';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-type Tab = 'dashboard' | 'tracker' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config';
+type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config';
 
 const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string; label: string }[] }[] = [
   {
@@ -43,6 +44,13 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string;
     label: 'Chat',
     items: [
       { id: 'chat', icon: '💬', label: 'Chat' },
+    ],
+  },
+  {
+    id: 'security-section',
+    label: 'SEGURIDAD',
+    items: [
+      { id: 'security', icon: '🔒', label: 'Anti-Bots' },
     ],
   },
   {
@@ -85,6 +93,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string;
 const TAB_LABELS: Record<Tab, string> = {
   dashboard: 'Gestor del Stream',
   tracker: 'Twitch Tracker',
+  security: 'Anti-Bots',
   chat: 'Chat',
   mod: 'Moderación',
   commands: 'Comandos',
@@ -412,6 +421,7 @@ export function App() {
               >
                 {activeTab === 'dashboard' && <StreamDashboard channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'tracker'   && <TrackerPanel channel={channel} backendUrl={BACKEND_URL} />}
+                {activeTab === 'security' && <SecurityPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'chat'     && <ChatPanel channel={channel} />}
                 {activeTab === 'mod'         && <ModPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'commands'    && <CommandsPanel channel={channel} backendUrl={BACKEND_URL} />}

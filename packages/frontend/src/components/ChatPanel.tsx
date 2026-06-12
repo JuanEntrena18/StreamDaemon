@@ -1,7 +1,24 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
-import { SOUNDS, type SoundKey } from '../utils/sounds';
+import { SOUNDS, setMasterVolume, type SoundKey } from '../utils/sounds';
+
+function getVoices(): SpeechSynthesisVoice[] {
+  return window.speechSynthesis?.getVoices()?.filter((v) => v.lang.startsWith('es') || v.lang.startsWith('en')) ?? [];
+}
+
+function speak(text: string, voiceURI: string | null, rate: number, volume: number) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  if (voiceURI) {
+    const found = getVoices().find((v) => v.voiceURI === voiceURI);
+    if (found) utterance.voice = found;
+  }
+  utterance.rate = rate;
+  utterance.volume = volume;
+  window.speechSynthesis.speak(utterance);
+}
 
 interface Props {
   channel: string;
@@ -37,19 +54,39 @@ export function ChatPanel({ channel }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const lastSoundRef = useRef(0);
+  const [soundVolume, setSoundVolume] = useState(1);
+  const [ttsVolume, setTtsVolume] = useState(1);
+  const [ttsEnabled, setTtsEnabled] = useState(false);
+  const [ttsVoiceURI, setTtsVoiceURI] = useState<string | null>(null);
+  const [ttsRate, setTtsRate] = useState(1);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const ttsLastMsgRef = useRef('');
+
+  useEffect(() => {
+    if (!window.speechSynthesis) return;
+    const update = () => setVoices(getVoices());
+    update();
+    window.speechSynthesis.onvoiceschanged = update;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, []);
 
   const playSound = useCallback(() => {
     if (!selectedSound) return;
     const now = Date.now();
     if (now - lastSoundRef.current < 2000) return;
     lastSoundRef.current = now;
+    setMasterVolume(soundVolume);
     SOUNDS[selectedSound]();
-  }, [selectedSound]);
+  }, [selectedSound, soundVolume]);
 
   useSocketEvent('chat:message', useCallback((msg: ChatMsg) => {
     setMessages((prev) => [...prev.slice(-MAX_MSGS + 1), msg]);
     playSound();
-  }, [playSound]));
+    if (ttsEnabled && msg.text !== ttsLastMsgRef.current) {
+      ttsLastMsgRef.current = msg.text;
+      speak(msg.text, ttsVoiceURI, ttsRate, ttsVolume);
+    }
+  }, [playSound, ttsEnabled, ttsVoiceURI, ttsRate, ttsVolume]));
 
   useEffect(() => {
     if (!channel || !socket) return;
@@ -436,7 +473,7 @@ export function ChatPanel({ channel }: Props) {
         </div>
       )}
 
-      {/* Sound selector */}
+      {/* Sound selector + volume */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
         <span style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>Sonido:</span>
         <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
@@ -461,10 +498,114 @@ export function ChatPanel({ channel }: Props) {
                 color: selectedSound === s ? '#a78bfa' : 'var(--sf-text-3)',
                 fontSize: '0.65rem', cursor: 'pointer', fontFamily: 'inherit',
               }}
-              onMouseEnter={() => SOUNDS[s]()}
+              onMouseEnter={() => { setMasterVolume(soundVolume); SOUNDS[s](); }}
             >{s === 'pop' ? 'Pop' : s === 'ding' ? 'Ding' : s === 'chime' ? 'Chime' : 'Notif'}</button>
           ))}
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginLeft: 'auto' }}>
+          <span style={{ fontSize: '0.6rem', color: 'var(--sf-text-3)', minWidth: 16 }}>🔈</span>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={soundVolume}
+            onChange={(e) => { setSoundVolume(parseFloat(e.target.value)); setMasterVolume(parseFloat(e.target.value)); }}
+            style={{ width: 56, accentColor: '#7c3aed', cursor: 'pointer' }}
+            title="Volumen de sonidos"
+          />
+          <span style={{ fontSize: '0.6rem', color: 'var(--sf-text-3)', minWidth: 16 }}>🔊</span>
+        </div>
+      </div>
+
+      {/* TTS Controls */}
+      <div style={{
+        marginBottom: '0.5rem', padding: '0.6rem 0.75rem',
+        background: ttsEnabled ? 'rgba(124,58,237,0.06)' : 'transparent',
+        border: `1px solid ${ttsEnabled ? 'rgba(124,58,237,0.15)' : 'var(--sf-border)'}`,
+        borderRadius: 'var(--sf-radius-sm)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>TTS</span>
+            <button
+              onClick={() => { setTtsEnabled(!ttsEnabled); if (ttsEnabled) window.speechSynthesis?.cancel(); }}
+              style={{
+                width: 36, height: 18, borderRadius: 99,
+                background: ttsEnabled ? 'var(--sf-primary)' : 'var(--sf-border)',
+                border: 'none', cursor: 'pointer', position: 'relative',
+                transition: 'background 0.2s',
+              }}
+            >
+              <span style={{
+                position: 'absolute', top: 2, left: ttsEnabled ? 18 : 2,
+                width: 14, height: 14, borderRadius: '50%',
+                background: '#fff', transition: 'left 0.2s',
+              }} />
+            </button>
+          </div>
+          {ttsEnabled && window.speechSynthesis && (
+            <button
+              onClick={() => window.speechSynthesis.cancel()}
+              style={{
+                background: 'none', border: 'none', color: 'var(--sf-text-3)',
+                cursor: 'pointer', fontSize: '0.65rem', fontFamily: 'inherit',
+                padding: '0.1rem 0.4rem', borderRadius: 4,
+              }}
+            >Detener</button>
+          )}
+        </div>
+        {ttsEnabled && window.speechSynthesis && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>Voz:</span>
+              <select
+                value={ttsVoiceURI ?? ''}
+                onChange={(e) => setTtsVoiceURI(e.target.value || null)}
+                style={{
+                  flex: 1, padding: '0.2rem 0.4rem', borderRadius: 4,
+                  border: '1px solid var(--sf-border)',
+                  background: 'var(--sf-surface)', color: 'var(--sf-text)',
+                  fontSize: '0.7rem', fontFamily: 'inherit', outline: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="">Voz por defecto</option>
+                {voices.map((v) => (
+                  <option key={v.voiceURI} value={v.voiceURI}>
+                    {v.name} ({v.lang})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>Vel:</span>
+              <input
+                type="range"
+                min={0.5}
+                max={2}
+                step={0.1}
+                value={ttsRate}
+                onChange={(e) => setTtsRate(parseFloat(e.target.value))}
+                style={{ flex: 1, accentColor: '#7c3aed', cursor: 'pointer' }}
+              />
+              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 24 }}>{ttsRate.toFixed(1)}x</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>Vol:</span>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={ttsVolume}
+                onChange={(e) => setTtsVolume(parseFloat(e.target.value))}
+                style={{ flex: 1, accentColor: '#7c3aed', cursor: 'pointer' }}
+              />
+              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 24 }}>{Math.round(ttsVolume * 100)}%</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Input */}
