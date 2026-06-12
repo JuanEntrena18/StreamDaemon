@@ -107,7 +107,6 @@ export function App() {
   const [channel, setChannel] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('chat');
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
-  const [opacity, setOpacity] = useState(1);
 
   const userLogin = user?.login;
   useEffect(() => {
@@ -127,18 +126,13 @@ export function App() {
     window.streamforger?.window.setAlwaysOnTop(next);
   }
 
-  function handleOpacity(v: number) {
-    setOpacity(v);
-    window.streamforger?.window.setOpacity(v);
-  }
-
   return (
     <div
       style={{
         height: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        background: opacity < 1 ? `rgba(10,10,26,${opacity})` : 'var(--sf-bg)',
+        background: 'var(--sf-bg)',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -286,25 +280,6 @@ export function App() {
                     background: 'white', transition: 'left 0.2s',
                   }} />
                 </button>
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)' }}>
-                    💧 Transparencia
-                  </span>
-                  <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)' }}>
-                    {Math.round(opacity * 100)}%
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={10}
-                  max={100}
-                  value={Math.round(opacity * 100)}
-                  onChange={(e) => handleOpacity(parseInt(e.target.value) / 100)}
-                  style={{ width: '100%', accentColor: 'var(--sf-primary)', cursor: 'pointer' }}
-                />
               </div>
             </div>
           )}
