@@ -14,18 +14,19 @@ Available in two modes:
 
 - **🎨 Themed standalone overlays** — Pure HTML+CSS+JS overlays (no React) for Subnautica 2, Fortnite, and animated alerts. Each includes Canvas particles, CSS animations, real-time event queue, and direct Socket.IO connection. Loaded as static files (`/overlays/`) in OBS.
 - **🔴 Subathon** — Extendable countdown timer: viewers add time via subscriptions (+5min), bits (+1min per 100 bits), or channel rewards. Configurable max limit (12/24h). Control panel with start/pause/resume/stop, manual time addition, action history, and dedicated OBS overlay.
-- **📡 Unified Stream Dashboard** — Stream preview (iframe embed), title/game editor, live stats (viewers, followers, subs, uptime), and filtered channel activity feed in one screen.
+- **📡 Unified Stream Dashboard** — Stream preview (iframe embed with multi-parent support for Electron and browser), title/game editor, live stats (viewers, followers, subs, uptime), and filtered channel activity feed in one screen.
 - **💬 Live Chat** — Twitch IRC chat relayed in real-time to overlays via Socket.IO. Includes message sending, reply (@user), moderation (timeout/ban), role badges, and notification sound selector.
 - **🎁 Interactive Giveaways** — `!sorteo` command in chat to enter. Control panel with canvas wheel, spin duration selector (10/15/20s), and bulk name import. Dedicated overlay with live participant list and animated winner reveal.
 - **📊 Predictions** — Twitch Predictions API integration. Create polls from the control panel with automatic resolution.
 - **📊 Stream HUD** — Live stats panel (viewers, followers, subs, uptime, game) with auto-polling and informative overlay.
+- **📈 Twitch Tracker** — Historical channel stats with period selector (7d, 30d, 90d, all time). Aggregate metric cards (hours, peak viewers, followers), last stream summary with views, followers, subs, bits, and estimated revenue. Interactive SVG evolution chart by stream. Expandable recent streams list with per-stream metrics. Multi-factor advice engine (frequency, duration, audience, monetization) with optional Ollama integration for local AI.
 - **⏱️ Timer** — Configurable countdown from the panel with start, pause, resume, reset. Overlay with progress bar, last-30s visual alert, and "Time's up" state.
 - **🏆 Scoreboard** — Live tournament/competition scoreboard with player management, increment/decrement scoring, and visual progress bar.
 - **🔔 EventSub Notifications** — Follows, subs, re-subs, gifts, redemptions, and cheers in real-time via EventSub WebSocket with animated screen overlay.
 - **🌐 Social Media** — Animated rotating overlay showing streamer's social links.
 - **🛡️ Moderation** — Mod panel with timeout, ban, unban and live connected-user list.
 - **🤖 Commands** — Custom chat command management: create, edit, enable/disable, with aliases and cooldown.
-- **🎮 Transparent overlay control** — Always-on-top window with toggleable click-through (Ctrl+Shift+T), per-message background opacity, resizable (S/M/L), black/transparent background mode, font selector (6 fonts), text size slider (10-24px), and always-visible control bar with drag handle, lock/unlock, and integrated settings panel. Settings persist in localStorage.
+- **🎮 Transparent overlay control** — Always-on-top window with sidebar toggle, background mode (black/transparent), font selector (6 fonts), text size slider (10-24px), general opacity control (10-100%), always-visible control bar with drag handle and integrated settings panel. Settings persist in localStorage. Includes `OverlayErrorBoundary` that catches React errors and shows a visible message instead of leaving the window invisible.
 - **🔐 OAuth Authentication** — Twitch login. Browser: Authorization Code Grant with redirect. Desktop: **Device Code Grant** (user enters a code at twitch.tv/activate). Auto-refreshing tokens. Full logout.
 - **🖥️ Premium Dashboard** — Sidebar navigation, glassmorphism, Framer Motion animations, violet/indigo palette, Twitch user badge, real-time connection status.
 - **📊 Fortnite Stats Overlay** — Configurable overlay panel showing kills, wins, matches, K/D, and win rate from [fortnite-api.com](https://fortnite-api.com). Per-user API key management. 5 min cache.
@@ -140,6 +141,7 @@ StreamForge/
 │   │   ├── subathon/      # Subathon
 │   │   ├── activity/      # Activity feed
 │   │   ├── commands/      # Custom commands
+│   │   ├── tracker/       # Twitch Tracker (stats, streams, advice engine)
 │   │   └── fortnite/      # Fortnite stats
 │   ├── frontend/
 │   │   ├── src/components/  # Dashboard

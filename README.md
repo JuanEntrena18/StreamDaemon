@@ -14,18 +14,19 @@ Disponible en dos modos:
 
 - **🎨 Overlays temáticos independientes** — Overlays en HTML+CSS+JS puro (sin React) para Subnautica 2, Fortnite y Alertas animadas. Cada overlay incluye Canvas de partículas, animaciones CSS, cola de eventos en tiempo real y conexión directa a Socket.IO. Se cargan como archivos estáticos (`/overlays/`) en OBS.
 - **🔴 Subathon** — Temporizador ampliable en directo: los espectadores añaden tiempo con suscripciones (+5 min), bits (+1 min por cada 100 bits) o recompensas de canal. Límite máximo configurable (12/24h). Panel de control con inicio/pausa/reanudar/detener, añadir tiempo manual, historial de acciones y overlay OBS dedicado con cuenta atrás, barra de progreso, estadísticas y feed de actividad.
-- **📡 Gestor del Stream unificado** — Dashboard que combina vista previa del stream (iframe embed), editor de título/juego, estadísticas en vivo (viewers, followers, subs, uptime) y feed de actividad del canal con filtros — todo en una sola pantalla.
+- **📡 Gestor del Stream unificado** — Dashboard que combina vista previa del stream (iframe embed con soporte multi-parent para Electron y navegador), editor de título/juego, estadísticas en vivo (viewers, followers, subs, uptime) y feed de actividad del canal con filtros — todo en una sola pantalla.
 - **💬 Chat en vivo** — Lectura del chat de Twitch vía IRC con reenvío en tiempo real a los overlays mediante Socket.IO. Incluye envío de mensajes, reply (↩ @usuario), moderación (timeout/ban), badges por rol y selector de sonido de notificación.
 - **🎁 Sorteos interactivos** — Comando `!sorteo` en el chat para participar. Panel de control con ruleta canvas, selector de duración del giro (10/15/20s) e importación masiva de nombres. Overlay dedicado con lista de participantes en vivo y ruleta animada con ganador gigante.
 - **📊 Predicciones** — Integración con la API de Predicciones de Twitch. Creación de encuestas desde el panel de control con resolución automática.
 - **📊 Stream HUD** — Panel de estadísticas en vivo (viewers, followers, subs, uptime, game) con polling automático y overlay informativo.
+- **📈 Twitch Tracker** — Estadísticas históricas del canal con selector de período (7d, 30d, 90d, all time). Cards de métricas agregadas (horas, pico de viewers, seguidores), resumen del último stream con visualizaciones, seguidores, suscripciones, bits e ingresos estimados. Gráfico SVG interactivo de evolución por stream. Lista expandible de streams recientes con métricas detalladas. Motor de consejos inteligente multi-factor (frecuencia, duración, audiencia, monetización) con integración opcional de Ollama para IA local.
 - **⏱️ Temporizador** — Cuenta regresiva configurable desde el panel con inicio, pausa, reanudación y reset. Overlay con barra de progreso, alerta visual los últimos 30s y estado "Tiempo cumplido".
 - **🏆 Scoreboard** — Marcador en vivo para torneos y competiciones con jugadores, puntuaciones por incremento/decremento y barra de progreso visual. Panel completo con gestión de jugadores.
 - **🔔 Notificaciones EventSub** — Follows, subs, re-suscripciones, gifts, redemptions y cheers en tiempo real vía EventSub WebSocket, con overlay animado en pantalla.
 - **🌐 Redes sociales** — Overlay animado que muestra las redes del streamer de forma rotativa.
 - **🛡️ Moderación** — Panel de moderación con timeout, ban y unban. Incluye lista de usuarios conectados al canal en ese momento con selección clickeable.
 - **🤖 Comandos** — Gestión de comandos personalizados del chat: crear, editar, habilitar/deshabilitar, con alias y cooldown configurable.
-- **🎮 Control de overlay transparente** — Ventana always-on-top con click-through toggleable (Ctrl+Shift+T), opacidad solo del fondo, redimensionable (Peq/Med/Grande), fondo negro/transparente, selector de tipografía (6 fuentes), ajuste de tamaño de texto (10-24px) y barra de control siempre visible con zona de arrastre, bloqueo/desbloqueo de clics y panel de ajustes integrado. Los cambios persisten en localStorage.
+- **🎮 Control de overlay transparente** — Ventana always-on-top con toggle desde la sidebar, modo fondo (negro/transparente), selector de tipografía (6 fuentes), ajuste de tamaño de texto (10-24px), control de opacidad general (10-100%), barra de control siempre visible con zona de arrastre y panel de ajustes integrado. Los cambios persisten en localStorage. Incluye `OverlayErrorBoundary` que captura errores de React y muestra un mensaje visible en lugar de dejar la ventana invisible.
 - **🔐 Autenticación OAuth** — Login con Twitch. En navegador: flujo Authorization Code Grant con redirect. En escritorio: flujo **Device Code Grant** (el usuario ve un código en la app y lo ingresa en twitch.tv/activate). Tokens persistidos con refresco automático. Logout completo.
 - **🖥️ Dashboard premium** — Interfaz con sidebar de navegación, glassmorphism, animaciones Framer Motion, paleta violeta/índigo, badge de usuario Twitch y estado de conexión en tiempo real.
 - **📊 Fortnite Stats Overlay** — Panel configurable en el overlay de Fortnite que muestra kills, wins, partidas, K/D y win rate desde la API de [fortnite-api.com](https://fortnite-api.com). Cada usuario registra su propia API Key desde el panel. Cache de 5 min.
@@ -142,6 +143,7 @@ StreamForge/
 │   │   ├── subathon/      # Subathon (temporizador ampliable)
 │   │   ├── activity/      # Feed de actividad del canal
 │   │   ├── commands/      # Comandos personalizados del chat
+│   │   ├── tracker/       # Twitch Tracker (stats, streams, advice engine)
 │   │   └── fortnite/      # Fortnite stats (config + API)
 │   ├── frontend/
 │   │   ├── src/components/  # Dashboard (App, Chat, Giveaway, etc.)

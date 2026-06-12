@@ -113,9 +113,15 @@ function SvgBarChart({ data, dataKey, color }: {
   if (data.length === 0) return null;
   const values = data.map((d) => d[dataKey]);
   const max = Math.max(...values, 1);
-  const barWidth = Math.max(12, Math.min(48, 400 / data.length));
-  const chartW = data.length * (barWidth + 6);
-  const chartH = 160;
+  const barCount = data.length;
+  const barWidth = Math.max(12, Math.min(64, Math.max(400, window.innerWidth - 100) / barCount - 10));
+  const gap = Math.max(6, Math.min(14, barWidth * 0.3));
+  const padL = 4;
+  const padR = 60;
+  const labelPad = 34;
+  const chartW = barCount * (barWidth + gap) + padL + padR;
+  const chartH = 200;
+  const plotH = chartH - labelPad;
 
   const formatVal = (v: number) => {
     if (dataKey === 'durationInSeconds') return formatDuration(v);
@@ -123,28 +129,64 @@ function SvgBarChart({ data, dataKey, color }: {
   };
 
   return (
-    <svg width={chartW} height={chartH} style={{ display: 'block' }}>
+    <svg width={chartW} height={chartH} style={{ display: 'block', maxWidth: '100%', height: 'auto', minWidth: 300 }}>
       {data.map((d, i) => {
-        const x = i * (barWidth + 6);
-        const barHeight = (d[dataKey] / max) * (chartH - 20);
+        const x = i * (barWidth + gap) + padL;
+        const barHeight = (d[dataKey] / max) * plotH;
+        const label = formatVal(d[dataKey]);
         return (
           <g key={d.videoId}>
             <motion.rect
               initial={{ height: 0, y: chartH }}
-              animate={{ height: barHeight, y: chartH - barHeight }}
+              animate={{ height: barHeight, y: chartH - barHeight - 8 }}
               transition={{ duration: 0.4, delay: i * 0.03, ease: 'easeOut' }}
               x={x}
               width={barWidth}
               rx={3}
               fill={color}
-              opacity={0.8}
+              opacity={0.85}
             />
-            <title>{`${formatShortDate(d.creationDate)}: ${formatVal(d[dataKey])}`}</title>
+            <motion.text
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: i * 0.03 + 0.2 }}
+              x={x + barWidth / 2}
+              y={chartH - barHeight - 14}
+              textAnchor="middle"
+              fill="#cbd5e1"
+              fontSize="11"
+              fontWeight={700}
+              style={{ fontFamily: 'system-ui, sans-serif' }}
+            >
+              {label}
+            </motion.text>
+            <text
+              x={x + barWidth / 2}
+              y={chartH - 2}
+              textAnchor="middle"
+              fill="#64748b"
+              fontSize="9"
+              style={{ fontFamily: 'system-ui, sans-serif' }}
+            >
+              {formatShortDate(d.creationDate)}
+            </text>
+            <title>{`${formatShortDate(d.creationDate)}: ${label}`}</title>
           </g>
         );
       })}
+      {/* Max reference */}
+      <text
+        x={chartW - 6}
+        y={14}
+        textAnchor="end"
+        fill="#64748b"
+        fontSize="10"
+        style={{ fontFamily: 'system-ui, sans-serif' }}
+      >
+        máx: {formatVal(max)}
+      </text>
       {/* Baseline */}
-      <line x1={0} y1={chartH - 0.5} x2={chartW} y2={chartH - 0.5} stroke="var(--sf-border)" strokeWidth={1} />
+      <line x1={0} y1={chartH - 8} x2={chartW} y2={chartH - 8} stroke="#334155" strokeWidth={1} />
     </svg>
   );
 }

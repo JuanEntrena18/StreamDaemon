@@ -59,12 +59,12 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 
 | Componente | Descripción |
 |---|---|
-| `App.tsx` | Layout principal con sidebar (6 secciones: GESTOR, Chat, MOD, COMANDOS, Herramientas, Config) + header + tab transitions |
+| `App.tsx` | Layout principal con sidebar (7 secciones: GESTOR, ESTADÍSTICAS, Chat, MOD, COMANDOS, Herramientas, Config) + header + tab transitions |
 | `StreamDashboard.tsx` | Gestor unificado: preview embed, editor título/juego, stats en vivo, feed actividad con filtros |
 | `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación, selector sonido, overlay controls (tamaño, opacidad, tipografía, fondo negro/transparente) |
 | `GiveawayPanel.tsx` | Panel sorteos con ruleta canvas e importación masiva |
 | `PredictionPanel.tsx` | Panel de predicciones con opciones A/B/C |
-| `TrackerPanel.tsx` | Twitch Tracker: estadísticas históricas del canal |
+| `TrackerPanel.tsx` | Twitch Tracker: estadísticas históricas, resumen del último stream, gráficos SVG de evolución (views/seguidores/duración), consejos inteligentes multi-factor e integración Ollama |
 | `HudPanel.tsx` | Stream HUD: botones iniciar/detener polling, stats en vivo |
 | `TimerPanel.tsx` | Temporizador: configurar duración, iniciar, pausar, reanudar, reset |
 | `ScoreboardPanel.tsx` | Scoreboard: jugadores, puntuaciones, ranking |
@@ -104,7 +104,7 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 | **Scoreboard** | `src/scoreboard/index.ts` | Scoreboard: gestión de jugadores y puntuaciones in-memory, emisión `scoreboard:update` |
 | **EventSub** | `src/eventsub/index.ts` | EventSub WebSocket listener: follows, subs, resubs, gifts, redemptions, cheers |
 | **Mod** | `src/mod/index.ts` | Moderación: chatters (GET /mod/chatters/:channel), timeout, ban, unban vía Twitch Helix API |
-| **Tracker** | `src/tracker/index.ts` | Twitch Tracker: estadísticas del canal con try/catch por endpoint |
+| **Tracker** | `src/tracker/index.ts` | Twitch Tracker: estadísticas agregadas (`/tracker/stats`), desglose por stream con datos de actividad (`/tracker/streams`) y motor de consejos inteligente multi-factor con integración opcional Ollama (`/tracker/advice`) |
 | **Subathon** | `src/subathon/index.ts` | Subathon: temporizador ampliable con subs, bits y recompensas. Tick cada 1s. REST: start (con initialTime), add-time, pause, resume, stop, config. Socket.IO: `subathon:tick`, `subathon:time-added`, `subathon:state` |
 | **Activity** | `src/activity/index.ts` | Feed de actividad del canal: follows, subs, bits, raids. Almacenamiento in-memory + persistencia a archivo. Socket.IO: `activity:new`, `activity:list` |
 | **Commands** | `src/commands/index.ts` | Comandos personalizados del chat: CRUD, persistencia a archivo, exportación/importación, auto-respuesta vía chat handler |
@@ -252,3 +252,7 @@ twitch_overlay/
 | 26 | **Fortnite config UI** — API key, epic username y modo (SOLO/DUO/TRIO/SQUAD) configurables desde ObsPanel. `GET/PUT /fortnite/config` con persistencia a archivo | ✅ |
 | 27 | **Fortnite stats panel en overlay** — Panel superior derecho con kills, wins, partidas, K/D, win rate. Fetch directo al backend cada 5 min (independiente del socket). Demo mode con stats de ejemplo | ✅ |
 | 28 | **Backend param en URL** — `&backend=` auto-agregado al copiar URL en dev para que el overlay sepa dónde está el backend | ✅ |
+| 29 | **Twitch Tracker v2** — Per-stream breakdown con datos de actividad (follows, subs, bits), SVG charts evolutivos, resumen del último stream con ingresos estimados | ✅ |
+| 30 | **Consejos inteligentes** — Motor multi-factor (frecuencia, duración, audiencia, monetización) con reglas contextuales e integración opcional Ollama para IA local | ✅ |
+| 31 | **CSP fix** — Agregado `frame-src https://player.twitch.tv` al Content-Security-Policy para permitir embed de Twitch en producción | ✅ |
+| 32 | **Overlay controls redesign** — Toggle always-on-top desde sidebar, control de opacidad general (10-100%), modo fondo, selector de fuente y tamaño. `OverlayErrorBoundary` para manejo de errores React | ✅ |
