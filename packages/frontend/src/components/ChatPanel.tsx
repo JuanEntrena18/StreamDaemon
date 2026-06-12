@@ -3,6 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { SOUNDS, setMasterVolume, type SoundKey } from '../utils/sounds';
 
+const OVERLAY_LS_KEY = 'streamforger-chat-overlay-settings';
+
+function loadOverlaySettings() {
+  try {
+    const raw = localStorage.getItem(OVERLAY_LS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return {};
+}
+
+function saveOverlaySettings(settings: Record<string, unknown>) {
+  try {
+    localStorage.setItem(OVERLAY_LS_KEY, JSON.stringify(settings));
+  } catch {}
+}
+
 function getVoices(): SpeechSynthesisVoice[] {
   return window.speechSynthesis?.getVoices()?.filter((v) => v.lang.startsWith('es') || v.lang.startsWith('en')) ?? [];
 }
@@ -89,17 +105,6 @@ export function ChatPanel({ channel }: Props) {
   }, [playSound, ttsEnabled, ttsVoiceURI, ttsRate, ttsVolume]));
 
   useEffect(() => {
-    if (!channel || !socket) return;
-    const rejoin = () => socket.emit('join:channel', channel);
-    rejoin();
-    socket.on('connect', rejoin);
-    return () => {
-      socket.off('connect', rejoin);
-      socket.emit('leave:channel', channel);
-    };
-  }, [channel, socket]);
-
-  useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
@@ -146,11 +151,12 @@ export function ChatPanel({ channel }: Props) {
     setMenuMsg(null);
   }
 
-  const [overlayOpacity, setOverlayOpacity] = useState(0.9);
-  const [overlaySize, setOverlaySize] = useState<'sm' | 'md' | 'lg'>('md');
-  const [overlayBgMode, setOverlayBgMode] = useState<'transparent' | 'black'>('black');
-  const [overlayFont, setOverlayFont] = useState("'Inter', sans-serif");
-  const [overlayFontSize, setOverlayFontSize] = useState(14);
+  const ls = loadOverlaySettings();
+  const [overlayOpacity, setOverlayOpacity] = useState(() => ls.opacity ?? 0.9);
+  const [overlaySize, setOverlaySize] = useState<'sm' | 'md' | 'lg'>(() => ls.size ?? 'md');
+  const [overlayBgMode, setOverlayBgMode] = useState<'transparent' | 'black'>(() => ls.bgMode ?? 'black');
+  const [overlayFont, setOverlayFont] = useState(() => ls.font ?? "'Inter', sans-serif");
+  const [overlayFontSize, setOverlayFontSize] = useState(() => ls.fontSize ?? 14);
 
   const FONT_OPTIONS = [
     { label: 'Inter', value: "'Inter', sans-serif" },
@@ -181,6 +187,7 @@ export function ChatPanel({ channel }: Props) {
 
   function changeOverlaySize(size: 'sm' | 'md' | 'lg') {
     setOverlaySize(size);
+    saveOverlaySettings({ ...loadOverlaySettings(), size });
     const dims = { sm: [300, 450], md: [400, 600], lg: [550, 800] };
     if (window.streamforger) {
       window.streamforger.overlay.resize(dims[size][0], dims[size][1]);
@@ -189,6 +196,7 @@ export function ChatPanel({ channel }: Props) {
 
   function changeOverlayOpacity(val: number) {
     setOverlayOpacity(val);
+    saveOverlaySettings({ ...loadOverlaySettings(), opacity: val });
     if (window.streamforger) {
       window.streamforger.overlay.setOpacity(val);
     }
@@ -285,6 +293,7 @@ export function ChatPanel({ channel }: Props) {
               onClick={() => {
                 const next = overlayBgMode === 'transparent' ? 'black' : 'transparent';
                 setOverlayBgMode(next);
+                saveOverlaySettings({ ...loadOverlaySettings(), bgMode: next });
                 window.streamforger?.overlay.setBgMode?.(next);
               }}
               style={{
@@ -303,6 +312,7 @@ export function ChatPanel({ channel }: Props) {
               value={overlayFont}
               onChange={(e) => {
                 setOverlayFont(e.target.value);
+                saveOverlaySettings({ ...loadOverlaySettings(), font: e.target.value });
                 window.streamforger?.overlay.setFont?.(e.target.value);
               }}
               style={{
@@ -327,6 +337,7 @@ export function ChatPanel({ channel }: Props) {
                 onChange={(e) => {
                   const v = parseInt(e.target.value);
                   setOverlayFontSize(v);
+                  saveOverlaySettings({ ...loadOverlaySettings(), fontSize: v });
                   window.streamforger?.overlay.setFontSize?.(v);
                 }}
                 style={{ width: 60, accentColor: '#7c3aed', cursor: 'pointer' }}

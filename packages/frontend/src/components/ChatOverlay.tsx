@@ -5,6 +5,37 @@ import type { ChatMessage } from '@streamforger/shared';
 
 const MAX_MESSAGES = 50;
 
+const TTS_LS_KEY = 'streamforger-overlay-tts';
+
+function loadTtsSettings() {
+  try {
+    const raw = localStorage.getItem(TTS_LS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return {};
+}
+
+function saveTtsSettings(s: Record<string, unknown>) {
+  try { localStorage.setItem(TTS_LS_KEY, JSON.stringify(s)); } catch {}
+}
+
+function getVoices(): SpeechSynthesisVoice[] {
+  return window.speechSynthesis?.getVoices()?.filter((v) => v.lang.startsWith('es') || v.lang.startsWith('en')) ?? [];
+}
+
+function speak(text: string, voiceURI: string | null, rate: number, volume: number) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  if (voiceURI) {
+    const found = getVoices().find((v) => v.voiceURI === voiceURI);
+    if (found) utterance.voice = found;
+  }
+  utterance.rate = rate;
+  utterance.volume = volume;
+  window.speechSynthesis.speak(utterance);
+}
+
 interface Props {
   channel: string;
   fontFamily?: string;
@@ -14,24 +45,70 @@ interface Props {
 
 export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontSize = 14, bgMode = 'black' }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const { socket, connected } = useSocket();
+  const { socket } = useSocket();
   const listRef = useRef<HTMLDivElement>(null);
+  const ttsLastRef = useRef('');
+
+  const tls = loadTtsSettings();
+  const [ttsEnabled, setTtsEnabled] = useState(() => tls.enabled ?? false);
+  const [ttsVoiceURI, setTtsVoiceURI] = useState<string | null>(() => tls.voiceURI ?? null);
+  const [ttsRate, setTtsRate] = useState(() => tls.rate ?? 1);
+  const [ttsVolume, setTtsVolume] = useState(() => tls.volume ?? 1);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+
+  useEffect(() => {
+    if (!window.speechSynthesis) return;
+    const update = () => setVoices(getVoices());
+    update();
+    window.speechSynthesis.onvoiceschanged = update;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, []);
+
+  // Rejoin channel on reconnect
+  useEffect(() => {
+    if (!channel || !socket) return;
+    const join = () => socket.emit('join:channel', channel);
+    join();
+    socket.on('connect', join);
+    return () => { socket.off('connect', join); };
+  }, [channel, socket]);
 
   useSocketEvent('chat:message', useCallback((msg: ChatMessage) => {
     setMessages((prev) => [...prev.slice(-MAX_MESSAGES + 1), msg]);
-  }, []));
-
-  useEffect(() => {
-    if (channel && connected) {
-      socket.emit('join:channel', channel);
+    if (ttsEnabled && msg.text !== ttsLastRef.current) {
+      ttsLastRef.current = msg.text;
+      speak(msg.text, ttsVoiceURI, ttsRate, ttsVolume);
     }
-  }, [channel, connected, socket]);
+  }, [ttsEnabled, ttsVoiceURI, ttsRate, ttsVolume]));
 
   useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
   }, [messages]);
+
+  function toggleTts() {
+    const next = !ttsEnabled;
+    setTtsEnabled(next);
+    saveTtsSettings({ ...loadTtsSettings(), enabled: next });
+    if (!next) window.speechSynthesis?.cancel();
+  }
+
+  function changeVoice(uri: string) {
+    const val = uri || null;
+    setTtsVoiceURI(val);
+    saveTtsSettings({ ...loadTtsSettings(), voiceURI: val });
+  }
+
+  function changeRate(r: number) {
+    setTtsRate(r);
+    saveTtsSettings({ ...loadTtsSettings(), rate: r });
+  }
+
+  function changeVolume(v: number) {
+    setTtsVolume(v);
+    saveTtsSettings({ ...loadTtsSettings(), volume: v });
+  }
 
   return (
     <div
@@ -98,6 +175,84 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
           ))}
         </AnimatePresence>
       </div>
+
+      {/* TTS bar */}
+      {window.speechSynthesis && (
+        <div
+          style={{
+            padding: '4px 8px',
+            background: bgMode === 'black' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 11,
+            color: '#a0aec0',
+            flexShrink: 0,
+          }}
+        >
+          <button
+            onClick={toggleTts}
+            style={{
+              background: ttsEnabled ? 'rgba(124,58,237,0.3)' : 'transparent',
+              border: `1px solid ${ttsEnabled ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.15)'}`,
+              color: ttsEnabled ? '#a78bfa' : '#718096',
+              borderRadius: 4, padding: '2px 8px', cursor: 'pointer',
+              fontSize: 10, fontFamily: 'inherit', fontWeight: 600,
+            }}
+          >
+            TTS {ttsEnabled ? 'ON' : 'OFF'}
+          </button>
+
+          {ttsEnabled && (
+            <>
+              <select
+                value={ttsVoiceURI ?? ''}
+                onChange={(e) => changeVoice(e.target.value)}
+                style={{
+                  flex: 1, maxWidth: 140, padding: '1px 4px', borderRadius: 4,
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'rgba(0,0,0,0.4)', color: '#e2e8f0',
+                  fontSize: 10, fontFamily: 'inherit', outline: 'none',
+                }}
+              >
+                <option value="">Voz</option>
+                {voices.map((v) => (
+                  <option key={v.voiceURI} value={v.voiceURI}>{v.name}</option>
+                ))}
+              </select>
+
+              <span style={{ fontSize: 9, color: '#718096' }}>Vel</span>
+              <input
+                type="range" min={0.5} max={2} step={0.1}
+                value={ttsRate}
+                onChange={(e) => changeRate(parseFloat(e.target.value))}
+                style={{ width: 40, accentColor: '#7c3aed', cursor: 'pointer' }}
+              />
+
+              <span style={{ fontSize: 9, color: '#718096' }}>Vol</span>
+              <input
+                type="range" min={0} max={1} step={0.05}
+                value={ttsVolume}
+                onChange={(e) => changeVolume(parseFloat(e.target.value))}
+                style={{ width: 40, accentColor: '#7c3aed', cursor: 'pointer' }}
+              />
+
+              <button
+                onClick={() => window.speechSynthesis.cancel()}
+                style={{
+                  background: 'none', border: 'none', color: '#718096',
+                  cursor: 'pointer', fontSize: 10, padding: '2px 4px',
+                  fontFamily: 'inherit',
+                }}
+                title="Detener"
+              >
+                ✕
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

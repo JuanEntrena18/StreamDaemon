@@ -122,10 +122,23 @@ export function App() {
     if (userLogin && !channel) setChannel(userLogin);
   }, [userLogin]);
 
+  const { socket } = useSocket();
+
   useEffect(() => {
     if (!isDesktop) return;
     window.streamforger?.window.getAlwaysOnTop().then(setAlwaysOnTop);
   }, []);
+
+  // Global channel join — keeps the main app socket in the channel regardless of active tab
+  useEffect(() => {
+    if (!channel || !socket) return;
+    const join = () => socket.emit('join:channel', channel);
+    join();
+    socket.on('connect', join);
+    return () => {
+      socket.off('connect', join);
+    };
+  }, [channel, socket]);
 
   if (!backendReady) return <SplashScreen onReady={onReady} />;
 
