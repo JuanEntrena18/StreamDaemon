@@ -15,7 +15,7 @@ Available in two modes:
 - **🎨 Themed standalone overlays** — Pure HTML+CSS+JS overlays (no React) for Subnautica 2, Fortnite, and animated alerts. Each includes Canvas particles, CSS animations, real-time event queue, and direct Socket.IO connection. Loaded as static files (`/overlays/`) in OBS.
 - **🔴 Subathon** — Extendable countdown timer: viewers add time via subscriptions (+5min), bits (+1min per 100 bits), or channel rewards. Configurable max limit (12/24h). Control panel with start/pause/resume/stop, manual time addition, action history, and dedicated OBS overlay.
 - **📡 Unified Stream Dashboard** — Stream preview (iframe embed with multi-parent support for Electron and browser), title/game editor, live stats (viewers, followers, subs, uptime), and filtered channel activity feed in one screen.
-- **💬 Live Chat** — Twitch IRC chat relayed in real-time to overlays via Socket.IO. Includes message sending, reply (@user), moderation (timeout/ban), role badges, and notification sound selector.
+- **💬 Live Chat** — Twitch IRC chat relayed in real-time to overlays via Socket.IO. Includes message sending, reply (@user), moderation (timeout/ban), role badges, notification sound selector with volume control, **TTS (text-to-speech)** with voice selection, speed, and volume.
 - **🎁 Interactive Giveaways** — `!sorteo` command in chat to enter. Control panel with canvas wheel, spin duration selector (10/15/20s), and bulk name import. Dedicated overlay with live participant list and animated winner reveal.
 - **📊 Predictions** — Twitch Predictions API integration. Create polls from the control panel with automatic resolution.
 - **📊 Stream HUD** — Live stats panel (viewers, followers, subs, uptime, game) with auto-polling and informative overlay.
@@ -26,6 +26,7 @@ Available in two modes:
 - **🌐 Social Media** — Animated rotating overlay showing streamer's social links.
 - **🛡️ Moderation** — Mod panel with timeout, ban, unban and live connected-user list.
 - **🤖 Commands** — Custom chat command management: create, edit, enable/disable, with aliases and cooldown.
+- **🔒 Anti-Bots** — Automatic bot and spam protection inspired by **Sery Bot**. Follow bot detection via EventSub, chat spam filtering by patterns, auto-ban via Helix API, and manual follower scan. Dashboard with stats, protection toggles, whitelist, and detection log.
 - **🎮 Transparent overlay control** — Always-on-top window with sidebar toggle, background mode (black/transparent), font selector (6 fonts), text size slider (10-24px), general opacity control (10-100%), always-visible control bar with drag handle and integrated settings panel. Settings persist in localStorage. Includes `OverlayErrorBoundary` that catches React errors and shows a visible message instead of leaving the window invisible.
 - **🔐 OAuth Authentication** — Twitch login. Browser: Authorization Code Grant with redirect. Desktop: **Device Code Grant** (user enters a code at twitch.tv/activate). Auto-refreshing tokens. Full logout.
 - **🖥️ Premium Dashboard** — Sidebar navigation, glassmorphism, Framer Motion animations, violet/indigo palette, Twitch user badge, real-time connection status.
@@ -49,6 +50,7 @@ StreamForger implements multiple security layers:
 | **M-2** | Input validation with **Zod** on all API routes | ✅ |
 | **M-3** | CORS restricted to localhost | ✅ |
 | **B-1** | Security headers: `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` | ✅ |
+| **B-2** | **Anti-Bots**: follow bot detection, spam filter, auto-ban, and manual follower scan | ✅ |
 
 ---
 
@@ -142,6 +144,7 @@ StreamForge/
 │   │   ├── activity/      # Activity feed
 │   │   ├── commands/      # Custom commands
 │   │   ├── tracker/       # Twitch Tracker (stats, streams, advice engine)
+│   │   ├── security/      # Anti-Bots (follow bot detection, spam filter, auto-ban)
 │   │   └── fortnite/      # Fortnite stats
 │   ├── frontend/
 │   │   ├── src/components/  # Dashboard
@@ -156,6 +159,17 @@ StreamForge/
 ├── README.md
 └── README_en.md
 ```
+
+---
+
+## 🧭 Roadmap
+
+### Upcoming features
+
+| Feature | Description |
+|---|---|
+| **🌍 Multi-language translation** | Frontend translated to English, French, German, and Italian with automatic browser language detection |
+| **🎮 Stream Deck integration** | Native Elgato Stream Deck plugin to control StreamForger from physical buttons: start/stop Subathon, launch giveaways, ban user, change stream title, and more |
 
 ---
 

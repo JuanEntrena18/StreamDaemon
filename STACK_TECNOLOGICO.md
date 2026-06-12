@@ -18,6 +18,7 @@ Aplicación modular para creadores de contenido que permite gestionar el canal d
 | **@twurple/chat** | ^6.x | Cliente IRC para leer el chat de Twitch (en backend, expuesto vía WS al frontend) |
 | **@twurple/eventsub-ws** | ^7.x | EventSub WebSocket (follows, subs, gifts, redemptions, cheers) |
 | **Inter (Google Fonts)** | — | Tipografía principal del dashboard |
+| **Web Speech API** | — | Text-to-Speech integrado en el panel de chat con selección de voz, velocidad y volumen |
 
 ### Overlays independientes (HTML/CSS/JS puro)
 
@@ -59,9 +60,10 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 
 | Componente | Descripción |
 |---|---|
-| `App.tsx` | Layout principal con sidebar (7 secciones: GESTOR, ESTADÍSTICAS, Chat, MOD, COMANDOS, Herramientas, Config) + header + tab transitions |
+| `App.tsx` | Layout principal con sidebar (8 secciones: GESTOR, ESTADÍSTICAS, SEGURIDAD, Chat, MOD, COMANDOS, Herramientas, Config) + header + tab transitions |
 | `StreamDashboard.tsx` | Gestor unificado: preview embed, editor título/juego, stats en vivo, feed actividad con filtros |
-| `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación, selector sonido, overlay controls (tamaño, opacidad, tipografía, fondo negro/transparente) |
+| `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación, selector sonido con volumen, **TTS (voz, velocidad, volumen)**, overlay controls (tamaño, opacidad, tipografía, fondo negro/transparente) |
+| `SecurityPanel.tsx` | Anti-Bots: estadísticas de detección, toggles de protección (follow bots, spam, auto-ban), escaneo manual de seguidores, lista blanca, log de detecciones recientes |
 | `GiveawayPanel.tsx` | Panel sorteos con ruleta canvas e importación masiva |
 | `PredictionPanel.tsx` | Panel de predicciones con opciones A/B/C |
 | `TrackerPanel.tsx` | Twitch Tracker: estadísticas históricas, resumen del último stream, gráficos SVG de evolución (views/seguidores/duración), consejos inteligentes multi-factor e integración Ollama |
@@ -95,16 +97,17 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 | Módulo | Archivo | Descripción |
 |---|---|---|
 | **Auth** | `src/auth/index.ts` | OAuth Twitch (Authorization Code + Device Code Grant), refresco automático de tokens |
-| **Chat** | `src/chat/index.ts` | ChatClient IRC, comandos (`!sorteo`), reenvío de mensajes vía socket |
+| **Chat** | `src/chat/index.ts` | ChatClient IRC, comandos (`!sorteo`), reenvío de mensajes vía socket, integración con detección de spam |
 | **Socket** | `src/socket/index.ts` | Socket.IO server, eventos `join:channel`, `leave:channel`, `chat:send` |
 | **Giveaways** | `src/giveaways/index.ts` | Sorteos: crear, finalizar, entrada vía chat, selección aleatoria |
 | **Predictions** | `src/predictions/index.ts` | Predicciones Twitch: crear, resolver |
 | **HUD** | `src/hud/index.ts` | Stream HUD: polling Twitch API cada 10-15s, emisión `hud:update` |
 | **Timer** | `src/timer/index.ts` | Temporizador: cuenta regresiva in-memory con tick cada 1s vía Socket.IO, REST start/pause/resume/reset |
 | **Scoreboard** | `src/scoreboard/index.ts` | Scoreboard: gestión de jugadores y puntuaciones in-memory, emisión `scoreboard:update` |
-| **EventSub** | `src/eventsub/index.ts` | EventSub WebSocket listener: follows, subs, resubs, gifts, redemptions, cheers |
+| **EventSub** | `src/eventsub/index.ts` | EventSub WebSocket listener: follows, subs, resubs, gifts, redemptions, cheers. Integrado con detección de follow bots |
 | **Mod** | `src/mod/index.ts` | Moderación: chatters (GET /mod/chatters/:channel), timeout, ban, unban vía Twitch Helix API |
 | **Tracker** | `src/tracker/index.ts` | Twitch Tracker: estadísticas agregadas (`/tracker/stats`), desglose por stream con datos de actividad (`/tracker/streams`) y motor de consejos inteligente multi-factor con integración opcional Ollama (`/tracker/advice`) |
+| **Security** | `src/security/index.ts` | Anti-Bots: detección de follow bots vía EventSub, filtro de spam por patrones en IRC, auto-ban por Helix API, escaneo manual de seguidores, configuración persistente, lista blanca y estadísticas |
 | **Subathon** | `src/subathon/index.ts` | Subathon: temporizador ampliable con subs, bits y recompensas. Tick cada 1s. REST: start (con initialTime), add-time, pause, resume, stop, config. Socket.IO: `subathon:tick`, `subathon:time-added`, `subathon:state` |
 | **Activity** | `src/activity/index.ts` | Feed de actividad del canal: follows, subs, bits, raids. Almacenamiento in-memory + persistencia a archivo. Socket.IO: `activity:new`, `activity:list` |
 | **Commands** | `src/commands/index.ts` | Comandos personalizados del chat: CRUD, persistencia a archivo, exportación/importación, auto-respuesta vía chat handler |
@@ -206,16 +209,17 @@ twitch_overlay/
 ├── packages/
 │   ├── backend/src/
 │   │   ├── auth/          # OAuth Twitch
-│   │   ├── chat/          # IRC
+│   │   ├── chat/          # IRC + spam detection
 │   │   ├── socket/        # WebSocket server
 │   │   ├── giveaways/     # Sorteos
 │   │   ├── predictions/   # Predicciones
-│   │   ├── eventsub/      # EventSub WS
+│   │   ├── eventsub/      # EventSub WS + follow bot detection
 │   │   ├── hud/           # Stream HUD
 │   │   ├── timer/         # Temporizador
 │   │   ├── scoreboard/    # Scoreboard
 │   │   ├── mod/           # Moderación
 │   │   ├── tracker/       # Twitch Tracker
+│   │   ├── security/      # Anti-Bots
 │   │   ├── subathon/      # Subathon
 │   │   ├── activity/      # Feed actividad
 │   │   ├── commands/      # Comandos personalizados
@@ -256,3 +260,7 @@ twitch_overlay/
 | 30 | **Consejos inteligentes** — Motor multi-factor (frecuencia, duración, audiencia, monetización) con reglas contextuales e integración opcional Ollama para IA local | ✅ |
 | 31 | **CSP fix** — Agregado `frame-src https://player.twitch.tv` al Content-Security-Policy para permitir embed de Twitch en producción | ✅ |
 | 32 | **Overlay controls redesign** — Toggle always-on-top desde sidebar, control de opacidad general (10-100%), modo fondo, selector de fuente y tamaño. `OverlayErrorBoundary` para manejo de errores React | ✅ |
+| 33 | **Chat TTS + Volumen** — Text-to-Speech con selección de voz, velocidad y volumen. Control de volumen maestro para sonidos de alerta. Control de volumen independiente para TTS | ✅ |
+| 34 | **Anti-Bots** — Módulo de seguridad con detección de follow bots, filtro de spam, auto-ban, escaneo manual, lista blanca y estadísticas. Sección SEGURIDAD en el dashboard | ✅ |
+| **35** | **🌍 Traducción multi-idioma** — Frontend traducido a inglés, francés, alemán e italiano con detección automática del idioma del navegador | 🔜 |
+| **36** | **🎮 Integración Stream Deck** — Plugin nativo para Elgato Stream Deck (Node.js + CLI SDK). Acciones: Subathon, Sorteo, Moderación, Stream info, Anti-Bots. Conexión vía HTTP REST a la API local de StreamForger | 🔜 |

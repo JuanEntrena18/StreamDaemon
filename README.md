@@ -15,7 +15,7 @@ Disponible en dos modos:
 - **🎨 Overlays temáticos independientes** — Overlays en HTML+CSS+JS puro (sin React) para Subnautica 2, Fortnite y Alertas animadas. Cada overlay incluye Canvas de partículas, animaciones CSS, cola de eventos en tiempo real y conexión directa a Socket.IO. Se cargan como archivos estáticos (`/overlays/`) en OBS.
 - **🔴 Subathon** — Temporizador ampliable en directo: los espectadores añaden tiempo con suscripciones (+5 min), bits (+1 min por cada 100 bits) o recompensas de canal. Límite máximo configurable (12/24h). Panel de control con inicio/pausa/reanudar/detener, añadir tiempo manual, historial de acciones y overlay OBS dedicado con cuenta atrás, barra de progreso, estadísticas y feed de actividad.
 - **📡 Gestor del Stream unificado** — Dashboard que combina vista previa del stream (iframe embed con soporte multi-parent para Electron y navegador), editor de título/juego, estadísticas en vivo (viewers, followers, subs, uptime) y feed de actividad del canal con filtros — todo en una sola pantalla.
-- **💬 Chat en vivo** — Lectura del chat de Twitch vía IRC con reenvío en tiempo real a los overlays mediante Socket.IO. Incluye envío de mensajes, reply (↩ @usuario), moderación (timeout/ban), badges por rol y selector de sonido de notificación.
+- **💬 Chat en vivo** — Lectura del chat de Twitch vía IRC con reenvío en tiempo real a los overlays mediante Socket.IO. Incluye envío de mensajes, reply (↩ @usuario), moderación (timeout/ban), badges por rol, selector de sonido de notificación con control de volumen, **TTS (text-to-speech)** con selección de voz, velocidad y volumen.
 - **🎁 Sorteos interactivos** — Comando `!sorteo` en el chat para participar. Panel de control con ruleta canvas, selector de duración del giro (10/15/20s) e importación masiva de nombres. Overlay dedicado con lista de participantes en vivo y ruleta animada con ganador gigante.
 - **📊 Predicciones** — Integración con la API de Predicciones de Twitch. Creación de encuestas desde el panel de control con resolución automática.
 - **📊 Stream HUD** — Panel de estadísticas en vivo (viewers, followers, subs, uptime, game) con polling automático y overlay informativo.
@@ -26,6 +26,7 @@ Disponible en dos modos:
 - **🌐 Redes sociales** — Overlay animado que muestra las redes del streamer de forma rotativa.
 - **🛡️ Moderación** — Panel de moderación con timeout, ban y unban. Incluye lista de usuarios conectados al canal en ese momento con selección clickeable.
 - **🤖 Comandos** — Gestión de comandos personalizados del chat: crear, editar, habilitar/deshabilitar, con alias y cooldown configurable.
+- **🔒 Anti-Bots** — Protección automática contra bots y spam inspirada en **Sery Bot**. Detección de follow bots vía EventSub, filtro de spam en chat IRC por patrones, auto-ban mediante Helix API y escaneo manual de seguidores. Panel con estadísticas, toggles de protección, lista blanca y registro de detecciones.
 - **🎮 Control de overlay transparente** — Ventana always-on-top con toggle desde la sidebar, modo fondo (negro/transparente), selector de tipografía (6 fuentes), ajuste de tamaño de texto (10-24px), control de opacidad general (10-100%), barra de control siempre visible con zona de arrastre y panel de ajustes integrado. Los cambios persisten en localStorage. Incluye `OverlayErrorBoundary` que captura errores de React y muestra un mensaje visible en lugar de dejar la ventana invisible.
 - **🔐 Autenticación OAuth** — Login con Twitch. En navegador: flujo Authorization Code Grant con redirect. En escritorio: flujo **Device Code Grant** (el usuario ve un código en la app y lo ingresa en twitch.tv/activate). Tokens persistidos con refresco automático. Logout completo.
 - **🖥️ Dashboard premium** — Interfaz con sidebar de navegación, glassmorphism, animaciones Framer Motion, paleta violeta/índigo, badge de usuario Twitch y estado de conexión en tiempo real.
@@ -49,6 +50,7 @@ StreamForger implementa múltiples capas de seguridad para proteger las credenci
 | **M-2** | Validación de entrada con **Zod** en todas las rutas de API | ✅ |
 | **M-3** | CORS restringido a localhost | ✅ |
 | **B-1** | Cabeceras de seguridad: `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` | ✅ |
+| **B-2** | **Anti-Bots**: detección de follow bots, filtro de spam, auto-ban y escaneo manual de seguidores | ✅ |
 
 ---
 
@@ -144,6 +146,7 @@ StreamForge/
 │   │   ├── activity/      # Feed de actividad del canal
 │   │   ├── commands/      # Comandos personalizados del chat
 │   │   ├── tracker/       # Twitch Tracker (stats, streams, advice engine)
+│   │   ├── security/      # Anti-Bots (follow bot detection, spam filter, auto-ban)
 │   │   └── fortnite/      # Fortnite stats (config + API)
 │   ├── frontend/
 │   │   ├── src/components/  # Dashboard (App, Chat, Giveaway, etc.)
@@ -157,6 +160,17 @@ StreamForge/
 ├── STACK_TECNOLOGICO.md
 └── README.md
 ```
+
+---
+
+## 🧭 Roadmap
+
+### Próximas funcionalidades
+
+| Funcionalidad | Descripción |
+|---|---|
+| **🌍 Traducción multi-idioma** | Frontend traducido a inglés, francés, alemán e italiano con detección automática del idioma del navegador |
+| **🎮 Integración con Stream Deck** | Plugin nativo para Elgato Stream Deck que permite controlar StreamForger desde los botones físicos: iniciar/detener Subathon, lanzar sorteo, banear usuario, cambiar título del stream y más |
 
 ---
 
