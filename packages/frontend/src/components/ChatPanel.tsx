@@ -578,7 +578,7 @@ export function ChatPanel({ channel }: Props) {
                 style={{
                   flex: 1, padding: '0.2rem 0.4rem', borderRadius: 4,
                   border: '1px solid var(--sf-border)',
-                  background: 'var(--sf-surface)', color: 'var(--sf-text)',
+                  background: '#13132e', color: '#e2e8f0',
                   fontSize: '0.7rem', fontFamily: 'inherit', outline: 'none',
                   cursor: 'pointer',
                 }}
