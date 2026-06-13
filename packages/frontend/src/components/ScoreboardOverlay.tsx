@@ -9,6 +9,16 @@ interface Props {
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 
+function defaultFighter(): FighterState {
+  return {
+    p1: { name: 'Player 1', health: 144, rounds: 0, charName: '', portrait: '' },
+    p2: { name: 'Player 2', health: 144, rounds: 0, charName: '', portrait: '' },
+    maxHealth: 144, roundsToWin: 2,
+    timerRemaining: 99, timerRunning: false, timerDuration: 99,
+    status: 'waiting',
+  };
+}
+
 function healthColor(health: number, max: number): string {
   const pct = health / max;
   if (pct > 0.5) return `hsl(${120 * pct}, 80%, 42%)`;
@@ -95,7 +105,7 @@ function Portrait({ url, name, side }: { url: string; name: string; side: 'p1' |
 }
 
 export function ScoreboardOverlay({ channel }: Props) {
-  const [fighter, setFighter] = useState<FighterState | null>(null);
+  const [fighter, setFighter] = useState<FighterState>(defaultFighter);
   const { socket, connected } = useSocket();
 
   useEffect(() => {
@@ -109,14 +119,12 @@ export function ScoreboardOverlay({ channel }: Props) {
   }, []));
 
   useEffect(() => {
-    if (!channel || !connected) return;
+    if (!channel) return;
     fetch(`${BACKEND_URL}/fighter/${channel}`)
       .then((r) => r.json())
       .then((data) => { if (data) setFighter(data); })
-      .catch(() => {});
-  }, [channel, connected]);
-
-  if (!fighter) return null;
+      .catch((err) => console.warn('Fighter fetch failed:', err));
+  }, [channel]);
 
   const p1Theme = playerTheme('p1');
   const p2Theme = playerTheme('p2');
