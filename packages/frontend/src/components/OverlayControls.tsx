@@ -4,6 +4,7 @@ import { useTranslation } from '../i18n/context';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
 interface Props {
+  mode: string;
   bgMode: 'transparent' | 'black';
   fontFamily: string;
   fontSize: number;
@@ -11,6 +12,17 @@ interface Props {
   onFontFamilyChange: (font: string) => void;
   onFontSizeChange: (size: number) => void;
 }
+
+const MODE_LABELS: Record<string, string> = {
+  chat: 'Chat',
+  scoreboard: 'Fighter',
+  timer: 'Timer',
+  giveaway: 'Giveaway',
+  prediction: 'Prediction',
+  hud: 'HUD',
+  social: 'Social',
+  custom: 'Custom',
+};
 
 const FONTS = [
   { label: 'Inter', value: "'Inter', sans-serif" },
@@ -21,7 +33,7 @@ const FONTS = [
   { label: 'Impact', value: "'Arial Black', Impact, sans-serif" },
 ];
 
-export function OverlayControls({ bgMode, fontFamily, fontSize, onBgModeChange, onFontFamilyChange, onFontSizeChange }: Props) {
+export function OverlayControls({ mode, bgMode, fontFamily, fontSize, onBgModeChange, onFontFamilyChange, onFontSizeChange }: Props) {
   const { t } = useTranslation();
   const [clickThrough, setClickThrough] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
@@ -87,7 +99,7 @@ export function OverlayControls({ bgMode, fontFamily, fontSize, onBgModeChange, 
           } as React.CSSProperties }}
         >
           <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', userSelect: 'none' }}>
-            ⋮⋮ {t('overlay.streamforgerChat')}
+            ⋮⋮ StreamForger {MODE_LABELS[mode] || mode}
           </span>
         </div>
 

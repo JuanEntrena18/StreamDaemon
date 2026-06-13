@@ -112,6 +112,7 @@ export function OverlayContainer() {
       />
       {channel && <ChannelNotifications />}
       <OverlayControls
+        mode={mode}
         bgMode={settings.bgMode}
         fontFamily={settings.fontFamily}
         fontSize={settings.fontSize}
