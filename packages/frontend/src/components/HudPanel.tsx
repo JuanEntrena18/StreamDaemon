@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
+import { useTranslation } from '../i18n/context';
 import type { HudData } from '@streamforger/shared';
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function HudPanel({ channel, backendUrl }: Props) {
+  const { t } = useTranslation();
   const [hud, setHud] = useState<HudData | null>(null);
   const [polling, setPolling] = useState(false);
   const { socket, connected } = useSocket();
@@ -75,19 +77,19 @@ export function HudPanel({ channel, backendUrl }: Props) {
     <div style={{ maxWidth: 600 }}>
       <div style={{ marginBottom: '1.75rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
-          📈 Stream HUD
+          {t('hud.title')}
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-          Estadísticas en vivo del canal. Aparece como overlay automático en OBS.
+          {t('hud.subtitle')}
         </p>
       </div>
 
       <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
-        <p className="sf-section-title">📊 Estadísticas actuales</p>
+        <p className="sf-section-title">{t('hud.statsTitle')}</p>
 
         {!hud && (
           <p style={{ fontSize: '0.85rem', color: 'var(--sf-text-3)' }}>
-            {channel ? 'Cargando datos del canal...' : 'Conectá un canal para ver estadísticas.'}
+            {channel ? t('hud.cargando') : t('hud.empty')}
           </p>
         )}
 
@@ -96,18 +98,18 @@ export function HudPanel({ channel, backendUrl }: Props) {
             <div style={{
               display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: '1rem',
             }}>
-              {stat('Viewers', hud.viewers.toString(), '👁️')}
-              {stat('Followers', hud.followers.toLocaleString(), '❤️')}
-              {stat('Subs', hud.subscribers.toLocaleString(), '⭐')}
-              {stat('Tiempo', formatUptime(hud.uptimeSeconds), '⏱️')}
+              {stat(t('hud.viewers'), hud.viewers.toString(), '👁️')}
+              {stat(t('hud.followers'), hud.followers.toLocaleString(), '❤️')}
+              {stat(t('hud.subs'), hud.subscribers.toLocaleString(), '⭐')}
+              {stat(t('hud.tiempo'), formatUptime(hud.uptimeSeconds), '⏱️')}
             </div>
 
             <div style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', lineHeight: 1.6 }}>
-              <div><strong style={{ color: 'var(--sf-text)' }}>Título:</strong> {hud.streamTitle}</div>
-              {hud.gameName && <div><strong style={{ color: 'var(--sf-text)' }}>Juego:</strong> {hud.gameName}</div>}
-              <div><strong style={{ color: 'var(--sf-text)' }}>Estado:</strong>{' '}
+              <div><strong style={{ color: 'var(--sf-text)' }}>{t('hud.titulo')}</strong> {hud.streamTitle}</div>
+              {hud.gameName && <div><strong style={{ color: 'var(--sf-text)' }}>{t('hud.juego')}</strong> {hud.gameName}</div>}
+              <div><strong style={{ color: 'var(--sf-text)' }}>{t('hud.estado')}</strong>{' '}
                 <span style={{ color: hud.isLive ? '#34d399' : '#f87171' }}>
-                  {hud.isLive ? 'En vivo' : 'Offline'}
+                  {hud.isLive ? t('hud.enVivo') : t('hud.offline')}
                 </span>
               </div>
             </div>
@@ -116,26 +118,26 @@ export function HudPanel({ channel, backendUrl }: Props) {
       </div>
 
       <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
-        <p className="sf-section-title">🔄 Actualización automática</p>
+        <p className="sf-section-title">{t('hud.autoTitle')}</p>
         <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', marginBottom: '1rem' }}>
-          El HUD se actualiza cada 10 segundos via Socket.IO cuando está encendido.
+          {t('hud.autoDesc')}
         </p>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button onClick={togglePolling} className={`sf-btn ${polling ? 'sf-btn-danger' : 'sf-btn-primary'}`}
             style={{ fontSize: '0.82rem', padding: '0.5rem 1rem' }}>
-            {polling ? 'Detener actualización' : 'Iniciar actualización'}
+            {polling ? t('hud.detenerActualizacion') : t('hud.iniciarActualizacion')}
           </button>
           <button onClick={refresh} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.82rem', padding: '0.5rem 1rem' }}>
-            Actualizar ahora
+            {t('hud.actualizarAhora')}
           </button>
         </div>
         <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: polling ? '#34d399' : 'var(--sf-text-3)' }}>
-          {polling ? '⏺ Actualizando cada 10s' : '⏹ Actualización manual'}
+          {polling ? t('hud.actualizando') : t('hud.manual')}
         </div>
       </div>
 
       <div className="glass-card" style={{ padding: '1.5rem' }}>
-        <p className="sf-section-title">🔌 Overlay URL</p>
+        <p className="sf-section-title">{t('hud.overlayUrl')}</p>
         <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', marginBottom: '0.5rem' }}>
           Agregá esta URL como Browser Source en OBS:
         </p>

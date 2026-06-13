@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from '../i18n/context';
 
 const isDesktop = typeof window.streamforger !== 'undefined';
 
@@ -21,6 +22,7 @@ const FONTS = [
 ];
 
 export function OverlayControls({ bgMode, fontFamily, fontSize, onBgModeChange, onFontFamilyChange, onFontSizeChange }: Props) {
+  const { t } = useTranslation();
   const [clickThrough, setClickThrough] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -85,14 +87,14 @@ export function OverlayControls({ bgMode, fontFamily, fontSize, onBgModeChange, 
           } as React.CSSProperties }}
         >
           <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', userSelect: 'none' }}>
-            ⋮⋮ StreamForger Chat
+            ⋮⋮ {t('overlay.streamforgerChat')}
           </span>
         </div>
 
         {/* Settings gear */}
         <button
           onClick={() => setShowSettings(!showSettings)}
-          title="Ajustes"
+          title={t('overlay.ajustes')}
           style={{
             width: 26, height: 26, borderRadius: 4,
             background: showSettings ? 'rgba(124,58,237,0.3)' : 'transparent',
@@ -108,7 +110,7 @@ export function OverlayControls({ bgMode, fontFamily, fontSize, onBgModeChange, 
         {/* Lock/Unlock click-through */}
         <button
           onClick={toggleLock}
-          title={clickThrough ? 'Activar click-through (los clics pasan al juego)' : 'Desactivar click-through'}
+          title={clickThrough ? t('overlay.clickThroughOn') : t('overlay.clickThroughOff')}
           style={{
             width: 26, height: 26, borderRadius: 4,
             background: clickThrough ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)',
@@ -127,7 +129,7 @@ export function OverlayControls({ bgMode, fontFamily, fontSize, onBgModeChange, 
         {/* Background mode toggle */}
         <button
           onClick={() => onBgModeChange(bgMode === 'transparent' ? 'black' : 'transparent')}
-          title={bgMode === 'transparent' ? 'Fondo negro' : 'Fondo transparente'}
+          title={bgMode === 'transparent' ? t('overlay.fondoNegro') : t('overlay.fondoTransparente')}
           style={{
             width: 26, height: 26, borderRadius: 4,
             background: bgMode === 'black' ? 'rgba(0,0,0,0.4)' : 'transparent',
@@ -145,7 +147,7 @@ export function OverlayControls({ bgMode, fontFamily, fontSize, onBgModeChange, 
         {/* Always on top */}
         <button
           onClick={toggleAlwaysOnTop}
-          title={overlayAlwaysOnTop ? 'Desactivar siempre encima' : 'Activar siempre encima'}
+          title={overlayAlwaysOnTop ? t('overlay.siempreEncimaOff') : t('overlay.siempreEncimaOn')}
           style={{
             width: 26, height: 26, borderRadius: 4,
             background: overlayAlwaysOnTop ? 'rgba(59,130,246,0.25)' : 'transparent',
@@ -162,7 +164,7 @@ export function OverlayControls({ bgMode, fontFamily, fontSize, onBgModeChange, 
         {/* Close */}
         <button
           onClick={closeOverlay}
-          title="Cerrar overlay"
+          title={t('overlay.cerrarOverlay')}
           style={{
             width: 26, height: 26, borderRadius: 4,
             background: 'rgba(239,68,68,0.15)',
@@ -196,7 +198,7 @@ export function OverlayControls({ bgMode, fontFamily, fontSize, onBgModeChange, 
           backdropFilter: 'blur(12px)',
         }}>
           <div style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
-            Tipografía
+            {t('overlay.tipografia')}
           </div>
           <select
             value={fontFamily}
@@ -221,7 +223,7 @@ export function OverlayControls({ bgMode, fontFamily, fontSize, onBgModeChange, 
           </select>
 
           <div style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>
-            Tamaño
+            {t('overlay.tamano')}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)' }}>A</span>

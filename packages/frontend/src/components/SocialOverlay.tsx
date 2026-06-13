@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 import type { SocialLink } from '@streamforger/shared';
 
 const DEFAULT_LINKS: SocialLink[] = [
@@ -44,6 +45,7 @@ function parseLinksFromUrl(): SocialLink[] | null {
 }
 
 export function SocialOverlay() {
+  const { t } = useTranslation();
   const [links, setLinks] = useState<SocialLink[]>(() => parseLinksFromUrl() ?? DEFAULT_LINKS);
   const [visible, setVisible] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -127,7 +129,7 @@ export function SocialOverlay() {
                   opacity: 0.85,
                 }}
               >
-                Sígueme en
+                {t('socialOverlay.sigueme')}
               </div>
               <div
                 style={{

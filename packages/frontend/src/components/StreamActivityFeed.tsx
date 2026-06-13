@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 
 interface Props {
   channel: string;
@@ -16,6 +17,7 @@ interface ActivityEvent {
 }
 
 export function StreamActivityFeed({ channel, backendUrl }: Props) {
+  const { t } = useTranslation();
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [filter, setFilter] = useState<string>('all');
 
@@ -47,10 +49,10 @@ export function StreamActivityFeed({ channel, backendUrl }: Props) {
     <div style={{ maxWidth: 700 }}>
       <div style={{ marginBottom: '1.75rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          🔴 Fuente de actividad
+          {t('activity.title')}
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-          Eventos en vivo del canal: follows, subs, raids, bits y canjes
+          {t('activity.subtitle')}
         </p>
       </div>
 
@@ -60,7 +62,7 @@ export function StreamActivityFeed({ channel, backendUrl }: Props) {
           fontSize: '0.72rem', padding: '0.3rem 0.6rem',
           background: filter === 'all' ? 'var(--sf-primary)' : 'var(--sf-surface-hover)',
           color: filter === 'all' ? '#fff' : 'var(--sf-text-2)',
-        }}>Todos</button>
+        }}>{t('activity.todos')}</button>
         {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
           <button key={key} onClick={() => setFilter(key)} className="sf-btn" style={{
             fontSize: '0.72rem', padding: '0.3rem 0.6rem',
@@ -74,7 +76,7 @@ export function StreamActivityFeed({ channel, backendUrl }: Props) {
       <div className="glass-card" style={{ padding: '1rem' }}>
         {filtered.length === 0 ? (
           <p style={{ fontSize: '0.85rem', color: 'var(--sf-text-3)', textAlign: 'center', padding: '2rem 0' }}>
-            {channel ? 'Esperando actividad del canal...' : 'Conectá un canal para ver la actividad.'}
+            {channel ? t('activity.esperando') : t('activity.conectar')}
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

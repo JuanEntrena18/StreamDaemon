@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from '../i18n/context';
 import { Logo } from './Logo';
 
 interface Props {
@@ -6,6 +7,7 @@ interface Props {
 }
 
 export function SplashScreen({ onReady }: Props) {
+  const { t } = useTranslation();
   useEffect(() => {
     const t = setTimeout(onReady, 5000);
     return () => clearTimeout(t);
@@ -96,7 +98,7 @@ export function SplashScreen({ onReady }: Props) {
             transition: 'all 0.15s',
           }}
         >
-          ☕ Apoya el desarrollo de StreamForger aquí
+          {t('splash.apoya')}
         </a>
 
         <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
@@ -106,7 +108,7 @@ export function SplashScreen({ onReady }: Props) {
             animation: 'pulse-spinner 1s ease-in-out infinite',
           }} />
           <span style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)' }}>
-            Cargando…
+            {t('splash.cargando')}
           </span>
         </div>
       </div>

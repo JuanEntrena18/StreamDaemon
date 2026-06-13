@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 import type { TimerState } from '@streamforger/shared';
 
 interface Props {
@@ -17,6 +18,7 @@ function formatTime(totalSeconds: number): string {
 }
 
 export function TimerOverlay({ channel }: Props) {
+  const { t } = useTranslation();
   const [timer, setTimer] = useState<TimerState | null>(null);
   const [remaining, setRemaining] = useState(0);
   const { socket, connected } = useSocket();
@@ -96,7 +98,7 @@ export function TimerOverlay({ channel }: Props) {
         color: timerColor + '88',
         marginTop: 4,
       }}>
-        {isFinished ? 'Tiempo cumplido' : timer.status === 'paused' ? 'Pausado' : 'Corriendo'}
+        {isFinished ? t('timer.tiempoCumplido') : timer.status === 'paused' ? t('timer.pausado') : t('timer.corriendo')}
       </div>
 
       {/* Progress bar */}

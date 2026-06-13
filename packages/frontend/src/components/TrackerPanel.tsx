@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from '../i18n/context';
 import { motion } from 'framer-motion';
 
 interface Props {
@@ -41,13 +42,6 @@ interface AdviceResponse {
   metrics: Record<string, unknown>;
   ollamaAvailable: boolean;
 }
-
-const PERIODS = [
-  { id: '7d', label: '7 días' },
-  { id: '30d', label: '30 días' },
-  { id: '90d', label: '90 días' },
-  { id: 'all', label: 'All time' },
-];
 
 function formatDate(iso: string): string {
   if (!iso) return '—';
@@ -215,6 +209,13 @@ const ADVICE_TYPE_STYLES: Record<string, { border: string; bg: string; iconBg: s
 };
 
 export function TrackerPanel({ channel, backendUrl }: Props) {
+  const { t } = useTranslation();
+  const PERIODS = [
+    { id: '7d', label: t('tracker.period7d') },
+    { id: '30d', label: t('tracker.period30d') },
+    { id: '90d', label: t('tracker.period90d') },
+    { id: 'all', label: 'All time' },
+  ];
   const [period, setPeriod] = useState('7d');
   const [stats, setStats] = useState<TrackerStats | null>(null);
   const [streams, setStreams] = useState<StreamDetail[]>([]);
@@ -260,24 +261,24 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
   const lastStream = streams[0];
   const chartColor = CHART_COLORS[chartMetric === 'totalViews' ? 'views' : chartMetric === 'followersGained' ? 'followers' : 'duration'] ?? '#a78bfa';
 
-  const chartLabel = chartMetric === 'totalViews' ? 'Visualizaciones' :
-    chartMetric === 'followersGained' ? 'Seguidores' : 'Duración';
+  const chartLabel = chartMetric === 'totalViews' ? t('tracker.metricViews') :
+    chartMetric === 'followersGained' ? t('tracker.metricFollowers') : t('tracker.metricDuration');
 
   return (
     <div style={{ maxWidth: 860 }}>
       <div style={{ marginBottom: '1.75rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          📊 Twitch Tracker
+          {t('tracker.title')}
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-          Estadísticas de rendimiento de tu canal
+          {t('tracker.subtitle')}
         </p>
       </div>
 
       {/* Period selector */}
       <div className="glass-card" style={{ padding: '1rem 1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--sf-text-2)', whiteSpace: 'nowrap' }}>
-          📅 Período
+          {t('tracker.periodo')}
         </span>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {PERIODS.map((p) => (
@@ -307,7 +308,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
       {loading && (
         <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--sf-text-3)', fontSize: '0.9rem' }}>
           <div style={{ marginBottom: '0.75rem' }}>⏳</div>
-          Cargando estadísticas…
+          {t('tracker.cargando')}
         </div>
       )}
 
@@ -318,7 +319,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
           borderRadius: 'var(--sf-radius-sm)', fontSize: '0.82rem', color: '#f87171',
         }}>
           {error === 'Error al obtener estadísticas'
-            ? 'No se pudieron cargar las estadísticas. Asegúrate de tener Twitch conectado.'
+            ? t('tracker.error')
             : error}
         </div>
       )}
@@ -331,7 +332,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
           marginBottom: '1.5rem',
         }}>
           <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>📭</div>
-          No hay streams archivados en este período.
+          {t('tracker.empty')}
         </div>
       )}
 
@@ -344,10 +345,10 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
               {formatHours(stats.totalHoursStreamed)}
             </div>
             <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Horas estremeadas
+              {t('tracker.horasStreameadas')}
             </div>
             <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-4)', marginTop: '0.3rem' }}>
-              {stats.videoCount} {stats.videoCount === 1 ? 'directo' : 'directos'}
+              {stats.videoCount} {stats.videoCount === 1 ? t('tracker.directo') : t('tracker.directos')}
             </div>
           </div>
 
@@ -357,7 +358,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
               {stats.peakViewers.toLocaleString()}
             </div>
             <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Pico de espectadores
+              {t('tracker.picoEspectadores')}
             </div>
             {stats.peakDate && (
               <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-4)', marginTop: '0.3rem' }}>
@@ -372,7 +373,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
               {stats.totalFollowers.toLocaleString()}
             </div>
             <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Seguidores totales
+              {t('tracker.seguidoresTotales')}
             </div>
           </div>
         </div>
@@ -387,7 +388,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
         >
           <div style={{ marginBottom: '1rem' }}>
             <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              🎬 Último stream
+              {t('tracker.ultimoStream')}
             </h3>
             <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)' }}>
               {lastStream.title} · {formatDate(lastStream.creationDate)} · {formatDuration(lastStream.durationInSeconds)}
@@ -400,7 +401,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                 {formatNumber(lastStream.totalViews)}
               </div>
               <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.2rem' }}>
-                Visualizaciones
+                {t('tracker.visualizaciones')}
               </div>
             </div>
             <div className="glass-card" style={{ padding: '0.875rem 1rem', textAlign: 'center' }}>
@@ -408,7 +409,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                 +{lastStream.followersGained}
               </div>
               <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.2rem' }}>
-                Seguidores
+                {t('tracker.seguidores')}
               </div>
             </div>
             <div className="glass-card" style={{ padding: '0.875rem 1rem', textAlign: 'center' }}>
@@ -416,7 +417,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                 {lastStream.subsGained > 0 ? '+' : ''}{lastStream.subsGained}
               </div>
               <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.2rem' }}>
-                Suscripciones
+                {t('tracker.suscripciones')}
               </div>
             </div>
             <div className="glass-card" style={{ padding: '0.875rem 1rem', textAlign: 'center' }}>
@@ -424,7 +425,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                 {lastStream.bitsDonated > 0 ? '+' : ''}{lastStream.bitsDonated}
               </div>
               <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.2rem' }}>
-                Bits
+                {t('tracker.bits')}
               </div>
             </div>
           </div>
@@ -440,7 +441,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
             fontSize: '0.82rem',
           }}>
             <span style={{ color: 'var(--sf-text-2)' }}>
-              💰 Ingresos estimados (suscripciones + bits)
+              {t('tracker.ingresosEstimados')}
             </span>
             <span style={{ fontWeight: 700, color: '#34d399' }}>
               {estimateRevenue(lastStream.subsGained, lastStream.bitsDonated)}
@@ -460,14 +461,14 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              📈 Evolución
+              {t('tracker.evolucion')}
               <span style={{ fontSize: '0.72rem', fontWeight: 400, color: 'var(--sf-text-3)' }}>
                 — {chartLabel}
               </span>
             </h3>
             <div style={{ display: 'flex', gap: '0.35rem' }}>
               {(['totalViews', 'followersGained', 'durationInSeconds'] as const).map((key) => {
-                const lbl = key === 'totalViews' ? 'Views' : key === 'followersGained' ? 'Seguidores' : 'Duración';
+                const lbl = key === 'totalViews' ? t('tracker.metricViews') : key === 'followersGained' ? t('tracker.metricFollowers') : t('tracker.metricDuration');
                 const c = CHART_COLORS[key === 'totalViews' ? 'views' : key === 'followersGained' ? 'followers' : 'duration'];
                 return (
                   <button
@@ -507,14 +508,14 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
           style={{ marginBottom: '2rem' }}
         >
           <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            💡 Consejos inteligentes
+            {t('tracker.consejos')}
             {advice.ollamaAvailable && (
               <span style={{
                 fontSize: '0.6rem', padding: '0.15rem 0.4rem',
                 background: 'rgba(52,211,153,0.12)', color: '#34d399',
                 borderRadius: 4, fontWeight: 600, letterSpacing: '0.03em',
               }}>
-                IA
+                {t('tracker.ia')}
               </span>
             )}
           </h3>
@@ -565,9 +566,9 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
           transition={{ delay: 0.08 }}
         >
           <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            📋 Streams recientes
+            {t('tracker.streamsRecientes')}
             <span style={{ fontSize: '0.72rem', fontWeight: 400, color: 'var(--sf-text-3)' }}>
-              ({streams.length} {streams.length === 1 ? 'stream' : 'streams'})
+              ({streams.length} {streams.length === 1 ? t('tracker.stream') : t('tracker.streams')})
             </span>
           </h3>
 
@@ -610,7 +611,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                         {s.title}
                       </div>
                       <div style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', marginTop: '0.15rem' }}>
-                        {formatDateTime(s.creationDate)} · {formatDuration(s.durationInSeconds)} · {formatNumber(s.totalViews)} visualizaciones
+                        {formatDateTime(s.creationDate)} · {formatDuration(s.durationInSeconds)} · {formatNumber(s.totalViews)} {t('tracker.visualizaciones')}
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.75rem', flexShrink: 0 }}>
@@ -643,7 +644,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
                         <div>
                           <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
-                            Seguidores
+                            {t('tracker.seguidores')}
                           </div>
                           <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--sf-text)' }}>
                             {s.followersGained > 0 ? `+${s.followersGained}` : '—'}
@@ -651,7 +652,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                         </div>
                         <div>
                           <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
-                            Suscripciones
+                            {t('tracker.suscripciones')}
                           </div>
                           <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--sf-text)' }}>
                             {s.subsGained > 0 ? `+${s.subsGained}` : '—'}
@@ -659,7 +660,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                         </div>
                         <div>
                           <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
-                            Bits
+                            {t('tracker.bits')}
                           </div>
                           <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--sf-text)' }}>
                             {s.bitsDonated > 0 ? `+${s.bitsDonated}` : '—'}
@@ -669,7 +670,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                       <div style={{ display: 'flex', gap: '0.75rem' }}>
                         <div>
                           <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
-                            Duración
+                            {t('tracker.duracion')}
                           </div>
                           <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--sf-text)' }}>
                             {formatDuration(s.durationInSeconds)}
@@ -677,7 +678,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                         </div>
                         <div>
                           <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
-                            Views
+                            {t('tracker.views')}
                           </div>
                           <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--sf-text)' }}>
                             {s.totalViews.toLocaleString()}
@@ -685,7 +686,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                         </div>
                         <div>
                           <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
-                            Ingresos est.
+                            {t('tracker.ingresosEst')}
                           </div>
                           <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#34d399' }}>
                             {estimateRevenue(s.subsGained, s.bitsDonated)}
@@ -701,7 +702,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                           textDecoration: 'none', marginTop: '0.25rem',
                         }}
                       >
-                        ↗ Ver VOD en Twitch
+                        {t('tracker.verVod')}
                       </a>
                     </div>
                   )}

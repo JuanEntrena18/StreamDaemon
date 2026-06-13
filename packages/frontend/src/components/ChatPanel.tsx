@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { SOUNDS, setMasterVolume, type SoundKey } from '../utils/sounds';
+import { useTranslation } from '../i18n/context';
 
 const OVERLAY_LS_KEY = 'streamforger-chat-overlay-settings';
 
@@ -59,6 +60,7 @@ function formatTimestamp(ts: number): string {
 }
 
 export function ChatPanel({ channel }: Props) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [input, setInput] = useState('');
@@ -159,12 +161,12 @@ export function ChatPanel({ channel }: Props) {
   const [overlayFontSize, setOverlayFontSize] = useState(() => ls.fontSize ?? 14);
 
   const FONT_OPTIONS = [
-    { label: 'Inter', value: "'Inter', sans-serif" },
-    { label: 'Arial', value: 'Arial, sans-serif' },
-    { label: 'Monospace', value: "'Courier New', monospace" },
-    { label: 'Georgia', value: 'Georgia, serif' },
-    { label: 'Verdana', value: 'Verdana, sans-serif' },
-    { label: 'Impact', value: "'Arial Black', Impact, sans-serif" },
+    { label: t('chat.fontInter'), value: "'Inter', sans-serif" },
+    { label: t('chat.fontArial'), value: 'Arial, sans-serif' },
+    { label: t('chat.fontMonospace'), value: "'Courier New', monospace" },
+    { label: t('chat.fontGeorgia'), value: 'Georgia, serif' },
+    { label: t('chat.fontVerdana'), value: 'Verdana, sans-serif' },
+    { label: t('chat.fontImpact'), value: "'Arial Black', Impact, sans-serif" },
   ];
 
   function openOverlayWindow() {
@@ -208,10 +210,10 @@ export function ChatPanel({ channel }: Props) {
       <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            💬 Chat en vivo
+            {t('chat.title')}
           </h2>
           <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-            Mensajes del chat en tiempo real
+            {t('chat.subtitle')}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
@@ -222,7 +224,7 @@ export function ChatPanel({ channel }: Props) {
               className="sf-btn sf-btn-primary"
               style={{ fontSize: '0.78rem', padding: '0.4rem 0.875rem' }}
             >
-              🪟 Abrir ventana transparente
+              {t('chat.abrirOverlay')}
             </button>
           ) : (
             <button
@@ -230,7 +232,7 @@ export function ChatPanel({ channel }: Props) {
               className="sf-btn sf-btn-danger"
               style={{ fontSize: '0.78rem', padding: '0.4rem 0.875rem' }}
             >
-              ✕ Cerrar overlay
+              {t('chat.cerrarOverlay')}
             </button>
           )}
         </div>
@@ -249,10 +251,10 @@ export function ChatPanel({ channel }: Props) {
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
             <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--sf-text-2)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              🪟 Control del overlay
+              {t('chat.controlOverlay')}
             </span>
             <button onClick={closeOverlayWindow} className="sf-btn sf-btn-danger" style={{ fontSize: '0.72rem', padding: '0.2rem 0.6rem' }}>
-              ✕ Cerrar
+              {t('chat.cerrar')}
             </button>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -270,12 +272,12 @@ export function ChatPanel({ channel }: Props) {
                     fontSize: '0.68rem', fontWeight: overlaySize === s ? 600 : 400,
                     cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase',
                   }}
-                >{s === 'sm' ? 'Peq' : s === 'md' ? 'Med' : 'Grande'}</button>
+                >{s === 'sm' ? t('chat.small') : s === 'md' ? t('chat.medium') : t('chat.large')}</button>
               ))}
             </div>
             {/* Opacity */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flex: 1, maxWidth: 180 }}>
-              <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)' }}>Opacidad</span>
+              <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)' }}>{t('chat.opacidad')}</span>
               <input
                 type="range"
                 min={0.1}
@@ -304,7 +306,7 @@ export function ChatPanel({ channel }: Props) {
                 fontSize: '0.68rem', cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
-              {overlayBgMode === 'transparent' ? '◻ Fondo transp.' : '◼ Fondo negro'}
+              {overlayBgMode === 'transparent' ? t('chat.fondoTransparente') : t('chat.fondoNegro')}
             </button>
 
             {/* Font selector */}
@@ -356,7 +358,7 @@ export function ChatPanel({ channel }: Props) {
           background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)',
           borderRadius: 'var(--sf-radius-sm)', fontSize: '0.82rem', color: '#fbbf24', textAlign: 'center',
         }}>
-          Ingresa un canal de Twitch en la barra superior
+          {t('chat.emptyChannel')}
         </div>
       )}
       {channel && !connected && (
@@ -366,9 +368,9 @@ export function ChatPanel({ channel }: Props) {
           borderRadius: 'var(--sf-radius-sm)', fontSize: '0.82rem', color: '#f87171',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
         }}>
-          <span>Desconectado del servidor.</span>
+          <span>{t('chat.disconnected')}</span>
           <button onClick={reconnect} className="sf-btn sf-btn-primary" style={{ fontSize: '0.78rem', padding: '0.3rem 0.75rem' }}>
-            Reconectar
+            {t('chat.reconectar')}
           </button>
         </div>
       )}
@@ -389,8 +391,8 @@ export function ChatPanel({ channel }: Props) {
             color: 'var(--sf-text-3)', fontSize: '0.85rem', textAlign: 'center',
           }}>
             {channel && connected
-              ? 'Esperando mensajes del chat...'
-              : 'Los mensajes aparecerán aquí'}
+              ? t('chat.waitingMessages')
+              : t('chat.messagesHere')}
           </div>
         ) : (
           <AnimatePresence initial={false}>
@@ -446,17 +448,17 @@ export function ChatPanel({ channel }: Props) {
                   >
                     <button
                       onClick={() => handleReply(msg)}
-                      title="Responder"
+                      title={t('chat.responder')}
                       style={btnMenuStyle}
                     >↩</button>
                     <button
                       onClick={() => handleModAction('timeout', msg.user.displayName)}
-                      title="Timeout 5 min"
+                      title={t('chat.timeout5m')}
                       style={btnMenuStyle}
                     >⏳</button>
                     <button
                       onClick={() => handleModAction('ban', msg.user.displayName)}
-                      title="Banear"
+                      title={t('chat.banear')}
                       style={btnMenuStyle}
                     >🚫</button>
                   </div>
@@ -476,7 +478,7 @@ export function ChatPanel({ channel }: Props) {
           color: 'var(--sf-text-2)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
-          <span>Respondiendo a <strong style={{ color: '#a78bfa' }}>@{replyTo.user}</strong></span>
+          <span>{t('chat.replyingTo', { user: replyTo.user })}</span>
           <button
             onClick={() => setReplyTo(null)}
             style={{ background: 'none', border: 'none', color: 'var(--sf-text-3)', cursor: 'pointer', fontSize: '0.85rem' }}
@@ -486,7 +488,7 @@ export function ChatPanel({ channel }: Props) {
 
       {/* Sound selector + volume */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-        <span style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>Sonido:</span>
+        <span style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>{t('chat.sonido')}</span>
         <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
           <button
             onClick={() => setSelectedSound('')}
@@ -497,7 +499,7 @@ export function ChatPanel({ channel }: Props) {
               color: selectedSound === '' ? '#a78bfa' : 'var(--sf-text-3)',
               fontSize: '0.65rem', cursor: 'pointer', fontFamily: 'inherit',
             }}
-          >Sin</button>
+          >{t('chat.sinSonido')}</button>
           {(['pop', 'ding', 'chime', 'notification'] as SoundKey[]).map((s) => (
             <button
               key={s}
@@ -510,7 +512,7 @@ export function ChatPanel({ channel }: Props) {
                 fontSize: '0.65rem', cursor: 'pointer', fontFamily: 'inherit',
               }}
               onMouseEnter={() => { setMasterVolume(soundVolume); SOUNDS[s](); }}
-            >{s === 'pop' ? 'Pop' : s === 'ding' ? 'Ding' : s === 'chime' ? 'Chime' : 'Notif'}</button>
+            >{s === 'pop' ? t('chat.sonidoPop') : s === 'ding' ? t('chat.sonidoDing') : s === 'chime' ? t('chat.sonidoChime') : t('chat.sonidoNotif')}</button>
           ))}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginLeft: 'auto' }}>
@@ -523,7 +525,7 @@ export function ChatPanel({ channel }: Props) {
             value={soundVolume}
             onChange={(e) => { setSoundVolume(parseFloat(e.target.value)); setMasterVolume(parseFloat(e.target.value)); }}
             style={{ width: 56, accentColor: '#7c3aed', cursor: 'pointer' }}
-            title="Volumen de sonidos"
+            title={t('chat.volumenSonidos')}
           />
           <span style={{ fontSize: '0.6rem', color: 'var(--sf-text-3)', minWidth: 16 }}>🔊</span>
         </div>
@@ -538,7 +540,7 @@ export function ChatPanel({ channel }: Props) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>TTS</span>
+            <span style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>{t('chat.tts')}</span>
             <button
               onClick={() => { setTtsEnabled(!ttsEnabled); if (ttsEnabled) window.speechSynthesis?.cancel(); }}
               style={{
@@ -563,13 +565,13 @@ export function ChatPanel({ channel }: Props) {
                 cursor: 'pointer', fontSize: '0.65rem', fontFamily: 'inherit',
                 padding: '0.1rem 0.4rem', borderRadius: 4,
               }}
-            >Detener</button>
+            >{t('chat.detener')}</button>
           )}
         </div>
         {ttsEnabled && window.speechSynthesis && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>Voz:</span>
+              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>{t('chat.voz')}</span>
               <select
                 value={ttsVoiceURI ?? ''}
                 onChange={(e) => setTtsVoiceURI(e.target.value || null)}
@@ -581,7 +583,7 @@ export function ChatPanel({ channel }: Props) {
                   cursor: 'pointer',
                 }}
               >
-                <option value="">Voz por defecto</option>
+                <option value="">{t('chat.vozPorDefecto')}</option>
                 {voices.map((v) => (
                   <option key={v.voiceURI} value={v.voiceURI}>
                     {v.name} ({v.lang})
@@ -590,7 +592,7 @@ export function ChatPanel({ channel }: Props) {
               </select>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>Vel:</span>
+              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>{t('chat.velocidad')}</span>
               <input
                 type="range"
                 min={0.5}
@@ -603,7 +605,7 @@ export function ChatPanel({ channel }: Props) {
               <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 24 }}>{ttsRate.toFixed(1)}x</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>Vol:</span>
+              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>{t('chat.volumen')}</span>
               <input
                 type="range"
                 min={0}
@@ -627,7 +629,7 @@ export function ChatPanel({ channel }: Props) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKey}
-          placeholder={replyTo ? `Escribe tu respuesta a @${replyTo.user}...` : 'Escribe un mensaje...'}
+          placeholder={replyTo ? t('chat.placeholderReply', { user: replyTo.user }) : t('chat.placeholderMessage')}
           disabled={!channel || !connected}
           className="sf-input"
           style={{ flex: 1, fontSize: '0.82rem' }}
@@ -638,7 +640,7 @@ export function ChatPanel({ channel }: Props) {
           className="sf-btn sf-btn-primary"
           style={{ padding: '0.4rem 1rem', fontSize: '0.82rem' }}
         >
-          Enviar
+          {t('chat.enviar')}
         </button>
       </div>
 
@@ -647,8 +649,8 @@ export function ChatPanel({ channel }: Props) {
         marginTop: '0.5rem', fontSize: '0.72rem', color: 'var(--sf-text-3)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
-        <span>Conectado a: <strong style={{ color: 'var(--sf-text-2)' }}>#{channel || '—'}</strong></span>
-        <span>{messages.length} mensajes · {connected ? '🟢' : '🔴'}</span>
+        <span>{t('chat.conectadoA')} <strong style={{ color: 'var(--sf-text-2)' }}>#{channel || '—'}</strong></span>
+        <span>{messages.length} {t('chat.mensajes')} · {connected ? '🟢' : '🔴'}</span>
       </div>
     </div>
   );

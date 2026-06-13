@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 import type { ChatMessage } from '@streamforger/shared';
 
 const MAX_MESSAGES = 40;
@@ -17,6 +18,7 @@ interface Activity {
 }
 
 export function CustomOverlay({ channel }: Props) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const { socket, connected } = useSocket();
@@ -182,7 +184,7 @@ export function CustomOverlay({ channel }: Props) {
               }}
             >
               <span style={{ fontWeight: 600, color: '#a78bfa' }}>{act.user}</span>
-              {' '}está viendo el stream
+              {' '}{t('customOverlay.viendoStream')}
             </motion.div>
           ))}
         </AnimatePresence>
@@ -196,7 +198,7 @@ export function CustomOverlay({ channel }: Props) {
           letterSpacing: '0.1em', fontWeight: 500,
         }}
       >
-        streamforger · cyber haute couture
+        {t('customOverlay.brandBar')}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiGet, apiPost, apiPut } from '../utils/api';
+import { useTranslation } from '../i18n/context';
 
 interface Props {
   channel: string;
@@ -35,9 +36,9 @@ interface StatsResponse {
 }
 
 const DETECTION_TYPE_LABELS: Record<string, string> = {
-  'follow-bot': 'Follow Bot',
-  spam: 'Spam',
-  suspicious: 'Sospechoso',
+  'follow-bot': 'security.followBot',
+  spam: 'security.spam',
+  suspicious: 'security.sospechoso',
 };
 
 const DETECTION_TYPE_COLORS: Record<string, string> = {
@@ -47,6 +48,7 @@ const DETECTION_TYPE_COLORS: Record<string, string> = {
 };
 
 export function SecurityPanel({ channel }: Props) {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<SecurityConfig>({
     followBotProtection: true,
     spamFilter: true,
@@ -114,7 +116,7 @@ export function SecurityPanel({ channel }: Props) {
   if (loading) {
     return (
       <div style={{ color: 'var(--sf-text-2)', fontSize: '0.9rem' }}>
-        Cargando configuración de seguridad...
+        {t('security.loading')}
       </div>
     );
   }
@@ -123,34 +125,34 @@ export function SecurityPanel({ channel }: Props) {
     <div style={{ maxWidth: 700 }}>
       <div style={{ marginBottom: '1.75rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          Protección Anti-Bots
+          {t('security.title')}
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-          Detección automática de bots y spam inspirada en Sery Bot
+          {t('security.subtitle')}
         </p>
       </div>
 
       {/* Stats */}
       <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
         <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--sf-text)' }}>
-          Estadísticas
+          {t('security.stats')}
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem' }}>
           <div style={{ background: 'var(--sf-surface)', borderRadius: 8, padding: '0.75rem', textAlign: 'center' }}>
             <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f87171' }}>{stats?.stats.totalBanned ?? 0}</div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginTop: '0.2rem' }}>Baneados totales</div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginTop: '0.2rem' }}>{t('security.baneadosTotales')}</div>
           </div>
           <div style={{ background: 'var(--sf-surface)', borderRadius: 8, padding: '0.75rem', textAlign: 'center' }}>
             <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#fbbf24' }}>{stats?.stats.todayBanned ?? 0}</div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginTop: '0.2rem' }}>Baneados hoy</div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginTop: '0.2rem' }}>{t('security.baneadosHoy')}</div>
           </div>
           <div style={{ background: 'var(--sf-surface)', borderRadius: 8, padding: '0.75rem', textAlign: 'center' }}>
             <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#fb923c' }}>{stats?.stats.totalFlagged ?? 0}</div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginTop: '0.2rem' }}>Marcados</div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginTop: '0.2rem' }}>{t('security.marcados')}</div>
           </div>
           <div style={{ background: 'var(--sf-surface)', borderRadius: 8, padding: '0.75rem', textAlign: 'center' }}>
             <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--sf-primary)' }}>{stats?.knownBotCount ?? 0}</div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginTop: '0.2rem' }}>Bots conocidos</div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginTop: '0.2rem' }}>{t('security.botsConocidos')}</div>
           </div>
         </div>
       </div>
@@ -158,24 +160,24 @@ export function SecurityPanel({ channel }: Props) {
       {/* Toggles */}
       <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
         <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--sf-text)' }}>
-          Protecciones activas
+          {t('security.protecciones')}
         </h3>
 
         <ToggleRow
-          label="Protección contra Follow Bots"
-          desc="Detecta y bloquea automáticamente cuentas sospechosas al seguir el canal"
+          label={t('security.followBots')}
+          desc={t('security.followBotsDesc')}
           checked={config.followBotProtection}
           onChange={(v) => toggleConfig('followBotProtection', v)}
         />
         <ToggleRow
-          label="Filtro de Spam en chat"
-          desc="Detecta mensajes con enlaces acortados, promociones no solicitadas y patrones de spam"
+          label={t('security.spamFilter')}
+          desc={t('security.spamFilterDesc')}
           checked={config.spamFilter}
           onChange={(v) => toggleConfig('spamFilter', v)}
         />
         <ToggleRow
-          label="Auto-ban"
-          desc="Banear automáticamente a los usuarios detectados como bots. Si está desactivado, solo se marcarán"
+          label={t('security.autoBan')}
+          desc={t('security.autoBanDesc')}
           checked={config.autoBan}
           onChange={(v) => toggleConfig('autoBan', v)}
         />
@@ -184,17 +186,17 @@ export function SecurityPanel({ channel }: Props) {
       {/* Manual scan */}
       <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
         <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--sf-text)' }}>
-          Escaneo manual de seguidores
+          {t('security.scanTitle')}
         </h3>
         <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.75rem' }}>
-          Revisa la lista de seguidores actual buscando patrones sospechosos
+          {t('security.scanDesc')}
         </p>
         <button onClick={runScan} disabled={scanning} className="sf-btn" style={{
           fontSize: '0.82rem', padding: '0.45rem 1rem',
           background: 'rgba(239,68,68,0.1)', color: '#f87171',
           border: '1px solid rgba(239,68,68,0.25)',
         }}>
-          {scanning ? 'Escaneando...' : 'Escanear seguidores'}
+          {scanning ? t('security.escanenado') : t('security.escanear')}
         </button>
         {scanResult && (
           <div style={{
@@ -204,8 +206,8 @@ export function SecurityPanel({ channel }: Props) {
             color: scanResult.found > 0 ? '#f87171' : '#34d399',
           }}>
             {scanResult.found > 0
-              ? `Se encontraron ${scanResult.found} cuentas sospechosas. ${scanResult.banned} baneadas.`
-              : 'No se encontraron cuentas sospechosas.'}
+              ? t('security.scanResult', { found: scanResult.found, banned: scanResult.banned })
+              : t('security.scanClean')}
           </div>
         )}
       </div>
@@ -213,10 +215,10 @@ export function SecurityPanel({ channel }: Props) {
       {/* Whitelist */}
       <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
         <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--sf-text)' }}>
-          Lista blanca
+          {t('security.whitelist')}
         </h3>
         <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.75rem' }}>
-          Usuarios excluidos de la detección automática
+          {t('security.whitelistDesc')}
         </p>
 
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
@@ -225,7 +227,7 @@ export function SecurityPanel({ channel }: Props) {
             value={newWhitelistUser}
             onChange={(e) => setNewWhitelistUser(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') addWhitelist(); }}
-            placeholder="Nombre de usuario"
+            placeholder={t('security.whitelistPlaceholder')}
             className="sf-input"
             style={{ flex: 1 }}
           />
@@ -233,13 +235,13 @@ export function SecurityPanel({ channel }: Props) {
             fontSize: '0.82rem', padding: '0.45rem 1rem',
             background: 'var(--sf-primary)', color: '#fff', border: 'none',
           }}>
-            Agregar
+            {t('security.agregar')}
           </button>
         </div>
 
         {config.whitelist.length === 0 ? (
           <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)' }}>
-            No hay usuarios en la lista blanca
+            {t('security.whitelistEmpty')}
           </div>
         ) : (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
@@ -266,11 +268,11 @@ export function SecurityPanel({ channel }: Props) {
       {/* Recent detections */}
       <div className="glass-card" style={{ padding: '1.25rem' }}>
         <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--sf-text)' }}>
-          Detecciones recientes
+          {t('security.detections')}
         </h3>
         {(!stats?.recentDetections || stats.recentDetections.length === 0) ? (
           <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)' }}>
-            No hay detecciones registradas
+            {t('security.detectionsEmpty')}
           </div>
         ) : (
           <div style={{ maxHeight: 300, overflowY: 'auto' }}>
@@ -287,7 +289,7 @@ export function SecurityPanel({ channel }: Props) {
                       fontSize: '0.65rem', fontWeight: 400, marginLeft: '0.4rem',
                       color: DETECTION_TYPE_COLORS[d.type] || 'var(--sf-text-2)',
                     }}>
-                      {DETECTION_TYPE_LABELS[d.type] || d.type}
+                      {t(DETECTION_TYPE_LABELS[d.type] || d.type)}
                     </span>
                   </div>
                   <div style={{
@@ -296,7 +298,7 @@ export function SecurityPanel({ channel }: Props) {
                     color: d.action === 'banned' ? '#f87171' : '#fbbf24',
                     textTransform: 'uppercase', fontWeight: 600,
                   }}>
-                    {d.action === 'banned' ? 'Baneado' : 'Marcado'}
+                    {d.action === 'banned' ? t('security.baneado') : t('security.marcado')}
                   </div>
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)' }}>

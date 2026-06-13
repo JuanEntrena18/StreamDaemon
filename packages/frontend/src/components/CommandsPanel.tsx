@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from '../i18n/context';
 import { apiPost, apiPut } from '../utils/api';
 import { useSocket } from '../hooks/useSocket';
 
@@ -19,29 +20,30 @@ interface Command {
 }
 
 const TWITCH_VARS = [
-  { var: '{user}', desc: 'Nombre del usuario que ejecutó el comando' },
-  { var: '{channel}', desc: 'Nombre del canal' },
-  { var: '{streamer}', desc: 'Nombre del streamer' },
-  { var: '{game}', desc: 'Juego actual del stream' },
-  { var: '{title}', desc: 'Título actual del stream' },
-  { var: '{uptime}', desc: 'Tiempo que lleva en vivo (ej: 2h 15m)' },
-  { var: '{viewers}', desc: 'Espectadores actuales' },
-  { var: '{followers}', desc: 'Seguidores totales' },
-  { var: '{subs}', desc: 'Suscriptores totales' },
-  { var: '{count}', desc: 'Veces que se usó el comando' },
-  { var: '{random:1-100}', desc: 'Número aleatorio entre 1 y 100' },
-  { var: '{args}', desc: 'Texto después del comando (argumentos)' },
+  { var: '{user}', descKey: 'varUser' },
+  { var: '{channel}', descKey: 'varChannel' },
+  { var: '{streamer}', descKey: 'varStreamer' },
+  { var: '{game}', descKey: 'varGame' },
+  { var: '{title}', descKey: 'varTitle' },
+  { var: '{uptime}', descKey: 'varUptime' },
+  { var: '{viewers}', descKey: 'varViewers' },
+  { var: '{followers}', descKey: 'varFollowers' },
+  { var: '{subs}', descKey: 'varSubs' },
+  { var: '{count}', descKey: 'varUses' },
+  { var: '{random:1-100}', descKey: 'varRandom' },
+  { var: '{args}', descKey: 'varArgs' },
 ];
 
 const EXAMPLE_COMMANDS = [
-  { cmd: '!redes', resp: 'Sígueme en {channel}: https://twitch.tv/{channel}', desc: 'Muestra las redes' },
-  { cmd: '!edad', resp: 'El canal tiene {uptime} de directo hoy', desc: 'Muestra uptime' },
-  { cmd: '!sorteo', resp: '@{user} ganó un pase de batalla! 🎉', desc: 'Anunciar ganador' },
-  { cmd: '!dado', resp: '{user} sacó un {random:1-6} 🎲', desc: 'Dado aleatorio' },
-  { cmd: '!info', resp: '🎮 {game} · {title} · {viewers} viewers', desc: 'Info del stream' },
+  { cmd: '!redes', resp: 'Sígueme en {channel}: https://twitch.tv/{channel}', descKey: 'exampleSocials' },
+  { cmd: '!edad', resp: 'El canal tiene {uptime} de directo hoy', descKey: 'exampleUptime' },
+  { cmd: '!sorteo', resp: '@{user} ganó un pase de batalla! 🎉', descKey: 'exampleWinner' },
+  { cmd: '!dado', resp: '{user} sacó un {random:1-6} 🎲', descKey: 'exampleDice' },
+  { cmd: '!info', resp: '🎮 {game} · {title} · {viewers} viewers', descKey: 'exampleStreamInfo' },
 ];
 
 function VarPicker({ onSelect, onClose }: { onSelect: (v: string) => void; onClose: () => void }) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handler = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) onClose(); };
@@ -56,7 +58,7 @@ function VarPicker({ onSelect, onClose }: { onSelect: (v: string) => void; onClo
       boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
     }}>
       <div style={{ padding: '0.4rem 0.6rem', fontSize: '0.65rem', color: 'var(--sf-text-3)', fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        Variables disponibles
+        {t('commands.variables')}
       </div>
       {TWITCH_VARS.map((v) => (
         <div key={v.var} onClick={() => onSelect(v.var)} style={{
@@ -66,7 +68,7 @@ function VarPicker({ onSelect, onClose }: { onSelect: (v: string) => void; onClo
           onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(124,58,237,0.15)')}
           onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
           <span style={{ color: '#a78bfa', fontWeight: 700, fontFamily: 'monospace' }}>{v.var}</span>
-          <span style={{ color: 'var(--sf-text-3)', fontSize: '0.7rem', marginLeft: 8 }}>{v.desc}</span>
+          <span style={{ color: 'var(--sf-text-3)', fontSize: '0.7rem', marginLeft: 8 }}>{t('commands.' + v.descKey)}</span>
         </div>
       ))}
     </div>
@@ -74,6 +76,7 @@ function VarPicker({ onSelect, onClose }: { onSelect: (v: string) => void; onClo
 }
 
 export function CommandsPanel({ channel, backendUrl }: Props) {
+  const { t } = useTranslation();
   const [commands, setCommands] = useState<Command[]>([]);
   const [editing, setEditing] = useState<Command | null>(null);
   const [newName, setNewName] = useState('');
@@ -114,10 +117,10 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
         setNewResponse('');
       } else {
         const data = await r.json();
-        setError(data.error || 'Error al crear comando');
+        setError(data.error || t('commands.errorCrear'));
       }
     } catch {
-      setError('Error de conexión');
+      setError(t('commands.errorConexion'));
     } finally {
       setSaving(false);
     }
@@ -141,7 +144,7 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
       setCommands((prev) => prev.map((c) => c.id === editing.id ? editing : c));
       setEditing(null);
     } catch {
-      setError('Error al actualizar');
+      setError(t('commands.errorActualizar'));
     } finally {
       setSaving(false);
     }
@@ -213,38 +216,38 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
     <div style={{ maxWidth: 700 }}>
       <div style={{ marginBottom: '1.75rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          🤖 Comandos
+          {t('commands.title')}
           <button onClick={() => setShowHelp(!showHelp)} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', marginLeft: 'auto' }}>
-            {showHelp ? '✕ Cerrar ayuda' : '📖 Ayuda'}
+            {showHelp ? t('commands.cerrarAyuda') : t('commands.ayuda')}
           </button>
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-          Gestioná los comandos personalizados de tu chat
+          {t('commands.subtitle')}
         </p>
       </div>
 
       {/* Help section */}
       {showHelp && (
         <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
-          <p className="sf-section-title" style={{ fontSize: '0.82rem', marginBottom: '0.6rem' }}>📘 Ejemplos de comandos</p>
+          <p className="sf-section-title" style={{ fontSize: '0.82rem', marginBottom: '0.6rem' }}>{t('commands.ejemplos')}</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: '1rem' }}>
             {EXAMPLE_COMMANDS.map((ex) => (
               <div key={ex.cmd} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', padding: '0.3rem 0.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: 6 }}>
                 <span style={{ color: '#a78bfa', fontWeight: 700, fontFamily: 'monospace', minWidth: 60 }}>{ex.cmd}</span>
                 <span style={{ color: 'var(--sf-text-2)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ex.resp}</span>
-                <span style={{ color: 'var(--sf-text-3)', fontSize: '0.68rem' }}>{ex.desc}</span>
+                <span style={{ color: 'var(--sf-text-3)', fontSize: '0.68rem' }}>{t('commands.' + ex.descKey)}</span>
               </div>
             ))}
           </div>
-          <p className="sf-section-title" style={{ fontSize: '0.82rem', marginBottom: '0.5rem' }}>🔤 Variables disponibles</p>
+          <p className="sf-section-title" style={{ fontSize: '0.82rem', marginBottom: '0.5rem' }}>{t('commands.variablesDisponibles')}</p>
           <p style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.5rem' }}>
-            Escribí <code style={{ color: '#a78bfa' }}>{'\{'}</code> en la respuesta para ver el menú de variables. También podés usarlas directamente:
+            {t('commands.variablesHelp')}
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem 1rem' }}>
             {TWITCH_VARS.map((v) => (
               <div key={v.var} style={{ fontSize: '0.74rem', display: 'flex', gap: '0.4rem' }}>
                 <span style={{ color: '#a78bfa', fontFamily: 'monospace', fontWeight: 600, minWidth: 100 }}>{v.var}</span>
-                <span style={{ color: 'var(--sf-text-3)' }}>{v.desc}</span>
+                <span style={{ color: 'var(--sf-text-3)' }}>{t('commands.' + v.descKey)}</span>
               </div>
             ))}
           </div>
@@ -254,15 +257,15 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
       {/* Add new command */}
       <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-          <p className="sf-section-title" style={{ margin: 0 }}>➕ Nuevo comando</p>
+          <p className="sf-section-title" style={{ margin: 0 }}>{t('commands.nuevoComando')}</p>
           <div style={{ display: 'flex', gap: '0.375rem' }}>
             <button onClick={exportCommands} disabled={commands.length === 0}
               className="sf-btn" style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem' }}>
-              📤 Exportar
+              {t('commands.exportar')}
             </button>
             <button onClick={() => fileRef.current?.click()}
               className="sf-btn" style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem' }}>
-              📥 Importar
+              {t('commands.importar')}
             </button>
             <input ref={fileRef} type="file" accept=".json" onChange={importCommands} style={{ display: 'none' }} />
           </div>
@@ -271,7 +274,7 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
           <input
             type="text" value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="!comando"
+            placeholder={t('commands.comandoPlaceholder')}
             className="sf-input"
             style={{ width: 140, fontSize: '0.82rem' }}
           />
@@ -281,7 +284,7 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
               type="text" value={newResponse}
               onChange={(e) => setNewResponse(e.target.value)}
               onKeyDown={(e) => handleResponseKeyDown('new', e)}
-              placeholder='Respuesta (ej: Hola {user}! 👋)'
+              placeholder={t('commands.respuestaPlaceholder')}
               className="sf-input"
               style={{ width: '100%', fontSize: '0.82rem' }}
             />
@@ -293,7 +296,7 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <button onClick={addCommand} disabled={saving || !newName.trim() || !newResponse.trim()}
             className="sf-btn sf-btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.875rem' }}>
-            {saving ? '...' : 'Crear comando'}
+            {saving ? '...' : t('commands.crearComando')}
           </button>
           {error && <span style={{ fontSize: '0.78rem', color: '#f87171' }}>{error}</span>}
           {importResult && <span style={{ fontSize: '0.78rem', color: importResult.startsWith('✅') ? '#34d399' : '#f87171' }}>{importResult}</span>}
@@ -304,7 +307,7 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
       <div className="glass-card" style={{ padding: '1rem' }}>
         {commands.length === 0 ? (
           <p style={{ fontSize: '0.85rem', color: 'var(--sf-text-3)', textAlign: 'center', padding: '2rem 0' }}>
-            {channel ? 'No hay comandos configurados. Creá el primero arriba.' : 'Conectá un canal para gestionar comandos.'}
+            {channel ? t('commands.empty') : t('commands.emptyChannel')}
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -324,20 +327,20 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
                         <VarPicker onSelect={(v) => handleVarInsert('edit', v)} onClose={() => setShowVarPicker(null)} />
                       )}
                     </div>
-                    <input value={editing.aliases.join(',')} onChange={(e) => setEditing({ ...editing, aliases: e.target.value.split(',').map((a) => a.trim()) })} placeholder="Alias (separados por coma)" className="sf-input" style={{ width: 180, fontSize: '0.8rem' }} />
+                    <input value={editing.aliases.join(',')} onChange={(e) => setEditing({ ...editing, aliases: e.target.value.split(',').map((a) => a.trim()) })} placeholder={t('commands.aliasPlaceholder')} className="sf-input" style={{ width: 180, fontSize: '0.8rem' }} />
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                     <label style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <input type="checkbox" checked={editing.modOnly} onChange={(e) => setEditing({ ...editing, modOnly: e.target.checked })} />
-                      Solo mods
+                      {t('commands.soloMods')}
                     </label>
                     <label style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)', display: 'flex', alignItems: 'center', gap: 4 }}>
                       Cooldown:
                       <input type="number" value={editing.cooldown} onChange={(e) => setEditing({ ...editing, cooldown: parseInt(e.target.value) || 0 })} style={{ width: 50, fontSize: '0.75rem', padding: '0.2rem 0.4rem', background: 'rgba(0,0,0,0.25)', border: '1px solid var(--sf-border)', borderRadius: 4, color: 'var(--sf-text)' }} />
                       s
                     </label>
-                    <button onClick={updateCommand} disabled={saving} className="sf-btn sf-btn-primary" style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem' }}>Guardar</button>
-                    <button onClick={() => setEditing(null)} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem' }}>Cancelar</button>
+                    <button onClick={updateCommand} disabled={saving} className="sf-btn sf-btn-primary" style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem' }}>{t('commands.guardar')}</button>
+                    <button onClick={() => setEditing(null)} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem' }}>{t('commands.cancelar')}</button>
                   </div>
                 </div>
               ) : (
@@ -359,11 +362,11 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
                   <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', minWidth: 40, textAlign: 'right' }}>
                     {cmd.count > 0 ? `${cmd.count}x` : ''}
                   </span>
-                  <button onClick={() => { setEditing(cmd); setShowVarPicker(null); }} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.7rem', padding: '0.2rem 0.45rem' }} title="Editar">✏️</button>
-                  <button onClick={() => toggleCommand(cmd)} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.7rem', padding: '0.2rem 0.45rem' }} title={cmd.enabled ? 'Deshabilitar' : 'Habilitar'}>
+                  <button onClick={() => { setEditing(cmd); setShowVarPicker(null); }} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.7rem', padding: '0.2rem 0.45rem' }} title={t('commands.editar')}>✏️</button>
+                  <button onClick={() => toggleCommand(cmd)} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.7rem', padding: '0.2rem 0.45rem' }} title={cmd.enabled ? t('commands.deshabilitar') : t('commands.habilitar')}>
                     {cmd.enabled ? '🔕' : '🔔'}
                   </button>
-                  <button onClick={() => deleteCommand(cmd)} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.7rem', padding: '0.2rem 0.45rem', color: '#f87171' }} title="Eliminar">🗑️</button>
+                  <button onClick={() => deleteCommand(cmd)} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.7rem', padding: '0.2rem 0.45rem', color: '#f87171' }} title={t('commands.eliminar')}>🗑️</button>
                 </div>
               )
             ))}

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 import type { ChatMessage } from '@streamforger/shared';
 
 const MAX_MESSAGES = 18;
@@ -17,6 +18,7 @@ interface Props {
    - Decoraciones: cráneos, huesos, runas orcas
 ───────────────────────────────────────── */
 export function WowChatOverlay({ channel }: Props) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const { socket, connected } = useSocket();
   const chatRef = useRef<HTMLDivElement>(null);
@@ -339,7 +341,7 @@ export function WowChatOverlay({ channel }: Props) {
               fill={H.goldLight} textAnchor="middle" letterSpacing="4"
               opacity="0.7"
             >
-              SUSURROS DE GUERRA
+              {t('overlayChat.susurrosGuerra')}
             </text>
             <text
               x="210" y="40"
@@ -347,7 +349,7 @@ export function WowChatOverlay({ channel }: Props) {
               fill={H.goldGlow} textAnchor="middle" letterSpacing="1"
               style={{ filter: `drop-shadow(0 0 6px ${H.red}88)` }}
             >
-              Chat de la Horda
+              {t('overlayChat.chatHorda')}
             </text>
 
             <text x="396" y="34" fontSize="20" fill={H.red} opacity="0.8" fontFamily="serif" textAnchor="end">⚔</text>
@@ -483,7 +485,7 @@ export function WowChatOverlay({ channel }: Props) {
                   color: `${H.red}66`,
                   letterSpacing: '0.15em',
                 }}>
-                  — LOS GUERREROS AGUARDAN —
+                  {t('overlayChat.guerrerosAguardan')}
                 </div>
               </div>
             )}
@@ -565,7 +567,7 @@ export function WowChatOverlay({ channel }: Props) {
           letterSpacing: '0.12em',
           textTransform: 'uppercase',
         }}>
-          {connected ? 'En Vivo' : 'Desconectado'}
+          {connected ? t('overlayChat.enVivo') : t('overlayChat.desconectado')}
         </span>
       </div>
 

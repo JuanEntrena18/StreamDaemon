@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from '../i18n/context';
 import { apiPost } from '../utils/api';
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 type ModAction = 'timeout' | 'ban' | 'unban' | 'delete';
 
 export function ModPanel({ channel, backendUrl }: Props) {
+  const { t } = useTranslation();
   const [userName, setUserName] = useState('');
   const [duration, setDuration] = useState(300);
   const [reason, setReason] = useState('');
@@ -27,13 +29,13 @@ export function ModPanel({ channel, backendUrl }: Props) {
         const r = await fetch(`${backendUrl}/mod/chatters/${encodeURIComponent(channel)}`);
         if (!r.ok) {
           const d = await r.json();
-          setChattersError(d.error || 'Error al obtener usuarios');
+          setChattersError(d.error || t('mod.errorUsuarios'));
           return;
         }
         const d = await r.json();
         setChatters(d.chatters || []);
       } catch {
-        setChattersError('Error de conexión');
+        setChattersError(t('mod.errorConexion'));
       } finally {
         setChattersLoading(false);
       }
@@ -72,7 +74,7 @@ export function ModPanel({ channel, backendUrl }: Props) {
         setResult({ ok: false, message: data.error || 'Error' });
       }
     } catch {
-      setResult({ ok: false, message: 'Error de conexión' });
+      setResult({ ok: false, message: t('mod.errorConexion') });
     } finally {
       setLoading(false);
     }
@@ -91,10 +93,10 @@ export function ModPanel({ channel, backendUrl }: Props) {
     <div style={{ maxWidth: 600 }}>
       <div style={{ marginBottom: '1.75rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          🛡️ Moderación
+          {t('mod.title')}
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-          Gestioná tu chat con timeout, ban y unban desde el panel
+          {t('mod.subtitle')}
         </p>
       </div>
 
@@ -114,7 +116,7 @@ export function ModPanel({ channel, backendUrl }: Props) {
                 textTransform: 'capitalize',
               }}
             >
-              {a === 'timeout' ? '⏳ Timeout' : a === 'ban' ? '🚫 Ban' : '✅ Unban'}
+              {a === 'timeout' ? t('mod.timeout') : a === 'ban' ? t('mod.ban') : t('mod.unban')}
             </button>
           ))}
         </div>
@@ -122,14 +124,14 @@ export function ModPanel({ channel, backendUrl }: Props) {
         {/* Username */}
         <div style={{ marginBottom: '0.75rem' }}>
           <label style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.35rem', display: 'block' }}>
-            Nombre de usuario
+            {t('mod.usuario')}
           </label>
           <input
             type="text"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') execute(); }}
-            placeholder="Ej: nombre_del_usuario"
+            placeholder={t('mod.usuarioPlaceholder')}
             className="sf-input"
             style={{ width: '100%' }}
           />
@@ -137,7 +139,7 @@ export function ModPanel({ channel, backendUrl }: Props) {
           {/* Chatters list */}
           {chattersLoading ? (
             <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginTop: '0.4rem' }}>
-              Cargando usuarios en el canal...
+              {t('mod.cargandoUsuarios')}
             </div>
           ) : chattersError ? (
             <div style={{ fontSize: '0.75rem', color: '#f87171', marginTop: '0.4rem' }}>
@@ -168,7 +170,7 @@ export function ModPanel({ channel, backendUrl }: Props) {
             </div>
           ) : userName && filteredChatters.length === 0 ? (
             <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginTop: '0.4rem' }}>
-              No se encontraron usuarios con ese nombre
+              {t('mod.noEncontrado')}
             </div>
           ) : null}
         </div>
@@ -177,7 +179,7 @@ export function ModPanel({ channel, backendUrl }: Props) {
         {action === 'timeout' && (
           <div style={{ marginBottom: '0.75rem' }}>
             <label style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.35rem', display: 'block' }}>
-              Duración
+              {t('mod.duracion')}
             </label>
             <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
               {DURATION_PRESETS.map((p) => (
@@ -202,13 +204,13 @@ export function ModPanel({ channel, backendUrl }: Props) {
         {action !== 'unban' && (
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.35rem', display: 'block' }}>
-              Razón (opcional)
+              {t('mod.razon')}
             </label>
             <input
               type="text"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Ej: Spam en el chat"
+              placeholder={t('mod.razonPlaceholder')}
               className="sf-input"
               style={{ width: '100%' }}
             />
@@ -222,7 +224,7 @@ export function ModPanel({ channel, backendUrl }: Props) {
           color: action === 'timeout' ? '#fbbf24' : action === 'ban' ? '#f87171' : '#34d399',
           border: `1px solid ${action === 'timeout' ? 'rgba(245,158,11,0.3)' : action === 'ban' ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'}`,
         }}>
-          {loading ? 'Procesando...' : `Ejecutar ${action === 'timeout' ? 'Timeout' : action === 'ban' ? 'Ban' : 'Unban'}`}
+          {loading ? t('mod.procesando') : `${t('mod.ejecutar')} ${action === 'timeout' ? t('mod.timeout') : action === 'ban' ? t('mod.ban') : t('mod.unban')}`}
         </button>
 
         {/* Result */}

@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket } from './hooks/useSocket';
 import { useAuthStatus } from './hooks/useAuthStatus';
+import { useTranslation } from './i18n/context';
+import type { Locale } from './i18n/types';
 import { GiveawayPanel } from './components/GiveawayPanel';
 import { PredictionPanel } from './components/PredictionPanel';
 import { ObsPanel } from './components/ObsPanel';
@@ -24,91 +26,8 @@ const isDesktop = typeof window.streamforger !== 'undefined';
 
 type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config';
 
-const NAV_SECTIONS: { id: string; label: string; items: { id: Tab; icon: string; label: string }[] }[] = [
-  {
-    id: 'gestor',
-    label: 'GESTOR DEL STREAM',
-    items: [
-      { id: 'dashboard', icon: '📡', label: 'Gestor del Stream' },
-    ],
-  },
-  {
-    id: 'tracker-section',
-    label: 'ESTADÍSTICAS',
-    items: [
-      { id: 'tracker', icon: '📈', label: 'Twitch Tracker' },
-    ],
-  },
-  {
-    id: 'chat-section',
-    label: 'Chat',
-    items: [
-      { id: 'chat', icon: '💬', label: 'Chat' },
-    ],
-  },
-  {
-    id: 'security-section',
-    label: 'SEGURIDAD',
-    items: [
-      { id: 'security', icon: '🔒', label: 'Anti-Bots' },
-    ],
-  },
-  {
-    id: 'mod-section',
-    label: 'MOD',
-    items: [
-      { id: 'mod', icon: '🛡️', label: 'Moderación' },
-    ],
-  },
-  {
-    id: 'commands-section',
-    label: 'COMANDOS',
-    items: [
-      { id: 'commands', icon: '🤖', label: 'Comandos' },
-    ],
-  },
-  {
-    id: 'tools',
-    label: 'Herramientas',
-    items: [
-      { id: 'subathon',   icon: '🔴', label: 'Subathon' },
-      { id: 'giveaway',   icon: '🎁', label: 'Sorteos' },
-      { id: 'prediction', icon: '📊', label: 'Predicciones' },
-
-      { id: 'hud',        icon: '📊', label: 'Stream HUD' },
-      { id: 'timer',      icon: '⏱️', label: 'Temporizador' },
-      { id: 'scoreboard', icon: '🏆', label: 'Scoreboard' },
-      { id: 'obs',        icon: '🎮', label: 'Game Overlays' },
-    ],
-  },
-  {
-    id: 'config',
-    label: 'Configuración',
-    items: [
-      { id: 'config', icon: '⚙️', label: 'Configuración' },
-    ],
-  },
-];
-
-const TAB_LABELS: Record<Tab, string> = {
-  dashboard: 'Gestor del Stream',
-  tracker: 'Twitch Tracker',
-  security: 'Anti-Bots',
-  chat: 'Chat',
-  mod: 'Moderación',
-  commands: 'Comandos',
-  subathon: 'Subathon',
-  giveaway: 'Sorteos',
-  prediction: 'Predicciones',
-
-  hud: 'Stream HUD',
-  timer: 'Temporizador',
-  scoreboard: 'Scoreboard',
-  obs: 'Game Overlays',
-  config: 'Configuración',
-};
-
 export function App() {
+  const { t, locale, setLocale } = useTranslation();
   const [backendReady, setBackendReady] = useState(false);
   const onReady = useCallback(() => setBackendReady(true), []);
   const { connected } = useSocket();
@@ -146,6 +65,30 @@ export function App() {
     const next = !alwaysOnTop;
     setAlwaysOnTop(next);
     window.streamforger?.window.setAlwaysOnTop(next);
+  }
+
+  function buildNav() {
+    type NavItem = { id: Tab; icon: string; label: string };
+    type NavSection = { id: string; label: string; items: NavItem[] };
+    const s = (k: string) => t(`nav.${k}`);
+    return [
+      { id: 'gestor', label: s('gestorDelStream'), items: [{ id: 'dashboard' as Tab, icon: '📡', label: s('gestorTab') }] },
+      { id: 'tracker-section', label: s('estadisticas'), items: [{ id: 'tracker' as Tab, icon: '📈', label: s('trackerTab') }] },
+      { id: 'chat-section', label: s('chat'), items: [{ id: 'chat' as Tab, icon: '💬', label: s('chatTab') }] },
+      { id: 'security-section', label: s('seguridad'), items: [{ id: 'security' as Tab, icon: '🔒', label: s('antiBotsTab') }] },
+      { id: 'mod-section', label: s('mod'), items: [{ id: 'mod' as Tab, icon: '🛡️', label: s('moderacionTab') }] },
+      { id: 'commands-section', label: s('comandos'), items: [{ id: 'commands' as Tab, icon: '🤖', label: s('comandosTab') }] },
+      { id: 'tools', label: s('herramientas'), items: [
+        { id: 'subathon' as Tab,   icon: '🔴', label: s('subathonTab') },
+        { id: 'giveaway' as Tab,   icon: '🎁', label: s('sorteosTab') },
+        { id: 'prediction' as Tab, icon: '📊', label: s('prediccionesTab') },
+        { id: 'hud' as Tab,        icon: '📊', label: s('hudTab') },
+        { id: 'timer' as Tab,      icon: '⏱️', label: s('temporizadorTab') },
+        { id: 'scoreboard' as Tab, icon: '🏆', label: s('scoreboardTab') },
+        { id: 'obs' as Tab,        icon: '🎮', label: s('gameOverlaysTab') },
+      ]},
+      { id: 'config', label: s('configuracion'), items: [{ id: 'config' as Tab, icon: '⚙️', label: s('configTab') }] },
+    ] as NavSection[];
   }
 
   return (
@@ -192,12 +135,12 @@ export function App() {
           >
             <button
               onClick={() => window.streamforger?.window.minimize()}
-              title="Minimizar"
+              title={t('app.minimizar')}
               style={winBtnStyle('#f59e0b')}
             >-</button>
             <button
               onClick={() => window.streamforger?.window.close()}
-              title="Cerrar"
+              title={t('app.cerrar')}
               style={winBtnStyle('#ef4444')}
             >x</button>
           </div>
@@ -233,7 +176,7 @@ export function App() {
 
           {/* Navigation */}
           <nav style={{ flex: 1, padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', overflowY: 'auto' }}>
-            {NAV_SECTIONS.map((section) => (
+            {buildNav().map((section) => (
               <div key={section.id}>
                 <p className="sf-section-title" style={{ paddingLeft: '0.5rem', marginBottom: '0.5rem' }}>
                   {section.label}
@@ -279,15 +222,15 @@ export function App() {
               flexDirection: 'column',
               gap: '0.625rem',
             }}>
-              <p className="sf-section-title">Modo overlay</p>
+              <p className="sf-section-title">{t('app.modoOverlay')}</p>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)' }}>
-                  🎮 Siempre encima
+                  {t('app.siempreEncima')}
                 </span>
                 <button
                   onClick={toggleAlwaysOnTop}
-                  title={alwaysOnTop ? 'Desactivar siempre encima' : 'Activar siempre encima'}
+                  title={alwaysOnTop ? t('app.desactivarSiempreEncima') : t('app.activarSiempreEncima')}
                   style={{
                     width: 38, height: 20, borderRadius: 99,
                     background: alwaysOnTop ? 'var(--sf-primary)' : 'var(--sf-border)',
@@ -312,7 +255,24 @@ export function App() {
             borderTop: '1px solid var(--sf-border)',
             fontSize: '0.7rem', color: 'var(--sf-text-3)', lineHeight: 1.6,
           }}>
-            <div>v0.2.0 · Open Source</div>
+            <div>{t('app.version')}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+              <select
+                value={locale}
+                onChange={(e) => setLocale(e.target.value as Locale)}
+                style={{
+                  padding: '1px 4px', borderRadius: 4, border: '1px solid var(--sf-border)',
+                  background: 'transparent', color: 'var(--sf-text-2)', fontSize: '0.65rem',
+                  fontFamily: 'inherit', outline: 'none', cursor: 'pointer',
+                }}
+              >
+                <option value="es">ES</option>
+                <option value="en">EN</option>
+                <option value="fr">FR</option>
+                <option value="de">DE</option>
+                <option value="it">IT</option>
+              </select>
+            </div>
             <a
               href="https://github.com/JuanEntrena18/StreamForge"
               target="_blank" rel="noreferrer"
@@ -338,10 +298,10 @@ export function App() {
           }}>
             <div>
               <h1 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--sf-text)', letterSpacing: '-0.01em' }}>
-                {TAB_LABELS[activeTab]}
+                {t(`nav.${activeTab}Tab`)}
               </h1>
               <p style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)', marginTop: '1px' }}>
-                Panel de control · StreamForger
+                {t('app.panelControl')}
               </p>
             </div>
 
@@ -351,10 +311,10 @@ export function App() {
                 <span style={{
                   position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)',
                   fontSize: '0.85rem', color: 'var(--sf-text-3)', pointerEvents: 'none',
-                }}>#</span>
+                }}>{t('app.hash')}</span>
                 <input
                   type="text"
-                  placeholder="canal de twitch..."
+                  placeholder={t('app.placeholderCanal')}
                   value={channel}
                   onChange={(e) => setChannel(e.target.value.replace(/^#/, '').toLowerCase())}
                   className="sf-input"
@@ -400,7 +360,7 @@ export function App() {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
                   </svg>
-                  Conectar Twitch
+                  {t('app.conectarTwitch')}
                 </button>
               ) : null}
 
@@ -417,7 +377,7 @@ export function App() {
                     display: 'inline-block',
                   }}
                 />
-                {connected ? 'Conectado' : 'Desconectado'}
+                {connected ? t('app.conectado') : t('app.desconectado')}
               </div>
             </div>
           </header>

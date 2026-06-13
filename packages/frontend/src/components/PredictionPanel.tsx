@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from '../i18n/context';
 
 interface Props {
   channel: string;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export function PredictionPanel({ channel, backendUrl }: Props) {
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [options, setOptions] = useState(['', '']);
   const [message, setMessage] = useState('');
@@ -61,26 +63,26 @@ export function PredictionPanel({ channel, backendUrl }: Props) {
       {/* Header */}
       <div style={{ marginBottom: '1.75rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          📊 Predicciones
+          {t('predictions.title')}
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-          Crea predicciones de Twitch y permite que tu audiencia vote con puntos del canal.
+          {t('predictions.subtitle')}
         </p>
       </div>
 
       <div className="glass-card" style={{ padding: '1.5rem' }}>
-        <p className="sf-section-title">Nueva predicción</p>
+        <p className="sf-section-title">{t('predictions.nuevaPrediccion')}</p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.125rem' }}>
           {/* Title */}
           <div>
             <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
-              Pregunta de la predicción
+              {t('predictions.pregunta')}
             </label>
             <input
               id="prediction-title-input"
               type="text"
-              placeholder="ej. ¿Pasaremos el boss en este intento?"
+              placeholder={t('predictions.preguntaPlaceholder')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={!channel}
@@ -91,9 +93,9 @@ export function PredictionPanel({ channel, backendUrl }: Props) {
           {/* Options */}
           <div>
             <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.5rem', fontWeight: 500 }}>
-              Opciones de voto
+              {t('predictions.opciones')}
               <span style={{ color: 'var(--sf-text-3)', fontWeight: 400, marginLeft: '0.4rem' }}>
-                (mín. 2, máx. 10)
+                {t('predictions.opcionesHint')}
               </span>
             </label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -116,7 +118,7 @@ export function PredictionPanel({ channel, backendUrl }: Props) {
                   <input
                     id={`prediction-option-${i}`}
                     type="text"
-                    placeholder={`Opción ${i + 1}`}
+                    placeholder={t('predictions.opcion', { number: i + 1 })}
                     value={opt}
                     onChange={(e) => updateOption(i, e.target.value)}
                     disabled={!channel}
@@ -160,7 +162,7 @@ export function PredictionPanel({ channel, backendUrl }: Props) {
                   transition: 'opacity 0.15s',
                 }}
               >
-                + Agregar opción
+                {t('predictions.agregarOpcion')}
               </button>
             )}
           </div>
@@ -173,7 +175,7 @@ export function PredictionPanel({ channel, backendUrl }: Props) {
             className="sf-btn sf-btn-primary"
             style={{ width: '100%', marginTop: '0.25rem' }}
           >
-            {loading ? '⏳ Creando...' : '📊 Crear predicción'}
+            {loading ? t('predictions.creando') : t('predictions.crear')}
           </button>
 
           {/* Feedback */}
@@ -191,7 +193,7 @@ export function PredictionPanel({ channel, backendUrl }: Props) {
                 textAlign: 'center',
               }}
             >
-              ✅ Predicción creada en Twitch
+              {t('predictions.creada')}
             </motion.div>
           )}
           {message && message !== 'success' && (
@@ -199,7 +201,7 @@ export function PredictionPanel({ channel, backendUrl }: Props) {
           )}
           {!channel && (
             <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', textAlign: 'center' }}>
-              Ingresa tu canal de Twitch en la barra superior para comenzar
+              {t('predictions.emptyChannel')}
             </p>
           )}
         </div>

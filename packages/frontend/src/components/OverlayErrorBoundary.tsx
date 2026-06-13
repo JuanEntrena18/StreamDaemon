@@ -1,9 +1,12 @@
 import { Component, type ReactNode } from 'react';
+import { TranslationContext } from '../i18n/context';
 
 interface Props { children: ReactNode; }
 interface State { error: Error | null; }
 
 export class OverlayErrorBoundary extends Component<Props, State> {
+  static contextType = TranslationContext;
+  declare context: { t: (key: string, params?: Record<string, string | number>) => string };
   state: State = { error: null };
 
   static getDerivedStateFromError(error: Error) {
@@ -24,7 +27,7 @@ export class OverlayErrorBoundary extends Component<Props, State> {
           textAlign: 'center',
         }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>⚠</div>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>Error en overlay</div>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>{this.context.t('overlay.errorOverlay')}</div>
           <div style={{ color: '#94a3b8', maxWidth: 400, wordBreak: 'break-word' }}>
             {this.state.error.message}
           </div>

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 import type { GiveawayData, GiveawayEntryData } from '@streamforger/shared';
 
 interface Props {
@@ -19,6 +20,7 @@ const WHEEL_COLORS = [
 ];
 
 export function GiveawayOverlay({ channel }: Props) {
+  const { t } = useTranslation();
   const [giveaway, setGiveaway] = useState<GiveawayData | null>(null);
   const [participants, setParticipants] = useState<string[]>([]);
   const [tickets, setTickets] = useState<TicketInfo[]>([]);
@@ -165,7 +167,7 @@ export function GiveawayOverlay({ channel }: Props) {
           flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: 'rgba(255,255,255,0.3)', fontSize: '1.2rem', fontWeight: 500,
         }}>
-          Esperando sorteo...
+          {t('overlay.esperandoSorteo')}
         </div>
       ) : (
         <div style={{
@@ -185,7 +187,7 @@ export function GiveawayOverlay({ channel }: Props) {
               letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)',
               marginBottom: '0.5rem',
             }}>
-              Participantes ({participants.length}) · {totalTickets} boletos
+              {t('overlay.participantes', { n: participants.length, total: totalTickets })}
             </div>
             {hasGiveaway && (
               <>
@@ -254,7 +256,7 @@ export function GiveawayOverlay({ channel }: Props) {
               marginBottom: '1rem',
             }}>
               <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
-                ⏱ Giro
+                {t('overlay.giro')}
               </span>
               {[10, 15, 20].map((s) => (
                 <button
@@ -288,7 +290,7 @@ export function GiveawayOverlay({ channel }: Props) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem',
                 }}>
-                  Esperando participantes...
+                  {t('overlay.esperandoParticipantes')}
                 </div>
               ) : (
                 <>
@@ -312,7 +314,7 @@ export function GiveawayOverlay({ channel }: Props) {
             </div>
 
             <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginBottom: '0.75rem' }}>
-              {totalTickets > 0 ? `${totalTickets} boletos en total` : ''}
+              {totalTickets > 0 ? `${totalTickets} ${t('overlay.boletosTotal')}` : ''}
             </div>
 
             <button
@@ -329,7 +331,7 @@ export function GiveawayOverlay({ channel }: Props) {
                 opacity: participants.length < 2 ? 0.4 : 1,
               }}
             >
-              {spinning ? '🎡 Girando...' : '🎡 Girar ruleta'}
+              {spinning ? t('overlay.girando') : t('overlay.girarRuleta')}
             </button>
           </div>
         </div>
@@ -356,7 +358,7 @@ export function GiveawayOverlay({ channel }: Props) {
               transition={{ delay: 0.2, duration: 0.4 }}
               style={{ fontSize: '1rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginBottom: '0.5rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}
             >
-              🏆 GANADOR
+              {t('overlay.ganador')}
             </motion.div>
             <motion.div
               initial={{ y: 30, opacity: 0 }}

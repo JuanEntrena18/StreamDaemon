@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 import type { ChatMessage } from '@streamforger/shared';
 
 const MAX_MESSAGES = 50;
@@ -44,6 +45,7 @@ interface Props {
 }
 
 export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontSize = 14, bgMode = 'black' }: Props) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const { socket } = useSocket();
   const listRef = useRef<HTMLDivElement>(null);
@@ -149,7 +151,7 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
               fontSize: 11, fontFamily: 'inherit', fontWeight: 600, whiteSpace: 'nowrap',
             }}
           >
-            TTS {ttsEnabled ? 'ON' : 'OFF'}
+            {ttsEnabled ? t('overlay.ttsOn') : t('overlay.ttsOff')}
           </button>
 
           <select
@@ -162,13 +164,13 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
               fontSize: 10, fontFamily: 'inherit', outline: 'none',
             }}
           >
-            <option value="">Voz</option>
+            <option value="">{t('overlay.voz')}</option>
             {voices.map((v) => (
               <option key={v.voiceURI} value={v.voiceURI}>{v.name}</option>
             ))}
           </select>
 
-          <span style={{ fontSize: 9, color: '#718096', whiteSpace: 'nowrap' }}>Vel</span>
+          <span style={{ fontSize: 9, color: '#718096', whiteSpace: 'nowrap' }}>{t('overlay.vel')}</span>
           <input
             type="range" min={0.5} max={2} step={0.1}
             value={ttsRate}
@@ -176,7 +178,7 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
             style={{ width: 48, accentColor: '#7c3aed', cursor: 'pointer' }}
           />
 
-          <span style={{ fontSize: 9, color: '#718096', whiteSpace: 'nowrap' }}>Vol</span>
+          <span style={{ fontSize: 9, color: '#718096', whiteSpace: 'nowrap' }}>{t('overlay.vol')}</span>
           <input
             type="range" min={0} max={1} step={0.05}
             value={ttsVolume}
@@ -191,7 +193,7 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
               cursor: 'pointer', fontSize: 12, padding: '2px 6px',
               fontFamily: 'inherit', lineHeight: 1,
             }}
-            title="Detener"
+            title={t('overlay.detener')}
           >
             ✕
           </button>

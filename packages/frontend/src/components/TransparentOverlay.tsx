@@ -1,25 +1,28 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from '../i18n/context';
 
 interface Props {
   channel: string;
 }
 
-const OVERLAY_MODES = [
-  { mode: 'channel', icon: '💬', label: 'Chat del canal' },
-  { mode: 'custom', icon: '🎨', label: 'Overlay Personalizado' },
-  { mode: 'url', icon: '🔗', label: 'URL personalizada' },
-];
-
-const THEMES = [
-  { id: '', label: 'Sin tema', icon: '⬜' },
-  { id: 'subnautica2', label: 'Subnautica 2', icon: '🌊', color: '#00d4ff' },
-  { id: 'poe2', label: 'Path of Exile 2', icon: '⚔️', color: '#c9a04a' },
-  { id: 'wow', label: 'World of Warcraft', icon: '🛡️', color: '#ffd100' },
-  { id: 'fortnite', label: 'Fortnite', icon: '🔫', color: '#ff007f' },
-];
-
 export function TransparentOverlay({ channel }: Props) {
+  const { t } = useTranslation();
+
+  const OVERLAY_MODES = [
+    { mode: 'channel', icon: '💬', label: t('overlay.chatCanal') },
+    { mode: 'custom', icon: '🎨', label: t('overlay.overlayPersonalizado') },
+    { mode: 'url', icon: '🔗', label: t('overlay.urlPersonalizada') },
+  ];
+
+  const THEMES = [
+    { id: '', label: t('obs.sinTema'), icon: '⬜' },
+    { id: 'subnautica2', label: t('overlay.temaSubnautica'), icon: '🌊', color: '#00d4ff' },
+    { id: 'poe2', label: t('overlay.temaPoE2'), icon: '⚔️', color: '#c9a04a' },
+    { id: 'wow', label: t('overlay.temaWow'), icon: '🛡️', color: '#ffd100' },
+    { id: 'fortnite', label: t('overlay.temaFortnite'), icon: '🔫', color: '#ff007f' },
+  ];
+
   const [mode, setMode] = useState<'channel' | 'url' | 'custom'>('channel');
   const [isOpen, setIsOpen] = useState(false);
   const [clickThrough, setClickThrough] = useState(true);
@@ -87,14 +90,14 @@ export function TransparentOverlay({ channel }: Props) {
       <div style={{ marginBottom: '1.75rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
-            🪟 Overlay Transparente
+            {t('overlay.overlayTitle')}
           </h2>
           <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
             Ventana siempre visible sobre tus juegos.{' '}
             <kbd style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid var(--sf-border)', padding: '0.1rem 0.4rem', borderRadius: 4, fontSize: '0.72rem', color: 'var(--sf-text-2)' }}>
               Ctrl+Shift+T
             </kbd>{' '}
-            para toggle click-through.
+            {t('overlay.overlayDesc')}
           </p>
         </div>
 
@@ -108,7 +111,7 @@ export function TransparentOverlay({ channel }: Props) {
             }
           >
             <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor', display: 'inline-block' }} />
-            {authStatus === 'logged' ? 'Twitch ✓' : authStatus === 'checking' ? 'Verificando' : 'Sin sesión'}
+            {authStatus === 'logged' ? t('overlay.authStatus') : authStatus === 'checking' ? t('overlay.verificando') : t('overlay.sinSesion')}
           </span>
           {authStatus !== 'logged' && (
             <button
@@ -117,7 +120,7 @@ export function TransparentOverlay({ channel }: Props) {
               className="sf-btn sf-btn-primary"
               style={{ fontSize: '0.75rem', padding: '0.3rem 0.75rem' }}
             >
-              Iniciar sesión
+              {t('overlay.iniciarSesion')}
             </button>
           )}
         </div>
@@ -125,7 +128,7 @@ export function TransparentOverlay({ channel }: Props) {
 
       <div className="glass-card" style={{ padding: '1.5rem' }}>
         {/* Mode selector */}
-        <p className="sf-section-title">Fuente del overlay</p>
+        <p className="sf-section-title">{t('overlay.fuenteOverlay')}</p>
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
           {OVERLAY_MODES.map((m) => (
             <button
@@ -153,7 +156,7 @@ export function TransparentOverlay({ channel }: Props) {
         {mode === 'url' ? (
           <div>
             <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
-              URL del overlay
+              {t('overlay.urlOverlay')}
             </label>
             <input
               id="overlay-custom-url"
@@ -169,14 +172,14 @@ export function TransparentOverlay({ channel }: Props) {
           <div>
             <div style={{ marginBottom: '1rem' }}>
               <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
-                Nombre del juego
+                {t('overlay.nombreJuego')}
               </label>
               <input
                 id="overlay-custom-game"
                 type="text"
                 value={customGame}
                 onChange={(e) => setCustomGame(e.target.value)}
-                placeholder="Ej: Subnautica 2, World of Warcraft..."
+                placeholder={t('overlay.juegoPlaceholder')}
                 className="sf-input"
                 style={{ marginBottom: '0.875rem', maxWidth: 300 }}
               />
@@ -185,7 +188,7 @@ export function TransparentOverlay({ channel }: Props) {
         ) : (
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.625rem', fontWeight: 500 }}>
-              Tema visual
+              {t('overlay.temaVisual')}
             </label>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {THEMES.map((t) => (
@@ -223,7 +226,7 @@ export function TransparentOverlay({ channel }: Props) {
           className={`sf-btn ${isOpen ? 'sf-btn-danger' : 'sf-btn-primary'}`}
           style={{ width: '100%', marginBottom: isOpen ? '1rem' : 0 }}
         >
-          {isOpen ? '✕ Cerrar overlay' : '▶ Abrir overlay'}
+          {isOpen ? t('overlay.cerrar') : t('overlay.abrir')}
         </button>
 
         {/* Click-through toggle (only when open) */}
@@ -244,10 +247,10 @@ export function TransparentOverlay({ channel }: Props) {
             }}>
               <div>
                 <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.1rem' }}>
-                  Click-through
+                  {t('overlay.clickThrough')}
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)' }}>
-                  Arrastra desde el borde superior para mover
+                  {t('overlay.arrastra')}
                 </div>
               </div>
               <button
@@ -272,7 +275,7 @@ export function TransparentOverlay({ channel }: Props) {
 
         {!canOpen && mode !== 'url' && (
           <p style={{ marginTop: '0.75rem', fontSize: '0.78rem', color: 'var(--sf-text-3)', textAlign: 'center' }}>
-            Ingresa tu canal de Twitch en la barra superior
+            {t('overlay.emptyChannel')}
           </p>
         )}
       </div>

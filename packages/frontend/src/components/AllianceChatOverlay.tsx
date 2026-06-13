@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 import type { ChatMessage } from '@streamforger/shared';
 
 const MAX_MESSAGES = 18;
@@ -17,6 +18,7 @@ interface Props {
    - Decoraciones: leones heráldicos, escudos, runas arcanas
 ───────────────────────────────────────── */
 export function AllianceChatOverlay({ channel }: Props) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const { socket, connected } = useSocket();
   const chatRef = useRef<HTMLDivElement>(null);
@@ -331,7 +333,7 @@ export function AllianceChatOverlay({ channel }: Props) {
             fill={A.goldGlow} textAnchor="middle" letterSpacing="1"
             style={{ filter: `drop-shadow(0 0 6px ${A.blueGlow}88)` }}
           >
-            Chat de la Alianza
+            {t('overlayChat.chatAlianza')}
           </text>
 
           {/* León derecho */}
@@ -464,7 +466,7 @@ export function AllianceChatOverlay({ channel }: Props) {
                   color: `${A.blueGlow}55`,
                   letterSpacing: '0.15em',
                 }}>
-                  — LOS HERALDOS ESPERAN —
+                  {t('overlayChat.heraldosEsperan')}
                 </div>
               </div>
             )}
@@ -548,7 +550,7 @@ export function AllianceChatOverlay({ channel }: Props) {
           letterSpacing: '0.12em',
           textTransform: 'uppercase',
         }}>
-          {connected ? 'En Vivo' : 'Desconectado'}
+          {connected ? t('overlayChat.enVivo') : t('overlayChat.desconectado')}
         </span>
       </div>
 

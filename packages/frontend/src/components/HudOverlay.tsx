@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 import type { HudData, HudConfig } from '@streamforger/shared';
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 
 export function HudOverlay({ channel }: Props) {
+  const { t } = useTranslation();
   const [hud, setHud] = useState<HudData | null>(null);
   const [config] = useState<HudConfig>({
     showViewers: true, showFollowers: true, showSubs: true,
@@ -49,7 +51,7 @@ export function HudOverlay({ channel }: Props) {
         fontFamily: "'Inter', sans-serif", fontSize: '0.85rem',
         color: 'rgba(255,255,255,0.4)',
       }}>
-        Esperando datos...
+        {t('hudOverlay.esperandoDatos')}
       </div>
     );
   }

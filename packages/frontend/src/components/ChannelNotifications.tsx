@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 import type {
   ChannelFollowEvent,
   ChannelSubscribeEvent,
@@ -27,6 +28,7 @@ const TIER_NAMES: Record<string, string> = {
 };
 
 function NotificationCard({ notif, onDone }: { notif: Notification; onDone: () => void }) {
+  const { t } = useTranslation();
   useEffect(() => {
     const t = setTimeout(onDone, DURATION);
     return () => clearTimeout(t);
@@ -42,12 +44,12 @@ function NotificationCard({ notif, onDone }: { notif: Notification; onDone: () =
   }[notif.type];
 
   const title = {
-    follow: 'Nuevo seguidor',
-    subscribe: 'Nueva suscripción',
-    'subscription-message': 'Re-suscripción',
-    subgift: 'Regalo de suscripción',
-    redemption: 'Recompensa canjeada',
-    cheer: 'Bits!',
+    follow: t('overlay.nuevoSeguidor'),
+    subscribe: t('overlay.nuevaSuscripcion'),
+    'subscription-message': t('overlay.resuscripcion'),
+    subgift: t('overlay.regaloSuscripcion'),
+    redemption: t('overlay.recompensaCanjeada'),
+    cheer: t('overlay.bits'),
   }[notif.type];
 
   let desc = '';

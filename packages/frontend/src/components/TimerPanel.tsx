@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import type { TimerState } from '@streamforger/shared';
 
@@ -27,6 +28,7 @@ const DURATION_PRESETS = [
 ];
 
 export function TimerPanel({ channel, backendUrl }: Props) {
+  const { t } = useTranslation();
   const [timer, setTimer] = useState<TimerState>({ status: 'stopped', remaining: 0, duration: 0, label: '' });
   const [remaining, setRemaining] = useState(0);
   const [duration, setDuration] = useState(300);
@@ -78,10 +80,10 @@ export function TimerPanel({ channel, backendUrl }: Props) {
     <div style={{ maxWidth: 600 }}>
       <div style={{ marginBottom: '1.75rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
-          ⏱️ Temporizador
+          {t('timer.title')}
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-          Cuenta regresiva en vivo para el stream. Aparece como overlay en OBS.
+          {t('timer.subtitle')}
         </p>
       </div>
 
@@ -115,17 +117,17 @@ export function TimerPanel({ channel, backendUrl }: Props) {
         )}
 
         <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '1rem' }}>
-          {isRunning && 'Corriendo'}
-          {isPaused && 'Pausado'}
-          {isFinished && '⏰ Tiempo cumplido'}
-          {timer.status === 'stopped' && 'Sin temporizador activo'}
+          {isRunning && t('timer.corriendo')}
+          {isPaused && t('timer.pausado')}
+          {isFinished && t('timer.tiempoCumplido')}
+          {timer.status === 'stopped' && t('timer.sinActivo')}
         </div>
 
         {/* Controls */}
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           {!isActive && !isFinished && (
             <button onClick={start} className="sf-btn sf-btn-primary" style={{ fontSize: '0.85rem' }}>
-              ▶ Iniciar
+              {t('timer.iniciar')}
             </button>
           )}
           {isRunning && (
@@ -134,17 +136,17 @@ export function TimerPanel({ channel, backendUrl }: Props) {
               background: 'rgba(245,158,11,0.15)', color: '#fbbf24',
               border: '1px solid rgba(245,158,11,0.3)',
             }}>
-              ⏸ Pausar
+              {t('timer.pausar')}
             </button>
           )}
           {isPaused && (
             <button onClick={resume} className="sf-btn sf-btn-primary" style={{ fontSize: '0.85rem' }}>
-              ▶ Reanudar
+              {t('timer.reanudar')}
             </button>
           )}
           {(isActive || isFinished) && (
             <button onClick={reset} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.85rem' }}>
-              ⏹ Reiniciar
+              {t('timer.reiniciar')}
             </button>
           )}
         </div>
@@ -153,12 +155,12 @@ export function TimerPanel({ channel, backendUrl }: Props) {
       {/* New timer config */}
       {!isActive && (
         <div className="glass-card" style={{ padding: '1.5rem' }}>
-          <p className="sf-section-title">⏲️ Nuevo temporizador</p>
+          <p className="sf-section-title">{t('timer.nuevoTimer')}</p>
 
           {/* Duration presets */}
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.4rem', display: 'block' }}>
-              Duración
+              {t('timer.duracion')}
             </label>
             <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
               {DURATION_PRESETS.map((p) => (
@@ -179,15 +181,15 @@ export function TimerPanel({ channel, backendUrl }: Props) {
                 </button>
               ))}
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <input
-                  type="number" min="1"
-                  placeholder="min"
-                  value={customMinutes}
-                  onChange={(e) => { setCustomMinutes(e.target.value); }}
-                  className="sf-input"
-                  style={{ width: 60, fontSize: '0.75rem', padding: '0.35rem 0.5rem' }}
-                />
-                <span style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)' }}>min</span>
+                  <input
+                    type="number" min="1"
+                    placeholder={t('timer.min')}
+                    value={customMinutes}
+                    onChange={(e) => { setCustomMinutes(e.target.value); }}
+                    className="sf-input"
+                    style={{ width: 60, fontSize: '0.75rem', padding: '0.35rem 0.5rem' }}
+                  />
+                  <span style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)' }}>{t('timer.min')}</span>
               </div>
             </div>
           </div>
@@ -195,27 +197,27 @@ export function TimerPanel({ channel, backendUrl }: Props) {
           {/* Label */}
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.4rem', display: 'block' }}>
-              Etiqueta (opcional)
+              {t('timer.etiqueta')}
             </label>
             <input
               type="text"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="Ej: Pausa, Speedrun, Sorteo..."
+              placeholder={t('timer.etiquetaPlaceholder')}
               className="sf-input"
               style={{ maxWidth: 300 }}
             />
           </div>
 
           <button onClick={start} className="sf-btn sf-btn-primary" style={{ fontSize: '0.85rem' }}>
-            ▶ Iniciar temporizador
+            {t('timer.iniciarTimer')}
           </button>
         </div>
       )}
 
       {/* Overlay URL */}
       <div className="glass-card" style={{ padding: '1.5rem', marginTop: '1.25rem' }}>
-        <p className="sf-section-title">🔌 Overlay URL</p>
+        <p className="sf-section-title">{t('timer.overlayUrl')}</p>
         <div style={{
           padding: '0.75rem 1rem', borderRadius: 6,
           background: 'rgba(0,0,0,0.3)', border: '1px solid var(--sf-border)',

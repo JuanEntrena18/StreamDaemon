@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
+import { useTranslation } from '../i18n/context';
 import type { ScoreboardState } from '@streamforger/shared';
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function ScoreboardPanel({ channel, backendUrl }: Props) {
+  const { t } = useTranslation();
   const [board, setBoard] = useState<ScoreboardState>({ players: [], title: 'Scoreboard' });
   const [playerName, setPlayerName] = useState('');
   const [boardTitle, setBoardTitle] = useState('Scoreboard');
@@ -72,16 +74,16 @@ export function ScoreboardPanel({ channel, backendUrl }: Props) {
     <div style={{ maxWidth: 600 }}>
       <div style={{ marginBottom: '1.75rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
-          🏆 Scoreboard
+          {t('scoreboard.title')}
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-          Marcador en vivo para torneos, juegos PVP o competencias.
+          {t('scoreboard.subtitle')}
         </p>
       </div>
 
       {/* Title */}
       <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
-        <p className="sf-section-title">📛 Título del marcador</p>
+        <p className="sf-section-title">{t('scoreboard.tituloMarcador')}</p>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <input
             type="text"
@@ -91,26 +93,26 @@ export function ScoreboardPanel({ channel, backendUrl }: Props) {
             style={{ flex: 1 }}
           />
           <button onClick={updateTitle} className="sf-btn sf-btn-primary" style={{ fontSize: '0.8rem' }}>
-            Actualizar
+            {t('scoreboard.actualizar')}
           </button>
         </div>
       </div>
 
       {/* Add player */}
       <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
-        <p className="sf-section-title">👤 Agregar jugador</p>
+        <p className="sf-section-title">{t('scoreboard.agregarJugador')}</p>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <input
             type="text"
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') addPlayer(); }}
-            placeholder="Nombre del jugador"
+            placeholder={t('scoreboard.jugadorPlaceholder')}
             className="sf-input"
             style={{ flex: 1 }}
           />
           <button onClick={addPlayer} className="sf-btn sf-btn-primary" style={{ fontSize: '0.8rem' }}>
-            Agregar
+            {t('scoreboard.agregar')}
           </button>
         </div>
       </div>
@@ -118,20 +120,20 @@ export function ScoreboardPanel({ channel, backendUrl }: Props) {
       {/* Players list */}
       <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <p className="sf-section-title" style={{ margin: 0 }}>Jugadores</p>
+          <p className="sf-section-title" style={{ margin: 0 }}>{t('scoreboard.jugadores')}</p>
           <div style={{ display: 'flex', gap: '0.375rem' }}>
             <button onClick={resetScores} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem' }}>
-              Reset puntajes
+              {t('scoreboard.resetPuntajes')}
             </button>
             <button onClick={clearBoard} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem', color: '#f87171' }}>
-              Limpiar todo
+              {t('scoreboard.limpiarTodo')}
             </button>
           </div>
         </div>
 
         {board.players.length === 0 && (
           <p style={{ fontSize: '0.85rem', color: 'var(--sf-text-3)', textAlign: 'center', padding: '1rem 0' }}>
-            No hay jugadores. Agregá uno arriba.
+            {t('scoreboard.empty')}
           </p>
         )}
 
@@ -206,7 +208,7 @@ export function ScoreboardPanel({ channel, backendUrl }: Props) {
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                   onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
-                  title="Eliminar jugador"
+                  title={t('scoreboard.eliminarJugador')}
                 >
                   ✕
                 </button>
@@ -218,7 +220,7 @@ export function ScoreboardPanel({ channel, backendUrl }: Props) {
 
       {/* Overlay URL */}
       <div className="glass-card" style={{ padding: '1.5rem' }}>
-        <p className="sf-section-title">🔌 Overlay URL</p>
+        <p className="sf-section-title">{t('scoreboard.overlayUrl')}</p>
         <div style={{
           padding: '0.75rem 1rem', borderRadius: 6,
           background: 'rgba(0,0,0,0.3)', border: '1px solid var(--sf-border)',

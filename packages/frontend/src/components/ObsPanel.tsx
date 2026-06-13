@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiGet, apiPut } from '../utils/api';
+import { useTranslation } from '../i18n/context';
 
 interface Props {
   channel: string;
@@ -10,8 +11,8 @@ interface Props {
 interface OBSUrl {
   id: string;
   icon: string;
-  label: string;
-  description: string;
+  labelKey: string;
+  descKey: string;
   mode: string;
   supportsTheme: boolean;
   color: string;
@@ -21,8 +22,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'chat',
     icon: '💬',
-    label: 'Chat Overlay',
-    description: 'Mensajes del chat en tiempo real con animaciones temáticas',
+    labelKey: 'obs.chatOverlay',
+    descKey: 'obs.chatOverlayDesc',
     mode: 'chat',
     supportsTheme: true,
     color: '#7c3aed',
@@ -30,8 +31,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'custom',
     icon: '🎨',
-    label: 'Overlay Personalizado',
-    description: 'Overlay interactivo con nombre del canal, juego y actividad de usuarios',
+    labelKey: 'obs.customOverlay',
+    descKey: 'obs.customOverlayDesc',
     mode: 'custom',
     supportsTheme: false,
     color: '#a855f7',
@@ -39,8 +40,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'giveaway',
     icon: '🎁',
-    label: 'Sorteos',
-    description: 'Notificaciones de sorteos activos y anuncio del ganador',
+    labelKey: 'obs.giveaways',
+    descKey: 'obs.giveawaysDesc',
     mode: 'giveaway',
     supportsTheme: true,
     color: '#10b981',
@@ -48,8 +49,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'prediction',
     icon: '📊',
-    label: 'Predicciones',
-    description: 'Estado y resultados de predicciones de Twitch en vivo',
+    labelKey: 'obs.predictions',
+    descKey: 'obs.predictionsDesc',
     mode: 'prediction',
     supportsTheme: true,
     color: '#f59e0b',
@@ -57,8 +58,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'social',
     icon: '🌐',
-    label: 'Redes Sociales',
-    description: 'Overlay animado con enlaces a redes sociales del canal',
+    labelKey: 'obs.social',
+    descKey: 'obs.socialDesc',
     mode: 'social',
     supportsTheme: false,
     color: '#06b6d4',
@@ -66,8 +67,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'hud',
     icon: '📊',
-    label: 'Stream HUD',
-    description: 'Estadísticas en vivo: viewers, followers, subs y tiempo de stream',
+    labelKey: 'obs.hud',
+    descKey: 'obs.hudDesc',
     mode: 'hud',
     supportsTheme: false,
     color: '#a855f7',
@@ -75,8 +76,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'timer',
     icon: '⏱️',
-    label: 'Temporizador',
-    description: 'Cuenta regresiva en pantalla configurable desde el panel',
+    labelKey: 'obs.timer',
+    descKey: 'obs.timerDesc',
     mode: 'timer',
     supportsTheme: false,
     color: '#f59e0b',
@@ -84,8 +85,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'scoreboard',
     icon: '🏆',
-    label: 'Scoreboard',
-    description: 'Marcador en vivo para torneos y competiciones',
+    labelKey: 'obs.scoreboard',
+    descKey: 'obs.scoreboardDesc',
     mode: 'scoreboard',
     supportsTheme: false,
     color: '#10b981',
@@ -93,8 +94,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'subathon',
     icon: '🔴',
-    label: 'Subathon',
-    description: 'Temporizador ampliable con suscripciones, bits y recompensas',
+    labelKey: 'obs.subathon',
+    descKey: 'obs.subathonDesc',
     mode: 'subathon',
     supportsTheme: false,
     color: '#ef4444',
@@ -102,8 +103,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'subnautica2_standalone',
     icon: '🌊',
-    label: 'Subnautica 2 (Completo)',
-    description: 'Overlay completo de Subnautica 2 con HUD, partículas, sonar, chat y alertas en vivo',
+    labelKey: 'obs.subnautica',
+    descKey: 'obs.subnauticaDesc',
     mode: 'subnautica2_standalone',
     supportsTheme: false,
     color: '#00d4ff',
@@ -111,8 +112,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'fortnite',
     icon: '🔫',
-    label: 'Fortnite Overlay',
-    description: 'Overlay temático de Fortnite con HUD, stats, alertas y chat en vivo',
+    labelKey: 'obs.fortnite',
+    descKey: 'obs.fortniteDesc',
     mode: 'fortnite',
     supportsTheme: false,
     color: '#00D4FF',
@@ -120,8 +121,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'alerts',
     icon: '🔔',
-    label: 'Alertas',
-    description: 'Alertas animadas con confetti: follows, subs, bits, raids y canjeos',
+    labelKey: 'obs.alertas',
+    descKey: 'obs.alertasDesc',
     mode: 'alerts',
     supportsTheme: false,
     color: '#c84bff',
@@ -130,8 +131,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'dj-webcam',
     icon: '🎥',
-    label: 'DJ · Webcam',
-    description: 'Marco DJ para webcam con ecualizador y vinilos decorativos',
+    labelKey: 'obs.djWebcam',
+    descKey: 'obs.djWebcamDesc',
     mode: 'dj-webcam',
     supportsTheme: false,
     color: '#00f0ff',
@@ -139,8 +140,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'dj-webcam-labels',
     icon: '🏷️',
-    label: 'DJ · Webcam + Etiquetas',
-    description: 'Webcam DJ con seguidores, suscriptores, donaciones y bits en vivo',
+    labelKey: 'obs.djWebcamTags',
+    descKey: 'obs.djWebcamTagsDesc',
     mode: 'dj-webcam-labels',
     supportsTheme: false,
     color: '#ff00aa',
@@ -148,8 +149,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'dj-chroma',
     icon: '🟢',
-    label: 'DJ · Chroma Verde',
-    description: 'Overlay DJ con fondo chroma green para cámara',
+    labelKey: 'obs.djChroma',
+    descKey: 'obs.djChromaDesc',
     mode: 'dj-chroma',
     supportsTheme: false,
     color: '#34d399',
@@ -157,8 +158,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'dj-chroma-labels',
     icon: '🔰',
-    label: 'DJ · Chroma + Etiquetas',
-    description: 'Chroma verde DJ con seguidores, suscriptores, donaciones y cheers',
+    labelKey: 'obs.djChromaTags',
+    descKey: 'obs.djChromaTagsDesc',
     mode: 'dj-chroma-labels',
     supportsTheme: false,
     color: '#8b5cf6',
@@ -166,8 +167,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'dj-banner-webcam',
     icon: '📰',
-    label: 'DJ · Banner + Webcam',
-    description: 'Banner inferior DJ con webcam, nombre y estadísticas en vivo',
+    labelKey: 'obs.djBannerWebcam',
+    descKey: 'obs.djBannerWebcamDesc',
     mode: 'dj-banner-webcam',
     supportsTheme: false,
     color: '#fbbf24',
@@ -175,8 +176,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'dj-banner-chroma',
     icon: '📋',
-    label: 'DJ · Banner Chroma',
-    description: 'Banner inferior DJ con fondo chroma, nombre y estadísticas',
+    labelKey: 'obs.djBannerChroma',
+    descKey: 'obs.djBannerChromaDesc',
     mode: 'dj-banner-chroma',
     supportsTheme: false,
     color: '#f472b6',
@@ -184,8 +185,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'dj-fullscreen',
     icon: '🖥️',
-    label: 'DJ · Pantalla Completa',
-    description: 'Overlay DJ a pantalla completa con nombre, ecualizador y 4 etiquetas',
+    labelKey: 'obs.djFullscreen',
+    descKey: 'obs.djFullscreenDesc',
     mode: 'dj-fullscreen',
     supportsTheme: false,
     color: '#a855f7',
@@ -193,8 +194,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'dj-alerts',
     icon: '🔔',
-    label: 'DJ · Alertas',
-    description: 'Alertas temáticas DJ: seguidor, sub, donación, cheer, host y raid',
+    labelKey: 'obs.djAlerts',
+    descKey: 'obs.djAlertsDesc',
     mode: 'dj-alerts',
     supportsTheme: false,
     color: '#ff00aa',
@@ -202,8 +203,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'dj-transition',
     icon: '💿',
-    label: 'DJ · Transición',
-    description: 'Transición DJ con vinilo giratorio, brillos y nombre en vivo',
+    labelKey: 'obs.djTransition',
+    descKey: 'obs.djTransitionDesc',
     mode: 'dj-transition',
     supportsTheme: false,
     color: '#00f0ff',
@@ -212,8 +213,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-alliance-webcam',
     icon: '🎥',
-    label: 'Alianza · Webcam',
-    description: 'Marco Alianza para webcam con escudo y corona decorativos',
+    labelKey: 'obs.allianceWebcam',
+    descKey: 'obs.allianceWebcamDesc',
     mode: 'wow-alliance-webcam',
     supportsTheme: false,
     color: '#2b5fc8',
@@ -221,8 +222,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-alliance-webcam-labels',
     icon: '🏷️',
-    label: 'Alianza · Webcam + Etiquetas',
-    description: 'Webcam Alianza con seguidores, suscriptores, donaciones y bits en vivo',
+    labelKey: 'obs.allianceWebcamTags',
+    descKey: 'obs.allianceWebcamTagsDesc',
     mode: 'wow-alliance-webcam-labels',
     supportsTheme: false,
     color: '#ffc800',
@@ -230,8 +231,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-alliance-chat',
     icon: '💬',
-    label: 'Alianza · Chat',
-    description: 'Chat transparente de la Alianza con escudo decorativo, izquierda o derecha',
+    labelKey: 'obs.allianceChat',
+    descKey: 'obs.allianceChatDesc',
     mode: 'wow-alliance-chat',
     supportsTheme: false,
     color: '#8ab4ff',
@@ -239,8 +240,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-alliance-chat-labels',
     icon: '🔰',
-    label: 'Alianza · Etiquetas',
-    description: '4 etiquetas informativas (seguidores, subs, donaciones, cheers) con escudo Alianza',
+    labelKey: 'obs.allianceTags',
+    descKey: 'obs.allianceTagsDesc',
     mode: 'wow-alliance-chat-labels',
     supportsTheme: false,
     color: '#6b4ce6',
@@ -248,8 +249,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-alliance-banner-webcam',
     icon: '📰',
-    label: 'Alianza · Banner + Webcam',
-    description: 'Banner inferior Alianza con webcam, nombre y estadísticas en vivo',
+    labelKey: 'obs.allianceBannerWebcam',
+    descKey: 'obs.allianceBannerWebcamDesc',
     mode: 'wow-alliance-banner-webcam',
     supportsTheme: false,
     color: '#ffc800',
@@ -257,8 +258,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-alliance-banner-transparent',
     icon: '📋',
-    label: 'Alianza · Banner Transparente',
-    description: 'Banner inferior Alianza con fondo transparente, nombre y estadísticas',
+    labelKey: 'obs.allianceBannerTransparente',
+    descKey: 'obs.allianceBannerTransparenteDesc',
     mode: 'wow-alliance-banner-transparent',
     supportsTheme: false,
     color: '#2b5fc8',
@@ -266,8 +267,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-alliance-fullscreen',
     icon: '🖥️',
-    label: 'Alianza · Pantalla Completa',
-    description: 'Overlay Alianza a pantalla completa con escudo, corona, nombre y 4 etiquetas',
+    labelKey: 'obs.allianceFullscreen',
+    descKey: 'obs.allianceFullscreenDesc',
     mode: 'wow-alliance-fullscreen',
     supportsTheme: false,
     color: '#a855f7',
@@ -275,8 +276,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-alliance-alerts',
     icon: '🔔',
-    label: 'Alianza · Alertas',
-    description: 'Alertas temáticas Alianza: seguidor, sub, donación, cheer, host y raid',
+    labelKey: 'obs.allianceAlerts',
+    descKey: 'obs.allianceAlertsDesc',
     mode: 'wow-alliance-alerts',
     supportsTheme: false,
     color: '#ffc800',
@@ -284,8 +285,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-alliance-transition',
     icon: '👑',
-    label: 'Alianza · Transición',
-    description: 'Transición Alianza con escudo giratorio, corona y nombre en vivo',
+    labelKey: 'obs.allianceTransition',
+    descKey: 'obs.allianceTransitionDesc',
     mode: 'wow-alliance-transition',
     supportsTheme: false,
     color: '#2b5fc8',
@@ -294,8 +295,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-horde-webcam',
     icon: '🎥',
-    label: 'Horda · Webcam',
-    description: 'Marco Horda para webcam con cresta y espadas decorativas',
+    labelKey: 'obs.hordaWebcam',
+    descKey: 'obs.hordaWebcamDesc',
     mode: 'wow-horde-webcam',
     supportsTheme: false,
     color: '#cc0000',
@@ -303,8 +304,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-horde-webcam-labels',
     icon: '🏷️',
-    label: 'Horda · Webcam + Etiquetas',
-    description: 'Webcam Horda con seguidores, suscriptores, donaciones y bits en vivo',
+    labelKey: 'obs.hordaWebcamTags',
+    descKey: 'obs.hordaWebcamTagsDesc',
     mode: 'wow-horde-webcam-labels',
     supportsTheme: false,
     color: '#ffc800',
@@ -312,8 +313,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-horde-chat',
     icon: '💬',
-    label: 'Horda · Chat',
-    description: 'Chat independiente de la Horda con cresta decorativa, izquierda o derecha',
+    labelKey: 'obs.hordaChat',
+    descKey: 'obs.hordaChatDesc',
     mode: 'wow-horde-chat',
     supportsTheme: false,
     color: '#8b0000',
@@ -321,8 +322,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-horde-labels',
     icon: '🔰',
-    label: 'Horda · Etiquetas',
-    description: '4 etiquetas informativas (seguidores, subs, donaciones, cheers) con cresta Horda',
+    labelKey: 'obs.hordaTags',
+    descKey: 'obs.hordaTagsDesc',
     mode: 'wow-horde-labels',
     supportsTheme: false,
     color: '#cc0000',
@@ -330,8 +331,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-horde-banner-webcam',
     icon: '📰',
-    label: 'Horda · Banner + Webcam',
-    description: 'Banner inferior Horda con webcam, nombre y estadísticas en vivo',
+    labelKey: 'obs.hordaBannerWebcam',
+    descKey: 'obs.hordaBannerWebcamDesc',
     mode: 'wow-horde-banner-webcam',
     supportsTheme: false,
     color: '#ffc800',
@@ -339,8 +340,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-horde-banner-transparent',
     icon: '📋',
-    label: 'Horda · Banner Transparente',
-    description: 'Banner inferior Horda con fondo transparente, nombre y estadísticas',
+    labelKey: 'obs.hordaBannerTransparente',
+    descKey: 'obs.hordaBannerTransparenteDesc',
     mode: 'wow-horde-banner-transparent',
     supportsTheme: false,
     color: '#cc0000',
@@ -348,8 +349,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-horde-fullscreen',
     icon: '🖥️',
-    label: 'Horda · Pantalla Completa',
-    description: 'Overlay Horda a pantalla completa con cresta, espadas, nombre y 4 etiquetas',
+    labelKey: 'obs.hordaFullscreen',
+    descKey: 'obs.hordaFullscreenDesc',
     mode: 'wow-horde-fullscreen',
     supportsTheme: false,
     color: '#a855f7',
@@ -357,8 +358,8 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-horde-alerts',
     icon: '🔔',
-    label: 'Horda · Alertas',
-    description: 'Alertas temáticas Horda: seguidor, sub, donación, cheer, host y raid',
+    labelKey: 'obs.hordaAlerts',
+    descKey: 'obs.hordaAlertsDesc',
     mode: 'wow-horde-alerts',
     supportsTheme: false,
     color: '#ffc800',
@@ -366,43 +367,45 @@ const OBS_URLS: OBSUrl[] = [
   {
     id: 'wow-horde-transition',
     icon: '⚔️',
-    label: 'Horda · Transición',
-    description: 'Transición Horda con cresta giratoria, espadas y nombre en vivo',
+    labelKey: 'obs.hordaTransition',
+    descKey: 'obs.hordaTransitionDesc',
     mode: 'wow-horde-transition',
     supportsTheme: false,
     color: '#cc0000',
   },
 ];
 
-const THEMES = [
-  { id: '', label: 'Sin tema' },
-  { id: 'dj', label: '🎧 DJ' },
-  { id: 'subnautica2', label: '🌊 Subnautica 2' },
-  { id: 'poe2', label: '⚔️ Path of Exile 2' },
-  { id: 'wow', label: '🛡️ WoW - Horda' },
-  { id: 'alliance', label: '👑 WoW - Alianza' },
-  { id: 'fortnite', label: '🔫 Fortnite' },
-];
-
 interface SocialLink {
   platform: string;
   icon: string;
-  label: string;
-  placeholder: string;
+  labelKey: string;
+  placeholderKey: string;
   url: string;
   color: string;
 }
 
-const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
-  { platform: 'twitter',   icon: '🐦', label: 'Twitter / X',  placeholder: 'https://x.com/tu_usuario',        url: '', color: '#1d9bf0' },
-  { platform: 'youtube',   icon: '📺', label: 'YouTube',       placeholder: 'https://youtube.com/@tu_canal',   url: '', color: '#ff0000' },
-  { platform: 'instagram', icon: '📸', label: 'Instagram',     placeholder: 'https://instagram.com/tu_usuario',url: '', color: '#e1306c' },
-  { platform: 'discord',   icon: '💬', label: 'Discord',       placeholder: 'https://discord.gg/tu_invite',    url: '', color: '#5865f2' },
-  { platform: 'tiktok',    icon: '🎵', label: 'TikTok',        placeholder: 'https://tiktok.com/@tu_usuario',  url: '', color: '#ff0050' },
-  { platform: 'github',    icon: '💻', label: 'GitHub',        placeholder: 'https://github.com/tu_usuario',   url: '', color: '#e6edf3' },
-];
-
 export function ObsPanel({ channel, backendUrl }: Props) {
+  const { t } = useTranslation();
+
+  const THEMES = [
+    { id: '',       labelKey: 'obs.sinTema' },
+    { id: 'dj',     labelKey: 'obs.temaDJ' },
+    { id: 'subnautica2', labelKey: 'obs.temaSubnautica' },
+    { id: 'poe2',   labelKey: 'obs.temaPoE2' },
+    { id: 'wow',    labelKey: 'obs.temaHorda' },
+    { id: 'alliance', labelKey: 'obs.temaAlianza' },
+    { id: 'fortnite', labelKey: 'obs.temaFortnite' },
+  ];
+
+  const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
+    { platform: 'twitter',   icon: '🐦', labelKey: 'obs.socialTwitter',  placeholderKey: 'obs.twitterPlaceholder',  url: '', color: '#1d9bf0' },
+    { platform: 'youtube',   icon: '📺', labelKey: 'obs.socialYoutube',  placeholderKey: 'obs.youtubePlaceholder',  url: '', color: '#ff0000' },
+    { platform: 'instagram', icon: '📸', labelKey: 'obs.socialInstagram', placeholderKey: 'obs.instagramPlaceholder', url: '', color: '#e1306c' },
+    { platform: 'discord',   icon: '💬', labelKey: 'obs.socialDiscord',  placeholderKey: 'obs.discordPlaceholder',  url: '', color: '#5865f2' },
+    { platform: 'tiktok',    icon: '🎵', labelKey: 'obs.socialTiktok',   placeholderKey: 'obs.tiktokPlaceholder',   url: '', color: '#ff0050' },
+    { platform: 'github',    icon: '💻', labelKey: 'obs.socialGithub',   placeholderKey: 'obs.githubPlaceholder',   url: '', color: '#e6edf3' },
+  ];
+
   const [selectedTheme, setSelectedTheme] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
   const [socialExpanded, setSocialExpanded] = useState(false);
@@ -500,7 +503,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     // Encode social links as query params
     const linksParam =
       active.length > 0
-        ? `&socials=${encodeURIComponent(JSON.stringify(active.map((l) => ({ platform: l.platform, url: l.url, label: l.label }))))}` 
+        ? `&socials=${encodeURIComponent(JSON.stringify(active.map((l) => ({ platform: l.platform, url: l.url, label: t(l.labelKey) }))))}`
         : '';
     return `${base}${channelParam}${linksParam}`;
   }
@@ -533,39 +536,39 @@ export function ObsPanel({ channel, backendUrl }: Props) {
       {/* Header */}
       <div style={{ marginBottom: '1.75rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
-          URLs para OBS Browser Source
+          {t('obs.obsTitle')}
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem', lineHeight: 1.6 }}>
-          Copia la URL y agrégala en OBS como <strong style={{ color: 'var(--sf-text)' }}>Browser Source</strong>.
-          Resolución recomendada: <code style={{ background: 'rgba(124,58,237,0.15)', padding: '0.1rem 0.4rem', borderRadius: 4, color: '#a78bfa' }}>1920×1080</code>
+          {t('obs.obsInstructions')} <strong style={{ color: 'var(--sf-text)' }}>{t('obs.browserSource')}</strong>.
+          {' '}{t('obs.resolucionRecomendada')} <code style={{ background: 'rgba(124,58,237,0.15)', padding: '0.1rem 0.4rem', borderRadius: 4, color: '#a78bfa' }}>1920×1080</code>
         </p>
       </div>
 
       {/* Theme selector */}
       <div className="glass-card" style={{ padding: '1rem 1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--sf-text-2)', whiteSpace: 'nowrap' }}>
-          🎨 Tema visual
+          {t('obs.temaVisual')}
         </span>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          {THEMES.map((t) => (
+          {THEMES.map((theme) => (
             <button
-              key={t.id}
-              onClick={() => setSelectedTheme(t.id)}
+              key={theme.id}
+              onClick={() => setSelectedTheme(theme.id)}
               style={{
                 padding: '0.3rem 0.75rem',
                 borderRadius: 99,
                 border: '1px solid',
-                borderColor: selectedTheme === t.id ? 'var(--sf-primary)' : 'var(--sf-border)',
-                background: selectedTheme === t.id ? 'rgba(124,58,237,0.2)' : 'transparent',
-                color: selectedTheme === t.id ? '#a78bfa' : 'var(--sf-text-3)',
+                borderColor: selectedTheme === theme.id ? 'var(--sf-primary)' : 'var(--sf-border)',
+                background: selectedTheme === theme.id ? 'rgba(124,58,237,0.2)' : 'transparent',
+                color: selectedTheme === theme.id ? '#a78bfa' : 'var(--sf-text-3)',
                 fontSize: '0.78rem',
-                fontWeight: selectedTheme === t.id ? 600 : 400,
+                fontWeight: selectedTheme === theme.id ? 600 : 400,
                 cursor: 'pointer',
                 fontFamily: 'inherit',
                 transition: 'all 0.15s ease',
               }}
             >
-              {t.label}
+              {t(theme.labelKey)}
             </button>
           ))}
         </div>
@@ -609,15 +612,15 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                 {/* Info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                    <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--sf-text)' }}>{item.label}</span>
+                    <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--sf-text)' }}>{t(item.labelKey)}</span>
                     {item.supportsTheme && selectedTheme && (
                       <span className="sf-badge sf-badge-violet" style={{ fontSize: '0.6rem' }}>
-                        {THEMES.find((t) => t.id === selectedTheme)?.label}
+                        {t(THEMES.find((th) => th.id === selectedTheme)?.labelKey ?? '')}
                       </span>
                     )}
                   </div>
                   <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '0.625rem' }}>
-                    {item.description}
+                    {t(item.descKey)}
                   </p>
                   {item.id === 'custom' && (
                     <div style={{ marginBottom: '0.5rem' }}>
@@ -655,7 +658,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                     className={`sf-btn ${isCopied ? 'sf-btn-ghost' : 'sf-btn-primary'}`}
                     style={{ minWidth: 90, fontSize: '0.78rem', padding: '0.45rem 0.875rem' }}
                   >
-                    {isCopied ? '✓ Copiado' : 'Copiar'}
+                    {isCopied ? t('obs.copiado') : t('obs.copiar')}
                   </button>
 
                   {/* Configure button for social */}
@@ -680,7 +683,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                         justifyContent: 'center',
                       }}
                     >
-                      {socialExpanded ? '▲' : '▼'} Configurar
+                      {socialExpanded ? '▲' : '▼'} {t('obs.configurar')}
                     </button>
                   )}
                 </div>
@@ -711,7 +714,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                           className="sf-section-title"
                           style={{ marginBottom: '1rem', color: '#22d3ee' }}
                         >
-                          🌐 URLs de tus redes sociales
+                          {t('obs.socialUrls')}
                         </p>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
@@ -748,7 +751,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                                   flexShrink: 0,
                                 }}
                               >
-                                {link.label}
+                                {t(link.labelKey)}
                               </span>
 
                               {/* URL input */}
@@ -757,7 +760,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                                 type="url"
                                 value={link.url}
                                 onChange={(e) => updateSocialLink(link.platform, e.target.value)}
-                                placeholder={link.placeholder}
+                                placeholder={t(link.placeholderKey)}
                                 className="sf-input"
                                 style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem' }}
                               />
@@ -786,8 +789,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                             lineHeight: 1.5,
                           }}
                         >
-                          💡 Deja vacíos los campos que no uses. Las redes activas (
-                          <span style={{ color: '#10b981' }}>●</span>) se incluirán en la URL del overlay.
+                          {t('obs.socialHelp')}<span style={{ color: '#10b981' }}>●</span>) se incluirán en la URL del overlay.
                         </p>
                       </div>
                     </motion.div>
@@ -803,20 +805,20 @@ export function ObsPanel({ channel, backendUrl }: Props) {
       {selectedTheme === 'fortnite' && (
         <div className="glass-card" style={{ marginTop: '1.5rem', padding: '1.25rem' }}>
           <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            🔫 Estadísticas de Fortnite
+            {t('obs.fortniteTitle')}
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {/* API Key */}
             <div>
               <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                API Key de Fortnite-API.com
+                {t('obs.apiKeyLabel')}
                 <span style={{
                   fontSize: '0.6rem', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
                   color: fnHasKey ? '#34d399' : '#ef4444',
                   background: fnHasKey ? 'rgba(52,211,153,0.12)' : 'rgba(239,68,68,0.12)',
                   border: `1px solid ${fnHasKey ? 'rgba(52,211,153,0.3)' : 'rgba(239,68,68,0.3)'}`,
                 }}>
-                  {fnHasKey ? '✓ Configurada' : '✗ Sin key'}
+                  {fnHasKey ? t('obs.configurada') : t('obs.sinKey')}
                 </span>
               </label>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -824,7 +826,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                   type={showFnApiKey ? 'text' : 'password'}
                   value={fnEditingKey ? fnApiKey : (fnHasKey ? '••••••••' : '')}
                   onChange={(e) => { setFnEditingKey(true); setFnApiKey(e.target.value); }}
-                  placeholder={fnHasKey ? 'Escribí para cambiar la key...' : 'Ingresá tu API key...'}
+                  placeholder={fnHasKey ? t('obs.cambiarKey') : t('obs.ingresarKey')}
                   className="sf-input"
                   style={{ flex: 1, fontSize: '0.78rem' }}
                 />
@@ -832,23 +834,23 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                   onClick={() => setShowFnApiKey(!showFnApiKey)}
                   className="sf-btn"
                   style={{ fontSize: '0.78rem', padding: '0.3rem 0.6rem', cursor: 'pointer' }}
-                  title={showFnApiKey ? 'Ocultar key' : 'Mostrar key'}
+                  title={showFnApiKey ? t('obs.ocultarKey') : t('obs.mostrarKey')}
                 >{showFnApiKey ? '🙈' : '👁️'}</button>
                 <a href="https://dash.fortnite-api.com" target="_blank" rel="noreferrer" className="sf-btn" style={{ fontSize: '0.72rem', padding: '0.3rem 0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
-                  🌐 Obtener key
+                  {t('obs.obtenerKey')}
                 </a>
               </div>
             </div>
             {/* Epic Username */}
             <div>
               <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
-                Usuario de Epic Games
+                {t('obs.usuarioEpic')}
               </label>
               <input
                 type="text"
                 value={fnEpicUsername}
                 onChange={(e) => setFnEpicUsername(e.target.value)}
-                placeholder="Ej: jentrena"
+                placeholder={t('obs.epicPlaceholder')}
                 className="sf-input"
                 style={{ width: '100%', fontSize: '0.78rem' }}
               />
@@ -856,7 +858,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
             {/* Mode selector */}
             <div>
               <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
-                Modo de estadísticas
+                {t('obs.modoEstadisticas')}
               </label>
               <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
                 {['overall', 'solo', 'duo', 'trio', 'squad'].map((m) => (
@@ -878,13 +880,13 @@ export function ObsPanel({ channel, backendUrl }: Props) {
             {/* Layout selector */}
             <div>
               <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
-                Diseño del overlay
+                {t('obs.disenoOverlay')}
               </label>
               <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
                 {[
-                  { value: 'stats', label: '📊 Solo stats' },
-                  { value: 'chat-left', label: '💬 Chat izquierda' },
-                  { value: 'chat-right', label: '💬 Chat derecha' },
+                  { value: 'stats', labelKey: 'obs.layoutSoloStats' },
+                  { value: 'chat-left', labelKey: 'obs.layoutChatIzquierda' },
+                  { value: 'chat-right', labelKey: 'obs.layoutChatDerecha' },
                 ].map((o) => (
                   <button
                     key={o.value}
@@ -897,16 +899,16 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                       fontSize: '0.75rem', fontWeight: fnLayout === o.value ? 600 : 400,
                       cursor: 'pointer', fontFamily: 'inherit',
                     }}
-                  >{o.label}</button>
+                  >{t(o.labelKey)}</button>
                 ))}
               </div>
             </div>
             {/* Save */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <button onClick={saveFnConfig} className="sf-btn sf-btn-primary" style={{ fontSize: '0.78rem', padding: '0.4rem 1rem' }}>
-                Guardar Configuración
+                {t('obs.guardarConfig')}
               </button>
-              {fnSaved && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>✓ Guardado</span>}
+              {fnSaved && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>{t('obs.guardadoConfig')}</span>}
             </div>
           </div>
         </div>
@@ -923,8 +925,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
         color: 'var(--sf-text-2)',
         lineHeight: 1.6,
       }}>
-        <strong style={{ color: '#22d3ee' }}>💡 Tip:</strong> En OBS, ve a <em>Fuentes → + → Browser</em> y pega la URL.
-        Asegúrate de que StreamForger esté corriendo para que el overlay reciba datos en tiempo real.
+        <strong style={{ color: '#22d3ee' }}>{t('obs.tip')}</strong> {t('obs.obsTip')}
       </div>
     </div>
   );

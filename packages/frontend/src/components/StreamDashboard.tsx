@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { apiPut, apiGet } from '../utils/api';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 
 interface Props {
   channel: string;
@@ -63,6 +64,7 @@ function formatNumber(n: number): string {
 }
 
 export function StreamDashboard({ channel, backendUrl }: Props) {
+  const { t } = useTranslation();
   const [previewLoading, setPreviewLoading] = useState(true);
   const [stats, setStats] = useState<HudStats | null>(null);
   const { socket: sock } = useSocket();
@@ -176,25 +178,25 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
   }, []);
 
   useSocketEvent('channel:follow', (data: { userDisplayName: string }) => {
-    addEvent({ id: `${Date.now()}-follow`, type: 'follow', user: data.userDisplayName, message: 'siguió el canal', timestamp: Date.now() });
+    addEvent({ id: `${Date.now()}-follow`, type: 'follow', user: data.userDisplayName, message: t('dashboard.eventFollow'), timestamp: Date.now() });
   });
   useSocketEvent('channel:subscribe', (data: { userDisplayName: string; tier: string }) => {
     const tierLabel = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }[data.tier] ?? data.tier;
-    addEvent({ id: `${Date.now()}-sub`, type: 'sub', user: data.userDisplayName, message: `se suscribió (${tierLabel})`, timestamp: Date.now() });
+    addEvent({ id: `${Date.now()}-sub`, type: 'sub', user: data.userDisplayName, message: t('dashboard.eventSub', { tier: tierLabel }), timestamp: Date.now() });
   });
   useSocketEvent('channel:subscription-message', (data: { userDisplayName: string; tier: string; cumulativeMonths: number }) => {
     const tierLabel = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }[data.tier] ?? data.tier;
-    addEvent({ id: `${Date.now()}-resub`, type: 'resub', user: data.userDisplayName, message: `renovó suscripción (${tierLabel}, ${data.cumulativeMonths} meses)`, timestamp: Date.now() });
+    addEvent({ id: `${Date.now()}-resub`, type: 'resub', user: data.userDisplayName, message: t('dashboard.eventResub', { tier: tierLabel, months: data.cumulativeMonths }), timestamp: Date.now() });
   });
   useSocketEvent('channel:subgift', (data: { gifterDisplayName: string; amount: number; tier: string }) => {
     const tierLabel = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }[data.tier] ?? data.tier;
-    addEvent({ id: `${Date.now()}-gift`, type: 'gift', user: data.gifterDisplayName, message: `regaló ${data.amount} suscripción(es) (${tierLabel})`, timestamp: Date.now(), amount: data.amount });
+    addEvent({ id: `${Date.now()}-gift`, type: 'gift', user: data.gifterDisplayName, message: t('dashboard.eventGift', { amount: data.amount, tier: tierLabel }), timestamp: Date.now(), amount: data.amount });
   });
   useSocketEvent('channel:redemption', (data: { userDisplayName: string; rewardTitle: string; rewardCost: number }) => {
-    addEvent({ id: `${Date.now()}-redeem`, type: 'redemption', user: data.userDisplayName, message: `canjeó ${data.rewardTitle} (${data.rewardCost} pts)`, timestamp: Date.now() });
+    addEvent({ id: `${Date.now()}-redeem`, type: 'redemption', user: data.userDisplayName, message: t('dashboard.eventRedeem', { reward: data.rewardTitle, cost: data.rewardCost }), timestamp: Date.now() });
   });
   useSocketEvent('channel:cheer', (data: { userDisplayName: string; bits: number }) => {
-    addEvent({ id: `${Date.now()}-cheer`, type: 'cheer', user: data.userDisplayName, message: `donó ${data.bits} bits`, timestamp: Date.now(), amount: data.bits });
+    addEvent({ id: `${Date.now()}-cheer`, type: 'cheer', user: data.userDisplayName, message: t('dashboard.eventBits', { bits: data.bits }), timestamp: Date.now(), amount: data.bits });
   });
 
   // Save stream info
@@ -206,13 +208,13 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
       const r = await apiPut('/hud/stream/info', { channel, title, gameName: game || undefined, tags: activeTagIds });
       if (!r.ok) {
         const data = await r.json();
-        setSaveError(data.error || 'Error al guardar');
+        setSaveError(data.error || t('dashboard.errorGuardar'));
       } else {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
       }
     } catch {
-      setSaveError('Error de conexión');
+      setSaveError(t('dashboard.errorConexion'));
     } finally {
       setSaving(false);
     }
@@ -226,10 +228,10 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
         <div className="glass-card" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎮</div>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '0.5rem' }}>
-            Gestor del Stream
+            {t('dashboard.title')}
           </h2>
           <p style={{ color: 'var(--sf-text-3)', fontSize: '0.9rem', maxWidth: 400, margin: '0 auto' }}>
-            Ingresá un canal de Twitch en la barra superior para ver la previsualización, editar la info del stream y seguir la actividad en vivo.
+            {t('dashboard.emptyState')}
           </p>
         </div>
       </div>
@@ -247,7 +249,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
           <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            🔴 Actividad reciente
+            {t('dashboard.actividadReciente')}
           </h3>
 
           {/* Filters */}
@@ -257,7 +259,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
               background: filter === 'all' ? 'var(--sf-primary)' : 'var(--sf-surface-hover)',
               color: filter === 'all' ? '#fff' : 'var(--sf-text-2)',
               border: 'none', borderRadius: 6, cursor: 'pointer',
-            }}>Todos</button>
+            }}>{t('dashboard.todos')}</button>
             {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
               <button key={key} onClick={() => setFilter(key)} className="sf-btn" style={{
                 fontSize: '0.68rem', padding: '0.25rem 0.5rem',
@@ -271,7 +273,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
 
         {filteredEvents.length === 0 ? (
           <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-3)', textAlign: 'center', padding: '1.5rem 0' }}>
-            {channel ? 'Esperando actividad del canal...' : 'Conectá un canal para ver la actividad.'}
+            {channel ? t('dashboard.esperandoActividad') : t('dashboard.conectarParaActividad')}
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -324,7 +326,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
                 position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '0.85rem', color: 'var(--sf-text-3)', pointerEvents: 'none',
               }}>
-                Cargando stream...
+                {t('dashboard.cargandoStream')}
               </div>
             )}
           </div>
@@ -347,7 +349,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
                 boxShadow: stats?.isLive ? '0 0 8px rgba(52,211,153,0.5)' : 'none',
               }} />
               <span style={{ fontSize: '0.82rem', fontWeight: 600, color: stats?.isLive ? '#34d399' : 'var(--sf-text-3)' }}>
-                {stats?.isLive ? 'EN VIVO' : 'OFFLINE'}
+                {stats?.isLive ? t('dashboard.enVivo') : t('dashboard.offline')}
               </span>
             </div>
             <a
@@ -355,27 +357,27 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
               target="_blank" rel="noreferrer"
               style={{ fontSize: '0.75rem', color: 'var(--sf-primary-light)', textDecoration: 'none' }}
             >
-              ↗ Twitch
+              {t('dashboard.twitchLink')}
             </a>
           </div>
 
           {/* Stream info editor */}
           <div>
             <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
-              Título del stream
+              {t('dashboard.tituloStream')}
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Título del stream..."
+              placeholder={t('dashboard.tituloPlaceholder')}
               className="sf-input"
               style={{ width: '100%', fontSize: '0.82rem' }}
             />
           </div>
           <div style={{ position: 'relative' }}>
             <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
-              Juego / Categoría
+              {t('dashboard.juegoCategoria')}
             </label>
             <input
               type="text"
@@ -383,15 +385,15 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
               onChange={(e) => handleGameInput(e.target.value)}
               onFocus={() => setShowGameResults(true)}
               onBlur={() => setTimeout(() => setShowGameResults(false), 200)}
-              placeholder="Ej: Just Chatting, Valorant..."
+              placeholder={t('dashboard.juegoPlaceholder')}
               className="sf-input"
               style={{ width: '100%', fontSize: '0.82rem' }}
             />
-            {searchingGame && <span style={{ position: 'absolute', right: 8, top: 28, fontSize: '0.65rem', color: 'var(--sf-text-3)' }}>Buscando...</span>}
+            {searchingGame && <span style={{ position: 'absolute', right: 8, top: 28, fontSize: '0.65rem', color: 'var(--sf-text-3)' }}>{t('dashboard.buscando')}</span>}
             {showGameResults && gameResults.length > 0 && (
               <div style={{
                 position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10,
-                background: 'var(--sf-surface)', border: '1px solid var(--sf-border)',
+                background: '#13132e', border: '1px solid var(--sf-border)',
                 borderRadius: 8, maxHeight: 180, overflowY: 'auto', marginTop: 4,
               }}>
                 {gameResults.map((g) => (
@@ -414,7 +416,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
           {/* Tags */}
           <div>
             <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.35rem', display: 'block' }}>
-              Tags del stream {activeTagIds.length > 0 && <span style={{ color: 'var(--sf-text-3)', fontSize: '0.65rem' }}>({activeTagIds.length}/10)</span>}
+              {t('dashboard.tagsStream')} {activeTagIds.length > 0 && <span style={{ color: 'var(--sf-text-3)', fontSize: '0.65rem' }}>({activeTagIds.length}/10)</span>}
             </label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               {/* Active tag chips */}
@@ -433,7 +435,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
                   );
                 })}
                 {activeTagIds.length === 0 && (
-                  <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)' }}>Sin tags</span>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)' }}>{t('dashboard.sinTags')}</span>
                 )}
               </div>
               {/* Custom tag input */}
@@ -443,13 +445,13 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
                   value={customTagInput}
                   onChange={(e) => setCustomTagInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addCustomTag()}
-                  placeholder="Tag personalizado (max 25 chars)"
+                  placeholder={t('dashboard.tagPlaceholder')}
                   className="sf-input"
                   style={{ flex: 1, fontSize: '0.75rem' }}
                   maxLength={25}
                 />
                 <button onClick={addCustomTag} disabled={activeTagIds.length >= 10} className="sf-btn" style={{ fontSize: '0.68rem', padding: '0.2rem 0.5rem' }}>
-                  + Tag
+                  {t('dashboard.agregarTag')}
                 </button>
               </div>
               {/* Filter/search available tags */}
@@ -457,7 +459,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
                 type="text"
                 value={tagSearch}
                 onChange={(e) => setTagSearch(e.target.value)}
-                placeholder={allTags.length > 0 ? 'Buscar tags disponibles...' : ''}
+                placeholder={allTags.length > 0 ? t('dashboard.buscarTags') : ''}
                 className="sf-input"
                 style={{ width: '100%', fontSize: '0.75rem', display: allTags.length > 0 ? '' : 'none' }}
               />
@@ -465,19 +467,19 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
               {tagSearch && allTags.length > 0 && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', maxHeight: 80, overflowY: 'auto' }}>
                   {allTags
-                    .filter((t) => t.name.toLowerCase().includes(tagSearch.toLowerCase()) && !activeTagIds.includes(t.id))
+                    .filter((tag) => tag.name.toLowerCase().includes(tagSearch.toLowerCase()) && !activeTagIds.includes(tag.id))
                     .slice(0, 15)
-                    .map((t) => (
+                    .map((tag) => (
                       <button
-                        key={t.id}
-                        onClick={() => toggleTag(t.id)}
+                        key={tag.id}
+                        onClick={() => toggleTag(tag.id)}
                         style={{
                           fontSize: '0.68rem', padding: '0.2rem 0.5rem', borderRadius: 12, border: 'none',
                           cursor: 'pointer', whiteSpace: 'nowrap',
                           background: 'var(--sf-surface-hover)', color: 'var(--sf-text-2)',
-                          opacity: t.isAuto ? 0.5 : 1,
+                          opacity: tag.isAuto ? 0.5 : 1,
                         }}
-                      >{t.name}{t.isAuto ? ' (auto)' : ''}</button>
+                      >{tag.name}{tag.isAuto ? ` (${t('dashboard.auto')})` : ''}</button>
                     ))}
                 </div>
               )}
@@ -486,9 +488,9 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingTop: '0.25rem' }}>
             <button onClick={saveInfo} disabled={saving} className="sf-btn sf-btn-primary" style={{ fontSize: '0.78rem', padding: '0.4rem 1rem' }}>
-              {saving ? 'Guardando...' : 'Guardar Cambios'}
+              {saving ? t('dashboard.guardando') : t('dashboard.guardarCambios')}
             </button>
-            {saved && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>✓ Guardado</span>}
+            {saved && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>{t('dashboard.guardado')}</span>}
             {saveError && <span style={{ fontSize: '0.72rem', color: '#f87171' }}>{saveError}</span>}
           </div>
 
@@ -497,10 +499,10 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
             display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem',
             paddingTop: '0.75rem', borderTop: '1px solid var(--sf-border)',
           }}>
-            <StatCard label="Viewers" value={stats ? formatNumber(stats.viewers) : '—'} />
-            <StatCard label="Followers" value={stats ? formatNumber(stats.followers) : '—'} />
-            <StatCard label="Subs" value={stats ? formatNumber(stats.subscribers) : '—'} />
-            <StatCard label="Uptime" value={stats && stats.isLive ? formatUptime(stats.uptimeSeconds) : '—'} />
+            <StatCard label={t('dashboard.statsViewers')} value={stats ? formatNumber(stats.viewers) : '—'} />
+            <StatCard label={t('dashboard.statsFollowers')} value={stats ? formatNumber(stats.followers) : '—'} />
+            <StatCard label={t('dashboard.statsSubs')} value={stats ? formatNumber(stats.subscribers) : '—'} />
+            <StatCard label={t('dashboard.statsUptime')} value={stats && stats.isLive ? formatUptime(stats.uptimeSeconds) : '—'} />
           </div>
         </motion.div>
       </div>

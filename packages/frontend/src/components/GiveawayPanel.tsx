@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 
 interface Props {
   channel: string;
@@ -19,15 +20,7 @@ interface ActiveGiveaway {
   ticketRewardTitle: string;
 }
 
-const DURATION_OPTIONS = [
-  { value: 30,  label: '30 seg' },
-  { value: 60,  label: '1 min' },
-  { value: 120, label: '2 min' },
-  { value: 300, label: '5 min' },
-  { value: 600, label: '10 min' },
-  { value: 604800, label: '7 días' },
-  { value: 2592000, label: '30 días' },
-];
+
 
 const WHEEL_COLORS = [
   '#7c3aed', '#6366f1', '#8b5cf6', '#a78bfa',
@@ -36,12 +29,13 @@ const WHEEL_COLORS = [
 ];
 
 export function GiveawayPanel({ channel, backendUrl }: Props) {
+  const { t } = useTranslation();
   const [prize, setPrize] = useState('');
   const [duration, setDuration] = useState(60);
   const [message, setMessage] = useState('');
   const [active, setActive] = useState<ActiveGiveaway | null>(null);
   const [ticketCost, setTicketCost] = useState(1000);
-  const [ticketRewardTitle, setTicketRewardTitle] = useState('Sorteo');
+  const [ticketRewardTitle, setTicketRewardTitle] = useState(t('giveaway.configText2'));
 
   // Wheel state
   const [wheelNames, setWheelNames] = useState<string[]>([]);
@@ -54,6 +48,15 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
   const [autoSpin, setAutoSpin] = useState(false);
   const wheelRef = useRef<HTMLCanvasElement>(null);
   const { socket, connected } = useSocket();
+  const DURATION_OPTIONS = [
+    { value: 30,  label: t('giveaway.dur30s') },
+    { value: 60,  label: t('giveaway.dur1m') },
+    { value: 120, label: t('giveaway.dur2m') },
+    { value: 300, label: t('giveaway.dur5m') },
+    { value: 600, label: t('giveaway.dur10m') },
+    { value: 604800, label: t('giveaway.dur7d') },
+    { value: 2592000, label: t('giveaway.dur30d') },
+  ];
 
   useEffect(() => {
     if (channel && connected) {
@@ -256,32 +259,29 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
     <div style={{ maxWidth: 700 }}>
       <div style={{ marginBottom: '1.75rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          🎁 Sorteos
+          {t('giveaway.title')}
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-          Gestiona sorteos con sistema de boletos, multiplicador por suscripción y ruleta aleatoria
+          {t('giveaway.subtitle')}
         </p>
         <div style={{
           marginTop: '0.75rem', padding: '0.75rem 1rem', borderRadius: 8,
           background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)',
           fontSize: '0.78rem', color: 'var(--sf-text-2)', lineHeight: 1.5,
         }}>
-          <strong style={{ color: '#22d3ee' }}>⚙️ Configuración automática:</strong>
-          {' '}Crea una recompensa de puntos de canal en Twitch llamada{' '}
-          <strong>"Sorteo"</strong> con un costo de{' '}
-          <strong>1000 puntos</strong>. Cuando un viewer la canjee durante un
-          sorteo activo, recibirá boletos extra automáticamente (1 boleto por
-          cada 1000 pts canjeados).
+          <strong style={{ color: '#22d3ee' }}>{t('giveaway.configTitle')}</strong>
+          {' '}{t('giveaway.configText1')}{' '}
+          <strong>"{t('giveaway.configText2')}"</strong> con un costo de{' '}
+          <strong>{t('giveaway.configText3')}</strong>. {t('giveaway.configText4')}
         </div>
         <div style={{
           marginTop: '0.5rem', padding: '0.75rem 1rem', borderRadius: 8,
           background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
           fontSize: '0.78rem', color: 'var(--sf-text-2)', lineHeight: 1.5,
         }}>
-          <strong style={{ color: '#fbbf24' }}>👑 Multiplicador por suscripción:</strong>
-          {' '}Los suscriptores obtienen boletos extra automáticamente al escribir{' '}
-          <strong>!sorteo</strong>: Tier 1 = ×2, Tier 2 = ×5, Tier 3 = ×10 boletos.
-          Los no suscriptores reciben 1 boleto base.
+          <strong style={{ color: '#fbbf24' }}>{t('giveaway.subMultiplier')}</strong>
+          {' '}{t('giveaway.subMultiplierDesc')}{' '}
+          <strong>!sorteo</strong>{t('giveaway.subMultiplierDetail')}
         </div>
       </div>
 
@@ -302,7 +302,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                     <div>
                       <span className="sf-badge sf-badge-success" style={{ marginBottom: '0.625rem' }}>
                         <span className="animate-pulse-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--sf-success)', display: 'inline-block' }} />
-                        Sorteo activo
+                        {t('giveaway.activo')}
                       </span>
                       <h3 style={{ fontSize: '1.375rem', fontWeight: 700, color: 'var(--sf-text)', marginTop: '0.25rem', lineHeight: 1.3 }}>
                         {active.prize}
@@ -319,13 +319,13 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                         <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#34d399' }}>
                           {active.entries}
                         </span>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#34d399' }}>participantes</div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#34d399' }}>{t('giveaway.participantes')}</div>
                       </div>
                       <div>
                         <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#a78bfa' }}>
                           {active.totalTickets}
                         </span>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#a78bfa' }}>boletos totales</div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#a78bfa' }}>{t('giveaway.boletosTotales')}</div>
                       </div>
                       {active.ticketCost > 0 && (
                         <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)' }}>
@@ -336,20 +336,20 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                     {active.tickets && active.tickets.length > 0 && (
                       <details style={{ marginTop: '0.75rem' }}>
                         <summary style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', cursor: 'pointer' }}>
-                          Ver boletos por participante
+                          {t('giveaway.verBoletos')}
                         </summary>
                         <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                          {active.tickets.map((t) => {
-                            const prob = active.totalTickets > 0 ? ((t.tickets / active.totalTickets) * 100).toFixed(1) : '0';
+                          {active.tickets.map((entry) => {
+                            const prob = active.totalTickets > 0 ? ((entry.tickets / active.totalTickets) * 100).toFixed(1) : '0';
                             return (
-                              <div key={t.user} style={{
+                              <div key={entry.user} style={{
                                 display: 'flex', justifyContent: 'space-between',
                                 fontSize: '0.78rem', color: 'var(--sf-text-2)',
                                 padding: '0.2rem 0.4rem', borderRadius: 4,
                                 background: 'rgba(255,255,255,0.03)',
                               }}>
-                                <span>@{t.user}</span>
-                                <span>{t.tickets} boletos ({prob}%)</span>
+                                <span>@{entry.user}</span>
+                                <span>{entry.tickets} {t('giveaway.boletos')} ({prob}%)</span>
                               </div>
                             );
                           })}
@@ -358,7 +358,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                     )}
                   </div>
                   <button onClick={endGiveaway} className="sf-btn sf-btn-danger" style={{ width: '100%' }}>
-                    Finalizar sorteo y escoger ganador
+                    {t('giveaway.finalizar')}
                   </button>
                 </div>
               </motion.div>
@@ -371,15 +371,15 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                 transition={{ duration: 0.2 }}
               >
                 <div className="glass-card" style={{ padding: '1.5rem' }}>
-                  <p className="sf-section-title">Nuevo sorteo</p>
+                  <p className="sf-section-title">{t('giveaway.nuevoSorteo')}</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
-                        Premio
+                        {t('giveaway.premio')}
                       </label>
                       <input
                         type="text"
-                        placeholder="ej. Suscripción de 3 meses..."
+                        placeholder={t('giveaway.premioPlaceholder')}
                         value={prize}
                         onChange={(e) => setPrize(e.target.value)}
                         disabled={!channel}
@@ -388,7 +388,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                     </div>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
-                        Duración
+                        {t('giveaway.duracion')}
                       </label>
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {DURATION_OPTIONS.map((opt) => (
@@ -413,12 +413,12 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                     </div>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
-                        Boletos por puntos de canal (opcional)
+                        {t('giveaway.puntosCanal')}
                       </label>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <input
                           type="number"
-                          placeholder="Puntos por boleto (0 = desactivado)"
+                          placeholder={t('giveaway.puntosPorBoleto')}
                           value={ticketCost || ''}
                           onChange={(e) => setTicketCost(parseInt(e.target.value) || 0)}
                           disabled={!channel}
@@ -427,7 +427,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                         />
                         <input
                           type="text"
-                          placeholder="Nombre de la recompensa"
+                          placeholder={t('giveaway.recompensaPlaceholder')}
                           value={ticketRewardTitle}
                           onChange={(e) => setTicketRewardTitle(e.target.value)}
                           disabled={!channel || !ticketCost}
@@ -437,8 +437,8 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                       </div>
                       <div style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', marginTop: '0.25rem' }}>
                         {ticketCost > 0
-                          ? `Los viewers pueden canjear "${ticketRewardTitle || '...'}" por ${ticketCost} pts para obtener boletos extra`
-                          : 'Desactivado — solo se usará el comando !sorteo'}
+                          ? t('giveaway.puntosDesc', { reward: ticketRewardTitle || '...', cost: ticketCost })
+                          : t('giveaway.puntosDesactivado')}
                       </div>
                     </div>
                     <button
@@ -447,12 +447,12 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                       className="sf-btn sf-btn-primary"
                       style={{ width: '100%', marginTop: '0.25rem' }}
                     >
-                      🎁 Iniciar sorteo
+                      {t('giveaway.iniciar')}
                     </button>
                     {message && <p style={{ fontSize: '0.8rem', color: 'var(--sf-warning)', textAlign: 'center' }}>{message}</p>}
                     {!channel && (
                       <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', textAlign: 'center' }}>
-                        Ingresa tu canal de Twitch en la barra superior
+                        {t('giveaway.emptyChannel')}
                       </p>
                     )}
                   </div>
@@ -465,19 +465,19 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
         {/* ── Spin wheel ── */}
         <div>
           <div className="glass-card" style={{ padding: '1.5rem' }}>
-            <p className="sf-section-title" style={{ marginBottom: '0.75rem' }}>🎡 Ruleta aleatoria</p>
+            <p className="sf-section-title" style={{ marginBottom: '0.75rem' }}>{t('giveaway.ruleta')}</p>
             <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '1rem', lineHeight: 1.4 }}>
-              Añade nombres y haz girar la ruleta para escoger un ganador al azar.
+              {t('giveaway.ruletaDesc')}
             </p>
 
             <details style={{ marginBottom: '0.75rem' }}>
               <summary style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', cursor: 'pointer', userSelect: 'none' }}>
-                📋 Importar lista de nombres
+                {t('giveaway.importar')}
               </summary>
               <textarea
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
-                placeholder="Pega aquí los nombres, separados por comas o uno por línea&#10;Ej: usuario1, usuario2, usuario3&#10;o:&#10;usuario1&#10;usuario2"
+                placeholder={t('giveaway.importarPlaceholder')}
                 className="sf-input"
                 style={{ marginTop: '0.5rem', minHeight: 80, fontSize: '0.78rem', lineHeight: 1.5, resize: 'vertical' }}
               />
@@ -498,10 +498,10 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                   className="sf-btn sf-btn-primary"
                   style={{ fontSize: '0.78rem', padding: '0.35rem 0.875rem' }}
                 >
-                  Añadir a la ruleta
+                  {t('giveaway.añadirARuleta')}
                 </button>
                 <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', alignSelf: 'center' }}>
-                  Nombres separados por comas o saltos de línea
+                  {t('giveaway.nombresHint')}
                 </span>
               </div>
             </details>
@@ -512,7 +512,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                 value={wheelInput}
                 onChange={(e) => setWheelInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') addWheelName(); }}
-                placeholder="Nombre del participante"
+                placeholder={t('giveaway.participantePlaceholder')}
                 className="sf-input"
                 style={{ flex: 1, fontSize: '0.82rem' }}
               />
@@ -522,7 +522,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                 className="sf-btn sf-btn-primary"
                 style={{ padding: '0.4rem 0.75rem', fontSize: '0.78rem' }}
               >
-                Añadir
+                {t('giveaway.añadir')}
               </button>
             </div>
 
@@ -554,7 +554,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>
-                ⏱ Duración del giro
+                {t('giveaway.giroDuracion')}
               </span>
               {[10, 15, 20].map((s) => (
                 <button
@@ -569,7 +569,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                     cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s ease',
                   }}
                 >
-                  {s} seg
+                  {s} {t('giveaway.seg')}
                 </button>
               ))}
             </div>
@@ -582,7 +582,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: 'var(--sf-text-3)', fontSize: '0.82rem',
                 }}>
-                  Añade al menos 2 nombres
+                  {t('giveaway.minimoNombres')}
                 </div>
               ) : (
                 <>
@@ -611,7 +611,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
               className={`sf-btn ${spinning ? 'sf-btn-ghost' : 'sf-btn-primary'}`}
               style={{ width: '100%', marginBottom: winner ? '0.75rem' : 0 }}
             >
-              {spinning ? '🎡 Girando...' : '🎡 Girar ruleta'}
+              {spinning ? t('giveaway.girando') : t('giveaway.girar')}
             </button>
 
             {winner && (
@@ -625,7 +625,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                 }}
               >
                 <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 600, marginBottom: '0.15rem' }}>
-                  🏆 GANADOR
+                  {t('giveaway.ganador')}
                 </div>
                 <div style={{ fontSize: '1.125rem', fontWeight: 700, color: '#6ee7b7' }}>
                   {winner}
