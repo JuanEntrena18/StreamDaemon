@@ -25,7 +25,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
       {/* ── Twitch Auth ── */}
       <div className="glass-card" style={{ padding: '1.5rem' }}>
         <p className="sf-section-title">{t('config.twitchTitle')}</p>
