@@ -25,8 +25,9 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
         </p>
       </div>
 
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
       {/* ── Twitch Auth ── */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
+      <div className="glass-card" style={{ padding: '1.5rem' }}>
         <p className="sf-section-title">{t('config.twitchTitle')}</p>
         <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', marginBottom: '1rem', lineHeight: 1.5 }}>
           {t('config.twitchDesc')}
@@ -193,7 +194,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
       {/* ── Re-auth note ── */}
       {authenticated && (
         <div style={{
-          padding: '0.75rem 1rem', marginBottom: '1.25rem',
+          padding: '0.75rem 1rem',
           background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
           borderRadius: 'var(--sf-radius-sm)', fontSize: '0.78rem', color: '#fbbf24',
           lineHeight: 1.5,
@@ -204,7 +205,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
 
       {/* ── Always on top ── */}
       {window.streamforger && (
-        <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
+        <div className="glass-card" style={{ padding: '1.5rem' }}>
           <p className="sf-section-title">{t('config.ventanaTitle')}</p>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -298,7 +299,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
       </div>
 
       {/* ── Buy Me a Coffee ── */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginTop: '1.25rem' }}>
+      <div className="glass-card" style={{ padding: '1.5rem' }}>
         <p className="sf-section-title">{t('config.apoyoTitle')}</p>
         <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', marginBottom: '1rem', lineHeight: 1.5 }}>
           {t('config.apoyoDesc')}
@@ -342,6 +343,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }
