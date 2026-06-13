@@ -1,9 +1,46 @@
 import { FastifyInstance } from 'fastify';
 import { getIO } from '../socket/index.js';
-import { ScoreboardPlayerSchema, ScoreboardScoreSchema, ScoreboardIncrementSchema } from '@streamforger/shared';
-import type { ScoreboardState, ScoreboardPlayer } from '@streamforger/shared';
+import { ScoreboardPlayerSchema, ScoreboardScoreSchema, ScoreboardIncrementSchema, FighterConfigSchema, FighterDamageSchema, FighterRoundSchema, FighterHealSchema } from '@streamforger/shared';
+import type { ScoreboardState, ScoreboardPlayer, FighterState, FighterPlayer } from '@streamforger/shared';
 
 const boards = new Map<string, ScoreboardState>();
+const fighterBoards = new Map<string, FighterState>();
+const fighterIntervals = new Map<string, NodeJS.Timeout>();
+
+function defaultFighter(): FighterState {
+  return {
+    p1: { name: 'Player 1', health: 144, rounds: 0, charName: '', portrait: '' },
+    p2: { name: 'Player 2', health: 144, rounds: 0, charName: '', portrait: '' },
+    maxHealth: 144,
+    roundsToWin: 2,
+    timerRemaining: 99,
+    timerRunning: false,
+    timerDuration: 99,
+    status: 'waiting',
+  };
+}
+
+function getOrCreateFighter(channel: string): FighterState {
+  let f = fighterBoards.get(channel);
+  if (!f) {
+    f = defaultFighter();
+    fighterBoards.set(channel, f);
+  }
+  return f;
+}
+
+function broadcastFighter(channel: string) {
+  const f = fighterBoards.get(channel);
+  if (f) getIO().to(`channel:${channel}`).emit('fighter:update', f);
+}
+
+function stopFighterTimer(channel: string) {
+  const interval = fighterIntervals.get(channel);
+  if (interval) {
+    clearInterval(interval);
+    fighterIntervals.delete(channel);
+  }
+}
 
 function broadcast(channel: string) {
   const board = boards.get(channel);
@@ -133,5 +170,161 @@ export function setupScoreboard(app: FastifyInstance) {
     const empty: ScoreboardState = { players: [], title: 'Scoreboard' };
     getIO().to(`channel:${channel}`).emit('scoreboard:update', empty);
     reply.send(empty);
+  });
+
+  // ── Fighter routes ──
+
+  app.get('/fighter/:channel', async (req, reply) => {
+    const { channel } = req.params as { channel: string };
+    reply.send(getOrCreateFighter(channel));
+  });
+
+  app.post('/fighter/config', async (req, reply) => {
+    const { channel } = req.body as { channel?: string };
+    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
+    const parsed = FighterConfigSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() });
+    const f = getOrCreateFighter(channel);
+    const cfg = parsed.data;
+    if (cfg.p1Name !== undefined) f.p1.name = cfg.p1Name;
+    if (cfg.p1CharName !== undefined) f.p1.charName = cfg.p1CharName;
+    if (cfg.p1Portrait !== undefined) f.p1.portrait = cfg.p1Portrait;
+    if (cfg.p2Name !== undefined) f.p2.name = cfg.p2Name;
+    if (cfg.p2CharName !== undefined) f.p2.charName = cfg.p2CharName;
+    if (cfg.p2Portrait !== undefined) f.p2.portrait = cfg.p2Portrait;
+    if (cfg.maxHealth !== undefined) f.maxHealth = cfg.maxHealth;
+    if (cfg.roundsToWin !== undefined) f.roundsToWin = cfg.roundsToWin;
+    if (cfg.timerDuration !== undefined) { f.timerDuration = cfg.timerDuration; f.timerRemaining = cfg.timerDuration; }
+    broadcastFighter(channel);
+    reply.send(f);
+  });
+
+  app.post('/fighter/damage', async (req, reply) => {
+    const { channel } = req.body as { channel?: string };
+    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
+    const parsed = FighterDamageSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() });
+    const f = fighterBoards.get(channel);
+    if (!f) return reply.status(404).send({ error: 'No fighter board' });
+    const player = parsed.data.player === 'p1' ? f.p1 : f.p2;
+    player.health = Math.max(0, player.health - parsed.data.amount);
+    if (player.health <= 0) f.status = 'finished';
+    broadcastFighter(channel);
+    reply.send(f);
+  });
+
+  app.post('/fighter/heal', async (req, reply) => {
+    const { channel } = req.body as { channel?: string };
+    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
+    const parsed = FighterHealSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() });
+    const f = fighterBoards.get(channel);
+    if (!f) return reply.status(404).send({ error: 'No fighter board' });
+    const player = parsed.data.player === 'p1' ? f.p1 : f.p2;
+    player.health = Math.min(f.maxHealth, player.health + parsed.data.amount);
+    broadcastFighter(channel);
+    reply.send(f);
+  });
+
+  app.post('/fighter/round', async (req, reply) => {
+    const { channel } = req.body as { channel?: string };
+    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
+    const parsed = FighterRoundSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() });
+    const f = fighterBoards.get(channel);
+    if (!f) return reply.status(404).send({ error: 'No fighter board' });
+    const player = parsed.data.player === 'p1' ? f.p1 : f.p2;
+    player.rounds = Math.min(f.roundsToWin, player.rounds + 1);
+    const opponent = parsed.data.player === 'p1' ? f.p2 : f.p1;
+    if (player.rounds >= f.roundsToWin) {
+      f.status = 'finished';
+    } else {
+      f.p1.health = f.maxHealth;
+      f.p2.health = f.maxHealth;
+      f.timerRemaining = f.timerDuration;
+      f.timerRunning = false;
+      stopFighterTimer(channel);
+    }
+    broadcastFighter(channel);
+    reply.send(f);
+  });
+
+  app.post('/fighter/timer/start', async (req, reply) => {
+    const { channel } = req.body as { channel?: string };
+    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
+    const f = fighterBoards.get(channel);
+    if (!f) return reply.status(404).send({ error: 'No fighter board' });
+    if (f.timerRunning) return reply.send(f);
+    f.timerRunning = true;
+    if (f.timerRemaining <= 0) f.timerRemaining = f.timerDuration;
+    const interval = setInterval(() => {
+      const state = fighterBoards.get(channel);
+      if (!state || !state.timerRunning) { stopFighterTimer(channel); return; }
+      state.timerRemaining = Math.max(0, state.timerRemaining - 1);
+      broadcastFighter(channel);
+      if (state.timerRemaining <= 0) {
+        state.timerRunning = false;
+        stopFighterTimer(channel);
+        if (state.p1.health !== state.p2.health) {
+          state.p1.health > state.p2.health
+            ? state.p1.rounds = Math.min(state.roundsToWin, state.p1.rounds + 1)
+            : state.p2.rounds = Math.min(state.roundsToWin, state.p2.rounds + 1);
+          const winner = state.p1.health > state.p2.health ? state.p1 : state.p2;
+          const loser = state.p1.health > state.p2.health ? state.p2 : state.p1;
+          if (winner.rounds >= state.roundsToWin) {
+            state.status = 'finished';
+          } else {
+            state.p1.health = state.maxHealth;
+            state.p2.health = state.maxHealth;
+            state.timerRemaining = state.timerDuration;
+          }
+        } else {
+          state.status = 'finished';
+        }
+        broadcastFighter(channel);
+      }
+    }, 1000);
+    fighterIntervals.set(channel, interval);
+    broadcastFighter(channel);
+    reply.send(f);
+  });
+
+  app.post('/fighter/timer/pause', async (req, reply) => {
+    const { channel } = req.body as { channel?: string };
+    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
+    const f = fighterBoards.get(channel);
+    if (!f) return reply.status(404).send({ error: 'No fighter board' });
+    f.timerRunning = false;
+    stopFighterTimer(channel);
+    broadcastFighter(channel);
+    reply.send(f);
+  });
+
+  app.post('/fighter/timer/reset', async (req, reply) => {
+    const { channel } = req.body as { channel?: string };
+    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
+    const f = fighterBoards.get(channel);
+    if (!f) return reply.status(404).send({ error: 'No fighter board' });
+    f.timerRunning = false;
+    f.timerRemaining = f.timerDuration;
+    stopFighterTimer(channel);
+    broadcastFighter(channel);
+    reply.send(f);
+  });
+
+  app.post('/fighter/reset', async (req, reply) => {
+    const { channel } = req.body as { channel?: string };
+    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
+    stopFighterTimer(channel);
+    const f = getOrCreateFighter(channel);
+    f.p1.health = f.maxHealth;
+    f.p1.rounds = 0;
+    f.p2.health = f.maxHealth;
+    f.p2.rounds = 0;
+    f.timerRemaining = f.timerDuration;
+    f.timerRunning = false;
+    f.status = 'waiting';
+    broadcastFighter(channel);
+    reply.send(f);
   });
 }

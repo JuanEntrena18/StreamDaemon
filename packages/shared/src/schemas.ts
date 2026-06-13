@@ -51,6 +51,32 @@ export const ScoreboardIncrementSchema = z.object({
   amount: z.number().int().default(1),
 });
 
+export const FighterConfigSchema = z.object({
+  p1Name: z.string().min(1).max(50).optional(),
+  p2Name: z.string().min(1).max(50).optional(),
+  p1CharName: z.string().max(50).optional(),
+  p2CharName: z.string().max(50).optional(),
+  p1Portrait: z.string().max(500).optional(),
+  p2Portrait: z.string().max(500).optional(),
+  maxHealth: z.number().int().min(1).max(999).optional(),
+  roundsToWin: z.number().int().min(1).max(99).optional(),
+  timerDuration: z.number().int().min(1).max(3600).optional(),
+});
+
+export const FighterDamageSchema = z.object({
+  player: z.enum(['p1', 'p2']),
+  amount: z.number().int().min(1).max(999),
+});
+
+export const FighterRoundSchema = z.object({
+  player: z.enum(['p1', 'p2']),
+});
+
+export const FighterHealSchema = z.object({
+  player: z.enum(['p1', 'p2']),
+  amount: z.number().int().min(1).max(999),
+});
+
 export const HudConfigSchema = z.object({
   showViewers: z.boolean().default(true),
   showFollowers: z.boolean().default(true),

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
-import type { ScoreboardState } from '@streamforger/shared';
+import type { FighterState } from '@streamforger/shared';
 
 interface Props {
   channel: string;
@@ -8,8 +9,93 @@ interface Props {
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 
+function healthColor(health: number, max: number): string {
+  const pct = health / max;
+  if (pct > 0.5) return `hsl(${120 * pct}, 80%, 42%)`;
+  if (pct > 0.25) return `hsl(${60 + 60 * (pct - 0.25) / 0.25}, 90%, 45%)`;
+  return `hsl(0, 85%, 40%)`;
+}
+
+function healthBgColor(side: 'p1' | 'p2'): string {
+  return side === 'p1' ? 'rgba(59,130,246,0.15)' : 'rgba(239,68,68,0.15)';
+}
+
+function playerTheme(side: 'p1' | 'p2') {
+  return side === 'p1'
+    ? { primary: '#3b82f6', secondary: '#1d4ed8', accent: '#93c5fd', glow: 'rgba(59,130,246,0.4)' }
+    : { primary: '#ef4444', secondary: '#dc2626', accent: '#fca5a5', glow: 'rgba(239,68,68,0.4)' };
+}
+
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function RoundStars({ count, max, side }: { count: number; max: number; side: 'p1' | 'p2' }) {
+  const theme = playerTheme(side);
+  return (
+    <div style={{ display: 'flex', gap: 4, justifyContent: side === 'p1' ? 'flex-start' : 'flex-end' }}>
+      {Array.from({ length: max }, (_, i) => (
+        <motion.span
+          key={i}
+          initial={{ scale: 0, rotate: -180 }}
+          animate={i < count ? { scale: 1, rotate: 0 } : { scale: 0.7, opacity: 0.3 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 12, delay: i * 0.1 }}
+          style={{
+            display: 'inline-block',
+            fontSize: '1.1rem',
+            lineHeight: 1,
+            filter: i < count ? `drop-shadow(0 0 4px ${theme.glow})` : 'none',
+          }}
+        >
+          ★
+        </motion.span>
+      ))}
+    </div>
+  );
+}
+
+function Portrait({ url, name, side }: { url: string; name: string; side: 'p1' | 'p2' }) {
+  const theme = playerTheme(side);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: 56, flexShrink: 0 }}>
+      {url ? (
+        <img
+          src={url}
+          alt={name}
+          style={{
+            width: 48, height: 48, borderRadius: 8,
+            border: `2px solid ${theme.primary}`,
+            objectFit: 'cover',
+            background: 'rgba(0,0,0,0.4)',
+          }}
+        />
+      ) : (
+        <div style={{
+          width: 48, height: 48, borderRadius: 8,
+          border: `2px solid ${theme.primary}`,
+          background: 'rgba(0,0,0,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '1.2rem', color: theme.accent,
+        }}>
+          ?
+        </div>
+      )}
+      <span style={{
+        fontSize: '0.6rem', fontWeight: 700, color: theme.accent,
+        textTransform: 'uppercase', letterSpacing: '0.05em',
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        maxWidth: 56, textAlign: 'center',
+      }}>
+        {name}
+      </span>
+    </div>
+  );
+}
+
 export function ScoreboardOverlay({ channel }: Props) {
-  const [board, setBoard] = useState<ScoreboardState>({ players: [], title: 'Scoreboard' });
+  const [fighter, setFighter] = useState<FighterState | null>(null);
   const { socket, connected } = useSocket();
 
   useEffect(() => {
@@ -18,108 +104,184 @@ export function ScoreboardOverlay({ channel }: Props) {
     }
   }, [channel, connected, socket]);
 
-  useSocketEvent('scoreboard:update', useCallback((data: ScoreboardState) => {
-    setBoard(data);
+  useSocketEvent('fighter:update', useCallback((data: FighterState) => {
+    setFighter(data);
   }, []));
 
   useEffect(() => {
     if (!channel || !connected) return;
-    fetch(`${BACKEND_URL}/scoreboard/${channel}`)
+    fetch(`${BACKEND_URL}/fighter/${channel}`)
       .then((r) => r.json())
-      .then((data) => { if (data) setBoard(data); })
+      .then((data) => { if (data) setFighter(data); })
       .catch(() => {});
   }, [channel, connected]);
 
-  const { players, title } = board;
-  if (players.length === 0) return null;
+  if (!fighter) return null;
 
-  const sorted = [...players].sort((a, b) => b.score - a.score);
-  const maxScore = Math.max(...sorted.map((p) => p.score), 1);
+  const p1Theme = playerTheme('p1');
+  const p2Theme = playerTheme('p2');
+  const p1Pct = fighter.p1.health / fighter.maxHealth;
+  const p2Pct = fighter.p2.health / fighter.maxHealth;
+  const timerLow = fighter.timerRemaining <= 10 && fighter.timerRunning;
 
   return (
     <div style={{
       position: 'absolute',
-      top: '50%', right: 40,
-      transform: 'translateY(-50%)',
-      fontFamily: "'Inter', sans-serif",
-      minWidth: 200,
+      top: 0, left: 0, right: 0,
+      padding: '12px 24px 4px',
+      fontFamily: "'Inter', 'Segoe UI', sans-serif",
+      pointerEvents: 'none',
+      userSelect: 'none',
     }}>
-      {/* Title */}
-      <div style={{
-        textAlign: 'center',
-        fontSize: '0.85rem', fontWeight: 700,
-        color: 'rgba(255,255,255,0.6)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.15em',
-        marginBottom: 12,
-      }}>
-        {title}
-      </div>
-
-      {/* Players */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {sorted.map((player, i) => {
-          const pct = maxScore > 0 ? (player.score / maxScore) * 100 : 0;
-          const isFirst = i === 0 && player.score > 0;
-
-          return (
-            <div key={player.id} style={{
-              position: 'relative',
-              background: 'rgba(0,0,0,0.4)',
-              borderRadius: 8,
-              overflow: 'hidden',
+      {/* Timer & Round Indicators layer */}
+      <div style={{ display: 'flex', alignItems: 'stretch', gap: 8, height: 90 }}>
+        {/* ── P1 side ── */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          flex: 1, justifyContent: 'flex-start',
+        }}>
+          <Portrait url={fighter.p1.portrait} name={fighter.p1.charName || fighter.p1.name} side="p1" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, flex: 1 }}>
+            <div style={{
+              fontSize: '0.75rem', fontWeight: 700, color: p1Theme.accent,
+              textTransform: 'uppercase', letterSpacing: '0.08em',
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
             }}>
-              {/* Score bar */}
+              {fighter.p1.name}
+            </div>
+            <div style={{
+              height: 22, borderRadius: 4, overflow: 'hidden',
+              background: healthBgColor('p1'),
+              position: 'relative',
+              border: `1px solid ${p1Theme.primary}33`,
+            }}>
+              <motion.div
+                layout
+                animate={{ width: `${p1Pct * 100}%` }}
+                transition={{ type: 'spring', stiffness: 120, damping: 14 }}
+                style={{
+                  height: '100%',
+                  background: `linear-gradient(90deg, ${healthColor(fighter.p1.health, fighter.maxHealth)}, ${p1Theme.primary})`,
+                  borderRadius: 3,
+                  boxShadow: `inset 0 0 8px ${p1Theme.glow}`,
+                }}
+              />
               <div style={{
                 position: 'absolute', inset: 0,
-                width: `${pct}%`,
-                background: isFirst
-                  ? 'linear-gradient(90deg, rgba(168,85,247,0.35), rgba(99,102,241,0.25))'
-                  : 'rgba(255,255,255,0.06)',
-                transition: 'width 0.5s ease',
-                borderRadius: 8,
-              }} />
-
-              {/* Content */}
-              <div style={{
-                position: 'relative',
-                display: 'flex', alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '6px 12px',
-                zIndex: 1,
+                display: 'flex', alignItems: 'center', padding: '0 8px',
+                fontSize: '0.72rem', fontWeight: 800, color: '#fff',
+                fontVariantNumeric: 'tabular-nums',
+                textShadow: '0 1px 3px rgba(0,0,0,0.6)',
               }}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                }}>
-                  {/* Rank */}
-                  <span style={{
-                    fontSize: '0.68rem', fontWeight: 700,
-                    color: isFirst ? '#a78bfa' : 'rgba(255,255,255,0.35)',
-                    minWidth: 16, textAlign: 'center',
-                  }}>
-                    {isFirst ? '🏆' : `#${i + 1}`}
-                  </span>
-                  {/* Name */}
-                  <span style={{
-                    fontSize: '0.85rem', fontWeight: 600,
-                    color: 'rgba(255,255,255,0.9)',
-                  }}>
-                    {player.name}
-                  </span>
-                </div>
-                {/* Score */}
-                <span style={{
-                  fontSize: '0.95rem', fontWeight: 800,
-                  color: isFirst ? '#a78bfa' : 'rgba(255,255,255,0.7)',
-                  fontVariantNumeric: 'tabular-nums',
-                }}>
-                  {player.score}
-                </span>
+                {fighter.p1.health}
               </div>
             </div>
-          );
-        })}
+            <RoundStars count={fighter.p1.rounds} max={fighter.roundsToWin} side="p1" />
+          </div>
+        </div>
+
+        {/* ── Center Timer ── */}
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          justifyContent: 'center', width: 72, flexShrink: 0, gap: 2,
+        }}>
+          <motion.div
+            animate={timerLow ? { scale: [1, 1.15, 1] } : {}}
+            transition={{ repeat: timerLow ? Infinity : 0, duration: 0.5 }}
+            style={{
+              fontSize: '1.5rem', fontWeight: 900,
+              fontFamily: "'Inter', 'Segoe UI', monospace",
+              fontVariantNumeric: 'tabular-nums',
+              color: timerLow ? '#fbbf24' : 'rgba(255,255,255,0.85)',
+              textShadow: timerLow ? '0 0 12px rgba(251,191,36,0.6)' : '0 1px 4px rgba(0,0,0,0.5)',
+              lineHeight: 1,
+              letterSpacing: '0.02em',
+              transition: 'color 0.3s',
+            }}
+          >
+            {formatTime(fighter.timerRemaining)}
+          </motion.div>
+          <div style={{
+            fontSize: '0.55rem', fontWeight: 600,
+            color: 'rgba(255,255,255,0.4)',
+            textTransform: 'uppercase', letterSpacing: '0.12em',
+          }}>
+            TIME
+          </div>
+        </div>
+
+        {/* ── P2 side ── */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          flex: 1, justifyContent: 'flex-end',
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, flex: 1, textAlign: 'right' }}>
+            <div style={{
+              fontSize: '0.75rem', fontWeight: 700, color: p2Theme.accent,
+              textTransform: 'uppercase', letterSpacing: '0.08em',
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
+              {fighter.p2.name}
+            </div>
+            <div style={{
+              height: 22, borderRadius: 4, overflow: 'hidden',
+              background: healthBgColor('p2'),
+              position: 'relative',
+              border: `1px solid ${p2Theme.primary}33`,
+            }}>
+              <motion.div
+                layout
+                animate={{ width: `${p2Pct * 100}%` }}
+                transition={{ type: 'spring', stiffness: 120, damping: 14 }}
+                style={{
+                  height: '100%', marginLeft: 'auto',
+                  background: `linear-gradient(270deg, ${healthColor(fighter.p2.health, fighter.maxHealth)}, ${p2Theme.primary})`,
+                  borderRadius: 3,
+                  boxShadow: `inset 0 0 8px ${p2Theme.glow}`,
+                }}
+              />
+              <div style={{
+                position: 'absolute', inset: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 8px',
+                fontSize: '0.72rem', fontWeight: 800, color: '#fff',
+                fontVariantNumeric: 'tabular-nums',
+                textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+              }}>
+                {fighter.p2.health}
+              </div>
+            </div>
+            <RoundStars count={fighter.p2.rounds} max={fighter.roundsToWin} side="p2" />
+          </div>
+          <Portrait url={fighter.p2.portrait} name={fighter.p2.charName || fighter.p2.name} side="p2" />
+        </div>
       </div>
+
+      {/* ── Status Bar ── */}
+      {fighter.status === 'finished' && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            textAlign: 'center',
+            fontSize: '0.85rem', fontWeight: 800,
+            color: '#fbbf24',
+            textShadow: '0 0 20px rgba(251,191,36,0.5)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.15em',
+            marginTop: 6,
+          }}
+        >
+          {fighter.p1.rounds > fighter.p2.rounds
+            ? `${fighter.p1.name} WINS!`
+            : fighter.p2.rounds > fighter.p1.rounds
+              ? `${fighter.p2.name} WINS!`
+              : fighter.p1.health > fighter.p2.health
+                ? `${fighter.p1.name} WINS!`
+                : fighter.p2.health > fighter.p1.health
+                  ? `${fighter.p2.name} WINS!`
+                  : 'DRAW!'}
+        </motion.div>
+      )}
     </div>
   );
 }

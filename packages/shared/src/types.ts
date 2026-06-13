@@ -160,6 +160,25 @@ export interface ScoreboardState {
   title: string;
 }
 
+export interface FighterPlayer {
+  name: string;
+  health: number;
+  rounds: number;
+  charName: string;
+  portrait: string;
+}
+
+export interface FighterState {
+  p1: FighterPlayer;
+  p2: FighterPlayer;
+  maxHealth: number;
+  roundsToWin: number;
+  timerRemaining: number;
+  timerRunning: boolean;
+  timerDuration: number;
+  status: 'waiting' | 'playing' | 'finished';
+}
+
 export type ServerEvent =
   | { type: 'chat:message'; data: ChatMessage }
   | { type: 'channel:follow'; data: ChannelFollowEvent }
@@ -179,6 +198,7 @@ export type ServerEvent =
   | { type: 'timer:state'; data: TimerState }
   | { type: 'timer:tick'; data: { remaining: number } }
   | { type: 'scoreboard:update'; data: ScoreboardState }
+  | { type: 'fighter:update'; data: FighterState }
   | { type: 'subathon:tick'; data: { remaining: number; maxLimit: number } }
   | { type: 'subathon:time-added'; data: { amount: number; reason: string; user: string; remaining: number } }
   | { type: 'subathon:state'; data: SubathonState };
