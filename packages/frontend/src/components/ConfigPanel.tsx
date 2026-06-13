@@ -25,6 +25,52 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
         </p>
       </div>
 
+      {/* ── Buy Me a Coffee ── */}
+      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
+        <p className="sf-section-title">{t('config.apoyoTitle')}</p>
+        <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', marginBottom: '1rem', lineHeight: 1.5 }}>
+          {t('config.apoyoDesc')}
+        </p>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+          <img
+            src="/qr-code.png"
+            alt="Buy Me a Coffee QR"
+            style={{
+              width: 120, height: 120, borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--sf-border)', flexShrink: 0,
+            }}
+          />
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <a
+              href="https://buymeacoffee.com/jentrena"
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.6rem 1.25rem',
+                borderRadius: 'var(--radius-sm)',
+                background: 'linear-gradient(135deg, #FFDD00, #FFB800)',
+                color: '#1a1a2e',
+                textDecoration: 'none',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                transition: 'all 0.15s',
+                boxShadow: '0 2px 12px rgba(255,221,0,0.3)',
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 4H3c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h8l1 3h-2c-.55 0-1 .45-1 1s.45 1 1 1h6c.55 0 1-.45 1-1s-.45-1-1-1h-2l1-3h8c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1zm-1 10H4V6h16v8z"/>
+              </svg>
+              {t('config.invitameCafe')}
+            </a>
+            <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--sf-text-3)' }}>
+              buymeacoffee.com/jentrena
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ── Twitch Auth ── */}
       <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
         <p className="sf-section-title">{t('config.twitchTitle')}</p>
@@ -297,51 +343,6 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
         </div>
       </div>
 
-      {/* ── Buy Me a Coffee ── */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
-        <p className="sf-section-title">{t('config.apoyoTitle')}</p>
-        <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', marginBottom: '1rem', lineHeight: 1.5 }}>
-          {t('config.apoyoDesc')}
-        </p>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
-          <img
-            src="/qr-code.png"
-            alt="Buy Me a Coffee QR"
-            style={{
-              width: 120, height: 120, borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--sf-border)', flexShrink: 0,
-            }}
-          />
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <a
-              href="https://buymeacoffee.com/jentrena"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.6rem 1.25rem',
-                borderRadius: 'var(--radius-sm)',
-                background: 'linear-gradient(135deg, #FFDD00, #FFB800)',
-                color: '#1a1a2e',
-                textDecoration: 'none',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                transition: 'all 0.15s',
-                boxShadow: '0 2px 12px rgba(255,221,0,0.3)',
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M21 4H3c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h8l1 3h-2c-.55 0-1 .45-1 1s.45 1 1 1h6c.55 0 1-.45 1-1s-.45-1-1-1h-2l1-3h8c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1zm-1 10H4V6h16v8z"/>
-              </svg>
-              {t('config.invitameCafe')}
-            </a>
-            <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--sf-text-3)' }}>
-              buymeacoffee.com/jentrena
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
