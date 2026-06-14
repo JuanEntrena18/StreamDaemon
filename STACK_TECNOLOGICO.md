@@ -63,13 +63,14 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 | `App.tsx` | Layout principal con sidebar (8 secciones: GESTOR, ESTADÍSTICAS, SEGURIDAD, Chat, MOD, COMANDOS, Herramientas, Config) + header + tab transitions |
 | `StreamDashboard.tsx` | Gestor unificado: preview embed, editor título/juego, stats en vivo, feed actividad con filtros |
 | `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación, selector sonido con volumen, **TTS (voz, velocidad, volumen)**, overlay controls (tamaño, opacidad, tipografía, fondo negro/transparente) |
-| `SecurityPanel.tsx` | Anti-Bots: estadísticas de detección, toggles de protección (follow bots, spam, auto-ban), escaneo manual de seguidores, lista blanca, log de detecciones recientes |
+| `SecurityPanel.tsx` | Anti-Bots: estadísticas, toggles de protección, escaneo manual, lista blanca, log de detecciones con acciones ban/unban/whitelist por fila, tarjeta de ayuda del sistema |
 | `GiveawayPanel.tsx` | Panel sorteos con ruleta canvas e importación masiva |
 | `PredictionPanel.tsx` | Panel de predicciones con opciones A/B/C |
 | `TrackerPanel.tsx` | Twitch Tracker: estadísticas históricas, resumen del último stream, gráficos SVG de evolución (views/seguidores/duración), consejos inteligentes multi-factor e integración Ollama |
 | `HudPanel.tsx` | Stream HUD: botones iniciar/detener polling, stats en vivo |
 | `TimerPanel.tsx` | Temporizador: configurar duración, iniciar, pausar, reanudar, reset |
-| `ScoreboardPanel.tsx` | Scoreboard: jugadores, puntuaciones, ranking |
+| `ScoreboardPanel.tsx` | Scoreboard clásico + Fighter Overlay: presets de daño, rondas, timer, configuración de jugadores/personajes/retratos |
+| `BitrateCalculatorPanel` | Calculadora de bitrate para streaming: input de velocidad de subida con recomendación automática, selector de resolución, FPS, BPP, audio bitrate y % de uso de subida. Resultados con comparación "conexión vs. necesario", advertencia del límite de Twitch y guía paso a paso de configuración en OBS con valores dinámicos. Sin dependencia de backend |
 | `SubathonPanel.tsx` | Subathon: timer, progreso, añadir tiempo manual, historial, config, overlay URL |
 | `ModPanel.tsx` | Moderación: timeout/ban/unban + lista de chatters conectados |
 | `CommandsPanel.tsx` | Comandos personalizados: crear, editar, toggle, cooldown |
@@ -103,7 +104,7 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 | **Predictions** | `src/predictions/index.ts` | Predicciones Twitch: crear, resolver |
 | **HUD** | `src/hud/index.ts` | Stream HUD: polling Twitch API cada 10-15s, emisión `hud:update` |
 | **Timer** | `src/timer/index.ts` | Temporizador: cuenta regresiva in-memory con tick cada 1s vía Socket.IO, REST start/pause/resume/reset |
-| **Scoreboard** | `src/scoreboard/index.ts` | Scoreboard: gestión de jugadores y puntuaciones in-memory, emisión `scoreboard:update` |
+| **Scoreboard** | `src/scoreboard/index.ts` | Scoreboard clásico + **Fighter**: barras de vida, rondas, timer server-side (setInterval 1s), daño/curación, resolución automática de rondas. Emisiones `scoreboard:update` y `fighter:update` |
 | **EventSub** | `src/eventsub/index.ts` | EventSub WebSocket listener: follows, subs, resubs, gifts, redemptions, cheers. Integrado con detección de follow bots |
 | **Mod** | `src/mod/index.ts` | Moderación: chatters (GET /mod/chatters/:channel), timeout, ban, unban vía Twitch Helix API |
 | **Tracker** | `src/tracker/index.ts` | Twitch Tracker: estadísticas agregadas (`/tracker/stats`), desglose por stream con datos de actividad (`/tracker/streams`) y motor de consejos inteligente multi-factor con integración opcional Ollama (`/tracker/advice`) |
@@ -262,6 +263,7 @@ twitch_overlay/
 | 32 | **Overlay controls redesign** — Toggle always-on-top desde sidebar, control de opacidad general (10-100%), modo fondo, selector de fuente y tamaño. `OverlayErrorBoundary` para manejo de errores React | ✅ |
 | 33 | **Chat TTS + Volumen** — Text-to-Speech con selección de voz, velocidad y volumen. Control de volumen maestro para sonidos de alerta. Control de volumen independiente para TTS | ✅ |
 | 34 | **Anti-Bots** — Módulo de seguridad con detección de follow bots, filtro de spam, auto-ban, escaneo manual, lista blanca y estadísticas. Sección SEGURIDAD en el dashboard | ✅ |
-| **35** | **🌍 Traducción multi-idioma** — Frontend traducido a inglés, francés, alemán e italiano con detección automática del idioma del navegador | 🔜 |
-| **36** | **🎮 Integración Stream Deck** — Plugin nativo para Elgato Stream Deck (Node.js + CLI SDK). Acciones: Subathon, Sorteo, Moderación, Stream info, Anti-Bots. Conexión vía HTTP REST a la API local de StreamForger | 🔜 |
-| **37** | **🎬 Gestión y exportación de clips a TikTok** — Creación, edición y exportación automática de clips del stream a TikTok con formato vertical, subtítulos automáticos y programación de publicaciones | 🔜 |
+| **35** | **⚔️ Fighter Scoreboard Overlay** — Overlay de pelea con barras de vida animadas (spring physics), retratos, rondas, timer server-side, anuncios WIN/KO. Panel con presets de daño, control de rondas y configuración de jugadores | ✅ |
+| **36** | **🌍 Traducción multi-idioma** — Frontend traducido a inglés, francés, alemán e italiano con detección automática del idioma del navegador | 🔜 |
+| **37** | **🎮 Integración Stream Deck** — Plugin nativo para Elgato Stream Deck (Node.js + CLI SDK). Acciones: Subathon, Sorteo, Moderación, Stream info, Anti-Bots. Conexión vía HTTP REST a la API local de StreamForger | 🔜 |
+| **38** | **🎬 Gestión y exportación de clips a TikTok** — Creación, edición y exportación automática de clips del stream a TikTok con formato vertical, subtítulos automáticos y programación de publicaciones | 🔜 |

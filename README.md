@@ -21,16 +21,17 @@ Disponible en dos modos:
 - **📊 Stream HUD** — Panel de estadísticas en vivo (viewers, followers, subs, uptime, game) con polling automático y overlay informativo.
 - **📈 Twitch Tracker** — Estadísticas históricas del canal con selector de período (7d, 30d, 90d, all time). Cards de métricas agregadas (horas, pico de viewers, seguidores), resumen del último stream con visualizaciones, seguidores, suscripciones, bits e ingresos estimados. Gráfico SVG interactivo de evolución por stream. Lista expandible de streams recientes con métricas detalladas. Motor de consejos inteligente multi-factor (frecuencia, duración, audiencia, monetización) con integración opcional de Ollama para IA local.
 - **⏱️ Temporizador** — Cuenta regresiva configurable desde el panel con inicio, pausa, reanudación y reset. Overlay con barra de progreso, alerta visual los últimos 30s y estado "Tiempo cumplido".
-- **🏆 Scoreboard** — Marcador en vivo para torneos y competiciones con jugadores, puntuaciones por incremento/decremento y barra de progreso visual. Panel completo con gestión de jugadores.
+- **🏆 Scoreboard & Fighter Overlay** — Marcador en vivo para torneos con jugadores y puntuaciones. **Fighter Overlay**: overlay de pelea con barras de vida animadas (spring physics), retratos de personaje, rondas, temporizador con cuenta regresiva del servidor y anuncios de WIN/KO. Ideal para juegos de lucha, battle royale 1v1 o competencias head-to-head.
 - **🔔 Notificaciones EventSub** — Follows, subs, re-suscripciones, gifts, redemptions y cheers en tiempo real vía EventSub WebSocket, con overlay animado en pantalla.
 - **🌐 Redes sociales** — Overlay animado que muestra las redes del streamer de forma rotativa.
 - **🛡️ Moderación** — Panel de moderación con timeout, ban y unban. Incluye lista de usuarios conectados al canal en ese momento con selección clickeable.
 - **🤖 Comandos** — Gestión de comandos personalizados del chat: crear, editar, habilitar/deshabilitar, con alias y cooldown configurable.
-- **🔒 Anti-Bots** — Protección automática contra bots y spam inspirada en **Sery Bot**. Detección de follow bots vía EventSub, filtro de spam en chat IRC por patrones, auto-ban mediante Helix API y escaneo manual de seguidores. Panel con estadísticas, toggles de protección, lista blanca y registro de detecciones.
+- **🔒 Anti-Bots** — Protección automática contra bots y spam inspirada en **Sery Bot**. Detección de follow bots vía EventSub, filtro de spam en chat IRC por patrones, auto-ban mediante Helix API y escaneo manual de seguidores. Panel con estadísticas, toggles de protección, lista blanca y registro de detecciones con botones de banear/desbanear/whitelist por detección.
 - **🎮 Control de overlay transparente** — Ventana always-on-top con toggle desde la sidebar, modo fondo (negro/transparente), selector de tipografía (6 fuentes), ajuste de tamaño de texto (10-24px), control de opacidad general (10-100%), barra de control siempre visible con zona de arrastre y panel de ajustes integrado. Los cambios persisten en localStorage. Incluye `OverlayErrorBoundary` que captura errores de React y muestra un mensaje visible en lugar de dejar la ventana invisible.
 - **🔐 Autenticación OAuth** — Login con Twitch. En navegador: flujo Authorization Code Grant con redirect. En escritorio: flujo **Device Code Grant** (el usuario ve un código en la app y lo ingresa en twitch.tv/activate). Tokens persistidos con refresco automático. Logout completo.
 - **🖥️ Dashboard premium** — Interfaz con sidebar de navegación, glassmorphism, animaciones Framer Motion, paleta violeta/índigo, badge de usuario Twitch y estado de conexión en tiempo real.
 - **📊 Fortnite Stats Overlay** — Panel configurable en el overlay de Fortnite que muestra kills, wins, partidas, K/D y win rate desde la API de [fortnite-api.com](https://fortnite-api.com). Cada usuario registra su propia API Key desde el panel. Cache de 5 min.
+- **🧮 Calculadora de Bitrate** — Calcula el bitrate óptimo para tu stream con recomendación automática según tu velocidad de subida. Ingresá tu upload (o medilo con fast.com) y la herramienta sugiere la mejor resolución, FPS y bitrate. Ajuste manual fino con selectores de resolución (1080p/900p/720p/480p/personalizada), FPS (60/30/24), BPP, audio y % de uso de subida. Muestra comparación "tu conexión vs. lo necesario" y advertencia del límite de 6000 kbps de Twitch. Incluye guía paso a paso de configuración en OBS con los valores calculados. Sin backend — 100% client-side.
 - **📋 Feed de actividad** — Registro cronológico de follows, subs, bits y raids en el canal con filtros y persistencia en archivo.
 - **🎮 Editor de stream integrado** — Cambiá título, juego y tags del directo desde el dashboard con buscador de juegos y selector de tags.
 
@@ -111,6 +112,7 @@ Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 | Stream HUD | `http://localhost:3000/overlay.html?mode=hud&channel=tucanal` |
 | Temporizador | `http://localhost:3000/overlay.html?mode=timer&channel=tucanal` |
 | Scoreboard | `http://localhost:3000/overlay.html?mode=scoreboard&channel=tucanal` |
+| **Fighter** | `http://localhost:3000/overlay.html?mode=fighter&channel=tucanal` |
 | **Subathon** | `http://localhost:3000/overlays/subathon.html?channel=tucanal` |
 | **Subnautica 2 (completo)** | `http://localhost:3000/overlays/subnautica2.html?channel=tucanal` |
 | **Fortnite (completo)** | `http://localhost:3000/overlays/fortnite.html?channel=tucanal&epic=tuEpic&mode=solo` |
@@ -156,7 +158,7 @@ StreamForge/
 │   │       ├── alerts.html
 │   │       └── subathon.html
 │   ├── desktop/           # Electron + SQLite
-│   └── shared/            # Tipos compartidos (SubathonState, TimerState, etc.)
+│   └── shared/            # Tipos compartidos (SubathonState, TimerState, FighterState, etc.)
 ├── STACK_TECNOLOGICO.md
 └── README.md
 ```

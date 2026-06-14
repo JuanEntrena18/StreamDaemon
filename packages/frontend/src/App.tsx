@@ -20,11 +20,12 @@ import { CommandsPanel } from './components/CommandsPanel';
 import { SubathonPanel } from './components/SubathonPanel';
 import { SplashScreen } from './components/SplashScreen';
 import { SecurityPanel } from './components/SecurityPanel';
+import { BitrateCalculatorPanel } from './components/BitrateCalculatorPanel';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config';
+type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config' | 'bitrate';
 
 export function App() {
   const { t, locale, setLocale } = useTranslation();
@@ -86,6 +87,7 @@ export function App() {
         { id: 'timer' as Tab,      icon: '⏱️', label: s('temporizadorTab') },
         { id: 'scoreboard' as Tab, icon: '🏆', label: s('scoreboardTab') },
         { id: 'obs' as Tab,        icon: '🎮', label: s('gameOverlaysTab') },
+        { id: 'bitrate' as Tab,   icon: '📊', label: s('bitrateTab') },
       ]},
       { id: 'config', label: s('configuracion'), items: [{ id: 'config' as Tab, icon: '⚙️', label: s('configTab') }] },
     ] as NavSection[];
@@ -405,6 +407,7 @@ export function App() {
                 {activeTab === 'timer'       && <TimerPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'scoreboard'  && <ScoreboardPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'obs'         && <ObsPanel channel={channel} backendUrl={BACKEND_URL} />}
+                {activeTab === 'bitrate'    && <BitrateCalculatorPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'config'      && <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />}
               </motion.div>
             </AnimatePresence>

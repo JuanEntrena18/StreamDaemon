@@ -20,15 +20,17 @@ Available in two modes:
 - **📊 Twitch Predictions** — Integration with the Twitch Predictions API. Create polls from the control panel with automatic resolution.
 - **📊 Stream HUD** — Live statistics panel (viewers, followers, subs, uptime, game) with auto-polling and an informative overlay.
 - **⏱️ Timer** — Configurable countdown from the panel with start, pause, resume, and reset. Overlay with progress bar, urgent visual alert at 30s, and "Time's up" state.
-- **🏆 Scoreboard** — Live tournament scoreboard with players, increment/decrement scoring, and visual progress bars. Full player management panel.
+- **🏆 Scoreboard & Fighter Overlay** — Live tournament scoreboard with players and scores. **Fighter Overlay**: fighting game HUD with animated health bars (spring physics), character portraits, rounds, server-side countdown timer, and WIN/KO announcements. Perfect for fighting games, 1v1 battle royales, or head-to-head competitions.
 - **🔔 EventSub Notifications** — Follows, subs, re-subs, gifts, redemptions, and cheers in real-time via EventSub WebSocket, with animated on-screen overlay.
 - **🌐 Social Media** — Animated overlay that rotates through the streamer's social links.
 - **🛡️ Moderation** — Mod panel with timeout, ban, and unban. Includes a live list of users connected to the channel, filterable and clickable.
 - **🤖 Custom Commands** — Manage chat commands: create, edit, enable/disable, with aliases and configurable cooldown.
+- **🔒 Anti-Bots** — Automatic bot and spam protection inspired by **Sery Bot**. Follow bot detection via EventSub, chat spam filter by pattern, auto-ban through Helix API, and manual follower scan. Panel with stats, protection toggles, whitelist, and detection log with ban/unban/whitelist action buttons per detection.
 - **🎮 Transparent Overlay Control** — Always-on-top window with toggleable click-through (Ctrl+Shift+T), background-only opacity, resizable (S/M/L), and drag bar.
 - **🔐 Twitch OAuth** — Login with Twitch. Browser: Authorization Code Grant flow. Desktop: **Device Code Grant** (user sees a code in the app and enters it at twitch.tv/activate). Tokens persisted with auto-refresh. Full logout.
 - **🖥️ Premium Dashboard** — Glassmorphism sidebar navigation, Framer Motion animations, violet/indigo palette, Twitch user badge, and real-time connection status.
 - **📊 Fortnite Stats Overlay** — Configurable Fortnite overlay panel showing kills, wins, matches, K/D, and win rate from [fortnite-api.com](https://fortnite-api.com). Each user registers their own API Key from the panel. 5-min cache.
+- **🧮 Bitrate Calculator** — Calculate the optimal bitrate with automatic recommendations based on your upload speed. Enter your upload (or measure it with fast.com) and the tool suggests the best resolution, FPS, and bitrate. Fine-tune manually with selectors for resolution (1080p/900p/720p/480p/custom), FPS (60/30/24), BPP, audio, and upload usage %. Shows "your connection vs. required" comparison and Twitch 6000 kbps limit warnings. Includes a step-by-step OBS configuration guide with the calculated values. No backend — fully client-side.
 - **📋 Activity Feed** — Chronological log of follows, subs, bits, and raids with filters and file persistence.
 - **🎮 Integrated Stream Editor** — Change title, game, and tags from the dashboard with game search and tag selector.
 
@@ -48,6 +50,7 @@ StreamForge implements multiple security layers to protect Twitch credentials an
 | **M-2** | Input validation with **Zod** on all API routes | ✅ |
 | **M-3** | CORS restricted to localhost | ✅ |
 | **B-1** | Security headers: `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` | ✅ |
+| **B-2** | **Anti-Bots**: follow bot detection, spam filter, auto-ban, manual follower scan | ✅ |
 
 ---
 
@@ -108,6 +111,7 @@ Add a **Browser Source** in OBS and use the following URLs:
 | Stream HUD | `http://localhost:3000/overlay.html?mode=hud&channel=yourchannel` |
 | Timer | `http://localhost:3000/overlay.html?mode=timer&channel=yourchannel` |
 | Scoreboard | `http://localhost:3000/overlay.html?mode=scoreboard&channel=yourchannel` |
+| **Fighter** | `http://localhost:3000/overlay.html?mode=fighter&channel=yourchannel` |
 | **Subathon** | `http://localhost:3000/overlays/subathon.html?channel=yourchannel` |
 | **Subnautica 2 (full)** | `http://localhost:3000/overlays/subnautica2.html?channel=yourchannel` |
 | **Fortnite (full)** | `http://localhost:3000/overlays/fortnite.html?channel=yourchannel&epic=yourEpic&mode=solo` |
@@ -149,7 +153,7 @@ StreamForge/
 │   │       ├── alerts.html
 │   │       └── subathon.html
 │   ├── desktop/           # Electron + SQLite
-│   └── shared/            # Shared types (SubathonState, TimerState, etc.)
+│   └── shared/            # Shared types (SubathonState, TimerState, FighterState, etc.)
 ├── STACK_TECNOLOGICO.md
 ├── README.md              # Spanish
 └── README.en.md           # English
