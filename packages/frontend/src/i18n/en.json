@@ -4,6 +4,7 @@
     "estadisticas": "STATISTICS",
     "chat": "Chat",
     "seguridad": "SECURITY",
+    "securityTab": "Anti-Bots",
     "mod": "MOD",
     "comandos": "COMMANDS",
     "herramientas": "Tools",
@@ -325,7 +326,14 @@
     "marcado": "Flagged",
     "followBot": "Follow Bot",
     "spam": "Spam",
-    "sospechoso": "Suspicious"
+    "sospechoso": "Suspicious",
+    "ban": "Ban",
+    "unban": "Unban",
+    "addWhitelist": "Whitelist",
+    "removeWhitelist": "Remove from whitelist",
+    "banning": "Banning...",
+    "unbanning": "Unbanning...",
+    "helpText": "🧠 The Anti-Bot system analyzes patterns in usernames and chat messages to detect suspicious accounts. Follow bots are detected automatically when they follow the channel. The spam filter checks messages for shortened links and promotions. Enable Auto-ban to block automatically, or review detections and use the manual buttons. Use the whitelist to exclude legitimate users."
   },
   "tracker": {
     "period7d": "7 days",

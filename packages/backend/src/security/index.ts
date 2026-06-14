@@ -312,4 +312,64 @@ export function setupSecurity(app: FastifyInstance) {
     saveConfig();
     return { whitelist: config.whitelist };
   });
+
+  // POST ban user
+  app.post('/security/ban', async (req, reply) => {
+    const { user } = req.body as { user: string };
+    if (!user) return reply.status(400).send({ error: 'Missing user' });
+    if (!authProvider || !currentUser) return reply.status(401).send({ error: 'Not authenticated' });
+
+    try {
+      const api = new ApiClient({ authProvider });
+      const userData = await api.users.getUserByName(user);
+      if (!userData) return reply.status(404).send({ error: 'User not found' });
+
+      await api.moderation.banUser(currentUser.id, {
+        user: userData.id,
+        reason: '[Anti-Bots] Ban manual desde panel',
+      });
+
+      resetDailyStats();
+      const existing = detections.find((d) => d.user.toLowerCase() === user.toLowerCase() && d.action === 'flagged');
+      if (existing) {
+        existing.action = 'banned';
+      } else {
+        detections.unshift({
+          id: generateId(),
+          type: 'suspicious',
+          user,
+          userId: userData.id,
+          action: 'banned',
+          timestamp: Date.now(),
+          reason: 'Ban manual desde el panel',
+        });
+        if (detections.length > 100) detections.length = 100;
+      }
+      stats.totalBanned++;
+      stats.todayBanned++;
+      emitUpdate();
+
+      return { ok: true };
+    } catch {
+      return reply.status(500).send({ error: 'Ban failed' });
+    }
+  });
+
+  // POST unban user
+  app.post('/security/unban', async (req, reply) => {
+    const { user } = req.body as { user: string };
+    if (!user) return reply.status(400).send({ error: 'Missing user' });
+    if (!authProvider || !currentUser) return reply.status(401).send({ error: 'Not authenticated' });
+
+    try {
+      const api = new ApiClient({ authProvider });
+      const userData = await api.users.getUserByName(user);
+      if (!userData) return reply.status(404).send({ error: 'User not found' });
+
+      await api.moderation.unbanUser(currentUser.id, userData.id);
+      return { ok: true };
+    } catch {
+      return reply.status(500).send({ error: 'Unban failed' });
+    }
+  });
 }

@@ -4,6 +4,7 @@
     "estadisticas": "ESTADÍSTICAS",
     "chat": "Chat",
     "seguridad": "SEGURIDAD",
+    "securityTab": "Anti-Bots",
     "mod": "MOD",
     "comandos": "COMANDOS",
     "herramientas": "Herramientas",
@@ -325,7 +326,14 @@
     "marcado": "Marcado",
     "followBot": "Follow Bot",
     "spam": "Spam",
-    "sospechoso": "Sospechoso"
+    "sospechoso": "Sospechoso",
+    "ban": "Banear",
+    "unban": "Desbanear",
+    "addWhitelist": "Whitelist",
+    "removeWhitelist": "Quitar de whitelist",
+    "banning": "Baneando...",
+    "unbanning": "Desbaneando...",
+    "helpText": "🧠 El sistema Anti-Bots analiza patrones en nombres de usuario y mensajes del chat para detectar cuentas sospechosas. Los Follow Bots se detectan automáticamente al seguir el canal. El filtro de spam revisa mensajes con enlaces acortados y promociones. Activa Auto-ban para bloquear automáticamente, o revisa las detecciones y usa los botones manuales. Usa la lista blanca para excluir usuarios legítimos."
   },
   "tracker": {
     "period7d": "7 días",

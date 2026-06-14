@@ -18,6 +18,7 @@ interface BotDetection {
   id: string;
   type: 'follow-bot' | 'spam' | 'suspicious';
   user: string;
+  userId: string;
   action: 'banned' | 'flagged';
   timestamp: number;
   reason: string;
@@ -60,6 +61,7 @@ export function SecurityPanel({ channel }: Props) {
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<{ found: number; banned: number } | null>(null);
   const [newWhitelistUser, setNewWhitelistUser] = useState('');
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -113,6 +115,30 @@ export function SecurityPanel({ channel }: Props) {
     }
   };
 
+  const handleBan = async (user: string) => {
+    setActionLoading(`ban:${user}`);
+    try {
+      await apiPost('/security/ban', { user });
+      loadData();
+    } catch {
+      // ignore
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleUnban = async (user: string) => {
+    setActionLoading(`unban:${user}`);
+    try {
+      await apiPost('/security/unban', { user });
+      loadData();
+    } catch {
+      // ignore
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ color: 'var(--sf-text-2)', fontSize: '0.9rem' }}>
@@ -130,6 +156,13 @@ export function SecurityPanel({ channel }: Props) {
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
           {t('security.subtitle')}
         </p>
+      </div>
+
+      {/* Help card */}
+      <div className="glass-card" style={{ padding: '1rem 1.25rem', marginBottom: '1rem', background: 'rgba(59,130,246,0.06)', borderLeft: '3px solid #60a5fa' }}>
+        <div style={{ fontSize: '0.78rem', lineHeight: 1.6, color: 'var(--sf-text-2)' }}>
+          {t('security.helpText')}
+        </div>
       </div>
 
       {/* Stats */}
@@ -276,7 +309,14 @@ export function SecurityPanel({ channel }: Props) {
           </div>
         ) : (
           <div style={{ maxHeight: 300, overflowY: 'auto' }}>
-            {stats.recentDetections.map((d) => (
+            {stats.recentDetections.map((d) => {
+              const isWhitelisted = config.whitelist.some((w) => w.toLowerCase() === d.user.toLowerCase());
+              const loadingKey = actionLoading;
+              const isBanLoading = loadingKey === `ban:${d.user}`;
+              const isUnbanLoading = loadingKey === `unban:${d.user}`;
+              const isWlLoading = loadingKey === `wl:${d.user}`;
+
+              return (
               <div key={d.id} style={{
                 padding: '0.5rem 0.75rem', borderRadius: 6, marginBottom: '0.35rem',
                 background: 'var(--sf-surface)',
@@ -301,11 +341,76 @@ export function SecurityPanel({ channel }: Props) {
                     {d.action === 'banned' ? t('security.baneado') : t('security.marcado')}
                   </div>
                 </div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)' }}>
+                <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginBottom: '0.4rem' }}>
                   {d.reason} — {new Date(d.timestamp).toLocaleString('es-ES')}
                 </div>
+                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                  {d.action === 'flagged' && (
+                    <button
+                      onClick={() => handleBan(d.user)}
+                      disabled={isBanLoading}
+                      className="sf-btn"
+                      style={{
+                        fontSize: '0.7rem', padding: '0.2rem 0.5rem',
+                        background: 'rgba(239,68,68,0.1)', color: '#f87171',
+                        border: '1px solid rgba(239,68,68,0.25)',
+                      }}
+                    >
+                      {isBanLoading ? t('security.banning') : t('security.ban')}
+                    </button>
+                  )}
+                  {d.action === 'banned' && (
+                    <button
+                      onClick={() => handleUnban(d.user)}
+                      disabled={isUnbanLoading}
+                      className="sf-btn"
+                      style={{
+                        fontSize: '0.7rem', padding: '0.2rem 0.5rem',
+                        background: 'rgba(16,185,129,0.1)', color: '#34d399',
+                        border: '1px solid rgba(16,185,129,0.25)',
+                      }}
+                    >
+                      {isUnbanLoading ? t('security.unbanning') : t('security.unban')}
+                    </button>
+                  )}
+                  {isWhitelisted ? (
+                    <button
+                      onClick={() => removeFromWhitelist(d.user)}
+                      className="sf-btn"
+                      style={{
+                        fontSize: '0.7rem', padding: '0.2rem 0.5rem',
+                        background: 'rgba(251,191,36,0.1)', color: '#fbbf24',
+                        border: '1px solid rgba(251,191,36,0.25)',
+                      }}
+                    >
+                      {t('security.removeWhitelist')}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={async () => {
+                        setActionLoading(`wl:${d.user}`);
+                        try {
+                          await apiPut('/security/whitelist', { user: d.user });
+                          loadData();
+                        } finally {
+                          setActionLoading(null);
+                        }
+                      }}
+                      disabled={isWlLoading}
+                      className="sf-btn"
+                      style={{
+                        fontSize: '0.7rem', padding: '0.2rem 0.5rem',
+                        background: 'rgba(59,130,246,0.1)', color: '#60a5fa',
+                        border: '1px solid rgba(59,130,246,0.25)',
+                      }}
+                    >
+                      {isWlLoading ? '...' : t('security.addWhitelist')}
+                    </button>
+                  )}
+                </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
