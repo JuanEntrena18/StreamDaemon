@@ -173,6 +173,8 @@
     "invitameCafe": "Kauf mir einen Kaffee"
   },
   "obs": {
+    "start": "Start",
+    "startDesc": "Neutraler Startbildschirm mit Countdown, Fortschrittsbalken und benutzerdefiniertem Logo-Support (?logo=URL-Parameter)",
     "chatOverlay": "Chat-Overlay",
     "chatOverlayDesc": "Echtzeit-Chatnachrichten mit thematischen Animationen",
     "customOverlay": "Benutzerdefiniertes Overlay",

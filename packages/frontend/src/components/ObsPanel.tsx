@@ -20,6 +20,15 @@ interface OBSUrl {
 
 const OBS_URLS: OBSUrl[] = [
   {
+    id: 'start',
+    icon: '🚀',
+    labelKey: 'obs.start',
+    descKey: 'obs.startDesc',
+    mode: 'start',
+    supportsTheme: false,
+    color: '#7c3aed',
+  },
+  {
     id: 'chat',
     icon: '💬',
     labelKey: 'obs.chatOverlay',
@@ -464,6 +473,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
   };
 
   const STANDALONE_OVERLAYS: Record<string, string> = {
+    start: 'start.html',
     subnautica2_standalone: 'subnautica2.html',
     fortnite: 'fortnite.html',
     alerts: 'alerts.html',

@@ -173,6 +173,8 @@
     "invitameCafe": "Invítame un café"
   },
   "obs": {
+    "start": "Comienzo",
+    "startDesc": "Pantalla de inicio neutra con temporizador, barra de progreso y soporte para logotipo personalizado (parámetro ?logo=URL)",
     "chatOverlay": "Chat Overlay",
     "chatOverlayDesc": "Mensajes del chat en tiempo real con animaciones temáticas",
     "customOverlay": "Overlay Personalizado",

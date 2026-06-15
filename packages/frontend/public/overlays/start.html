@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Starting Soon</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px;
+            background: #0a0a0a;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+        }
+
+        .bg-particles {
+            position: absolute; width: 100%; height: 100%;
+            z-index: 1;
+            background-image:
+                radial-gradient(rgba(124,58,237,0.12) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: drift 8s linear infinite;
+        }
+        @keyframes drift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(30px, 30px); }
+        }
+
+        .bg-glow {
+            position: absolute; width: 100%; height: 100%;
+            z-index: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(124,58,237,0.06), transparent 60%);
+        }
+
+        .ui-container {
+            position: absolute; z-index: 10;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .logo-container {
+            width: 200px; height: 200px;
+            margin-bottom: 30px;
+            border-radius: 50%;
+            background: rgba(124,58,237,0.06);
+            border: 2px solid rgba(124,58,237,0.2);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            animation: logoPulse 4s ease-in-out infinite;
+            position: relative;
+        }
+        .logo-container::after {
+            content: '';
+            position: absolute; inset: -4px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent, rgba(124,58,237,0.3), transparent, rgba(124,58,237,0.3), transparent);
+            animation: borderSpin 6s linear infinite;
+            z-index: -1;
+        }
+        @keyframes borderSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .custom-logo {
+            width: 100%; height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+        .logo-placeholder {
+            font-size: 4rem;
+            opacity: 0.3;
+            filter: grayscale(1);
+        }
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(124,58,237,0.2); }
+            50% { transform: scale(1.03); box-shadow: 0 0 50px rgba(124,58,237,0.4); }
+        }
+
+        .status-text {
+            font-size: 50px;
+            font-weight: 900;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #a78bfa, #7c3aed, #a78bfa);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textShine 3s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes textShine {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .countdown-timer {
+            font-size: 150px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: #e4e4e7;
+            text-shadow: 0 0 40px rgba(124,58,237,0.5), 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .progress-container {
+            width: 700px; height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 3px;
+            margin-top: 40px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%; width: 100%;
+            background: linear-gradient(90deg, #7c3aed, #a78bfa, #7c3aed);
+            background-size: 200% 100%;
+            border-radius: 3px;
+            transition: width 1s linear;
+            animation: progressShine 2s linear infinite;
+        }
+        @keyframes progressShine {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+
+        .sub-text {
+            margin-top: 20px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.15);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .wow-logo {
+            position: absolute;
+            width: 72px; height: 72px;
+            bottom: 20px; right: 20px;
+            z-index: 999;
+            opacity: 0.2;
+            animation: wowSpin 10s linear infinite;
+            pointer-events: none;
+            filter: drop-shadow(0 0 20px rgba(255,200,0,0.3));
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        @keyframes wowSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="bg-particles"></div>
+
+    <div class="ui-container">
+        <div class="logo-container" id="logoContainer">
+            <img id="customLogo" class="custom-logo" style="display:none" alt="Logo">
+            <span id="logoPlaceholder" class="logo-placeholder">🎮</span>
+        </div>
+        <div class="status-text" id="statusText">Comenzando Transmisión</div>
+        <div class="countdown-timer" id="timerDisplay">05:00</div>
+        <div class="progress-container">
+            <div class="progress-fill" id="timerProgress"></div>
+        </div>
+        <div class="sub-text" id="subText">StreamForge</div>
+    </div>
+
+    <img class="wow-logo" src="world-of-warcraft-logo.png" alt="">
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const TOTAL_MINUTES = parseInt(params.get('duration') || '5', 10);
+        let totalSeconds = TOTAL_MINUTES * 60;
+        const initialSeconds = totalSeconds;
+
+        const displayEl = document.getElementById('timerDisplay');
+        const progressEl = document.getElementById('timerProgress');
+        const statusEl = document.getElementById('statusText');
+        const subTextEl = document.getElementById('subText');
+        const customLogo = document.getElementById('customLogo');
+        const logoPlaceholder = document.getElementById('logoPlaceholder');
+
+        // Custom logo from URL param
+        const logoUrl = params.get('logo');
+        if (logoUrl) {
+            customLogo.src = logoUrl;
+            customLogo.style.display = 'block';
+            logoPlaceholder.style.display = 'none';
+        }
+
+        // Custom status text
+        const statusText = params.get('status');
+        if (statusText) statusEl.textContent = statusText;
+
+        // Custom sub text
+        const subText = params.get('subtext');
+        if (subText) subTextEl.textContent = subText;
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function engineTick() {
+            displayEl.textContent = formatTime(totalSeconds);
+            const percentage = (totalSeconds / initialSeconds) * 100;
+            progressEl.style.width = percentage + '%';
+
+            if (totalSeconds > 0) {
+                totalSeconds--;
+                setTimeout(engineTick, 1000);
+            } else {
+                displayEl.textContent = "00:00";
+                const liveMsg = params.get('livetext') || 'EN VIVO';
+                statusEl.textContent = liveMsg;
+                statusEl.style.background = 'linear-gradient(135deg, #f472b6, #7c3aed, #f472b6)';
+                statusEl.style.backgroundSize = '200% auto';
+                statusEl.style.webkitBackgroundClip = 'text';
+                statusEl.style.webkitTextFillColor = 'transparent';
+            }
+        }
+
+        engineTick();
+    </script>
+</body>
+</html>

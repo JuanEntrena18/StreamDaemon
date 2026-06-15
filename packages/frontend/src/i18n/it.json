@@ -173,6 +173,8 @@
     "invitameCafe": "Offrimi un caffè"
   },
   "obs": {
+    "start": "Inizio",
+    "startDesc": "Schermata di inizio neutra con conto alla rovescia, barra di progresso e supporto per logo personalizzato (parametro ?logo=URL)",
     "chatOverlay": "Overlay Chat",
     "chatOverlayDesc": "Messaggi chat in tempo reale con animazioni tematiche",
     "customOverlay": "Overlay Personalizzato",

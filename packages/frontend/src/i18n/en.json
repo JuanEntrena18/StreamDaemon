@@ -173,6 +173,8 @@
     "invitameCafe": "Buy me a coffee"
   },
   "obs": {
+    "start": "Start",
+    "startDesc": "Neutral starting soon screen with timer, progress bar and custom logo support (?logo=URL parameter)",
     "chatOverlay": "Chat Overlay",
     "chatOverlayDesc": "Real-time chat messages with themed animations",
     "customOverlay": "Custom Overlay",
