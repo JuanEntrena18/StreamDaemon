@@ -216,7 +216,7 @@
         if (CHANNEL) socket.emit('join:channel', CHANNEL);
       });
       socket.on('chat:message', (d) => {
-        addMessage(d.userDisplayName || d.userName || d.user || 'Anónimo', d.text || d.message || '');
+        addMessage(d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo', d.text || '');
       });
     }
 
