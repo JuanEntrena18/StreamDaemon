@@ -233,6 +233,8 @@
     "allianceAlertsDesc": "Alertes thématiques Alliance : follower, sub, don, cheer, host et raid",
     "allianceTransition": "Alliance · Transition",
     "allianceTransitionDesc": "Transition Alliance avec bouclier tournant, couronne et nom en direct",
+    "hordaStart": "Horde · Début",
+    "hordaStartDesc": "Écran de début Horde avec compte à rebours, barre de progression et braises animées",
     "hordaWebcam": "Horde · Webcam",
     "hordaWebcamDesc": "Cadre Horde pour webcam avec crête et épées décoratives",
     "hordaWebcamTags": "Horde · Webcam + Étiquettes",

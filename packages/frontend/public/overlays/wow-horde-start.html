@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horde Stream - Starting Soon</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            background-color: #050000;
+            overflow: hidden;
+            font-family: 'Cinzel', serif;
+            color: #ffffff;
+        }
+
+        /* Entorno y texturas */
+        .environment {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #300000 0%, #050000 80%);
+            z-index: 1;
+        }
+
+        /* Partículas de ascuas (Embers) */
+        .embers {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            background-image: radial-gradient(#ff3300 2px, transparent 2px);
+            background-size: 80px 80px;
+            opacity: 0.15;
+            animation: riseEmbers 15s linear infinite;
+        }
+
+        @keyframes riseEmbers {
+            0% { transform: translateY(0) scale(1); opacity: 0.15; }
+            50% { opacity: 0.3; }
+            100% { transform: translateY(-200px) scale(1.5); opacity: 0; }
+        }
+
+        /* Contenedor Principal */
+        .ui-container {
+            position: absolute;
+            z-index: 10;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .horde-logo {
+            width: 350px;
+            filter: drop-shadow(0 0 25px rgba(255, 0, 0, 0.8));
+            animation: breath 4s ease-in-out infinite;
+            margin-bottom: 30px;
+        }
+
+        @keyframes breath {
+            0% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.5)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 50px rgba(255, 30, 0, 0.9)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.5)); }
+        }
+
+        .status-text {
+            font-size: 70px;
+            letter-spacing: 15px;
+            text-transform: uppercase;
+            color: #ff2222;
+            text-shadow: 3px 3px 15px #000, 0 0 30px #a00000;
+            margin-bottom: 20px;
+        }
+
+        .countdown-timer {
+            font-size: 160px;
+            font-weight: 700;
+            text-shadow: 0 0 40px rgba(255, 0, 0, 0.8), 5px 5px 10px #000;
+            letter-spacing: 5px;
+        }
+
+        /* Barra de Progreso Forjada */
+        .forge-bar-container {
+            width: 900px;
+            height: 12px;
+            background: #111;
+            border: 2px solid #4a0000;
+            border-radius: 4px;
+            margin-top: 50px;
+            box-shadow: inset 0 0 10px #000, 0 0 20px rgba(255, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .forge-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #8b0000, #ff1a1a, #8b0000);
+            background-size: 200% 100%;
+            box-shadow: 0 0 20px #ff0000;
+            transition: width 1s linear;
+            animation: flowMagma 2s linear infinite;
+        }
+
+        @keyframes flowMagma {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="environment"></div>
+    <div class="embers"></div>
+
+    <div class="ui-container">
+        <img src="horda_logo.png" alt="Sello de la Horda" class="horde-logo">
+        <div class="status-text" id="statusText">Preparando la Batalla</div>
+        <div class="countdown-timer" id="timerDisplay">05:00</div>
+        
+        <div class="forge-bar-container">
+            <div class="forge-bar-fill" id="timerProgress"></div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Lógica del temporizador - Sistema de despliegue
+         */
+        const TOTAL_MINUTES = 5;
+        let totalSeconds = TOTAL_MINUTES * 60;
+        const initialSeconds = totalSeconds;
+
+        const displayEl = document.getElementById('timerDisplay');
+        const progressEl = document.getElementById('timerProgress');
+        const statusEl = document.getElementById('statusText');
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function engineTick() {
+            displayEl.textContent = formatTime(totalSeconds);
+            
+            // Calcular porcentaje para la barra de magma
+            const percentage = (totalSeconds / initialSeconds) * 100;
+            progressEl.style.width = percentage + '%';
+
+            if (totalSeconds > 0) {
+                totalSeconds--;
+                setTimeout(engineTick, 1000);
+            } else {
+                // Estado final
+                displayEl.textContent = "00:00";
+                displayEl.style.color = "#fff";
+                displayEl.style.textShadow = "0 0 60px #ff0000, 0 0 20px #fff";
+                statusEl.textContent = "LOK'TAR OGAR - EN VIVO";
+            }
+        }
+
+        // Iniciar motor de renderizado del tiempo
+        engineTick();
+    </script>
+</body>
+</html>

@@ -233,6 +233,8 @@
     "allianceAlertsDesc": "Allianz-Themen-Alarme: Follower, Abo, Spende, Cheer, Host und Raid",
     "allianceTransition": "Allianz · Übergang",
     "allianceTransitionDesc": "Allianz-Übergang mit drehendem Schild, Krone und Live-Name",
+    "hordaStart": "Horde · Start",
+    "hordaStartDesc": "Horde-Startbildschirm mit Countdown, Fortschrittsbalken und animierten Glutpartikeln",
     "hordaWebcam": "Horde · Webcam",
     "hordaWebcamDesc": "Horde-Webcam-Rahmen mit Wappen und dekorativen Schwertern",
     "hordaWebcamTags": "Horde · Webcam + Labels",

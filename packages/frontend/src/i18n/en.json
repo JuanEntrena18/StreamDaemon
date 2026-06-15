@@ -233,6 +233,8 @@
     "allianceAlertsDesc": "Themed Alliance alerts: follower, sub, donation, cheer, host and raid",
     "allianceTransition": "Alliance · Transition",
     "allianceTransitionDesc": "Alliance transition with spinning shield, crown and live name",
+    "hordaStart": "Horde · Start",
+    "hordaStartDesc": "Horde starting soon screen with countdown timer, progress bar and animated embers",
     "hordaWebcam": "Horde · Webcam",
     "hordaWebcamDesc": "Horde webcam frame with crest and decorative swords",
     "hordaWebcamTags": "Horde · Webcam + Tags",

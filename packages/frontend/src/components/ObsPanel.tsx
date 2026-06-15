@@ -293,6 +293,15 @@ const OBS_URLS: OBSUrl[] = [
   },
   // ── WoW Horda Section ──
   {
+    id: 'wow-horde-start',
+    icon: '🔴',
+    labelKey: 'obs.hordaStart',
+    descKey: 'obs.hordaStartDesc',
+    mode: 'wow-horde-start',
+    supportsTheme: false,
+    color: '#ff2222',
+  },
+  {
     id: 'wow-horde-webcam',
     icon: '🎥',
     labelKey: 'obs.hordaWebcam',
@@ -468,6 +477,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     'wow-alliance-fullscreen': 'wow-alliance-fullscreen.html',
     'wow-alliance-alerts': 'wow-alliance-alerts.html',
     'wow-alliance-transition': 'wow-alliance-transition.html',
+    'wow-horde-start': 'wow-horde-start.html',
     'wow-horde-webcam': 'wow-horde-webcam.html',
     'wow-horde-webcam-labels': 'wow-horde-webcam-labels.html',
     'wow-horde-chat': 'wow-horde-chat.html',

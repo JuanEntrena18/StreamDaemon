@@ -233,6 +233,8 @@
     "allianceAlertsDesc": "Alertas temáticas Alianza: seguidor, sub, donación, cheer, host y raid",
     "allianceTransition": "Alianza · Transición",
     "allianceTransitionDesc": "Transición Alianza con escudo giratorio, corona y nombre en vivo",
+    "hordaStart": "Horda · Comienzo",
+    "hordaStartDesc": "Pantalla de inicio Horda con temporizador de cuenta atrás, barra de progreso y brasas animadas",
     "hordaWebcam": "Horda · Webcam",
     "hordaWebcamDesc": "Marco Horda para webcam con cresta y espadas decorativas",
     "hordaWebcamTags": "Horda · Webcam + Etiquetas",
