@@ -215,6 +215,8 @@
     "djAlertsDesc": "Themed DJ alerts: follower, sub, donation, cheer, host and raid",
     "djTransition": "DJ · Transition",
     "djTransitionDesc": "DJ transition with spinning vinyl, shines and live name",
+    "allianceStart": "Alliance · Start",
+    "allianceStartDesc": "Alliance starting soon screen with countdown timer, progress bar and animated stars",
     "allianceWebcam": "Alliance · Webcam",
     "allianceWebcamDesc": "Alliance webcam frame with decorative shield and crown",
     "allianceWebcamTags": "Alliance · Webcam + Tags",

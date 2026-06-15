@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alliance Stream - Starting Soon</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            background-color: #050510;
+            overflow: hidden;
+            font-family: 'Cinzel', serif;
+            color: #ffffff;
+        }
+
+        .environment {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #002040 0%, #050510 80%);
+            z-index: 1;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            background-image: radial-gradient(#8ab4ff 1.5px, transparent 1.5px);
+            background-size: 100px 100px;
+            opacity: 0.12;
+            animation: twinkle 6s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.12; }
+            50% { opacity: 0.25; }
+        }
+
+        .ui-container {
+            position: absolute;
+            z-index: 10;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .alliance-logo {
+            width: 280px;
+            filter: drop-shadow(0 0 30px rgba(43, 95, 200, 0.8));
+            animation: glow 4s ease-in-out infinite;
+            margin-bottom: 30px;
+        }
+
+        @keyframes glow {
+            0% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(43, 95, 200, 0.5)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 60px rgba(138, 180, 255, 0.9)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(43, 95, 200, 0.5)); }
+        }
+
+        .status-text {
+            font-size: 70px;
+            letter-spacing: 15px;
+            text-transform: uppercase;
+            color: #4a8cff;
+            text-shadow: 3px 3px 15px #000, 0 0 30px #1a3a7a;
+            margin-bottom: 20px;
+        }
+
+        .countdown-timer {
+            font-size: 160px;
+            font-weight: 700;
+            text-shadow: 0 0 40px rgba(43, 95, 200, 0.8), 5px 5px 10px #000;
+            letter-spacing: 5px;
+            color: #c8d4e8;
+        }
+
+        .forge-bar-container {
+            width: 900px;
+            height: 12px;
+            background: #0a0a1e;
+            border: 2px solid #1a3a7a;
+            border-radius: 4px;
+            margin-top: 50px;
+            box-shadow: inset 0 0 10px #000, 0 0 20px rgba(43, 95, 200, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .forge-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #1a3a7a, #4a8cff, #8ab4ff, #4a8cff, #1a3a7a);
+            background-size: 200% 100%;
+            box-shadow: 0 0 20px #4a8cff;
+            transition: width 1s linear;
+            animation: flowArcane 2s linear infinite;
+        }
+
+        @keyframes flowArcane {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="environment"></div>
+    <div class="stars"></div>
+
+    <div class="ui-container">
+        <img src="alianza_logo.png" alt="Emblema de la Alianza" class="alliance-logo">
+        <div class="status-text" id="statusText">Reuniendo a los Ejércitos</div>
+        <div class="countdown-timer" id="timerDisplay">05:00</div>
+        
+        <div class="forge-bar-container">
+            <div class="forge-bar-fill" id="timerProgress"></div>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_MINUTES = 5;
+        let totalSeconds = TOTAL_MINUTES * 60;
+        const initialSeconds = totalSeconds;
+
+        const displayEl = document.getElementById('timerDisplay');
+        const progressEl = document.getElementById('timerProgress');
+        const statusEl = document.getElementById('statusText');
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function engineTick() {
+            displayEl.textContent = formatTime(totalSeconds);
+            const percentage = (totalSeconds / initialSeconds) * 100;
+            progressEl.style.width = percentage + '%';
+
+            if (totalSeconds > 0) {
+                totalSeconds--;
+                setTimeout(engineTick, 1000);
+            } else {
+                displayEl.textContent = "00:00";
+                displayEl.style.color = "#8ab4ff";
+                displayEl.style.textShadow = "0 0 60px #4a8cff, 0 0 20px #fff";
+                statusEl.textContent = "¡POR LA ALIANZA - EN VIVO!";
+            }
+        }
+
+        engineTick();
+    </script>
+</body>
+</html>

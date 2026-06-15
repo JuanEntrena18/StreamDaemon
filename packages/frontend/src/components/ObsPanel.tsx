@@ -211,6 +211,15 @@ const OBS_URLS: OBSUrl[] = [
   },
   // ── WoW Alianza Section ──
   {
+    id: 'wow-alliance-start',
+    icon: '🔵',
+    labelKey: 'obs.allianceStart',
+    descKey: 'obs.allianceStartDesc',
+    mode: 'wow-alliance-start',
+    supportsTheme: false,
+    color: '#4a8cff',
+  },
+  {
     id: 'wow-alliance-webcam',
     icon: '🎥',
     labelKey: 'obs.allianceWebcam',
@@ -468,6 +477,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     'dj-fullscreen': 'dj-fullscreen.html',
     'dj-alerts': 'dj-alerts.html',
     'dj-transition': 'dj-transition.html',
+    'wow-alliance-start': 'wow-alliance-start.html',
     'wow-alliance-webcam': 'wow-alliance-webcam.html',
     'wow-alliance-webcam-labels': 'wow-alliance-webcam-labels.html',
     'wow-alliance-chat': 'wow-alliance-chat.html',

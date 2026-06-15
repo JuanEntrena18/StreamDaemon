@@ -215,6 +215,8 @@
     "djAlertsDesc": "DJ-Themen-Alarme: Follower, Abo, Spende, Cheer, Host und Raid",
     "djTransition": "DJ · Übergang",
     "djTransitionDesc": "DJ-Übergang mit drehender Schallplatte, Glanz und Live-Name",
+    "allianceStart": "Allianz · Start",
+    "allianceStartDesc": "Allianz-Startbildschirm mit Countdown, Fortschrittsbalken und animierten Sternen",
     "allianceWebcam": "Allianz · Webcam",
     "allianceWebcamDesc": "Allianz-Webcam-Rahmen mit dekorativem Schild und Krone",
     "allianceWebcamTags": "Allianz · Webcam + Labels",
