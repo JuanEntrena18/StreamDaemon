@@ -102,7 +102,12 @@ export function setupHud(app: FastifyInstance) {
 
       reply.send({ ok: true });
     } catch (err: any) {
-      reply.status(500).send({ error: err?.message ?? 'Failed to update stream info' });
+      const msg = err?.message ?? '';
+      if (msg.includes('scope') || msg.includes('channel:manage:broadcast')) {
+        reply.status(403).send({ error: 'missing_scope', message: 'Tu token de Twitch no tiene el permiso necesario (channel:manage:broadcast). Desconectá y volvé a conectar Twitch en Configuración para actualizar los permisos.' });
+      } else {
+        reply.status(500).send({ error: err?.message ?? 'Failed to update stream info' });
+      }
     }
   });
 

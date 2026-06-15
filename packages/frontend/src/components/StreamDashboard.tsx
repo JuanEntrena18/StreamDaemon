@@ -75,6 +75,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [missingScope, setMissingScope] = useState(false);
 
   // Game search
   const [gameResults, setGameResults] = useState<GameResult[]>([]);
@@ -204,11 +205,15 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
     setSaving(true);
     setSaveError('');
     setSaved(false);
+    setMissingScope(false);
     try {
       const r = await apiPut('/hud/stream/info', { channel, title, gameName: game || undefined, tags: activeTagIds });
       if (!r.ok) {
         const data = await r.json();
-        setSaveError(data.error || t('dashboard.errorGuardar'));
+        if (data.error === 'missing_scope') {
+          setMissingScope(true);
+        }
+        setSaveError(data.error === 'missing_scope' ? data.message : (data.error || t('dashboard.errorGuardar')));
       } else {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
@@ -491,7 +496,22 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
               {saving ? t('dashboard.guardando') : t('dashboard.guardarCambios')}
             </button>
             {saved && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>{t('dashboard.guardado')}</span>}
-            {saveError && <span style={{ fontSize: '0.72rem', color: '#f87171' }}>{saveError}</span>}
+            {saveError && (
+              <div style={{ fontSize: '0.74rem', color: '#f87171', lineHeight: 1.5 }}>
+                <span>{saveError}</span>
+                {missingScope && (
+                  <button onClick={() => window.location.href = '/auth/login'}
+                    className="sf-btn"
+                    style={{
+                      marginLeft: '0.5rem', fontSize: '0.72rem', padding: '0.25rem 0.6rem',
+                      background: 'rgba(239,68,68,0.1)', color: '#f87171',
+                      border: '1px solid rgba(239,68,68,0.25)',
+                    }}>
+                    Reconectar Twitch ↗
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Stats */}
