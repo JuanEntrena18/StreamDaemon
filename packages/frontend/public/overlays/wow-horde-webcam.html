@@ -110,9 +110,41 @@
   }
   .skull-tl { top: 45px; left: 35px; }
   .skull-br { bottom: 45px; right: 35px; }
+  .wow-logo {
+    position: absolute;
+    width: 72px; height: 72px;
+    bottom: 20px; right: 20px;
+    z-index: 999;
+    opacity: 0.2;
+    animation: wowSpin 10s linear infinite;
+    pointer-events: none;
+    filter: drop-shadow(0 0 20px rgba(255,200,0,0.3));
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  @keyframes wowSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .horde-crest-watermark {
+    position: absolute;
+    width: 180px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.05;
+    z-index: 0;
+    pointer-events: none;
+    animation: crestPulse 5s ease-in-out infinite;
+  }
+  @keyframes crestPulse {
+    0%, 100% { opacity: 0.05; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.1; transform: translate(-50%, -50%) scale(1.08); }
+  }
 </style>
 </head>
 <body>
+  <img class="horde-crest-watermark" src="horda_logo.png" alt="">
+  <img class="wow-logo" src="world-of-warcraft-logo.png" alt="">
   <div class="horde-crest crest-tl">
     <svg viewBox="0 0 100 110"><path d="M50 0 L95 20 L95 55 Q95 80 50 108 Q5 80 5 55 L5 20 Z" fill="none" stroke="#cc0000" stroke-width="2"/><path d="M50 8 L85 24 L85 52 Q85 74 50 100 Q15 74 15 52 L15 24 Z" fill="none" stroke="#ffc800" stroke-width="1.5"/><path d="M50 18 L65 30 L58 36 L50 50 L42 36 L35 30 Z" fill="none" stroke="#cc0000" stroke-width="1"/><path d="M30 40 L50 20 L70 40" fill="none" stroke="#ffc800" stroke-width="1"/><path d="M50 50 L50 85" fill="none" stroke="#cc0000" stroke-width="1.5"/></svg>
   </div>

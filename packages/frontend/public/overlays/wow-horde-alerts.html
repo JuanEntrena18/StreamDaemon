@@ -143,9 +143,41 @@
   .tier-badge.t1 { background: rgba(204,0,0,0.2); color: var(--red); border: 1px solid rgba(204,0,0,0.3); }
   .tier-badge.t2 { background: rgba(255,200,0,0.2); color: var(--gold); border: 1px solid rgba(255,200,0,0.3); }
   .tier-badge.t3 { background: rgba(112,0,0,0.2); color: var(--red); border: 1px solid rgba(112,0,0,0.3); }
+  .wow-logo {
+    position: absolute;
+    width: 72px; height: 72px;
+    bottom: 20px; right: 20px;
+    z-index: 999;
+    opacity: 0.2;
+    animation: wowSpin 10s linear infinite;
+    pointer-events: none;
+    filter: drop-shadow(0 0 20px rgba(255,200,0,0.3));
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  @keyframes wowSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .horde-crest-watermark {
+    position: absolute;
+    width: 180px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.05;
+    z-index: 0;
+    pointer-events: none;
+    animation: crestPulse 5s ease-in-out infinite;
+  }
+  @keyframes crestPulse {
+    0%, 100% { opacity: 0.05; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.1; transform: translate(-50%, -50%) scale(1.08); }
+  }
 </style>
 </head>
 <body>
+  <img class="horde-crest-watermark" src="horda_logo.png" alt="">
+  <img class="wow-logo" src="world-of-warcraft-logo.png" alt="">
   <div id="alert-center"></div>
 
   <script>
