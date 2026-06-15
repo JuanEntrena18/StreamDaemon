@@ -19,16 +19,16 @@ async function fetchHud(channelName: string): Promise<HudData | null> {
     try {
       const followInfo = await api.channels.getChannelFollowers(user.id);
       totalFollowers = followInfo.total;
-    } catch {
-      // Scope moderator:read:followers no concedido
+    } catch (e: any) {
+      console.warn(`[HUD] Followers fetch failed for ${channelName}: ${e?.message ?? e}`);
     }
 
     let totalSubs = 0;
     try {
       const subs = await api.subscriptions.getSubscriptions(user.id);
       totalSubs = subs.total;
-    } catch {
-      // Scope channel:read:subscriptions no concedido
+    } catch (e: any) {
+      console.warn(`[HUD] Subs fetch failed for ${channelName}: ${e?.message ?? e}`);
     }
 
     return {
@@ -43,7 +43,8 @@ async function fetchHud(channelName: string): Promise<HudData | null> {
       startedAt: stream?.startDate?.toISOString() ?? null,
       isLive: !!stream,
     };
-  } catch {
+  } catch (e: any) {
+    console.warn(`[HUD] fetchHud failed for ${channelName}: ${e?.message ?? e}`);
     return null;
   }
 }

@@ -281,10 +281,21 @@ export async function setupAuth(app: FastifyInstance) {
 
   // ── Status ──
 
-  app.get('/auth/status', () => ({
-    authenticated: authProvider !== null && currentUser !== null,
-    user: currentUser,
-  }));
+  app.get('/auth/status', async () => {
+    let tokenScopes: string[] = [];
+    try {
+      if (authProvider && currentUser) {
+        const token = await authProvider.getAccessTokenForUser(currentUser.id);
+        if (token?.scope) tokenScopes = Array.isArray(token.scope) ? token.scope : token.scope.split(' ');
+      }
+    } catch {}
+    return {
+      authenticated: authProvider !== null && currentUser !== null,
+      user: currentUser,
+      scopes: tokenScopes,
+      requiredScopes: SCOPES,
+    };
+  });
 }
 
 function normalizeScope(scope: unknown): string[] {
