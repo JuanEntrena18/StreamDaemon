@@ -139,22 +139,6 @@
             text-transform: uppercase;
         }
 
-        .wow-logo {
-            position: absolute;
-            width: 72px; height: 72px;
-            bottom: 20px; right: 20px;
-            z-index: 999;
-            opacity: 0.2;
-            animation: wowSpin 10s linear infinite;
-            pointer-events: none;
-            filter: drop-shadow(0 0 20px rgba(255,200,0,0.3));
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        @keyframes wowSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
@@ -173,8 +157,6 @@
         </div>
         <div class="sub-text" id="subText">StreamForge</div>
     </div>
-
-    <img class="wow-logo" src="world-of-warcraft-logo.png" alt="">
 
     <script>
         const params = new URLSearchParams(window.location.search);
