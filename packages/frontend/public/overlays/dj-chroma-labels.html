@@ -151,15 +151,27 @@
     document.getElementById('name-text').textContent = username;
     document.title = 'StreamForge - DJ Chroma+Labels · ' + username;
 
+    function applyHud(d) {
+      if (d.followers !== undefined) document.getElementById('followers').textContent = d.followers;
+      if (d.subscribers !== undefined) document.getElementById('subs').textContent = d.subscribers;
+    }
+
     function initSocket() {
       const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
       socket.on('connect', () => {
-        if (CHANNEL) socket.emit('join:channel', CHANNEL);
+        if (!CHANNEL) return;
+        socket.emit('join:channel', CHANNEL);
+        fetch(BACKEND_URL + '/hud/' + CHANNEL)
+          .then(r => r.ok ? r.json() : null)
+          .then(d => { if (d) applyHud(d); })
+          .catch(() => {});
+        fetch(BACKEND_URL + '/hud/start-poll', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channel: CHANNEL, interval: 10 })
+        }).catch(() => {});
       });
-      socket.on('hud:update', (d) => {
-        if (d.followers !== undefined) document.getElementById('followers').textContent = d.followers;
-        if (d.subscribers !== undefined) document.getElementById('subs').textContent = d.subscribers;
-      });
+      socket.on('hud:update', (d) => applyHud(d));
       socket.on('channel:follow', () => {
         const el = document.getElementById('followers');
         el.textContent = parseInt(el.textContent) + 1;
