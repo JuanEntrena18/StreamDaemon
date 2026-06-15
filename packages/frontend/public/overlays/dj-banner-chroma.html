@@ -98,39 +98,52 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const username = params.get('username') || 'DJ';
+    const BACKEND_URL = (params.get('backend') || 'http://localhost:3000').replace(/\/+$/, '');
+    const CHANNEL = params.get('channel');
     document.getElementById('name-text').textContent = username;
     document.title = `StreamForge – DJ Banner Chroma · ${username}`;
 
-    const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
-    socket.connect();
-    socket.on('connect', () => {
-      const ch = params.get('channel');
-      if (ch) socket.emit('join:channel', ch);
-    });
-    socket.on('hud:update', (d) => {
-      if (d.followers !== undefined) document.getElementById('followers').textContent = d.followers;
-      if (d.subscribers !== undefined) document.getElementById('subs').textContent = d.subscribers;
-    });
-    socket.on('channel:follow', () => {
-      const el = document.getElementById('followers');
-      el.textContent = parseInt(el.textContent) + 1;
-    });
-    socket.on('channel:subscribe', () => {
-      const el = document.getElementById('subs');
-      el.textContent = parseInt(el.textContent) + 1;
-    });
-    socket.on('channel:cheer', (d) => {
-      const el = document.getElementById('bits');
-      el.textContent = parseInt(el.textContent) + (d.bits || 0);
-    });
-    socket.on('channel:redemption', (d) => {
-      if (d.rewardCost) {
-        const el = document.getElementById('donations');
-        const current = parseFloat(el.textContent.replace('$','')) + (d.rewardCost / 100);
-        el.textContent = '$' + current.toFixed(2);
-      }
+    function initSocket() {
+      const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+      socket.on('connect', () => {
+        if (CHANNEL) socket.emit('join:channel', CHANNEL);
+      });
+      socket.on('hud:update', (d) => {
+        if (d.followers !== undefined) document.getElementById('followers').textContent = d.followers;
+        if (d.subscribers !== undefined) document.getElementById('subs').textContent = d.subscribers;
+      });
+      socket.on('channel:follow', () => {
+        const el = document.getElementById('followers');
+        el.textContent = parseInt(el.textContent) + 1;
+      });
+      socket.on('channel:subscribe', () => {
+        const el = document.getElementById('subs');
+        el.textContent = parseInt(el.textContent) + 1;
+      });
+      socket.on('channel:cheer', (d) => {
+        const el = document.getElementById('bits');
+        el.textContent = parseInt(el.textContent) + (d.bits || 0);
+      });
+      socket.on('channel:redemption', (d) => {
+        if (d.rewardCost) {
+          const el = document.getElementById('donations');
+          const current = parseFloat(el.textContent.replace('$','')) + (d.rewardCost / 100);
+          el.textContent = '$' + current.toFixed(2);
+        }
+      });
+    }
+
+    function loadSocketIO(cb) {
+      const script = document.createElement('script');
+      script.src = BACKEND_URL + '/socket.io/socket.io.js';
+      script.onload = cb;
+      script.onerror = () => cb(new Error('load failed'));
+      document.head.appendChild(script);
+    }
+
+    loadSocketIO(function(err) {
+      if (!err) initSocket();
     });
   </script>
-  <script src="/socket.io/socket.io.js"></script>
 </body>
 </html>

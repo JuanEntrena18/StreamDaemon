@@ -246,24 +246,36 @@
       }, DURATION);
     }
 
-    const socket = io((params.get('backend') || 'http://localhost:3000').replace(/\/+$/, ''), { autoConnect: false });
-    socket.connect();
-    socket.on('connect', () => {
-      const ch = params.get('channel');
-      if (ch) socket.emit('join:channel', ch);
-    });
+    const BACKEND_URL = (params.get('backend') || 'http://localhost:3000').replace(/\/+$/, '');
+    const CHANNEL = params.get('channel');
 
-    socket.on('channel:follow', (d) => showAlert('follow', d));
-    socket.on('channel:subscribe', (d) => showAlert('sub', d));
-    socket.on('channel:subscription-message', (d) => showAlert('sub', d));
-    socket.on('channel:cheer', (d) => showAlert('cheer', d));
+    function initSocket() {
+      const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+      socket.on('connect', () => {
+        if (CHANNEL) socket.emit('join:channel', CHANNEL);
+      });
+      socket.on('channel:follow', (d) => showAlert('follow', d));
+      socket.on('channel:subscribe', (d) => showAlert('sub', d));
+      socket.on('channel:subscription-message', (d) => showAlert('sub', d));
+      socket.on('channel:cheer', (d) => showAlert('cheer', d));
+      socket.on('channel:redemption', (d) => {
+        showAlert('donate', { ...d, amount: d.rewardCost });
+      });
+      socket.on('channel:raid', (d) => {
+        if (d) showAlert('raid', d);
+      });
+    }
 
-    socket.on('channel:redemption', (d) => {
-      showAlert('donate', { ...d, amount: d.rewardCost });
-    });
+    function loadSocketIO(cb) {
+      const script = document.createElement('script');
+      script.src = BACKEND_URL + '/socket.io/socket.io.js';
+      script.onload = cb;
+      script.onerror = () => cb(new Error('load failed'));
+      document.head.appendChild(script);
+    }
 
-    socket.on('channel:raid', (d) => {
-      if (d) showAlert('raid', d);
+    loadSocketIO(function(err) {
+      if (!err) initSocket();
     });
 
     document.addEventListener('click', () => {
@@ -279,6 +291,5 @@
       showAlert(demos[idx].type, demos[idx].data);
     });
   </script>
-  <script src="/socket.io/socket.io.js"></script>
 </body>
 </html>
