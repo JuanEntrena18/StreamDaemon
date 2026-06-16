@@ -159,6 +159,13 @@ function createMainWindow() {
   if (isDev) {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   }
+
+  // F12 opens DevTools in any focused window (dev + production)
+  mainWindow.webContents.on('before-input-event', (_event, input) => {
+    if (input.key === 'F12') {
+      mainWindow?.webContents.toggleDevTools();
+    }
+  });
 }
 
 // ── Overlay window ────────────────────────────────────────
@@ -221,6 +228,13 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
     const overlayBase = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
     if (!url.startsWith(overlayBase)) {
       event.preventDefault();
+    }
+  });
+
+  // F12 opens DevTools in overlay window too
+  overlayWindow.webContents.on('before-input-event', (_event, input) => {
+    if (input.key === 'F12') {
+      overlayWindow?.webContents.toggleDevTools();
     }
   });
 
