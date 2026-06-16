@@ -10,15 +10,15 @@
         body, html {
             width: 1920px;
             height: 1080px;
-            background-color: transparent; /* Transparente para OBS */
+            background-color: transparent;
             font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
             -webkit-font-smoothing: none;
             overflow: hidden;
             display: grid;
             padding: 20px;
             gap: 20px;
-            grid-template-columns: 1260px 600px; /* 2/3 y 1/3 exactos considerando padding */
-            grid-template-rows: 1040px; /* 1080 - 40 de padding vertical */
+            grid-template-columns: 1260px 600px;
+            grid-template-rows: 1040px;
         }
 
         .win-window {
@@ -59,20 +59,20 @@
 
         .game-content {
             flex-grow: 1;
-            background-color: transparent; /* AQUÍ SE VERÁ EL JUEGO EN OBS */
+            background-color: transparent;
             border: 2px solid;
-            border-color: #808080 #ffffff #ffffff #808080; /* Borde interior hundido */
+            border-color: #808080 #ffffff #ffffff #808080;
         }
 
         .side-panel {
             display: grid;
-            grid-template-rows: 340px 680px; /* Webcam arriba, Chat abajo */
+            grid-template-rows: 340px 680px;
             gap: 20px;
         }
 
         .webcam-area .win-content {
             flex-grow: 1;
-            background-color: transparent; /* AQUÍ SE VERÁ LA WEBCAM EN OBS */
+            background-color: transparent;
             border: 2px solid;
             border-color: #808080 #ffffff #ffffff #808080;
         }
@@ -100,11 +100,16 @@
 
         .user { font-weight: bold; color: #000080; }
 
+        .event-notif {
+            font-size: 14px; margin-bottom: 6px; padding: 4px 8px;
+            background-color: #ffffcc;
+            border: 1px solid #808080;
+            color: #000;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Monitor Izquierdo (Juego) -->
     <div class="win-window game-area">
         <div class="win-titlebar">
             <div class="title-text"><span>C:\Juegos\DirectX_Game.exe</span></div>
@@ -115,10 +120,8 @@
         <div class="game-content"></div>
     </div>
 
-    <!-- Panel Derecho -->
     <div class="side-panel">
         
-        <!-- Webcam -->
         <div class="win-window webcam-area">
             <div class="win-titlebar">
                 <div class="title-text"><span>Webcam.dll</span></div>
@@ -127,7 +130,6 @@
             <div class="win-content"></div>
         </div>
 
-        <!-- Chat -->
         <div class="win-window chat-area">
             <div class="win-titlebar">
                 <div class="title-text"><span>MSN_Chat_Log.txt - Bloc de notas</span></div>
@@ -135,9 +137,7 @@
                     <div class="win-btn">_</div><div class="win-btn">◻</div><div class="win-btn">X</div>
                 </div>
             </div>
-            <div class="win-content" id="chatWrapper">
-                <!-- Mensajes inyectados por JS -->
-            </div>
+            <div class="win-content" id="chatWrapper"></div>
         </div>
 
     </div>
@@ -152,7 +152,6 @@
             const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
             const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-            // Estilo clásico sin colores personalizados por usuario, puro Win95
             msgNode.innerHTML = `<span class="user">&lt;${safeUsername}&gt;</span> ${safeText}`;
             chatWrapper.appendChild(msgNode);
 
@@ -160,6 +159,63 @@
                 chatWrapper.removeChild(chatWrapper.firstChild);
             }
         }
+
+        function pushEvent(html) {
+            const node = document.createElement('div');
+            node.className = 'event-notif';
+            node.innerHTML = html;
+            chatWrapper.appendChild(node);
+            const total = chatWrapper.querySelectorAll('.event-notif').length;
+            if (total > 3) {
+                const first = chatWrapper.querySelector('.event-notif');
+                if (first) first.remove();
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const BACKEND_URL = (params.get('backend') || 'http://localhost:3000').replace(/\/+$/, '');
+        const CHANNEL = params.get('channel');
+
+        if (CHANNEL) {
+            document.title = 'Win95 Gameplay · ' + CHANNEL;
+        }
+
+        function initSocket() {
+            const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+            socket.on('connect', () => {
+                if (CHANNEL) socket.emit('join:channel', CHANNEL);
+            });
+            socket.on('chat:message', (d) => {
+                appendMessage(
+                    d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo',
+                    d.text || ''
+                );
+            });
+            socket.on('channel:follow', (d) => {
+                pushEvent('⭐ ' + (d.userDisplayName || d.userName || 'Alguien') + ' nos sigue!');
+            });
+            socket.on('channel:subscribe', (d) => {
+                pushEvent('🎉 ' + (d.userDisplayName || d.userName || 'Alguien') + ' se suscribió!');
+            });
+            socket.on('channel:cheer', (d) => {
+                pushEvent('💎 ' + (d.userDisplayName || d.userName || 'Anónimo') + ' animó con ' + (d.bits || 0) + ' bits!');
+            });
+            socket.on('channel:redemption', (d) => {
+                pushEvent('🎯 ' + (d.userDisplayName || d.userName || 'Alguien') + ' canjeó ' + (d.rewardTitle || ''));
+            });
+        }
+
+        function loadSocketIO(cb) {
+            const script = document.createElement('script');
+            script.src = BACKEND_URL + '/socket.io/socket.io.js';
+            script.onload = cb;
+            script.onerror = () => cb(new Error('load failed'));
+            document.head.appendChild(script);
+        }
+
+        loadSocketIO(function(err) {
+            if (!err) initSocket();
+        });
 
         window.addEventListener('message', (event) => {
             const payload = event.data;
