@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8-Bit Ending Screen</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            background-color: #000000;
+            font-family: 'Press Start 2P', monospace;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            /* Efecto estrella estática clásica */
+            background-image: 
+                radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 50px 160px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 90px 40px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 160px 120px, #fff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+        }
+
+        .title {
+            font-size: 100px;
+            color: #F8B800; /* Oro NES */
+            text-shadow: 8px 8px 0px #E52521;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            font-size: 30px;
+            color: #7C7C7C;
+            margin-bottom: 80px;
+            letter-spacing: 5px;
+        }
+
+        /* Menú RPG de Redes Sociales */
+        .social-menu {
+            background-color: #000000;
+            border: 8px solid #ffffff;
+            box-shadow: inset -8px -8px 0px #5C5C5C, inset 8px 8px 0px #7C7C7C;
+            padding: 50px;
+            width: 800px;
+            position: relative;
+        }
+
+        .social-menu::before {
+            content: "SOCIAL LINKS";
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            padding: 0 20px;
+            color: #004CE5;
+            font-size: 24px;
+        }
+
+        .social-item {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            margin-bottom: 30px;
+            padding: 10px;
+            transition: background 0.2s;
+        }
+
+        .social-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Iconos simulados con texto NES para mantener el estilo puro sin dependencias externas */
+        .icon-box {
+            width: 150px;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        /* Colores retro para identificar plataformas */
+        .twitch { color: #9146FF; } /* Morado adaptado */
+        .x-com { color: #aaaaaa; }
+        .youtube { color: #E52521; } /* Rojo NES perfecto para YT */
+        .instagram { color: #F8B800; } /* Amarillo NES */
+        .tiktok { color: #00E8D2; } /* Cyan 8 bits */
+
+        .username {
+            color: #ffffff;
+            margin-left: 30px;
+        }
+
+        /* Cursor parpadeante retro */
+        .cursor {
+            color: #E52521;
+            margin-right: 20px;
+            animation: blink 1s step-end infinite;
+            visibility: hidden; /* Oculto por defecto */
+        }
+        
+        .social-item:hover .cursor {
+            visibility: visible;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="title">STAGE CLEAR</div>
+    <div class="subtitle">THANKS FOR PLAYING</div>
+
+    <div class="social-menu">
+        <!-- INSTRUCCIONES: Cambia '@tu_usuario' por tus datos reales -->
+        
+        <div class="social-item">
+            <span class="cursor">►</span>
+            <span class="icon-box twitch">[TWITCH]</span>
+            <span class="username">@tu_usuario</span>
+        </div>
+
+        <div class="social-item">
+            <span class="cursor">►</span>
+            <span class="icon-box x-com">[X.COM]</span>
+            <span class="username">@tu_usuario</span>
+        </div>
+
+        <div class="social-item">
+            <span class="cursor">►</span>
+            <span class="icon-box youtube">[YOUTUBE]</span>
+            <span class="username">@tu_canal</span>
+        </div>
+
+        <div class="social-item">
+            <span class="cursor">►</span>
+            <span class="icon-box instagram">[INSTA]</span>
+            <span class="username">@tu_usuario</span>
+        </div>
+
+        <div class="social-item">
+            <span class="cursor">►</span>
+            <span class="icon-box tiktok">[TIKTOK]</span>
+            <span class="username">@tu_usuario</span>
+        </div>
+
+    </div>
+
+</body>
+</html>

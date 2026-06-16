@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8-Bit Just Chatting Overlay</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            background-color: transparent;
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1280px 640px; 
+            grid-template-rows: 1080px;
+        }
+
+        .rpg-box {
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 8px solid #ffffff;
+            box-shadow: inset -8px -8px 0px #5C5C5C, inset 8px 8px 0px #7C7C7C;
+            position: relative;
+            color: #fff;
+            box-sizing: border-box;
+        }
+
+        .box-title {
+            position: absolute;
+            top: -18px;
+            left: 30px;
+            background: #000;
+            padding: 0 15px;
+            color: #E52521; /* Rojo NES */
+            font-size: 20px;
+            border: 2px solid #fff;
+        }
+
+        /* Panel Principal de Webcam (2/3 de pantalla) */
+        .main-cam-container {
+            padding: 20px;
+            display: flex;
+        }
+
+        .main-cam {
+            flex-grow: 1;
+            background-color: transparent; /* Aquí va la cámara de OBS */
+        }
+
+        /* Panel Lateral (1/3) */
+        .side-panel {
+            display: grid;
+            grid-template-rows: 720px 360px; /* Chat es más grande, logo más pequeño */
+            padding: 20px 20px 20px 0;
+            gap: 20px;
+        }
+
+        .chat-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 30px 15px;
+            overflow: hidden;
+        }
+
+        .logo-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            color: #F8B800;
+        }
+
+        /* Contenedor del Logo Personalizable */
+        .user-logo-placeholder {
+            width: 150px;
+            height: 150px;
+            /* INSTRUCCIÓN PARA EL USUARIO:
+               Cambia la url() por la ruta de tu imagen, ej: background-image: url('mi_logo.png'); */
+            background-image: url(''); 
+            background-color: #222; /* Fondo temporal si no hay imagen */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border: 4px dashed #7C7C7C;
+            margin-bottom: 20px;
+            image-rendering: pixelated; /* Fuerza a que tu logo se vea pixelado/retro */
+        }
+
+        .chat-msg {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            word-wrap: break-word;
+        }
+
+        .user { color: #E52521; }
+        .text { color: #ffffff; }
+
+    </style>
+</head>
+<body>
+
+    <!-- 2/3 Izquierda: Webcam Principal -->
+    <div class="main-cam-container">
+        <div class="rpg-box main-cam">
+            <div class="box-title">PLAYER 1 CAM</div>
+        </div>
+    </div>
+
+    <!-- 1/3 Derecha: Chat y Logo -->
+    <div class="side-panel">
+        
+        <!-- Chat Fila 1 y 2 -->
+        <div class="rpg-box chat-area" id="chatWrapper">
+            <div class="box-title">WORLD CHAT</div>
+        </div>
+
+        <!-- Logo Fila 3 -->
+        <div class="rpg-box logo-area">
+            <!-- INSERTA AQUÍ LA IMAGEN DE TU LOGO -->
+            <div class="user-logo-placeholder"></div>
+            <div style="font-size: 14px; line-height: 1.5;">
+                TRANSMISIÓN<br>EN DIRECTO
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MSG = 10;
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#E52521';
+
+            msgNode.innerHTML = `<span class="user" style="color: ${finalColor}">[${safeUsername}]</span><br><span class="text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MSG + 1) {
+                chatWrapper.removeChild(chatWrapper.children[1]);
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+</body>
+</html>

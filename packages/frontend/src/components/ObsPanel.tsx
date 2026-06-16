@@ -218,6 +218,43 @@ const OBS_URLS: OBSUrl[] = [
     supportsTheme: false,
     color: '#00f0ff',
   },
+  // ── Retro 8-bits Section ──
+  {
+    id: '8bits-start',
+    icon: '🕹️',
+    labelKey: 'obs.b8bitsStart',
+    descKey: 'obs.b8bitsStartDesc',
+    mode: '8bits-start',
+    supportsTheme: false,
+    color: '#00ff41',
+  },
+  {
+    id: '8bits-gameplay',
+    icon: '📺',
+    labelKey: 'obs.b8bitsGameplay',
+    descKey: 'obs.b8bitsGameplayDesc',
+    mode: '8bits-gameplay',
+    supportsTheme: false,
+    color: '#ff00ff',
+  },
+  {
+    id: '8bits-just-chatting',
+    icon: '💬',
+    labelKey: 'obs.b8bitsJustChatting',
+    descKey: 'obs.b8bitsJustChattingDesc',
+    mode: '8bits-just-chatting',
+    supportsTheme: false,
+    color: '#ffff00',
+  },
+  {
+    id: '8bits-end',
+    icon: '🏁',
+    labelKey: 'obs.b8bitsEnd',
+    descKey: 'obs.b8bitsEndDesc',
+    mode: '8bits-end',
+    supportsTheme: false,
+    color: '#ff4444',
+  },
   // ── WoW Alianza Section ──
   {
     id: 'wow-alliance-start',
@@ -422,6 +459,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     { id: 'wow',    labelKey: 'obs.temaHorda' },
     { id: 'alliance', labelKey: 'obs.temaAlianza' },
     { id: 'fortnite', labelKey: 'obs.temaFortnite' },
+    { id: '8bits', labelKey: 'obs.tema8bits' },
   ];
 
   const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
@@ -487,6 +525,10 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     'dj-fullscreen': 'dj-fullscreen.html',
     'dj-alerts': 'dj-alerts.html',
     'dj-transition': 'dj-transition.html',
+    '8bits-start': '8bits-pantalla_comienzo.html',
+    '8bits-gameplay': '8bits-overlay_gameplay_tv.html',
+    '8bits-just-chatting': '8bits-overlay_just_chatting.html',
+    '8bits-end': '8bits-pantalla_despedida.html',
     'wow-alliance-start': 'wow-alliance-start.html',
     'wow-alliance-webcam': 'wow-alliance-webcam.html',
     'wow-alliance-webcam-labels': 'wow-alliance-webcam-labels.html',
@@ -612,10 +654,12 @@ export function ObsPanel({ channel, backendUrl }: Props) {
           if (selectedTheme === 'dj') return item.id.startsWith('dj-');
           if (selectedTheme === 'alliance') return item.id.startsWith('wow-alliance-');
           if (selectedTheme === 'wow') return item.id.startsWith('wow-horde-');
+          if (selectedTheme === '8bits') return item.id.startsWith('8bits-');
           // When no theme is selected, hide theme-specific overlays
           if (item.id.startsWith('dj-')) return false;
           if (item.id.startsWith('wow-alliance-')) return false;
           if (item.id.startsWith('wow-horde-')) return false;
+          if (item.id.startsWith('8bits-')) return false;
           return true;
         }).map((item) => {
           const isSocial = item.id === 'social';
