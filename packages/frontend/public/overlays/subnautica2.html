@@ -588,7 +588,7 @@
 <script>
 const CHANNEL = new URLSearchParams(location.search).get('channel') || '';
 const DEMO_MODE = new URLSearchParams(location.search).get('demo') === 'true';
-const BACKEND_URL = new URLSearchParams(location.search).get('backend') || location.origin;
+const BACKEND_URL = new URLSearchParams(location.search).get('backend') || 'http://localhost:3000';
 
 document.getElementById('channel-name').textContent = CHANNEL || '---';
 </script>

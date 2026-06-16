@@ -547,7 +547,7 @@
 ────────────────────────────────────────────────────────── */
 const CHANNEL     = new URLSearchParams(location.search).get('channel') || '';
 const DEMO_MODE   = new URLSearchParams(location.search).get('demo') === 'true';
-const BACKEND_URL = new URLSearchParams(location.search).get('backend') || location.origin;
+const BACKEND_URL = new URLSearchParams(location.search).get('backend') || 'http://localhost:3000';
 const EPIC_USER   = new URLSearchParams(location.search).get('epic') || '';
 const STATS_MODE  = new URLSearchParams(location.search).get('mode') || 'overall';
 const LAYOUT      = new URLSearchParams(location.search).get('layout') || 'stats';
@@ -713,7 +713,7 @@ function addChatMessage(displayName, text, color) {
 function initSocket() {
   let socket;
   try {
-    socket = io(BACKEND_URL, { transports: ['websocket'] });
+    socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
   } catch(e) {
     document.getElementById('offline-notice').classList.add('show');
     return;
