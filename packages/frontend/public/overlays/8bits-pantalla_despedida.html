@@ -124,40 +124,40 @@
     <div class="title">STAGE CLEAR</div>
     <div class="subtitle">THANKS FOR PLAYING</div>
 
-    <div class="social-menu">
-        <!-- INSTRUCCIONES: Cambia '@tu_usuario' por tus datos reales -->
-        
-        <div class="social-item">
-            <span class="cursor">►</span>
-            <span class="icon-box twitch">[TWITCH]</span>
-            <span class="username">@tu_usuario</span>
-        </div>
+    <div class="social-menu" id="social-container"></div>
 
-        <div class="social-item">
-            <span class="cursor">►</span>
-            <span class="icon-box x-com">[X.COM]</span>
-            <span class="username">@tu_usuario</span>
-        </div>
-
-        <div class="social-item">
-            <span class="cursor">►</span>
-            <span class="icon-box youtube">[YOUTUBE]</span>
-            <span class="username">@tu_canal</span>
-        </div>
-
-        <div class="social-item">
-            <span class="cursor">►</span>
-            <span class="icon-box instagram">[INSTA]</span>
-            <span class="username">@tu_usuario</span>
-        </div>
-
-        <div class="social-item">
-            <span class="cursor">►</span>
-            <span class="icon-box tiktok">[TIKTOK]</span>
-            <span class="username">@tu_usuario</span>
-        </div>
-
-    </div>
-
+    <script>
+        const SOCIAL_LABELS = {
+            twitch:  { badge: '[TWITCH]',  cls: 'twitch' },
+            x:       { badge: '[X.COM]',   cls: 'x-com' },
+            youtube: { badge: '[YOUTUBE]', cls: 'youtube' },
+            instagram: { badge: '[INSTA]',   cls: 'instagram' },
+            tiktok:  { badge: '[TIKTOK]',  cls: 'tiktok' },
+        };
+        (function() {
+            var p = new URLSearchParams(window.location.search);
+            var raw = p.get('socials');
+            if (!raw) {
+                document.getElementById('social-container').innerHTML =
+                    '<div class="social-item" style="color:#888;font-size:16px;justify-content:center;">Configura tus redes en el panel de OBS</div>';
+                return;
+            }
+            var list;
+            try { list = JSON.parse(raw); } catch(e) { return; }
+            if (!list || !list.length) return;
+            var html = '';
+            for (var i = 0; i < list.length; i++) {
+                var s = list[i];
+                var info = SOCIAL_LABELS[s.p] || { badge: '['+s.p.toUpperCase()+']', cls: '' };
+                html += '<div class="social-item">' +
+                    '<span class="cursor">►</span>' +
+                    '<span class="icon-box ' + info.cls + '">' + info.badge + '</span>' +
+                    '<span class="username">@' + _e(s.u) + '</span>' +
+                    '</div>';
+            }
+            document.getElementById('social-container').innerHTML = html;
+        })();
+        function _e(t) { return t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    </script>
 </body>
 </html>

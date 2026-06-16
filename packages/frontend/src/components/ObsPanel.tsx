@@ -595,6 +595,15 @@ interface SocialLink {
   color: string;
 }
 
+interface EndScreenSocial {
+  platform: string;
+  label: string;
+  icon: string;
+  color: string;
+  username: string;
+  visible: boolean;
+}
+
 export function ObsPanel({ channel, backendUrl }: Props) {
   const { t } = useTranslation();
 
@@ -621,10 +630,20 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     { platform: 'github',    icon: '💻', labelKey: 'obs.socialGithub',   placeholderKey: 'obs.githubPlaceholder',   url: '', color: '#e6edf3' },
   ];
 
+  const END_SCREEN_SOCIALS_INIT: EndScreenSocial[] = [
+    { platform: 'twitch',    label: 'Twitch',     icon: '📺', color: '#9146ff', username: '', visible: true },
+    { platform: 'x',         label: 'X / Twitter', icon: '🐦', color: '#ffffff', username: '', visible: true },
+    { platform: 'youtube',   label: 'YouTube',    icon: '📺', color: '#ff0000', username: '', visible: true },
+    { platform: 'instagram', label: 'Instagram',  icon: '📸', color: '#e1306c', username: '', visible: true },
+    { platform: 'tiktok',    label: 'TikTok',     icon: '🎵', color: '#ff0050', username: '', visible: true },
+  ];
+
   const [selectedTheme, setSelectedTheme] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
   const [socialExpanded, setSocialExpanded] = useState(false);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(DEFAULT_SOCIAL_LINKS);
+  const [endScreenSocials, setEndScreenSocials] = useState<EndScreenSocial[]>(END_SCREEN_SOCIALS_INIT);
+  const [endSocialExpanded, setEndSocialExpanded] = useState<string | null>(null);
   // En modo dev (Vite) el overlay lo sirve el frontend en :5173
   const overlayBaseUrl = import.meta.env.DEV ? 'http://localhost:5173' : (backendUrl || 'http://localhost:3000');
 
@@ -725,6 +744,13 @@ export function ObsPanel({ channel, backendUrl }: Props) {
       if (mode === 'fortnite' && fnEpicUsername) url += `&epic=${encodeURIComponent(fnEpicUsername)}&mode=${fnStatsMode}&layout=${fnLayout}`;
       const be = backendUrl || 'http://localhost:3000';
       if (be !== location.origin) url += `${channel ? '&' : '?'}backend=${encodeURIComponent(be)}`;
+      // End screen social links
+      if (mode.endsWith('-end')) {
+        const active = endScreenSocials.filter((s) => s.visible && s.username.trim());
+        if (active.length > 0) {
+          url += `&socials=${encodeURIComponent(JSON.stringify(active.map((s) => ({ p: s.platform, u: s.username }))))}`;
+        }
+      }
       return url;
     }
     let url = `${overlayBaseUrl}/overlay.html?mode=${mode}`;
@@ -932,8 +958,140 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                       {socialExpanded ? '▲' : '▼'} {t('obs.configurar')}
                     </button>
                   )}
+
+                  {/* Configure button for end screen socials */}
+                  {item.id.endsWith('-end') && (
+                    <button
+                      id={`endsocial-configure-btn-${item.id}`}
+                      onClick={() => setEndSocialExpanded(endSocialExpanded === item.id ? null : item.id)}
+                      style={{
+                        padding: '0.45rem 0.875rem',
+                        borderRadius: 'var(--sf-radius-sm)',
+                        border: `1px solid ${endSocialExpanded === item.id ? '#10b98188' : 'var(--sf-border)'}`,
+                        background: endSocialExpanded === item.id ? 'rgba(16,185,129,0.1)' : 'transparent',
+                        color: endSocialExpanded === item.id ? '#34d399' : 'var(--sf-text-3)',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                        transition: 'all 0.15s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {endSocialExpanded === item.id ? '▲' : '▼'} {t('obs.configurar')}
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {/* ── End screen social sub-menu ── */}
+              {item.id.endsWith('-end') && (
+                <AnimatePresence>
+                  {endSocialExpanded === item.id && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <div
+                        style={{
+                          marginTop: 4,
+                          padding: '1.25rem',
+                          background: 'rgba(16,185,129,0.04)',
+                          border: '1px solid rgba(16,185,129,0.15)',
+                          borderTop: 'none',
+                          borderRadius: '0 0 var(--sf-radius) var(--sf-radius)',
+                        }}
+                      >
+                        <p
+                          className="sf-section-title"
+                          style={{ marginBottom: '1rem', color: '#34d399' }}
+                        >
+                          Redes Sociales · Pantalla de Despedida
+                        </p>
+                        <p style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '1rem', lineHeight: 1.5 }}>
+                          Ingresa tu nombre de usuario en cada red y desactiva las que no quieras mostrar.
+                        </p>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                          {endScreenSocials.map((social, idx) => (
+                            <div
+                              key={social.platform}
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+                            >
+                              {/* Visibility toggle */}
+                              <button
+                                onClick={() => {
+                                  const next = [...endScreenSocials];
+                                  next[idx] = { ...next[idx], visible: !next[idx].visible };
+                                  setEndScreenSocials(next);
+                                }}
+                                style={{
+                                  width: 22, height: 22, borderRadius: 4, flexShrink: 0, cursor: 'pointer',
+                                  background: social.visible ? `${social.color}44` : 'transparent',
+                                  border: `2px solid ${social.visible ? social.color : 'var(--sf-border)'}`,
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  fontSize: '0.65rem', color: social.visible ? '#fff' : 'transparent',
+                                  transition: 'all 0.15s ease', fontFamily: 'inherit',
+                                }}
+                                title={social.visible ? 'Ocultar' : 'Mostrar'}
+                              >
+                                {social.visible ? '✓' : ''}
+                              </button>
+
+                              {/* Platform badge */}
+                              <div
+                                style={{
+                                  width: 32, height: 32, borderRadius: 8,
+                                  background: `${social.color}22`,
+                                  border: `1px solid ${social.color}44`,
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  fontSize: '1rem', flexShrink: 0,
+                                }}
+                              >
+                                {social.icon}
+                              </div>
+
+                              {/* Label */}
+                              <span
+                                style={{
+                                  fontSize: '0.78rem', fontWeight: 600,
+                                  color: social.visible ? 'var(--sf-text-2)' : 'var(--sf-text-3)',
+                                  width: 100, flexShrink: 0,
+                                }}
+                              >
+                                {social.label}
+                              </span>
+
+                              {/* Username input */}
+                              <input
+                                type="text"
+                                value={social.username}
+                                onChange={(e) => {
+                                  const next = [...endScreenSocials];
+                                  next[idx] = { ...next[idx], username: e.target.value };
+                                  setEndScreenSocials(next);
+                                }}
+                                placeholder="@tu_usuario"
+                                className="sf-input"
+                                style={{
+                                  fontSize: '0.78rem', padding: '0.4rem 0.75rem',
+                                  opacity: social.visible ? 1 : 0.4,
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              )}
 
               {/* ── Social sub-menu ── */}
               {isSocial && (

@@ -122,36 +122,45 @@
         <div class="sub-title">STAY RADICAL</div>
     </div>
 
-    <div class="social-container">
-        
-        <!-- INSTRUCCIONES: Cambia "@tu_usuario" por tus datos reales -->
-        
-        <div class="social-sign">
-            <span class="platform">TWITCH</span>
-            <span class="username">@tu_usuario</span>
-        </div>
+    <div class="social-container" id="social-container"></div>
 
-        <div class="social-sign">
-            <span class="platform">X / TWITTER</span>
-            <span class="username">@tu_usuario</span>
-        </div>
-
-        <div class="social-sign">
-            <span class="platform">YOUTUBE</span>
-            <span class="username">@tu_canal</span>
-        </div>
-
-        <div class="social-sign">
-            <span class="platform">INSTAGRAM</span>
-            <span class="username">@tu_usuario</span>
-        </div>
-
-        <div class="social-sign">
-            <span class="platform">TIKTOK</span>
-            <span class="username">@tu_usuario</span>
-        </div>
-
-    </div>
-
+    <script>
+        var SOCIAL_DATA = [
+            { p:'twitch',    label:'TWITCH' },
+            { p:'x',         label:'X / TWITTER' },
+            { p:'youtube',   label:'YOUTUBE' },
+            { p:'instagram', label:'INSTAGRAM' },
+            { p:'tiktok',    label:'TIKTOK' },
+        ];
+        (function() {
+            var p = new URLSearchParams(window.location.search);
+            var raw = p.get('socials');
+            if (!raw) {
+                document.getElementById('social-container').innerHTML =
+                    '<div style="grid-column:1/-1;color:#888;font-size:18px;padding:20px;text-align:center;">Configura tus redes en el panel de OBS</div>';
+                return;
+            }
+            var list;
+            try { list = JSON.parse(raw); } catch(e) { return; }
+            if (!list || !list.length) return;
+            var map = {};
+            for (var i = 0; i < list.length; i++) map[list[i].p] = list[i].u;
+            var html = '';
+            for (var i = 0; i < SOCIAL_DATA.length; i++) {
+                var sd = SOCIAL_DATA[i];
+                var username = map[sd.p] || '';
+                if (!username) continue;
+                html += '<div class="social-sign">' +
+                    '<span class="platform">' + sd.label + '</span>' +
+                    '<span class="username">@' + _e(username) + '</span>' +
+                    '</div>';
+            }
+            if (!html) {
+                html = '<div style="grid-column:1/-1;color:#888;font-size:18px;padding:20px;text-align:center;">Configura tus redes en el panel de OBS</div>';
+            }
+            document.getElementById('social-container').innerHTML = html;
+        })();
+        function _e(t) { return t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    </script>
 </body>
 </html>

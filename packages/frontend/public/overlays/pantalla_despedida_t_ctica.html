@@ -72,45 +72,45 @@
         <div class="sub-title">SEÑAL DE LA NAVE NODRIZA PERDIDA - INICIANDO PROTOCOLO DE APAGADO</div>
     </div>
 
-    <!-- INSTRUCCIONES: Modifica los textos "@tu_usuario" para apuntar a tus redes reales -->
-    <div class="comms-container">
-        
-        <div class="comm-node">
-            <div class="comm-inner">
-                <div class="platform">FREQ: TWITCH</div>
-                <div class="username">@tu_usuario</div>
-            </div>
-        </div>
+    <div class="comms-container" id="social-container"></div>
 
-        <div class="comm-node">
-            <div class="comm-inner">
-                <div class="platform">FREQ: X / TWITTER</div>
-                <div class="username">@tu_usuario</div>
-            </div>
-        </div>
-
-        <div class="comm-node">
-            <div class="comm-inner">
-                <div class="platform">FREQ: YOUTUBE</div>
-                <div class="username">@tu_canal</div>
-            </div>
-        </div>
-
-        <div class="comm-node">
-            <div class="comm-inner">
-                <div class="platform">FREQ: INSTAGRAM</div>
-                <div class="username">@tu_usuario</div>
-            </div>
-        </div>
-
-        <div class="comm-node">
-            <div class="comm-inner">
-                <div class="platform">FREQ: TIKTOK</div>
-                <div class="username">@tu_usuario</div>
-            </div>
-        </div>
-
-    </div>
-
+    <script>
+        var SOCIAL_DATA = [
+            { p:'twitch',    label:'FREQ: TWITCH' },
+            { p:'x',         label:'FREQ: X / TWITTER' },
+            { p:'youtube',   label:'FREQ: YOUTUBE' },
+            { p:'instagram', label:'FREQ: INSTAGRAM' },
+            { p:'tiktok',    label:'FREQ: TIKTOK' },
+        ];
+        (function() {
+            var p = new URLSearchParams(window.location.search);
+            var raw = p.get('socials');
+            if (!raw) {
+                document.getElementById('social-container').innerHTML =
+                    '<div style="grid-column:1/-1;color:#888;font-size:14px;padding:20px;text-align:center;font-family:monospace;">Configura tus redes en el panel de OBS</div>';
+                return;
+            }
+            var list;
+            try { list = JSON.parse(raw); } catch(e) { return; }
+            if (!list || !list.length) return;
+            var map = {};
+            for (var i = 0; i < list.length; i++) map[list[i].p] = list[i].u;
+            var html = '';
+            for (var i = 0; i < SOCIAL_DATA.length; i++) {
+                var sd = SOCIAL_DATA[i];
+                var username = map[sd.p] || '';
+                if (!username) continue;
+                html += '<div class="comm-node"><div class="comm-inner">' +
+                    '<div class="platform">' + sd.label + '</div>' +
+                    '<div class="username">@' + _e(username) + '</div>' +
+                    '</div></div>';
+            }
+            if (!html) {
+                html = '<div style="grid-column:1/-1;color:#888;font-size:14px;padding:20px;text-align:center;font-family:monospace;">Configura tus redes en el panel de OBS</div>';
+            }
+            document.getElementById('social-container').innerHTML = html;
+        })();
+        function _e(t) { return t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    </script>
 </body>
 </html>
