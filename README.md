@@ -12,7 +12,7 @@ Disponible en dos modos:
 
 ## ✨ Características
 
-- **🎨 Overlays temáticos independientes** — Overlays en HTML+CSS+JS puro (sin React) para Subnautica 2, Fortnite y Alertas animadas. Cada overlay incluye Canvas de partículas, animaciones CSS, cola de eventos en tiempo real y conexión directa a Socket.IO. Se cargan como archivos estáticos (`/overlays/`) en OBS.
+- **🎨 Overlays temáticos independientes** — Overlays en HTML+CSS+JS puro (sin React) para múltiples juegos y estilos: Subnautica 2, Fortnite, Alertas animadas, Subathon, **Retro 8-bits**, **Retro Win95**, **RetroWave** y **Tactical Sci-Fi**. Cada overlay incluye Canvas de partículas, animaciones CSS, cola de eventos en tiempo real y conexión directa a Socket.IO. Se cargan como archivos estáticos (`/overlays/`) en OBS.
 - **🔴 Subathon** — Temporizador ampliable en directo: los espectadores añaden tiempo con suscripciones (+5 min), bits (+1 min por cada 100 bits) o recompensas de canal. Límite máximo configurable (12/24h). Panel de control con inicio/pausa/reanudar/detener, añadir tiempo manual, historial de acciones y overlay OBS dedicado con cuenta atrás, barra de progreso, estadísticas y feed de actividad.
 - **📡 Gestor del Stream unificado** — Dashboard que combina vista previa del stream (iframe embed con soporte multi-parent para Electron y navegador), editor de título/juego, estadísticas en vivo (viewers, followers, subs, uptime) y feed de actividad del canal con filtros — todo en una sola pantalla.
 - **💬 Chat en vivo** — Lectura del chat de Twitch vía IRC con reenvío en tiempo real a los overlays mediante Socket.IO. Incluye envío de mensajes, reply (↩ @usuario), moderación (timeout/ban), badges por rol, selector de sonido de notificación con control de volumen, **TTS (text-to-speech)** con selección de voz, velocidad y volumen.
@@ -104,7 +104,7 @@ Panel (Vite): `http://localhost:5173` · API: `http://localhost:3000`
 Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 
 | Overlay | URL |
-|---|---|
+|---|---|---|
 | Chat | `http://localhost:3000/overlay.html?mode=chat&channel=tucanal` |
 | Sorteos | `http://localhost:3000/overlay.html?mode=giveaway&channel=tucanal` |
 | Predicciones | `http://localhost:3000/overlay.html?mode=prediction&channel=tucanal` |
@@ -117,10 +117,14 @@ Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 | **Subnautica 2 (completo)** | `http://localhost:3000/overlays/subnautica2.html?channel=tucanal` |
 | **Fortnite (completo)** | `http://localhost:3000/overlays/fortnite.html?channel=tucanal&epic=tuEpic&mode=solo` |
 | **Alertas animadas** | `http://localhost:3000/overlays/alerts.html?channel=tucanal` |
+| **8-bits (tema)** | `http://localhost:5173/overlays/8bits-pantalla_comienzo.html?backend=http://localhost:3000&channel=tucanal` |
+| **Win95 (tema)** | `http://localhost:5173/overlays/pantalla_comienzo_win95.html?backend=http://localhost:3000&channel=tucanal` |
+| **RetroWave (tema)** | `http://localhost:5173/overlays/pantalla_comienzo_retrowave.html?backend=http://localhost:3000&channel=tucanal` |
+| **Tactical Sci-Fi (tema)** | `http://localhost:5173/overlays/pantalla_de_inicio_t_ctica.html?backend=http://localhost:3000&channel=tucanal` |
 
 > Los overlays HTML independientes solo muestran datos reales del backend. Para vista previa con datos simulados añade `&demo=true` a la URL. Cuando el modo demo está activo se muestra un badge **🧪 MODO PRUEBA** permanente en pantalla.
 
-Para cambiar el tema visual del chat agrega `&theme=subnautica2`, `&theme=poe2`, `&theme=wow` o `&theme=alliance`.
+Para cambiar el tema visual del chat agrega `&theme=subnautica2`, `&theme=poe2`, `&theme=wow`, `&theme=alliance`, `&theme=8bits`, `&theme=win95`, `&theme=retrowave` o `&theme=tactical`. También puedes usar overlays HTML independientes por tema seleccionándolos desde el panel de control.
 
 > En la ventana transparente de escritorio, los ajustes de tipografía, tamaño y modo de fondo se pueden modificar desde la barra de control superior (⚙) o desde el panel de Chat en la aplicación. La configuración persiste entre sesiones.
 
@@ -156,7 +160,14 @@ StreamForge/
 │   │       ├── subnautica2.html
 │   │       ├── fortnite.html
 │   │       ├── alerts.html
-│   │       └── subathon.html
+│   │       ├── subathon.html
+│   │       ├── 8bits-* # Retro 8-bits (start, gameplay, just chatting, end)
+│   │       ├── *win95* # Retro Win95 (start, gameplay, just chatting, end)
+│   │       ├── *retrowave* # RetroWave (start, gameplay, just chatting, end)
+│   │       ├── hud_* # Tactical Sci-Fi (gameplay, just chatting)
+│   │       ├── pantalla_de_inicio_t_ctica.html
+│   │       ├── pantalla_despedida_t_ctica.html
+│   │       └── ...
 │   ├── desktop/           # Electron + SQLite
 │   └── shared/            # Tipos compartidos (SubathonState, TimerState, FighterState, etc.)
 ├── STACK_TECNOLOGICO.md

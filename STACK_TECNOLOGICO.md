@@ -22,7 +22,7 @@ Aplicación modular para creadores de contenido que permite gestionar el canal d
 
 ### Overlays independientes (HTML/CSS/JS puro)
 
-Cuatro overlays standalone en `public/overlays/` que se sirven como archivos estáticos. No requieren React ni Vite — conexión directa a Socket.IO:
+Dieciséis overlays standalone en `public/overlays/` que se sirven como archivos estáticos. No requieren React ni Vite — conexión directa a Socket.IO:
 
 | Overlay | Archivo | Descripción |
 |---|---|---|
@@ -30,6 +30,22 @@ Cuatro overlays standalone en `public/overlays/` que se sirven como archivos est
 | **Fortnite** | `fortnite.html` | HUD hexagonal: stat-rows con iconos SVG, partículas, cuadrícula, cola de alertas, uptime, badge de último follow, barra inferior. **Panel de stats** configurabl (kills, wins, partidas, K/D, win rate) desde fortnite-api.com con API key propia y selector de modo (SOLO/DUO/TRIO/SQUAD). Refresh cada 5 min independiente del socket. Demo con `?demo=true` |
 | **Alertas** | `alerts.html` | Alertas dedicadas: 7 tipos (follow/sub/resub/gift/bits/raid/canjeo), cola con animación bounce+shimmer+glow, Canvas confetti burst por tipo, colores específicos, botones de test. Demo con `?demo=true` |
 | **Subathon** | `subathon.html` | Temporizador ampliable: cuenta atrás de 7rem con glow rojo y pulso crítico, barra de progreso con shimmer, indicador de estado, stats (tiempo añadido, acciones, subs, bits), feed lateral de actividad, uptime, barra inferior. Demo con `?demo=true` |
+| **Retro 8-bits · Comienzo** | `8bits-pantalla_comienzo.html` | Pantalla de inicio pixelada con escenario retro, bordes NES, cuenta atrás y zona para logo |
+| **Retro 8-bits · Gameplay** | `8bits-overlay_gameplay_tv.html` | Monitor CRT con scanlines, webcam pixelada, chat en vivo y notificaciones de Twitch (follows, subs, cheers, redemptions) |
+| **Retro 8-bits · Just Chatting** | `8bits-overlay_just_chatting.html` | Estilo RPG con caja de diálogo, chat en vivo con nombre/color y eventos en tiempo real |
+| **Retro 8-bits · Despedida** | `8bits-pantalla_despedida.html` | Pantalla de cierre con estrella fugaz pixelada y créditos estilo NES |
+| **Retro Win95 · Comienzo** | `pantalla_comienzo_win95.html` | Pantalla de inicio estilo Windows 95 con escaneo CRT y botones retro |
+| **Retro Win95 · Gameplay** | `overlay_gameplay_win95.html` | Ventanas clásicas Win95, webcam, chat mIRC en vivo con eventos de Twitch |
+| **Retro Win95 · Just Chatting** | `overlay_just_chatting_win95.html` | Interfaz Windows 95 con chat tipo mIRC32, logo y notificaciones |
+| **Retro Win95 · Despedida** | `pantalla_despedida_win95.html` | Pantalla de apagado estilo Windows con efectos CRT |
+| **RetroWave · Comienzo** | `pantalla_comienzo_retrowave.html` | Sol radiante, cuadrícula 3D en perspectiva, cuenta atrás neón magenta/cyan |
+| **RetroWave · Gameplay** | `overlay_gameplay_retrowave.html` | Bordes neón, retícula, chat con efecto glitch y eventos Twitch en tiempo real |
+| **RetroWave · Just Chatting** | `overlay_just_chatting_retrowave.html` | Diseño magenta/cyan con logo pulsante, chat y notificaciones |
+| **RetroWave · Despedida** | `pantalla_despedida_retrowave.html` | Cuadrícula 3D superior e inferior, enlaces sociales neón |
+| **Tactical Sci-Fi · Comienzo** | `pantalla_de_inicio_t_ctica.html` | Radar DRADIS giratorio, panel octogonal BSG, cuenta atrás táctica |
+| **Tactical Sci-Fi · Gameplay** | `hud_gameplay_monitor.html` | Retícula de puntería, telemetría animada, chat de comunicaciones con eventos Twitch |
+| **Tactical Sci-Fi · Just Chatting** | `hud_just_chatting.html` | Parche de misión giratorio, visor táctico, registro de comunicaciones en vivo |
+| **Tactical Sci-Fi · Despedida** | `pantalla_despedida_t_ctica.html` | Alerta roja, panel de frecuencias de comunicación, estilo BSG |
 
 > Todos los overlays standalone solo muestran datos reales del backend. El modo demo (`?demo=true`) activa un badge **🧪 MODO PRUEBA** permanente en pantalla y datos simulados. Sin `?demo=true` y sin backend, todo se muestra en cero/`--`.
 
@@ -142,14 +158,18 @@ El overlay de chat se renderiza con React en una ventana Electron separada (o co
 
 ---
 
-## Overlays por Juego
+## Overlays por Juego / Tema
 
-| Juego | Estilo visual | Archivo overlay |
+| Juego / Tema | Estilo visual | Overlays |
 |---|---|---|
 | **Subnautica 2** | Azul profundo, neón bioluminiscente, interfaz HUD de PDA. Canvas partículas, sonar, chat, alertas por tipo | `subnautica2.html` |
 | **Fortnite** | Hexágonos, azul/dorado/púrpura, estilo battle royale. Partículas, cuadrícula, alertas, uptime, **panel de stats** (kills, wins, partidas, K/D, win rate) con fetch directo a backend cada 5 min | `fortnite.html` |
 | **Alertas genéricas** | Oscuro con bordes de color por tipo. Confetti Canvas, shimmer, glow ring. 7 tipos de evento | `alerts.html` |
 | **Subathon** | Rojo/gradiente, timer grande con pulso crítico. Barra progreso, feed actividad, stats | `subathon.html` |
+| **Retro 8-bits** | Pixel art NES, bordes estilo RPG, colores rojo/amarillo/azul. Scanlines CRT, fuentes Press Start 2P | 4 overlays (start, gameplay, just chatting, end) |
+| **Retro Win95** | Interfaz Windows 95: ventanas grises, título azul marino, bordes en relieve. Fuente MS Sans Serif | 4 overlays (start, gameplay, just chatting, end) |
+| **RetroWave** | Estilo outrun/synthwave: sol radiante, cuadrícula 3D, neón magenta/cyan. Fuentes VT323 + Righteous | 4 overlays (start, gameplay, just chatting, end) |
+| **Tactical Sci-Fi** | Estilo Battlestar Galactica: paneles octogonales, radar DRADIS, ámbar/verde táctico, scanlines. Fuente Share Tech Mono | 4 overlays (start, gameplay, just chatting, end) |
 
 ---
 
@@ -227,11 +247,18 @@ twitch_overlay/
 │   │   └── fortnite/      # Stats Fortnite
 │   ├── frontend/
 │   │   ├── src/components/  # Dashboard React
-│   │   └── public/overlays/ # Overlays HTML standalone
+│   │   └── public/overlays/ # Overlays HTML standalone (16+ archivos)
 │   │       ├── subnautica2.html
 │   │       ├── fortnite.html
 │   │       ├── alerts.html
-│   │       └── subathon.html
+│   │       ├── subathon.html
+│   │       ├── 8bits-*          # Retro 8-bits theme
+│   │       ├── *win95*          # Retro Win95 theme
+│   │       ├── *retrowave*      # RetroWave theme
+│   │       ├── hud_*            # Tactical Sci-Fi theme
+│   │       ├── pantalla_de_inicio_t_ctica.html
+│   │       ├── pantalla_despedida_t_ctica.html
+│   │       └── ...
 │   ├── desktop/           # Electron
 │   └── shared/            # Tipos compartidos
 ├── README.md
@@ -267,3 +294,8 @@ twitch_overlay/
 | **36** | **🌍 Traducción multi-idioma** — Frontend traducido a inglés, francés, alemán e italiano con detección automática del idioma del navegador | 🔜 |
 | **37** | **🎮 Integración Stream Deck** — Plugin nativo para Elgato Stream Deck (Node.js + CLI SDK). Acciones: Subathon, Sorteo, Moderación, Stream info, Anti-Bots. Conexión vía HTTP REST a la API local de StreamForger | 🔜 |
 | **38** | **🎬 Gestión y exportación de clips a TikTok** — Creación, edición y exportación automática de clips del stream a TikTok con formato vertical, subtítulos automáticos y programación de publicaciones | 🔜 |
+| **39** | **🕹️ Retro 8-bits theme** — 4 overlays pixel art NES (start, gameplay, just chatting, end) con chat en vivo y eventos Twitch | ✅ |
+| **40** | **🪟 Retro Win95 theme** — 4 overlays estilo Windows 95 con chat mIRC32 y notificaciones | ✅ |
+| **41** | **🌅 RetroWave theme** — 4 overlays outrun/synthwave con neón magenta/cyan, chat glitch y eventos | ✅ |
+| **42** | **🛸 Tactical Sci-Fi theme** — 4 overlays BSG con radar DRADIS, chat táctico y telemetría | ✅ |
+| **43** | **Socket.IO en overlays temáticos** — Todos los overlays con chat (gameplay y just chatting) conectados al backend via Socket.IO para mensajes, follows, subs, cheers y redemptions | ✅ |

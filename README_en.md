@@ -12,7 +12,7 @@ Available in two modes:
 
 ## ✨ Features
 
-- **🎨 Themed standalone overlays** — Pure HTML+CSS+JS overlays (no React) for Subnautica 2, Fortnite, and animated alerts. Each includes Canvas particles, CSS animations, real-time event queue, and direct Socket.IO connection. Loaded as static files (`/overlays/`) in OBS.
+- **🎨 Themed standalone overlays** — Pure HTML+CSS+JS overlays (no React) for multiple games and styles: Subnautica 2, Fortnite, animated alerts, Subathon, **Retro 8-bit**, **Retro Win95**, **RetroWave**, and **Tactical Sci-Fi**. Each includes Canvas particles, CSS animations, real-time event queue, and direct Socket.IO connection. Loaded as static files (`/overlays/`) in OBS.
 - **🔴 Subathon** — Extendable countdown timer: viewers add time via subscriptions (+5min), bits (+1min per 100 bits), or channel rewards. Configurable max limit (12/24h). Control panel with start/pause/resume/stop, manual time addition, action history, and dedicated OBS overlay.
 - **📡 Unified Stream Dashboard** — Stream preview (iframe embed with multi-parent support for Electron and browser), title/game editor, live stats (viewers, followers, subs, uptime), and filtered channel activity feed in one screen.
 - **💬 Live Chat** — Twitch IRC chat relayed in real-time to overlays via Socket.IO. Includes message sending, reply (@user), moderation (timeout/ban), role badges, notification sound selector with volume control, **TTS (text-to-speech)** with voice selection, speed, and volume.
@@ -103,7 +103,7 @@ Dashboard (Vite): `http://localhost:5173` · API: `http://localhost:3000`
 Add a **Browser Source** in OBS using these URLs:
 
 | Overlay | URL |
-|---|---|
+|---|---|---|
 | Chat | `http://localhost:3000/overlay.html?mode=chat&channel=yourchannel` |
 | Giveaways | `http://localhost:3000/overlay.html?mode=giveaway&channel=yourchannel` |
 | Predictions | `http://localhost:3000/overlay.html?mode=prediction&channel=yourchannel` |
@@ -115,10 +115,14 @@ Add a **Browser Source** in OBS using these URLs:
 | **Subnautica 2 (full)** | `http://localhost:3000/overlays/subnautica2.html?channel=yourchannel` |
 | **Fortnite (full)** | `http://localhost:3000/overlays/fortnite.html?channel=yourchannel&epic=yourEpic&mode=solo` |
 | **Animated Alerts** | `http://localhost:3000/overlays/alerts.html?channel=yourchannel` |
+| **8-bit (theme)** | `http://localhost:5173/overlays/8bits-pantalla_comienzo.html?backend=http://localhost:3000&channel=yourchannel` |
+| **Win95 (theme)** | `http://localhost:5173/overlays/pantalla_comienzo_win95.html?backend=http://localhost:3000&channel=yourchannel` |
+| **RetroWave (theme)** | `http://localhost:5173/overlays/pantalla_comienzo_retrowave.html?backend=http://localhost:3000&channel=yourchannel` |
+| **Tactical Sci-Fi (theme)** | `http://localhost:5173/overlays/pantalla_de_inicio_t_ctica.html?backend=http://localhost:3000&channel=yourchannel` |
 
 > Standalone HTML overlays only show real data from the backend. For preview with simulated data add `&demo=true`. A permanent **🧪 TEST MODE** badge is shown when demo is active.
 
-Add `&theme=subnautica2`, `&theme=poe2`, `&theme=wow`, or `&theme=alliance` to change the chat visual theme.
+Add `&theme=subnautica2`, `&theme=poe2`, `&theme=wow`, `&theme=alliance`, `&theme=8bits`, `&theme=win95`, `&theme=retrowave`, or `&theme=tactical` to change the chat visual theme. Standalone themed overlays can also be selected directly from the control panel.
 
 > In **development mode** (`npm run dev`), use `localhost:5173` instead of `localhost:3000`. The Fortnite overlay needs `&backend=http://localhost:3000` in that case (auto-added when copying the URL from the panel).
 
@@ -152,7 +156,14 @@ StreamForge/
 │   │       ├── subnautica2.html
 │   │       ├── fortnite.html
 │   │       ├── alerts.html
-│   │       └── subathon.html
+│   │       ├── subathon.html
+│   │       ├── 8bits-* # Retro 8-bit (start, gameplay, just chatting, end)
+│   │       ├── *win95* # Retro Win95 (start, gameplay, just chatting, end)
+│   │       ├── *retrowave* # RetroWave (start, gameplay, just chatting, end)
+│   │       ├── hud_* # Tactical Sci-Fi (gameplay, just chatting)
+│   │       ├── pantalla_de_inicio_t_ctica.html
+│   │       ├── pantalla_despedida_t_ctica.html
+│   │       └── ...
 │   ├── desktop/           # Electron + SQLite
 │   └── shared/            # Shared types
 ├── STACK_TECNOLOGICO.md

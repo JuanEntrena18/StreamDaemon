@@ -12,7 +12,7 @@ Available in two modes:
 
 ## ✨ Features
 
-- **🎨 Standalone themed overlays** — Pure HTML+CSS+JS overlays (no React) for Subnautica 2, Fortnite, and animated Alerts. Each includes Canvas particles, CSS animations, real-time event queue, and direct Socket.IO connection. Loaded as static files (`/overlays/`) in OBS.
+- **🎨 Standalone themed overlays** — Pure HTML+CSS+JS overlays (no React) for multiple games and styles: Subnautica 2, Fortnite, animated Alerts, Subathon, **Retro 8-bit**, **Retro Win95**, **RetroWave**, and **Tactical Sci-Fi**. Each includes Canvas particles, CSS animations, real-time event queue, and direct Socket.IO connection. Loaded as static files (`/overlays/`) in OBS.
 - **🔴 Subathon** — An extendable live timer: viewers add time through subscriptions (+5 min), bits (+1 min per 100 bits), or channel point redemptions. Configurable max limit (12/24h). Control panel with start/pause/resume/stop, manual time addition, action history log, and a dedicated OBS overlay with countdown, progress bar, stats, and activity feed.
 - **📡 Unified Stream Dashboard** — Combines a stream preview (embedded iframe), title/game editor, live stats (viewers, followers, subs, uptime), and a channel activity feed with filters — all in one screen.
 - **💬 Live Chat** — Twitch IRC chat reading with real-time relay to overlays via Socket.IO. Includes message sending, reply (↩ @user), moderation (timeout/ban), role badges, and notification sound selector.
@@ -103,7 +103,7 @@ Dashboard (Vite): `http://localhost:5173` · API: `http://localhost:3000`
 Add a **Browser Source** in OBS and use the following URLs:
 
 | Overlay | URL |
-|---|---|
+|---|---|---|
 | Chat | `http://localhost:3000/overlay.html?mode=chat&channel=yourchannel` |
 | Giveaways | `http://localhost:3000/overlay.html?mode=giveaway&channel=yourchannel` |
 | Predictions | `http://localhost:3000/overlay.html?mode=prediction&channel=yourchannel` |
@@ -116,10 +116,14 @@ Add a **Browser Source** in OBS and use the following URLs:
 | **Subnautica 2 (full)** | `http://localhost:3000/overlays/subnautica2.html?channel=yourchannel` |
 | **Fortnite (full)** | `http://localhost:3000/overlays/fortnite.html?channel=yourchannel&epic=yourEpic&mode=solo` |
 | **Animated Alerts** | `http://localhost:3000/overlays/alerts.html?channel=yourchannel` |
+| **8-bit (theme)** | `http://localhost:5173/overlays/8bits-pantalla_comienzo.html?backend=http://localhost:3000&channel=yourchannel` |
+| **Win95 (theme)** | `http://localhost:5173/overlays/pantalla_comienzo_win95.html?backend=http://localhost:3000&channel=yourchannel` |
+| **RetroWave (theme)** | `http://localhost:5173/overlays/pantalla_comienzo_retrowave.html?backend=http://localhost:3000&channel=yourchannel` |
+| **Tactical Sci-Fi (theme)** | `http://localhost:5173/overlays/pantalla_de_inicio_t_ctica.html?backend=http://localhost:3000&channel=yourchannel` |
 
 > Standalone HTML overlays only show real data from the backend. For a preview with simulated data add `&demo=true` to the URL. When demo mode is active, a permanent **🧪 TEST MODE** badge is shown on screen.
 
-For themed chat add `&theme=subnautica2`, `&theme=poe2`, `&theme=wow`, or `&theme=alliance`.
+For themed chat add `&theme=subnautica2`, `&theme=poe2`, `&theme=wow`, `&theme=alliance`, `&theme=8bits`, `&theme=win95`, `&theme=retrowave`, or `&theme=tactical`. You can also use standalone HTML overlays per theme by selecting them from the control panel.
 
 > In **development mode** (`npm run dev`), use `localhost:5173` instead of `localhost:3000`. The Fortnite overlay needs the `&backend=http://localhost:3000` parameter in that case (added automatically when copying the URL from the panel).
 
@@ -151,7 +155,14 @@ StreamForge/
 │   │       ├── subnautica2.html
 │   │       ├── fortnite.html
 │   │       ├── alerts.html
-│   │       └── subathon.html
+│   │       ├── subathon.html
+│   │       ├── 8bits-* # Retro 8-bit (start, gameplay, just chatting, end)
+│   │       ├── *win95* # Retro Win95 (start, gameplay, just chatting, end)
+│   │       ├── *retrowave* # RetroWave (start, gameplay, just chatting, end)
+│   │       ├── hud_* # Tactical Sci-Fi (gameplay, just chatting)
+│   │       ├── pantalla_de_inicio_t_ctica.html
+│   │       ├── pantalla_despedida_t_ctica.html
+│   │       └── ...
 │   ├── desktop/           # Electron + SQLite
 │   └── shared/            # Shared types (SubathonState, TimerState, FighterState, etc.)
 ├── STACK_TECNOLOGICO.md
