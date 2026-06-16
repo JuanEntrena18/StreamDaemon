@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSG Ending Screen</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            background-color: #020302;
+            overflow: hidden;
+            font-family: 'Share Tech Mono', monospace;
+            color: #ffb300;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.3));
+            background-size: 100% 4px; pointer-events: none; z-index: 100;
+        }
+
+        /* Título de Alerta Táctica */
+        .alert-box {
+            border-top: 4px solid #f44336; border-bottom: 4px solid #f44336;
+            padding: 20px 100px; text-align: center; margin-bottom: 80px;
+            background: rgba(244, 67, 54, 0.05);
+        }
+
+        .main-title {
+            font-size: 70px; color: #f44336; letter-spacing: 15px; font-weight: bold;
+            text-shadow: 0 0 20px rgba(244, 67, 54, 0.5);
+        }
+        
+        .sub-title { font-size: 24px; color: #ffb300; letter-spacing: 5px; margin-top: 10px; }
+
+        /* Contenedor de Redes Octogonal */
+        .comms-container {
+            width: 1200px; display: flex; flex-wrap: wrap; justify-content: center; gap: 30px;
+        }
+
+        .comm-node {
+            background: #ffb300; padding: 2px;
+            clip-path: polygon(15px 0, calc(100% - 15px) 0, 100% 15px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 15px 100%, 0 calc(100% - 15px), 0 15px);
+            width: 350px;
+        }
+
+        .comm-inner {
+            background: #0a0d0a; width: 100%; height: 100%; padding: 20px;
+            clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .platform { font-size: 20px; color: #4caf50; border-bottom: 1px dashed #4caf50; width: 100%; text-align: center; padding-bottom: 5px; margin-bottom: 15px; }
+        .username { font-size: 28px; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+
+    <div class="alert-box">
+        <div class="main-title">CONEXIÓN TERMINADA</div>
+        <div class="sub-title">SEÑAL DE LA NAVE NODRIZA PERDIDA - INICIANDO PROTOCOLO DE APAGADO</div>
+    </div>
+
+    <!-- INSTRUCCIONES: Modifica los textos "@tu_usuario" para apuntar a tus redes reales -->
+    <div class="comms-container">
+        
+        <div class="comm-node">
+            <div class="comm-inner">
+                <div class="platform">FREQ: TWITCH</div>
+                <div class="username">@tu_usuario</div>
+            </div>
+        </div>
+
+        <div class="comm-node">
+            <div class="comm-inner">
+                <div class="platform">FREQ: X / TWITTER</div>
+                <div class="username">@tu_usuario</div>
+            </div>
+        </div>
+
+        <div class="comm-node">
+            <div class="comm-inner">
+                <div class="platform">FREQ: YOUTUBE</div>
+                <div class="username">@tu_canal</div>
+            </div>
+        </div>
+
+        <div class="comm-node">
+            <div class="comm-inner">
+                <div class="platform">FREQ: INSTAGRAM</div>
+                <div class="username">@tu_usuario</div>
+            </div>
+        </div>
+
+        <div class="comm-node">
+            <div class="comm-inner">
+                <div class="platform">FREQ: TIKTOK</div>
+                <div class="username">@tu_usuario</div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

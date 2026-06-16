@@ -329,6 +329,43 @@ const OBS_URLS: OBSUrl[] = [
     supportsTheme: false,
     color: '#ffea00',
   },
+  // ── Tactical Sci-Fi Section ──
+  {
+    id: 'tactical-start',
+    icon: '🛸',
+    labelKey: 'obs.tacticalStart',
+    descKey: 'obs.tacticalStartDesc',
+    mode: 'tactical-start',
+    supportsTheme: false,
+    color: '#ffb300',
+  },
+  {
+    id: 'tactical-gameplay',
+    icon: '🎯',
+    labelKey: 'obs.tacticalGameplay',
+    descKey: 'obs.tacticalGameplayDesc',
+    mode: 'tactical-gameplay',
+    supportsTheme: false,
+    color: '#4caf50',
+  },
+  {
+    id: 'tactical-just-chatting',
+    icon: '📡',
+    labelKey: 'obs.tacticalJustChatting',
+    descKey: 'obs.tacticalJustChattingDesc',
+    mode: 'tactical-just-chatting',
+    supportsTheme: false,
+    color: '#ffb300',
+  },
+  {
+    id: 'tactical-end',
+    icon: '🏁',
+    labelKey: 'obs.tacticalEnd',
+    descKey: 'obs.tacticalEndDesc',
+    mode: 'tactical-end',
+    supportsTheme: false,
+    color: '#f44336',
+  },
   // ── WoW Alianza Section ──
   {
     id: 'wow-alliance-start',
@@ -536,6 +573,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     { id: '8bits', labelKey: 'obs.tema8bits' },
     { id: 'win95', labelKey: 'obs.temaWin95' },
     { id: 'retrowave', labelKey: 'obs.temaRetrowave' },
+    { id: 'tactical', labelKey: 'obs.temaTactical' },
   ];
 
   const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
@@ -613,6 +651,10 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     'retrowave-gameplay': 'overlay_gameplay_retrowave.html',
     'retrowave-just-chatting': 'overlay_just_chatting_retrowave.html',
     'retrowave-end': 'pantalla_despedida_retrowave.html',
+    'tactical-start': 'pantalla_de_inicio_t_ctica.html',
+    'tactical-gameplay': 'hud_gameplay_monitor.html',
+    'tactical-just-chatting': 'hud_just_chatting.html',
+    'tactical-end': 'pantalla_despedida_t_ctica.html',
     'wow-alliance-start': 'wow-alliance-start.html',
     'wow-alliance-webcam': 'wow-alliance-webcam.html',
     'wow-alliance-webcam-labels': 'wow-alliance-webcam-labels.html',
@@ -741,6 +783,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
           if (selectedTheme === '8bits') return item.id.startsWith('8bits-');
           if (selectedTheme === 'win95') return item.id.startsWith('win95-');
           if (selectedTheme === 'retrowave') return item.id.startsWith('retrowave-');
+          if (selectedTheme === 'tactical') return item.id.startsWith('tactical-');
           // When no theme is selected, hide theme-specific overlays
           if (item.id.startsWith('dj-')) return false;
           if (item.id.startsWith('wow-alliance-')) return false;
@@ -748,6 +791,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
           if (item.id.startsWith('8bits-')) return false;
           if (item.id.startsWith('win95-')) return false;
           if (item.id.startsWith('retrowave-')) return false;
+          if (item.id.startsWith('tactical-')) return false;
           return true;
         }).map((item) => {
           const isSocial = item.id === 'social';

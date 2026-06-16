@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSG Gameplay HUD</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: transparent; /* Fondo Alfa para OBS */
+            overflow: hidden; font-family: 'Share Tech Mono', monospace; color: #ffb300;
+        }
+
+        .scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px; pointer-events: none; z-index: 100;
+        }
+
+        .container {
+            display: flex; width: 100%; height: 100%; padding: 20px; gap: 20px;
+        }
+
+        /* ---------------- ÁREA DE VISOR (TRANSPARENTE) ---------------- */
+        .visor-area {
+            flex: 2; position: relative; border: 2px solid rgba(255, 179, 0, 0.2);
+            clip-path: polygon(40px 0, calc(100% - 40px) 0, 100% 40px, 100% calc(100% - 40px), calc(100% - 40px) 100%, 40px 100%, 0 calc(100% - 40px), 0 40px);
+        }
+
+        /* Marcas de esquinas del Visor */
+        .corner-mark { position: absolute; width: 50px; height: 50px; border: 4px solid #ffb300; opacity: 0.6; }
+        .cm-tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+        .cm-tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+        .cm-bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+        .cm-br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+        /* Retícula Central */
+        .reticle {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 300px; height: 300px; border: 1px dashed rgba(76, 175, 80, 0.4); border-radius: 50%;
+            pointer-events: none;
+        }
+        .reticle::before { content: ''; position: absolute; top: 50%; left: -20px; width: 40px; height: 2px; background: #4caf50; }
+        .reticle::after { content: ''; position: absolute; top: 50%; right: -20px; width: 40px; height: 2px; background: #4caf50; }
+        
+        /* Telemetría Falsa en el visor */
+        .telemetry { position: absolute; font-size: 14px; opacity: 0.8; text-shadow: 1px 1px 2px #000; }
+        .tel-left { top: 30%; left: 30px; color: #4caf50; }
+        .tel-right { top: 30%; right: 30px; text-align: right; }
+
+        /* ---------------- PANEL LATERAL ---------------- */
+        .side-panel {
+            flex: 1; display: flex; flex-direction: column; gap: 20px;
+        }
+
+        /* Estructura BSG Octogonal para Cajas */
+        .bsg-box {
+            position: relative; background: rgba(10, 15, 10, 0.75);
+            border: 2px solid #ffb300;
+            clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 20px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0 calc(100% - 20px), 0 20px);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .box-header {
+            background: #ffb300; color: #000; padding: 5px 15px; font-weight: bold;
+            font-size: 16px; text-transform: uppercase; border-bottom: 2px solid #ffb300;
+        }
+
+        /* Caja de Webcam */
+        .cam-box { height: 350px; }
+        .cam-placeholder { flex: 1; display: flex; align-items: center; justify-content: center; background: transparent; }
+
+        /* Caja de Chat */
+        .chat-box { flex: 1; }
+        .chat-content { flex: 1; padding: 15px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; }
+
+        /* Mensajes de Chat (Estilo Comando) */
+        .chat-msg {
+            margin-bottom: 8px; font-size: 15px; line-height: 1.3;
+            border-left: 3px solid #4caf50; padding-left: 10px;
+            animation: slideIn 0.2s ease-out forwards;
+            background: rgba(76, 175, 80, 0.05);
+        }
+        @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        
+        .chat-user { color: #f44336; font-weight: bold; margin-right: 5px; }
+        .chat-text { color: #e0e0e0; }
+
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+
+    <div class="container">
+        <!-- ÁREA DEL JUEGO CON HUD -->
+        <div class="visor-area">
+            <div class="corner-mark cm-tl"></div>
+            <div class="corner-mark cm-tr"></div>
+            <div class="corner-mark cm-bl"></div>
+            <div class="corner-mark cm-br"></div>
+            
+            <div class="reticle">
+                <div style="position: absolute; left: 50%; top: -20px; width: 2px; height: 40px; background: #4caf50; transform: translateX(-50%);"></div>
+                <div style="position: absolute; left: 50%; bottom: -20px; width: 2px; height: 40px; background: #4caf50; transform: translateX(-50%);"></div>
+            </div>
+
+            <!-- Datos Tácticos Animados -->
+            <div class="telemetry tel-left">
+                <div>SYS. INTEGRITY: <span id="hullData">100</span>%</div>
+                <div>RAD. LEVEL: <span id="radData">0.02</span> rads</div>
+                <div style="margin-top: 10px; width: 100px; height: 5px; border: 1px solid #4caf50;">
+                    <div style="width: 100%; height: 100%; background: #4caf50; animation: pulse 2s infinite;"></div>
+                </div>
+            </div>
+
+            <div class="telemetry tel-right">
+                <div>PITCH: <span id="pitchData">00.00</span></div>
+                <div>YAW: <span id="yawData">00.00</span></div>
+                <div style="color: #f44336; margin-top: 10px; animation: blink 1s infinite;">TRK_LOCK: ACTIVE</div>
+            </div>
+        </div>
+
+        <!-- PANEL LATERAL -->
+        <div class="side-panel">
+            <!-- WEBCAM -->
+            <div class="bsg-box cam-box">
+                <div class="box-header">ALIMENTACIÓN OPTICA - PILOTO</div>
+                <div class="cam-placeholder">
+                    <!-- Deja esta caja vacía, pon tu webcam DETRÁS de este overlay en OBS -->
+                </div>
+            </div>
+
+            <!-- CHAT -->
+            <div class="bsg-box chat-box">
+                <div class="box-header">COMUNICACIONES ENTRANTES</div>
+                <div class="chat-content" id="chatWrapper">
+                    <!-- Los mensajes se insertan aquí vía JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Generador de Telemetría ---
+        setInterval(() => {
+            document.getElementById('radData').textContent = (Math.random() * 0.1).toFixed(3);
+            document.getElementById('pitchData').textContent = (Math.random() * 10 - 5).toFixed(2);
+            document.getElementById('yawData').textContent = (Math.random() * 10 - 5).toFixed(2);
+            let hull = 100 - Math.floor(Math.random() * 3);
+            document.getElementById('hullData').textContent = hull;
+        }, 800);
+
+        // --- 2. Receptor de Chat ---
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MESSAGES = 18;
+
+        function appendMessage(username, text) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            
+            const date = new Date();
+            const timestamp = `${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}`;
+
+            msgNode.innerHTML = `<span style="color:#777; font-size:12px;">[${timestamp}]</span> <span class="chat-user">${safeUsername}:</span><span class="chat-text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MESSAGES) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        function pushEvent(html) {
+            const node = document.createElement('div');
+            node.className = 'chat-msg';
+            node.style.borderLeft = '3px solid #f44336';
+            node.style.background = 'rgba(244,67,54,0.08)';
+            node.innerHTML = html;
+            chatWrapper.appendChild(node);
+            if (chatWrapper.children.length > MAX_MESSAGES) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const BACKEND_URL = (params.get('backend') || 'http://localhost:3000').replace(/\/+$/, '');
+        const CHANNEL = params.get('channel');
+
+        if (CHANNEL) {
+            document.title = 'BSG Gameplay HUD · ' + CHANNEL;
+        }
+
+        function initSocket() {
+            const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+            socket.on('connect', () => {
+                if (CHANNEL) socket.emit('join:channel', CHANNEL);
+            });
+            socket.on('chat:message', (d) => {
+                appendMessage(
+                    d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo',
+                    d.text || ''
+                );
+            });
+            socket.on('channel:follow', (d) => {
+                pushEvent('⭐ <b style="color:#f44336">' + (d.userDisplayName || d.userName || 'Alguien') + '</b> nos sigue!');
+            });
+            socket.on('channel:subscribe', (d) => {
+                pushEvent('🎉 <b style="color:#f44336">' + (d.userDisplayName || d.userName || 'Alguien') + '</b> se suscribió!');
+            });
+            socket.on('channel:cheer', (d) => {
+                pushEvent('💎 <b style="color:#f44336">' + (d.userDisplayName || d.userName || 'Anónimo') + '</b> animó con ' + (d.bits || 0) + ' bits!');
+            });
+            socket.on('channel:redemption', (d) => {
+                pushEvent('🎯 <b style="color:#f44336">' + (d.userDisplayName || d.userName || 'Alguien') + '</b> canjeó <b>' + (d.rewardTitle || '') + '</b>');
+            });
+        }
+
+        function loadSocketIO(cb) {
+            const script = document.createElement('script');
+            script.src = BACKEND_URL + '/socket.io/socket.io.js';
+            script.onload = cb;
+            script.onerror = () => cb(new Error('load failed'));
+            document.head.appendChild(script);
+        }
+
+        loadSocketIO(function(err) {
+            if (!err) initSocket();
+        });
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message);
+            }
+        });
+    </script>
+</body>
+</html>
