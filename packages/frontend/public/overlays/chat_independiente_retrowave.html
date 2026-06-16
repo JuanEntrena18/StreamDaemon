@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrowave Standalone Chat</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body, html {
+        width: 100vw; height: 100vh; background-color: transparent;
+        overflow: hidden; font-family: 'Orbitron', sans-serif; color: #ff00ff;
+    }
+
+    .vhs-scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(255, 0, 255, 0.05) 50%, rgba(255, 0, 255, 0.05));
+            background-size: 100% 8px; pointer-events: none; z-index: 100;
+        }
+
+        .neon-box {
+            width: 100%; height: 100%; background: rgba(10, 5, 20, 0.9);
+            border: 3px solid #00ffff;
+            box-shadow: 0 0 15px #00ffff, inset 0 0 10px rgba(0, 255, 255, 0.5);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .box-header {
+            background: linear-gradient(90deg, #ff00ff, #00ffff);
+            color: #ffffff; padding: 10px; font-size: 12px;
+            text-transform: uppercase; text-align: center;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px #000;
+        }
+
+        .chat-content { flex: 1; padding: 15px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; }
+
+        .chat-msg {
+            margin-bottom: 10px; font-size: 12px; line-height: 1.4;
+            animation: glowIn 0.3s ease-out forwards;
+        }
+        @keyframes glowIn { from { filter: blur(5px); opacity: 0; } to { filter: blur(0); opacity: 1; } }
+        
+        .chat-user { color: #ff00ff; font-weight: bold; text-shadow: 0 0 5px #ff00ff; }
+        .chat-text { color: #ffffff; text-shadow: 0 0 3px #ffffff; }
+    </style>
+</head>
+<body>
+    <div class="vhs-scanlines"></div>
+
+    <div class="neon-box">
+        <div class="box-header">NET_FEED_CHAT</div>
+        <div class="chat-content" id="chatWrapper">
+            <!-- Mensajes inyectados -->
+        </div>
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MESSAGES = 14;
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const userColor = color || '#ff00ff';
+
+            msgNode.innerHTML = `<span class="chat-user" style="color: ${userColor}; text-shadow: 0 0 5px ${userColor}">${safeUsername}:</span> <span class="chat-text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MESSAGES) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const BACKEND_URL = (params.get('backend') || 'http://localhost:3000').replace(/\/+$/, '');
+        const CHANNEL = params.get('channel');
+
+        if (CHANNEL) {
+            document.title = 'RetroWave Chat · ' + CHANNEL;
+        }
+
+        function initSocket() {
+            const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+            socket.on('connect', () => {
+                if (CHANNEL) socket.emit('join:channel', CHANNEL);
+            });
+            socket.on('chat:message', (d) => {
+                appendMessage(
+                    d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo',
+                    d.text || '',
+                    d.user?.color || '#ff00ff'
+                );
+            });
+            socket.on('channel:follow', (d) => {
+                pushEvent('⭐ <b>' + (d.userDisplayName || d.userName || 'Alguien') + '</b> nos sigue!');
+            });
+            socket.on('channel:subscribe', (d) => {
+                pushEvent('🎉 <b>' + (d.userDisplayName || d.userName || 'Alguien') + '</b> se suscribió!');
+            });
+            socket.on('channel:cheer', (d) => {
+                pushEvent('💎 <b>' + (d.userDisplayName || d.userName || 'Anónimo') + '</b> animó con ' + (d.bits || 0) + ' bits!');
+            });
+            socket.on('channel:redemption', (d) => {
+                pushEvent('🎯 <b>' + (d.userDisplayName || d.userName || 'Alguien') + '</b> canjeó <b>' + (d.rewardTitle || '') + '</b>');
+            });
+        }
+
+        function loadSocketIO(cb) {
+            const script = document.createElement('script');
+            script.src = BACKEND_URL + '/socket.io/socket.io.js';
+            script.onload = cb;
+            script.onerror = () => cb(new Error('load failed'));
+            document.head.appendChild(script);
+        }
+
+        function pushEvent(html) {
+            const node = document.createElement('div');
+            node.className = 'chat-msg';
+            node.innerHTML = html;
+            chatWrapper.appendChild(node);
+            if (chatWrapper.children.length > MAX_MESSAGES) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        loadSocketIO(function(err) {
+            if (!err) initSocket();
+        });
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+</body>
+</html>

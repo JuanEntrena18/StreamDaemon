@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horde Standalone Chat</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100vw; height: 100vh;
+            background-color: transparent;
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .chat-container {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 15px;
+            background: linear-gradient(to top, rgba(10, 0, 0, 0.8) 0%, rgba(10, 0, 0, 0) 100%);
+            border-left: 2px solid rgba(139, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .chat-header {
+            position: absolute; top: 0; left: 0; width: 100%;
+            display: flex; align-items: center; padding: 10px 15px;
+            background: rgba(40, 0, 0, 0.9); border-bottom: 2px solid #ff0000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+        }
+
+        .chat-logo { width: 30px; margin-right: 10px; filter: drop-shadow(0 0 5px #ff0000); }
+        .chat-title { color: #fff; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; text-shadow: 1px 1px 3px #000; }
+
+        .message-box {
+            background: rgba(20, 0, 0, 0.85); border: 1px solid #4a0000;
+            border-radius: 4px; padding: 10px; margin-top: 10px;
+            color: #e0e0e0; font-size: 15px; line-height: 1.4;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            word-wrap: break-word;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+        .user-name { font-weight: 700; color: #ff4444; margin-right: 5px; text-shadow: 1px 1px 2px #000; }
+        .msg-text { color: #ffffff; }
+    </style>
+</head>
+<body>
+    <div class="chat-container" id="chatWrapper">
+        <div class="chat-header">
+            <img src="q162k8nk3a8v4alisen11ns63e-4454b5a62a84aeaf01536c8380716644.png" alt="Horda" class="chat-logo">
+            <span class="chat-title">Comunicaciones</span>
+        </div>
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MESSAGES = 18;
+
+        function appendMessage(username, text, userColor) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'message-box';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = userColor || '#ff4444';
+
+            msgNode.innerHTML = `<span class="user-name" style="color: ${finalColor}">${safeUsername}:</span><span class="msg-text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MESSAGES + 1) {
+                chatWrapper.removeChild(chatWrapper.children[1]);
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const BACKEND_URL = (params.get('backend') || 'http://localhost:3000').replace(/\/+$/, '');
+        const CHANNEL = params.get('channel');
+
+        if (CHANNEL) {
+            document.title = 'Chat Horda · ' + CHANNEL;
+        }
+
+        function initSocket() {
+            const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+            socket.on('connect', () => {
+                if (CHANNEL) socket.emit('join:channel', CHANNEL);
+            });
+            socket.on('chat:message', (d) => {
+                appendMessage(
+                    d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo',
+                    d.text || '',
+                    d.user?.color || '#ff4444'
+                );
+            });
+            socket.on('channel:follow', (d) => {
+                pushEvent('⭐ <b>' + (d.userDisplayName || d.userName || 'Alguien') + '</b> nos sigue!');
+            });
+            socket.on('channel:subscribe', (d) => {
+                pushEvent('🎉 <b>' + (d.userDisplayName || d.userName || 'Alguien') + '</b> se suscribió!');
+            });
+            socket.on('channel:cheer', (d) => {
+                pushEvent('💎 <b>' + (d.userDisplayName || d.userName || 'Anónimo') + '</b> animó con ' + (d.bits || 0) + ' bits!');
+            });
+            socket.on('channel:redemption', (d) => {
+                pushEvent('🎯 <b>' + (d.userDisplayName || d.userName || 'Alguien') + '</b> canjeó <b>' + (d.rewardTitle || '') + '</b>');
+            });
+        }
+
+        function loadSocketIO(cb) {
+            const script = document.createElement('script');
+            script.src = BACKEND_URL + '/socket.io/socket.io.js';
+            script.onload = cb;
+            script.onerror = () => cb(new Error('load failed'));
+            document.head.appendChild(script);
+        }
+
+        function pushEvent(html) {
+            const node = document.createElement('div');
+            node.className = 'message-box';
+            node.innerHTML = html;
+            chatWrapper.appendChild(node);
+            if (chatWrapper.children.length > MAX_MESSAGES + 1) {
+                chatWrapper.removeChild(chatWrapper.children[1]);
+            }
+        }
+
+        loadSocketIO(function(err) {
+            if (!err) initSocket();
+        });
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+</body>
+</html>
