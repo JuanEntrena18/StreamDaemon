@@ -28,7 +28,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export async function startServer(opts?: { port?: number; frontendDir?: string }) {
   const app = Fastify({ logger: true });
 
-  const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173'];
+  const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'];
   await app.register(cors, { origin: allowedOrigins, credentials: false });
 
   // Rate limiting — 100 req/min per IP
@@ -42,7 +42,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
     reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
     reply.header('Content-Security-Policy',
       "default-src 'self'; " +
-      "connect-src 'self' https://id.twitch.tv https://api.twitch.tv wss://eventsub.wss.twitch.tv; " +
+      "connect-src 'self' https://id.twitch.tv https://api.twitch.tv wss://eventsub.wss.twitch.tv ws://localhost:3000 ws://127.0.0.1:3000; " +
       "frame-src https://player.twitch.tv; " +
       "img-src 'self' https://static-cdn.jtvnw.net data:; " +
       "script-src 'self' 'unsafe-inline'; " +

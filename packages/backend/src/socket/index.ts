@@ -7,7 +7,7 @@ const chatThrottle = new Map<string, number>();
 
 export function setupSocketIO(app: FastifyInstance) {
   io = new SocketIOServer(app.server, {
-    cors: { origin: ['http://localhost:3000', 'http://localhost:5173'] },
+    cors: { origin: ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173', 'file://'] },
   });
 
   io.on('connection', (socket) => {
