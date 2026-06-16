@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 95 Ending Screen</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            background-color: #008080;
+            font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
+            -webkit-font-smoothing: none;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .win-window {
+            background-color: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            box-shadow: 1px 1px 0 #808080 inset, -1px -1px 0 #dfdfdf inset;
+            width: 1000px;
+            padding: 3px;
+        }
+
+        .win-titlebar {
+            background-color: #000080;
+            color: #ffffff;
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .win-buttons { display: flex; gap: 4px; }
+        .win-btn {
+            width: 30px; height: 30px;
+            background-color: #c0c0c0;
+            border: 2px solid; border-color: #ffffff #000000 #000000 #ffffff;
+            font-weight: bold; color: #000;
+            display: flex; justify-content: center; align-items: center; font-size: 18px;
+        }
+
+        .win-content {
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            border: 2px solid; border-color: #808080 #ffffff #ffffff #808080;
+            margin: 10px;
+        }
+
+        .main-message {
+            font-size: 40px;
+            color: #000;
+            margin-bottom: 50px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .social-explorer {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px 80px;
+            width: 100%;
+        }
+
+        .social-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px dotted transparent;
+        }
+
+        .social-item:hover {
+            border: 1px dotted #808080;
+            background-color: #000080;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* Iconos simulados con CSS puro para evitar dependencias externas */
+        .icon-file {
+            width: 48px;
+            height: 48px;
+            background-color: #fff;
+            border: 2px solid #000;
+            position: relative;
+            margin-right: 20px;
+            box-shadow: 2px 2px 0 #808080;
+        }
+        
+        /* Pestaña superior del archivo */
+        .icon-file::before {
+            content: ""; position: absolute; top: -10px; left: -2px; width: 20px; height: 10px;
+            border: 2px solid #000; border-bottom: none; background: #fff;
+        }
+
+        /* Colores internos para simular la app */
+        .ic-tw { background: linear-gradient(135deg, #fff 50%, #9146FF 50%); }
+        .ic-x { background: linear-gradient(135deg, #fff 50%, #000 50%); }
+        .ic-yt { background: linear-gradient(135deg, #fff 50%, #FF0000 50%); }
+        .ic-ig { background: linear-gradient(135deg, #fff 50%, #E1306C 50%); }
+        .ic-tk { background: linear-gradient(135deg, #fff 50%, #00E8D2 50%); }
+
+        .social-text {
+            font-size: 28px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .platform { font-weight: bold; font-size: 18px; margin-bottom: 5px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="win-window">
+        <div class="win-titlebar">
+            <span>Cierre de Sistema Windows</span>
+            <div class="win-buttons"><div class="win-btn">X</div></div>
+        </div>
+        
+        <div class="win-content">
+            <div class="main-message">
+                Ahora es seguro apagar su stream.<br>
+                <span style="font-size: 24px; font-weight: normal; margin-top: 20px; display: block;">Gracias por su compañía.</span>
+            </div>
+
+            <div class="social-explorer">
+                <!-- INSTRUCCIONES: Cambia "@tu_usuario" por tus datos -->
+                
+                <div class="social-item">
+                    <div class="icon-file ic-tw"></div>
+                    <div class="social-text"><span class="platform">Twitch.url</span>@tu_usuario</div>
+                </div>
+
+                <div class="social-item">
+                    <div class="icon-file ic-x"></div>
+                    <div class="social-text"><span class="platform">X_Com.url</span>@tu_usuario</div>
+                </div>
+
+                <div class="social-item">
+                    <div class="icon-file ic-yt"></div>
+                    <div class="social-text"><span class="platform">YouTube.url</span>@tu_canal</div>
+                </div>
+
+                <div class="social-item">
+                    <div class="icon-file ic-ig"></div>
+                    <div class="social-text"><span class="platform">Instagram.url</span>@tu_usuario</div>
+                </div>
+
+                <div class="social-item">
+                    <div class="icon-file ic-tk"></div>
+                    <div class="social-text"><span class="platform">TikTok.url</span>@tu_usuario</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

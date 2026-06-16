@@ -255,6 +255,43 @@ const OBS_URLS: OBSUrl[] = [
     supportsTheme: false,
     color: '#ff4444',
   },
+  // ── Retro Win95 Section ──
+  {
+    id: 'win95-start',
+    icon: '💻',
+    labelKey: 'obs.bwin95Start',
+    descKey: 'obs.bwin95StartDesc',
+    mode: 'win95-start',
+    supportsTheme: false,
+    color: '#008080',
+  },
+  {
+    id: 'win95-gameplay',
+    icon: '🎮',
+    labelKey: 'obs.bwin95Gameplay',
+    descKey: 'obs.bwin95GameplayDesc',
+    mode: 'win95-gameplay',
+    supportsTheme: false,
+    color: '#c0c0c0',
+  },
+  {
+    id: 'win95-just-chatting',
+    icon: '🪟',
+    labelKey: 'obs.bwin95JustChatting',
+    descKey: 'obs.bwin95JustChattingDesc',
+    mode: 'win95-just-chatting',
+    supportsTheme: false,
+    color: '#000080',
+  },
+  {
+    id: 'win95-end',
+    icon: '🏁',
+    labelKey: 'obs.bwin95End',
+    descKey: 'obs.bwin95EndDesc',
+    mode: 'win95-end',
+    supportsTheme: false,
+    color: '#800000',
+  },
   // ── WoW Alianza Section ──
   {
     id: 'wow-alliance-start',
@@ -460,6 +497,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     { id: 'alliance', labelKey: 'obs.temaAlianza' },
     { id: 'fortnite', labelKey: 'obs.temaFortnite' },
     { id: '8bits', labelKey: 'obs.tema8bits' },
+    { id: 'win95', labelKey: 'obs.temaWin95' },
   ];
 
   const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
@@ -529,6 +567,10 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     '8bits-gameplay': '8bits-overlay_gameplay_tv.html',
     '8bits-just-chatting': '8bits-overlay_just_chatting.html',
     '8bits-end': '8bits-pantalla_despedida.html',
+    'win95-start': 'pantalla_comienzo_win95.html',
+    'win95-gameplay': 'overlay_gameplay_win95.html',
+    'win95-just-chatting': 'overlay_just_chatting_win95.html',
+    'win95-end': 'pantalla_despedida_win95.html',
     'wow-alliance-start': 'wow-alliance-start.html',
     'wow-alliance-webcam': 'wow-alliance-webcam.html',
     'wow-alliance-webcam-labels': 'wow-alliance-webcam-labels.html',
@@ -655,11 +697,13 @@ export function ObsPanel({ channel, backendUrl }: Props) {
           if (selectedTheme === 'alliance') return item.id.startsWith('wow-alliance-');
           if (selectedTheme === 'wow') return item.id.startsWith('wow-horde-');
           if (selectedTheme === '8bits') return item.id.startsWith('8bits-');
+          if (selectedTheme === 'win95') return item.id.startsWith('win95-');
           // When no theme is selected, hide theme-specific overlays
           if (item.id.startsWith('dj-')) return false;
           if (item.id.startsWith('wow-alliance-')) return false;
           if (item.id.startsWith('wow-horde-')) return false;
           if (item.id.startsWith('8bits-')) return false;
+          if (item.id.startsWith('win95-')) return false;
           return true;
         }).map((item) => {
           const isSocial = item.id === 'social';

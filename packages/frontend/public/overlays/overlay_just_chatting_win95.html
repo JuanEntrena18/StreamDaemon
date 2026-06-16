@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 95 Just Chatting Overlay</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            background-color: transparent; 
+            font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
+            -webkit-font-smoothing: none;
+            overflow: hidden;
+            display: grid;
+            padding: 20px;
+            gap: 20px;
+            grid-template-columns: 1260px 600px; 
+            grid-template-rows: 1040px; 
+        }
+
+        .win-window {
+            background-color: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            box-shadow: 1px 1px 0 #808080 inset, -1px -1px 0 #dfdfdf inset;
+            display: flex;
+            flex-direction: column;
+            padding: 3px;
+        }
+
+        .win-titlebar {
+            background-color: #000080;
+            color: #ffffff;
+            padding: 4px 5px;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .win-buttons { display: flex; gap: 2px; }
+        .win-btn {
+            width: 20px; height: 20px;
+            background-color: #c0c0c0;
+            border: 2px solid; border-color: #ffffff #000000 #000000 #ffffff;
+            font-weight: bold; color: #000;
+            display: flex; justify-content: center; align-items: center; font-size: 12px;
+        }
+
+        .main-cam-area { height: 100%; }
+        .main-cam-content {
+            flex-grow: 1;
+            background-color: transparent; /* LA CÁMARA VA AQUÍ */
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+        }
+
+        .side-panel {
+            display: grid;
+            grid-template-rows: 680px 340px; /* Chat arriba, Logo abajo */
+            gap: 20px;
+        }
+
+        .chat-area .win-content {
+            flex-grow: 1;
+            background-color: #ffffff;
+            border: 2px solid; border-color: #808080 #ffffff #ffffff #808080;
+            padding: 10px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
+        }
+
+        .chat-msg {
+            font-size: 16px; margin-bottom: 8px; color: #000;
+        }
+        .user { font-weight: bold; color: #000080; }
+
+        .logo-area .win-content {
+            flex-grow: 1;
+            background-color: #ffffff; /* Simula MS Paint o Visor de imágenes */
+            border: 2px solid; border-color: #808080 #ffffff #ffffff #808080;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: radial-gradient(#c0c0c0 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+
+        .user-logo-placeholder {
+            width: 200px;
+            height: 200px;
+            /* INSTRUCCIÓN PARA EL USUARIO:
+               Añade la URL de tu logo aquí. Ej: background-image: url('mi_logo.png'); */
+            background-image: url(''); 
+            background-color: transparent;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            image-rendering: pixelated;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Izquierda: Webcam -->
+    <div class="win-window main-cam-area">
+        <div class="win-titlebar">
+            <span>Microsoft_NetMeeting_Cam.exe</span>
+            <div class="win-buttons"><div class="win-btn">_</div><div class="win-btn">◻</div><div class="win-btn">X</div></div>
+        </div>
+        <div class="main-cam-content"></div>
+    </div>
+
+    <!-- Derecha: Chat y Logo -->
+    <div class="side-panel">
+        
+        <!-- Chat -->
+        <div class="win-window chat-area">
+            <div class="win-titlebar">
+                <span>mIRC32 - Canal #Stream</span>
+                <div class="win-buttons"><div class="win-btn">X</div></div>
+            </div>
+            <div class="win-content" id="chatWrapper"></div>
+        </div>
+
+        <!-- Logo -->
+        <div class="win-window logo-area">
+            <div class="win-titlebar">
+                <span>mi_logo.bmp - Paint</span>
+                <div class="win-buttons"><div class="win-btn">X</div></div>
+            </div>
+            <div class="win-content">
+                <!-- INSERTA TU LOGO EN EL CSS (Clase .user-logo-placeholder) -->
+                <div class="user-logo-placeholder"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MSG = 18;
+
+        function appendMessage(username, text) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            msgNode.innerHTML = `<span class="user">&lt;${safeUsername}&gt;</span> ${safeText}`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MSG) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message);
+            }
+        });
+    </script>
+</body>
+</html>
