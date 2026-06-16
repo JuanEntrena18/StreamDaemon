@@ -286,7 +286,7 @@ export async function setupAuth(app: FastifyInstance) {
     try {
       if (authProvider && currentUser) {
         const token = await authProvider.getAccessTokenForUser(currentUser.id);
-        if (token?.scope) tokenScopes = Array.isArray(token.scope) ? token.scope : token.scope.split(' ');
+        if (token?.scope) tokenScopes = Array.isArray(token.scope) ? token.scope : (token.scope as string).split(' ');
       }
     } catch {}
     return {

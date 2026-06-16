@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horde Fullscreen Gameplay Overlay</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            background-color: transparent; /* Pantalla completa transparente para el juego en OBS */
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+            position: relative;
+        }
+
+        .horde-box {
+            background: rgba(15, 5, 5, 0.85);
+            border: 3px solid #4a0000;
+            box-shadow: 
+                0 0 15px rgba(255, 0, 0, 0.3), 
+                inset 0 0 20px rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        /* Remaches de metal decorativos */
+        .horde-box::before, .horde-box::after {
+            content: ''; position: absolute; width: 8px; height: 8px; background: #555;
+            border-radius: 50%; box-shadow: inset -1px -1px 3px #000, 1px 1px 2px rgba(255,0,0,0.5);
+            z-index: 10;
+        }
+        .horde-box::before { top: 6px; left: 6px; }
+        .horde-box::after { top: 6px; right: 6px; }
+
+        .horde-header {
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(to right, #4a0000, #8b0000, #4a0000);
+            color: #fff;
+            padding: 8px 15px;
+            font-size: 18px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #ff1a1a;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 2px 2px 4px #000;
+            position: relative;
+        }
+
+        /* Webcam Flotante Arriba a la Derecha */
+        .floating-cam {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            width: 480px;  /* Aspecto 16:9 aprox */
+            height: 310px; /* Incluyendo la cabecera */
+        }
+
+        .webcam-content {
+            flex-grow: 1;
+            background-color: transparent; /* La cámara va aquí detrás en OBS */
+            box-shadow: inset 0 0 40px rgba(0,0,0,1);
+        }
+
+        /* Chat Flotante Abajo a la Izquierda */
+        .floating-chat {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            width: 400px;
+            height: 550px;
+            background: linear-gradient(to top, rgba(15, 5, 5, 0.95) 0%, rgba(15, 5, 5, 0.5) 100%);
+        }
+
+        .chat-content {
+            flex-grow: 1;
+            padding: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            position: relative;
+        }
+
+        /* Marca de agua del logo en el chat */
+        .chat-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            opacity: 0.1;
+            pointer-events: none;
+            filter: grayscale(100%) brightness(200%);
+        }
+
+        .chat-msg {
+            font-size: 15px;
+            line-height: 1.4;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: rgba(20, 0, 0, 0.6);
+            border-left: 3px solid #ff1a1a;
+            color: #e0e0e0;
+            animation: slideIn 0.3s cubic-bezier(.25,.46,.45,.94) forwards;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            word-wrap: break-word;
+            border-radius: 0 4px 4px 0;
+            z-index: 2;
+        }
+
+        @keyframes slideIn {
+            0% { transform: translateX(-30px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        .user { font-weight: 700; color: #ff4444; margin-right: 8px; text-shadow: 1px 1px 2px #000;}
+        .text { color: #fff; }
+
+        /* Contenedor React global */
+        #overlay-root {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Permite clicks a través de la capa de React */
+            z-index: 1000; /* Asegura que los datos estén sobre el resto del diseño */
+        }
+        #overlay-root > * {
+            pointer-events: auto;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- CONTENEDOR REACT APP (Datos, Espectadores, Alertas) -->
+    <div id="overlay-root"></div>
+
+    <!-- Webcam Flotante -->
+    <div class="horde-box floating-cam">
+        <div class="horde-header">
+            <img src="horda_logo.png" alt="Horda" style="height: 20px; margin-right: 10px; filter: drop-shadow(0 0 5px #ff0000);">
+            Ojo de Kilrogg
+        </div>
+        <div class="webcam-content"></div>
+        <div style="position: absolute; bottom: 6px; left: 6px; width: 8px; height: 8px; background: #555; border-radius: 50%; box-shadow: inset -1px -1px 3px #000;"></div>
+        <div style="position: absolute; bottom: 6px; right: 6px; width: 8px; height: 8px; background: #555; border-radius: 50%; box-shadow: inset -1px -1px 3px #000;"></div>
+    </div>
+
+    <!-- Chat Flotante -->
+    <div class="horde-box floating-chat">
+        <div class="horde-header">
+            Grito de Guerra
+        </div>
+        <div class="chat-content" id="chatWrapper">
+            <img src="q162k8nk3a8v4alisen11ns63e-4454b5a62a84aeaf01536c8380716644.png" alt="Watermark" class="chat-watermark">
+            <!-- Mensajes inyectados por JS -->
+        </div>
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MSG = 10; // Reducido ligeramente para evitar desbordar el cuadro flotante
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#ff4444';
+
+            msgNode.innerHTML = `<span class="user" style="color: ${finalColor};">${safeUsername}:</span><span class="text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            // Eliminar los mensajes viejos, asegurando no borrar la marca de agua
+            const chatMessages = chatWrapper.querySelectorAll('.chat-msg');
+            if (chatMessages.length > MAX_MSG) {
+                chatWrapper.removeChild(chatMessages[0]);
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+
+    <!-- Script de Integración de React / Vite -->
+    <script type="module" src="./src/overlay.tsx"></script>
+</body>
+</html>

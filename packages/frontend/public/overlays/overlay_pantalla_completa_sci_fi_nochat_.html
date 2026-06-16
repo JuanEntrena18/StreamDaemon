@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSG Fullscreen Gameplay Overlay</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: transparent; /* Fondo Alfa para OBS */
+            overflow: hidden; font-family: 'Share Tech Mono', monospace; color: #ffb300;
+            position: relative;
+        }
+
+        /* Líneas de escaneo estilo monitor CRT */
+        .scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px; pointer-events: none; z-index: 100;
+        }
+
+        .bsg-box {
+            position: absolute; background: rgba(10, 15, 10, 0.75);
+            border: 2px solid #ffb300;
+            clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 20px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0 calc(100% - 20px), 0 20px);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .box-header {
+            background: #ffb300; color: #000; padding: 5px 15px; font-weight: bold;
+            font-size: 16px; text-transform: uppercase; border-bottom: 2px solid #ffb300;
+        }
+
+        /* Webcam Flotante Arriba a la Derecha */
+        .floating-cam {
+            top: 40px;
+            right: 40px;
+            width: 480px;
+            height: 310px;
+        }
+
+        .cam-placeholder { flex: 1; display: flex; align-items: center; justify-content: center; background: transparent; }
+
+        /* Contenedor React global para alertas externas */
+        #overlay-root {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1000;
+        }
+        #overlay-root > * { pointer-events: auto; }
+
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+
+    <!-- CONTENEDOR REACT APP -->
+    <div id="overlay-root"></div>
+
+    <!-- Webcam Flotante -->
+    <div class="bsg-box floating-cam">
+        <div class="box-header">ALIMENTACIÓN OPTICA - PILOTO</div>
+        <div class="cam-placeholder"></div>
+    </div>
+    
+    <!-- Script de Integración de React / Vite -->
+    <script type="module" src="./src/overlay.tsx"></script>
+</body>
+</html>

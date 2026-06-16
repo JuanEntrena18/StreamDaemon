@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrowave Fullscreen Gameplay Overlay</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: transparent;
+            overflow: hidden; font-family: 'Orbitron', sans-serif; color: #ff00ff;
+            position: relative;
+        }
+
+        /* Efecto de distorsión VHS */
+        .vhs-scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(255, 0, 255, 0.05) 50%, rgba(255, 0, 255, 0.05));
+            background-size: 100% 8px; pointer-events: none; z-index: 100;
+        }
+
+        .neon-box {
+            position: absolute;
+            background: rgba(10, 5, 20, 0.8);
+            border: 3px solid #00ffff;
+            box-shadow: 0 0 15px #00ffff, inset 0 0 10px rgba(0, 255, 255, 0.5);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .box-header {
+            background: linear-gradient(90deg, #ff00ff, #00ffff);
+            color: #ffffff; padding: 8px; font-size: 14px;
+            text-transform: uppercase; text-align: center;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px #000;
+        }
+
+        /* Webcam Flotante Arriba a la Derecha */
+        .floating-cam {
+            top: 40px;
+            right: 40px;
+            width: 480px;
+            height: 310px;
+        }
+
+        .cam-placeholder { flex: 1; background: transparent; }
+
+        /* Contenedor React global */
+        #overlay-root {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1000;
+        }
+        #overlay-root > * { pointer-events: auto; }
+
+    </style>
+</head>
+<body>
+    <div class="vhs-scanlines"></div>
+
+    <!-- CONTENEDOR REACT APP -->
+    <div id="overlay-root"></div>
+
+    <!-- Webcam Flotante -->
+    <div class="neon-box floating-cam">
+        <div class="box-header">LIVE_FEED.SYS</div>
+        <div class="cam-placeholder"></div>
+    </div>
+    
+    <!-- Script de Integración de React / Vite -->
+    <script type="module" src="./src/overlay.tsx"></script>
+</body>
+</html>
