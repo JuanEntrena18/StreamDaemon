@@ -172,7 +172,7 @@
 
     <script>
         const chatWrapper = document.getElementById('chatWrapper');
-        const MAX_MSG = 10; // Reducido ligeramente para evitar desbordar el cuadro flotante
+        const MAX_MSG = 10;
 
         function appendMessage(username, text, color) {
             const msgNode = document.createElement('div');
@@ -184,12 +184,66 @@
             msgNode.innerHTML = `<span class="user" style="color: ${finalColor};">${safeUsername}:</span><span class="text">${safeText}</span>`;
             chatWrapper.appendChild(msgNode);
 
-            // Eliminar los mensajes viejos, asegurando no borrar la marca de agua
             const chatMessages = chatWrapper.querySelectorAll('.chat-msg');
             if (chatMessages.length > MAX_MSG) {
                 chatWrapper.removeChild(chatMessages[0]);
             }
         }
+
+        function pushEvent(html) {
+            const node = document.createElement('div');
+            node.className = 'chat-msg';
+            node.style.borderLeft = '4px solid #ff1a1a';
+            node.style.paddingLeft = '10px';
+            node.innerHTML = html;
+            chatWrapper.appendChild(node);
+            const chatMessages = chatWrapper.querySelectorAll('.chat-msg');
+            if (chatMessages.length > MAX_MSG) {
+                chatWrapper.removeChild(chatMessages[0]);
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const BACKEND_URL = (params.get('backend') || 'http://localhost:3000').replace(/\/+$/, '');
+        const CHANNEL = params.get('channel');
+
+        function initSocket() {
+            const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+            socket.on('connect', () => {
+                if (CHANNEL) socket.emit('join:channel', CHANNEL);
+            });
+            socket.on('chat:message', (d) => {
+                appendMessage(
+                    d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo',
+                    d.text || '',
+                    d.user?.color || d.color || '#ff4444'
+                );
+            });
+            socket.on('channel:follow', (d) => {
+                pushEvent('⭐ <b style="color:#ff4444">' + (d.userDisplayName || d.userName || 'Alguien') + '</b> nos sigue!');
+            });
+            socket.on('channel:subscribe', (d) => {
+                pushEvent('🎉 <b style="color:#ff4444">' + (d.userDisplayName || d.userName || 'Alguien') + '</b> se suscribió!');
+            });
+            socket.on('channel:cheer', (d) => {
+                pushEvent('💎 <b style="color:#ff4444">' + (d.userDisplayName || d.userName || 'Anónimo') + '</b> animó con ' + (d.bits || 0) + ' bits!');
+            });
+            socket.on('channel:redemption', (d) => {
+                pushEvent('🎯 <b style="color:#ff4444">' + (d.userDisplayName || d.userName || 'Alguien') + '</b> canjeó <b>' + (d.rewardTitle || '') + '</b>');
+            });
+        }
+
+        function loadSocketIO(cb) {
+            const script = document.createElement('script');
+            script.src = BACKEND_URL + '/socket.io/socket.io.js';
+            script.onload = cb;
+            script.onerror = () => cb(new Error('load failed'));
+            document.head.appendChild(script);
+        }
+
+        loadSocketIO(function(err) {
+            if (!err) initSocket();
+        });
 
         window.addEventListener('message', (event) => {
             const payload = event.data;
@@ -198,8 +252,5 @@
             }
         });
     </script>
-
-    <!-- Script de Integración de React / Vite -->
-    <script type="module" src="./src/overlay.tsx"></script>
 </body>
 </html>
