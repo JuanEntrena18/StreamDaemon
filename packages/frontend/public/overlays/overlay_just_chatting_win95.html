@@ -54,14 +54,14 @@
         .main-cam-area { height: 100%; }
         .main-cam-content {
             flex-grow: 1;
-            background-color: transparent; /* LA CÁMARA VA AQUÍ */
+            background-color: transparent;
             border: 2px solid;
             border-color: #808080 #ffffff #ffffff #808080;
         }
 
         .side-panel {
             display: grid;
-            grid-template-rows: 680px 340px; /* Chat arriba, Logo abajo */
+            grid-template-rows: 680px 340px;
             gap: 20px;
         }
 
@@ -77,9 +77,16 @@
         }
         .user { font-weight: bold; color: #000080; }
 
+        .event-notif {
+            font-size: 14px; margin-bottom: 8px; padding: 4px 8px;
+            background-color: #ffffcc;
+            border: 1px solid #808080;
+            color: #000;
+        }
+
         .logo-area .win-content {
             flex-grow: 1;
-            background-color: #ffffff; /* Simula MS Paint o Visor de imágenes */
+            background-color: #ffffff;
             border: 2px solid; border-color: #808080 #ffffff #ffffff #808080;
             display: flex;
             justify-content: center;
@@ -91,8 +98,6 @@
         .user-logo-placeholder {
             width: 200px;
             height: 200px;
-            /* INSTRUCCIÓN PARA EL USUARIO:
-               Añade la URL de tu logo aquí. Ej: background-image: url('mi_logo.png'); */
             background-image: url(''); 
             background-color: transparent;
             background-size: contain;
@@ -105,7 +110,6 @@
 </head>
 <body>
 
-    <!-- Izquierda: Webcam -->
     <div class="win-window main-cam-area">
         <div class="win-titlebar">
             <span>Microsoft_NetMeeting_Cam.exe</span>
@@ -114,10 +118,8 @@
         <div class="main-cam-content"></div>
     </div>
 
-    <!-- Derecha: Chat y Logo -->
     <div class="side-panel">
         
-        <!-- Chat -->
         <div class="win-window chat-area">
             <div class="win-titlebar">
                 <span>mIRC32 - Canal #Stream</span>
@@ -126,14 +128,12 @@
             <div class="win-content" id="chatWrapper"></div>
         </div>
 
-        <!-- Logo -->
         <div class="win-window logo-area">
             <div class="win-titlebar">
                 <span>mi_logo.bmp - Paint</span>
                 <div class="win-buttons"><div class="win-btn">X</div></div>
             </div>
             <div class="win-content">
-                <!-- INSERTA TU LOGO EN EL CSS (Clase .user-logo-placeholder) -->
                 <div class="user-logo-placeholder"></div>
             </div>
         </div>
@@ -157,6 +157,64 @@
                 chatWrapper.removeChild(chatWrapper.firstChild);
             }
         }
+
+        function pushEvent(html) {
+            const node = document.createElement('div');
+            node.className = 'event-notif';
+            node.innerHTML = html;
+            chatWrapper.appendChild(node);
+            const total = chatWrapper.querySelectorAll('.event-notif').length;
+            if (total > 3) {
+                const first = chatWrapper.querySelector('.event-notif');
+                if (first) first.remove();
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const BACKEND_URL = (params.get('backend') || 'http://localhost:3000').replace(/\/+$/, '');
+        const CHANNEL = params.get('channel');
+
+        if (CHANNEL) {
+            document.querySelector('.win-titlebar span').textContent = 'mIRC32 - Canal #' + CHANNEL;
+            document.title = 'Win95 Just Chatting · ' + CHANNEL;
+        }
+
+        function initSocket() {
+            const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+            socket.on('connect', () => {
+                if (CHANNEL) socket.emit('join:channel', CHANNEL);
+            });
+            socket.on('chat:message', (d) => {
+                appendMessage(
+                    d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo',
+                    d.text || ''
+                );
+            });
+            socket.on('channel:follow', (d) => {
+                pushEvent('⭐ ' + (d.userDisplayName || d.userName || 'Alguien') + ' nos sigue!');
+            });
+            socket.on('channel:subscribe', (d) => {
+                pushEvent('🎉 ' + (d.userDisplayName || d.userName || 'Alguien') + ' se suscribió!');
+            });
+            socket.on('channel:cheer', (d) => {
+                pushEvent('💎 ' + (d.userDisplayName || d.userName || 'Anónimo') + ' animó con ' + (d.bits || 0) + ' bits!');
+            });
+            socket.on('channel:redemption', (d) => {
+                pushEvent('🎯 ' + (d.userDisplayName || d.userName || 'Alguien') + ' canjeó ' + (d.rewardTitle || ''));
+            });
+        }
+
+        function loadSocketIO(cb) {
+            const script = document.createElement('script');
+            script.src = BACKEND_URL + '/socket.io/socket.io.js';
+            script.onload = cb;
+            script.onerror = () => cb(new Error('load failed'));
+            document.head.appendChild(script);
+        }
+
+        loadSocketIO(function(err) {
+            if (!err) initSocket();
+        });
 
         window.addEventListener('message', (event) => {
             const payload = event.data;
