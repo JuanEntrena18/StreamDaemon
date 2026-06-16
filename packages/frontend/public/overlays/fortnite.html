@@ -713,7 +713,7 @@ function addChatMessage(displayName, text, color) {
 function initSocket() {
   let socket;
   try {
-    socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+    socket = io(BACKEND_URL, { transports: ['websocket'] });
   } catch(e) {
     document.getElementById('offline-notice').classList.add('show');
     return;
@@ -733,6 +733,9 @@ function initSocket() {
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d) applyHud(d); })
       .catch(() => {});
+  });
+  socket.on('connect_error', (err) => {
+    console.error('Socket connection error:', err.message);
   });
 
   socket.on('disconnect', () => {
@@ -859,9 +862,9 @@ function initSocket() {
 ────────────────────────────────────────────────────────── */
 function loadSocketIO(cb) {
   const script = document.createElement('script');
-  script.src = BACKEND_URL + '/socket.io/socket.io.js';
-  script.onload = cb;
+  script.onload = () => cb();
   script.onerror = () => cb(new Error('load failed'));
+  script.src = './js/socket.io.js';
   document.head.appendChild(script);
 }
 

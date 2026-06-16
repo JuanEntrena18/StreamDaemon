@@ -743,14 +743,13 @@ let socketConnected = false;
 
 function loadSocketIO(cb) {
   const script = document.createElement('script');
-  script.src = BACKEND_URL + '/socket.io/socket.io.js';
-  script.onload = cb;
+  script.onload = () => cb();  script.src = './js/socket.io.js';
   script.onerror = () => { console.warn('Socket.IO not available'); cb(new Error('load failed')); };
   document.head.appendChild(script);
 }
 
 function initSocket() {
-  const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+  const socket = io(BACKEND_URL, { transports: ['websocket'] });
 
   socket.on('connect', () => {
     socketConnected = true;
@@ -761,6 +760,9 @@ function initSocket() {
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d) applyHud(d); })
       .catch(() => {});
+  });
+  socket.on('connect_error', (err) => {
+    console.error('Socket connection error:', err.message);
   });
 
   socket.on('disconnect', () => {

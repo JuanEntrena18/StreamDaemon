@@ -360,11 +360,14 @@ function animateConfetti() {
 ─────────────────────────────────────────────── */
 function initSocket() {
   let socket;
-  try { socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] }); }
+  try { socket = io(BACKEND_URL, { transports: ['websocket'] }); }
   catch(e) { return; }
 
   socket.on('connect', () => {
     if (CHANNEL) socket.emit('join:channel', CHANNEL);
+  });
+  socket.on('connect_error', (err) => {
+    console.error('Socket connection error:', err.message);
   });
 
   socket.on('channel:follow', ({ userDisplayName }) => {
@@ -421,8 +424,7 @@ document.querySelectorAll('#controls button').forEach(btn => {
 ─────────────────────────────────────────────── */
 function loadSocketIO(cb) {
   const script = document.createElement('script');
-  script.src = BACKEND_URL + '/socket.io/socket.io.js';
-  script.onload = cb;
+  script.onload = () => cb();  script.src = './js/socket.io.js';
   script.onerror = () => cb(new Error('load failed'));
   document.head.appendChild(script);
 }

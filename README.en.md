@@ -12,7 +12,7 @@ Available in two modes:
 
 ## ✨ Features
 
-- **🎨 Standalone themed overlays** — Pure HTML+CSS+JS overlays (no React) for multiple games and styles: Subnautica 2, Fortnite, animated Alerts, Subathon, **Retro 8-bit**, **Retro Win95**, **RetroWave**, and **Tactical Sci-Fi**. Each includes Canvas particles, CSS animations, real-time event queue, and direct Socket.IO connection. Loaded as static files (`/overlays/`) in OBS.
+- **🎨 Standalone themed overlays** — 39 standalone HTML+CSS+JS overlays (no React) for multiple games and styles: Subnautica 2, Fortnite, animated Alerts, Subathon, **Retro 8-bit**, **Retro Win95**, **RetroWave**, and **Tactical Sci-Fi**. Each includes Canvas particles, CSS animations, real-time event queue, and Socket.IO connection using WebSocket-only transport. The Socket.IO client is served from `/overlays/js/socket.io.js` (via Vite) to avoid Fastify v5 intercepting the download. Loaded as static files (`/overlays/`) in OBS.
 - **🔴 Subathon** — An extendable live timer: viewers add time through subscriptions (+5 min), bits (+1 min per 100 bits), or channel point redemptions. Configurable max limit (12/24h). Control panel with start/pause/resume/stop, manual time addition, action history log, and a dedicated OBS overlay with countdown, progress bar, stats, and activity feed.
 - **📡 Unified Stream Dashboard** — Combines a stream preview (embedded iframe), title/game editor, live stats (viewers, followers, subs, uptime), and a channel activity feed with filters — all in one screen.
 - **💬 Live Chat** — Twitch IRC chat reading with real-time relay to overlays via Socket.IO. Includes message sending, reply (↩ @user), moderation (timeout/ban), role badges, and notification sound selector.
@@ -127,6 +127,8 @@ For themed chat add `&theme=subnautica2`, `&theme=poe2`, `&theme=wow`, `&theme=a
 
 > In **development mode** (`npm run dev`), use `localhost:5173` instead of `localhost:3000`. The Fortnite overlay needs the `&backend=http://localhost:3000` parameter in that case (added automatically when copying the URL from the panel).
 
+> **Socket.IO connection architecture in standalone overlays:** Fastify v5 intercepts all HTTP requests to `localhost:3000`, including `/socket.io/socket.io.js` (client) and Socket.IO polling POSTs, returning 404/401 before the Socket.IO handler can process them. The solution: (1) use WebSocket-only transport (`transports: ['websocket']`) — Fastify does not intercept the HTTP upgrade that WebSocket uses, (2) serve the Socket.IO client from Vite (`/overlays/js/socket.io.js`) copied from `node_modules/socket.io/client-dist/`, and (3) assign `script.onload / onerror` **before** `script.src` to avoid race conditions with the browser cache.
+
 ---
 
 ## 🏗️ Project Structure
@@ -151,7 +153,9 @@ StreamForge/
 │   │   └── fortnite/      # Fortnite stats (config + API)
 │   ├── frontend/
 │   │   ├── src/components/  # Dashboard (App, Chat, Giveaway, etc.)
-│   │   └── public/overlays/ # Standalone HTML overlays
+│   │   └── public/overlays/ # 39 standalone HTML overlays
+│   │       ├── js/
+│   │       │   └── socket.io.js  # Socket.IO client (non-minified, v4.8.3)
 │   │       ├── subnautica2.html
 │   │       ├── fortnite.html
 │   │       ├── alerts.html

@@ -226,7 +226,7 @@
 
     function initSocket() {
       console.log('[HUD] initSocket, BACKEND_URL=' + BACKEND_URL + ', CHANNEL=' + CHANNEL);
-      const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+      const socket = io(BACKEND_URL, { transports: ['websocket'] });
       socket.on('connect', () => {
         console.log('[HUD] socket connected');
         if (!CHANNEL) { console.warn('[HUD] no channel'); return; }
@@ -268,8 +268,11 @@
 
     function loadSocketIO(cb) {
       const script = document.createElement('script');
-      script.src = BACKEND_URL + '/socket.io/socket.io.js';
-      script.onload = () => { console.log('[HUD] socket.io.js loaded'); cb(); };
+      script.onload = () => cb();
+script.src = './js/socket.io.js';
+      script.src = './js/socket.io.js';
+script.src = './js/socket.io.js';
+      script.onerror = () => { console.log('[HUD] socket.io.js loaded'); cb(); };
       script.onerror = () => { console.warn('[HUD] socket.io.js load failed'); cb(new Error('load failed')); };
       document.head.appendChild(script);
     }

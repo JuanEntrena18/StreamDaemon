@@ -22,7 +22,7 @@ Aplicación modular para creadores de contenido que permite gestionar el canal d
 
 ### Overlays independientes (HTML/CSS/JS puro)
 
-Dieciséis overlays standalone en `public/overlays/` que se sirven como archivos estáticos. No requieren React ni Vite — conexión directa a Socket.IO:
+39 overlays standalone en `public/overlays/` que se sirven como archivos estáticos. No requieren React ni Vite — conexión directa a Socket.IO con transporte WebSocket-only y cliente servido desde `public/overlays/js/socket.io.js`:
 
 | Overlay | Archivo | Descripción |
 |---|---|---|
@@ -199,7 +199,7 @@ Scopes solicitados: `chat:read`, `chat:edit`, `channel:read:redemptions`, `chann
 ```
 OBS (Browser Source) ←→ Overlays HTML/React
        ↑                        ↓
-       |                   Socket.IO
+       |                   Socket.IO (WebSocket-only)
        |                        ↓
        +────────── Backend (Fastify + @twurple)
                              ↓
@@ -209,6 +209,26 @@ OBS (Browser Source) ←→ Overlays HTML/React
 - Overlays HTML standalone se conectan directamente a Socket.IO del backend sin pasar por React/Vite
 - Todos los overlays requieren `?demo=true` para datos simulados; sin él muestran cero/`--`
 - Socket.IO emite eventos por sala de canal (`channel:nombre`) para que overlays y paneles reciban solo su canal
+
+### Consideraciones de la conexión Socket.IO en overlays standalone
+
+Fastify v5 intercepta **todas** las peticiones HTTP entrantes a través de su hook `onRequest`, incluyendo:
+- `/socket.io/socket.io.js` — la descarga del cliente Socket.IO
+- Los POST de polling de Socket.IO (`/socket.io?EIO=4&transport=polling...`)
+
+Esto provoca que Fastify responda con 404 (rutas no registradas) o 401 (protegidas por `requireLocalAuth`) antes de que el módulo Socket.IO pueda procesarlas. Como resultado, los overlays standalone no podían conectarse.
+
+**Solución aplicada:**
+
+1. **WebSocket-only transport** — Se eliminó `polling` de la lista de transports. Socket.IO usa el upgrade HTTP para establecer WebSocket, y Fastify **no** intercepta el evento `upgrade` — solo Socket.IO lo escucha. Así la conexión real funciona sin interferencia.
+
+2. **Cliente Socket.IO local** — En lugar de cargar `socket.io.js` desde el backend (`BACKEND_URL + '/socket.io/socket.io.js'`), se copió el archivo no-minificado desde `node_modules/socket.io/client-dist/` a `public/overlays/js/socket.io.js`. Vite lo sirve como archivo estático, evitando que Fastify bloquee la descarga. El minificado no se usa porque no exponía `io` globalmente al cargarse con script dinámico.
+
+3. **Orden de asignación correcto** — Se descubrió que asignar `script.onload = cb` pasaba el objeto `Event` del navegador como primer argumento (`err`), haciendo que `if (!err)` siempre fallara y `initSocket()` nunca se ejecutara. Se cambió a `script.onload = () => cb()`. Además, `onload` y `onerror` se asignan **antes** de `script.src` para evitar que el script cargue desde caché antes de registrar los handlers.
+
+4. **connect_error handler** — Se agregó `socket.on('connect_error', ...)` con `console.error` a todos los overlays para visibilidad de errores de conexión.
+
+Estos cambios se aplicaron a los 39 overlays standalone en `public/overlays/`.
 
 ---
 
@@ -247,7 +267,9 @@ twitch_overlay/
 │   │   └── fortnite/      # Stats Fortnite
 │   ├── frontend/
 │   │   ├── src/components/  # Dashboard React
-│   │   └── public/overlays/ # Overlays HTML standalone (16+ archivos)
+│   │   └── public/overlays/ # 39 overlays HTML standalone
+│   │       ├── js/
+│   │       │   └── socket.io.js  # Socket.IO client (non-minified, v4.8.3)
 │   │       ├── subnautica2.html
 │   │       ├── fortnite.html
 │   │       ├── alerts.html
@@ -299,3 +321,4 @@ twitch_overlay/
 | **41** | **🌅 RetroWave theme** — 4 overlays outrun/synthwave con neón magenta/cyan, chat glitch y eventos | ✅ |
 | **42** | **🛸 Tactical Sci-Fi theme** — 4 overlays BSG con radar DRADIS, chat táctico y telemetría | ✅ |
 | **43** | **Socket.IO en overlays temáticos** — Todos los overlays con chat (gameplay y just chatting) conectados al backend via Socket.IO para mensajes, follows, subs, cheers y redemptions | ✅ |
+| **44** | **Socket.IO standalone fix** — Corrección de conexión Socket.IO en 39 overlays standalone: WebSocket-only transport para evitar interceptación de Fastify v5, cliente Socket.IO local (`/overlays/js/socket.io.js`), orden correcto de `script.onload` para evitar race condition, y handler `connect_error` en todos los overlays | ✅ |

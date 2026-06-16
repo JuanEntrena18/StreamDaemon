@@ -432,7 +432,7 @@ html, body {
 const params = new URLSearchParams(location.search);
 const channel = params.get('channel') || '';
 const DEMO_MODE = params.get('demo') === 'true';
-const SOCKET_URL = params.get('socket') || location.origin;
+const SOCKET_URL = params.get('socket') || 'http://localhost:3000';
 
 let state = {
   status: 'stopped',
@@ -553,9 +553,12 @@ function addFeedItem(action) {
 // ── Socket.IO ──
 function connectSocket() {
   const script = document.createElement('script');
-  script.src = SOCKET_URL + '/socket.io/socket.io.js';
-  script.onload = () => {
-    const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
+  script.onload = () => cb();
+script.src = './js/socket.io.js';
+  script.src = './js/socket.io.js';
+script.src = './js/socket.io.js';
+  script.onerror = () => {
+    const socket = io(SOCKET_URL, { transports: ['websocket'] });
     socket.on('connect', () => {
       socket.emit('join:channel', channel);
       socket.on('subathon:state', (data) => {
@@ -581,6 +584,9 @@ function connectSocket() {
         actionsCount++;
         statActions.textContent = actionsCount;
       });
+    });
+    socket.on('connect_error', (err) => {
+      console.error('Socket connection error:', err.message);
     });
   };
   document.head.appendChild(script);

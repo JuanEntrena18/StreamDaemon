@@ -168,9 +168,17 @@
         }
 
         function initSocket() {
-            const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+            const socket = io(BACKEND_URL, { transports: ['websocket'] });
             socket.on('connect', () => {
+
                 if (CHANNEL) socket.emit('join:channel', CHANNEL);
+
+            });
+
+            socket.on('connect_error', (err) => {
+
+                console.error('Socket connection error:', err.message);
+
             });
             socket.on('chat:message', (d) => {
                 appendMessage(
@@ -194,8 +202,7 @@
 
         function loadSocketIO(cb) {
             const script = document.createElement('script');
-            script.src = BACKEND_URL + '/socket.io/socket.io.js';
-            script.onload = cb;
+            script.onload = () => cb();  script.src = './js/socket.io.js';
             script.onerror = () => cb(new Error('load failed'));
             document.head.appendChild(script);
         }

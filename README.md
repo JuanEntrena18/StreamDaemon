@@ -12,7 +12,7 @@ Disponible en dos modos:
 
 ## ✨ Características
 
-- **🎨 Overlays temáticos independientes** — Overlays en HTML+CSS+JS puro (sin React) para múltiples juegos y estilos: Subnautica 2, Fortnite, Alertas animadas, Subathon, **Retro 8-bits**, **Retro Win95**, **RetroWave** y **Tactical Sci-Fi**. Cada overlay incluye Canvas de partículas, animaciones CSS, cola de eventos en tiempo real y conexión directa a Socket.IO. Se cargan como archivos estáticos (`/overlays/`) en OBS.
+- **🎨 Overlays temáticos independientes** — 39 overlays standalone en HTML+CSS+JS puro (sin React) para múltiples juegos y estilos: Subnautica 2, Fortnite, Alertas animadas, Subathon, **Retro 8-bits**, **Retro Win95**, **RetroWave** y **Tactical Sci-Fi**. Cada overlay incluye Canvas de partículas, animaciones CSS, cola de eventos en tiempo real y conexión Socket.IO con transporte WebSocket-only. El cliente Socket.IO se sirve desde `/overlays/js/socket.io.js` (Vite) para evitar que Fastify v5 intercepte la descarga. Se cargan como archivos estáticos (`/overlays/`) en OBS.
 - **🔴 Subathon** — Temporizador ampliable en directo: los espectadores añaden tiempo con suscripciones (+5 min), bits (+1 min por cada 100 bits) o recompensas de canal. Límite máximo configurable (12/24h). Panel de control con inicio/pausa/reanudar/detener, añadir tiempo manual, historial de acciones y overlay OBS dedicado con cuenta atrás, barra de progreso, estadísticas y feed de actividad.
 - **📡 Gestor del Stream unificado** — Dashboard que combina vista previa del stream (iframe embed con soporte multi-parent para Electron y navegador), editor de título/juego, estadísticas en vivo (viewers, followers, subs, uptime) y feed de actividad del canal con filtros — todo en una sola pantalla.
 - **💬 Chat en vivo** — Lectura del chat de Twitch vía IRC con reenvío en tiempo real a los overlays mediante Socket.IO. Incluye envío de mensajes, reply (↩ @usuario), moderación (timeout/ban), badges por rol, selector de sonido de notificación con control de volumen, **TTS (text-to-speech)** con selección de voz, velocidad y volumen.
@@ -130,6 +130,8 @@ Para cambiar el tema visual del chat agrega `&theme=subnautica2`, `&theme=poe2`,
 
 > En **modo desarrollo** (`npm run dev`), usá `localhost:5173` en lugar de `localhost:3000`. El overlay de Fortnite necesita el parámetro `&backend=http://localhost:3000` en ese caso (se agrega automáticamente al copiar la URL desde el panel).
 
+> **Arquitectura de conexión Socket.IO en overlays standalone:** Fastify v5 intercepta todas las peticiones HTTP a `localhost:3000`, incluyendo `/socket.io/socket.io.js` (cliente) y los POST de polling de Socket.IO, devolviendo 404/401 antes de que el handler de Socket.IO pueda procesarlos. La solución: (1) usar solo transporte WebSocket (`transports: ['websocket']`) — Fastify no intercepta el upgrade HTTP que WebSocket utiliza, (2) servir el cliente Socket.IO desde Vite (`/overlays/js/socket.io.js`) copiado de `node_modules/socket.io/client-dist/`, y (3) asignar `script.onload / onerror` **antes** de `script.src` para evitar race conditions con la caché del navegador.
+
 ---
 
 ## 🏗️ Estructura del proyecto
@@ -156,7 +158,9 @@ StreamForge/
 │   │   └── fortnite/      # Fortnite stats (config + API)
 │   ├── frontend/
 │   │   ├── src/components/  # Dashboard (App, Chat, Giveaway, etc.)
-│   │   └── public/overlays/ # Overlays HTML independientes
+│   │   └── public/overlays/ # 39 overlays HTML independientes
+│   │       ├── js/
+│   │       │   └── socket.io.js  # Socket.IO client (non-minified, v4.8.3)
 │   │       ├── subnautica2.html
 │   │       ├── fortnite.html
 │   │       ├── alerts.html
