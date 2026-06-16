@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horde Ending Screen</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            background-color: #050000;
+            overflow: hidden;
+            font-family: 'Cinzel', serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        .environment {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #300000 0%, #050000 80%);
+            z-index: 1;
+        }
+
+        .embers {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;
+            background-image: radial-gradient(#ff3300 2px, transparent 2px);
+            background-size: 80px 80px; opacity: 0.15;
+            animation: riseEmbers 15s linear infinite;
+        }
+
+        @keyframes riseEmbers {
+            0% { transform: translateY(0) scale(1); opacity: 0.15; }
+            50% { opacity: 0.3; }
+            100% { transform: translateY(-200px) scale(1.5); opacity: 0; }
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .main-title {
+            font-size: 90px;
+            color: #ff1a1a;
+            letter-spacing: 12px;
+            text-transform: uppercase;
+            text-shadow: 4px 4px 10px #000, 0 0 40px rgba(255, 0, 0, 0.8);
+            margin-bottom: 10px;
+        }
+
+        .sub-title {
+            font-size: 35px;
+            color: #b0b0b0;
+            letter-spacing: 5px;
+            margin-bottom: 80px;
+            text-shadow: 2px 2px 5px #000;
+        }
+
+        .social-grid {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1400px;
+        }
+
+        .social-banner {
+            background: linear-gradient(to bottom, #2a0000, #110000);
+            border: 2px solid #5a0000;
+            padding: 20px 40px;
+            border-radius: 4px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8), inset 0 0 15px rgba(255,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 300px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .social-banner::before {
+            content: ''; position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+            width: 50px; height: 10px; background: #8b0000; border-radius: 2px;
+            box-shadow: 0 0 5px #000;
+        }
+
+        .platform {
+            font-size: 22px;
+            color: #ff4444;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            border-bottom: 1px solid #5a0000;
+            padding-bottom: 5px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .username {
+            font-family: 'Roboto', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 1px 1px 3px #000;
+        }
+
+        .horde-logo {
+            width: 120px;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 0 15px rgba(255,0,0,0.6));
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="environment"></div>
+    <div class="embers"></div>
+
+    <div class="content-wrapper">
+        <img src="q162k8nk3a8v4alisen11ns63e-4454b5a62a84aeaf01536c8380716644.png" alt="Horda" class="horde-logo">
+        <div class="main-title">LA CAMPAÑA HA TERMINADO</div>
+        <div class="sub-title">FUERZA Y HONOR</div>
+
+        <!-- INSTRUCCIONES: Cambia "@tu_usuario" por tus redes -->
+        <div class="social-grid">
+            
+            <div class="social-banner">
+                <div class="platform">TWITCH</div>
+                <div class="username">@tu_usuario</div>
+            </div>
+
+            <div class="social-banner">
+                <div class="platform">X / TWITTER</div>
+                <div class="username">@tu_usuario</div>
+            </div>
+
+            <div class="social-banner">
+                <div class="platform">YOUTUBE</div>
+                <div class="username">@tu_canal</div>
+            </div>
+
+            <div class="social-banner">
+                <div class="platform">INSTAGRAM</div>
+                <div class="username">@tu_usuario</div>
+            </div>
+
+            <div class="social-banner">
+                <div class="platform">TIKTOK</div>
+                <div class="username">@tu_usuario</div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

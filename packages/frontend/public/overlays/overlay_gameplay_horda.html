@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horde Gameplay Overlay</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            background-color: transparent; /* Transparente para capturar el juego en OBS */
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+            display: grid;
+            padding: 20px;
+            gap: 20px;
+            grid-template-columns: 1260px 600px; 
+            grid-template-rows: 1040px; 
+        }
+
+        .horde-box {
+            position: relative;
+            background: rgba(15, 5, 5, 0.85);
+            border: 4px solid #3a0000;
+            box-shadow: 
+                0 0 15px rgba(255, 0, 0, 0.2), 
+                inset 0 0 30px rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Remaches de metal en las esquinas */
+        .horde-box::before, .horde-box::after {
+            content: ''; position: absolute; width: 10px; height: 10px; background: #555;
+            border-radius: 50%; box-shadow: inset -2px -2px 4px #000, 1px 1px 2px rgba(255,0,0,0.5);
+            z-index: 10;
+        }
+        .horde-box::before { top: 10px; left: 10px; }
+        .horde-box::after { top: 10px; right: 10px; }
+
+        .horde-header {
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(to right, #4a0000, #8b0000, #4a0000);
+            color: #fff;
+            padding: 12px 20px;
+            font-size: 22px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border-bottom: 3px solid #ff1a1a;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 2px 2px 4px #000;
+            position: relative;
+        }
+
+        .game-area {
+            background-color: transparent; /* El juego se ve aquí */
+            border: 4px solid #4a0000;
+            box-shadow: inset 0 0 40px rgba(255,0,0,0.2), 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .side-panel {
+            display: grid;
+            grid-template-rows: 340px 680px; /* Webcam arriba, Chat abajo */
+            gap: 20px;
+        }
+
+        .webcam-content {
+            flex-grow: 1;
+            background-color: transparent; /* La cámara va aquí */
+            box-shadow: inset 0 0 50px rgba(0,0,0,1);
+        }
+
+        .chat-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background: radial-gradient(circle at center, rgba(30,0,0,0.4) 0%, rgba(10,0,0,0.9) 100%);
+        }
+
+        .chat-msg {
+            font-size: 16px;
+            line-height: 1.4;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(20, 0, 0, 0.7);
+            border-left: 3px solid #ff1a1a;
+            color: #e0e0e0;
+            animation: slideIn 0.3s cubic-bezier(.25,.46,.45,.94) forwards;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            word-wrap: break-word;
+        }
+
+        @keyframes slideIn {
+            0% { transform: translateX(30px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        .user { font-weight: 700; color: #ff4444; margin-right: 8px; text-shadow: 1px 1px 2px #000;}
+        .text { color: #fff; }
+
+        #overlay-root {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Permite clicks a través de la capa de React */
+            z-index: 1000; /* Asegura que los datos estén sobre el resto del diseño */
+        }
+        #overlay-root > * {
+            pointer-events: auto; /* Reactiva los eventos para los hijos directos de tu app */
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- CONTENEDOR REACT APP (Datos, Espectadores, Alertas) -->
+    <div id="overlay-root"></div>
+
+    <!-- Monitor Izquierdo (Juego) -->
+    <div class="game-area"></div>
+
+    <!-- Panel Derecho -->
+    <div class="side-panel">
+        
+        <!-- Webcam -->
+        <div class="horde-box">
+            <div class="horde-header">
+                <img src="horda_logo.png" alt="Horda" style="height: 24px; margin-right: 10px; filter: drop-shadow(0 0 5px #ff0000); vertical-align: middle;">
+                Visión de Mando
+            </div>
+            <div class="webcam-content"></div>
+            <!-- Remaches inferiores -->
+            <div style="position: absolute; bottom: 10px; left: 10px; width: 10px; height: 10px; background: #555; border-radius: 50%; box-shadow: inset -2px -2px 4px #000;"></div>
+            <div style="position: absolute; bottom: 10px; right: 10px; width: 10px; height: 10px; background: #555; border-radius: 50%; box-shadow: inset -2px -2px 4px #000;"></div>
+        </div>
+
+        <!-- Chat -->
+        <div class="horde-box">
+            <div class="horde-header">
+                <img src="world-of-warcraft-logo.png" alt="WoW" style="height: 24px; margin-right: 10px; filter: drop-shadow(0 0 5px #ffaa00); vertical-align: middle;">
+                Grito de Guerra
+            </div>
+            <div class="chat-content" id="chatWrapper">
+                <!-- Mensajes inyectados por JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MSG = 12;
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#ff4444';
+
+            msgNode.innerHTML = `<span class="user" style="color: ${finalColor};">${safeUsername}:</span><span class="text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MSG) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const BACKEND_URL = (params.get('backend') || 'http://localhost:3000').replace(/\/+$/, '');
+        const CHANNEL = params.get('channel');
+
+        if (CHANNEL) {
+            document.title = 'Horde Gameplay · ' + CHANNEL;
+        }
+
+        function initSocket() {
+            const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+            socket.on('connect', () => {
+                if (CHANNEL) socket.emit('join:channel', CHANNEL);
+            });
+            socket.on('chat:message', (d) => {
+                appendMessage(
+                    d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo',
+                    d.text || '',
+                    d.user?.color || '#ff4444'
+                );
+            });
+            socket.on('channel:follow', (d) => {
+                pushEvent('⭐ <b>' + (d.userDisplayName || d.userName || 'Alguien') + '</b> nos sigue!');
+            });
+            socket.on('channel:subscribe', (d) => {
+                pushEvent('🎉 <b>' + (d.userDisplayName || d.userName || 'Alguien') + '</b> se suscribió!');
+            });
+            socket.on('channel:cheer', (d) => {
+                pushEvent('💎 <b>' + (d.userDisplayName || d.userName || 'Anónimo') + '</b> animó con ' + (d.bits || 0) + ' bits!');
+            });
+            socket.on('channel:redemption', (d) => {
+                pushEvent('🎯 <b>' + (d.userDisplayName || d.userName || 'Alguien') + '</b> canjeó <b>' + (d.rewardTitle || '') + '</b>');
+            });
+        }
+
+        function loadSocketIO(cb) {
+            const script = document.createElement('script');
+            script.src = BACKEND_URL + '/socket.io/socket.io.js';
+            script.onload = cb;
+            script.onerror = () => cb(new Error('load failed'));
+            document.head.appendChild(script);
+        }
+
+        function pushEvent(html) {
+            const node = document.createElement('div');
+            node.className = 'chat-msg event-notif';
+            node.innerHTML = html;
+            chatWrapper.appendChild(node);
+            if (chatWrapper.children.length > MAX_MSG) {
+                chatWrapper.removeChild(chatWrapper.children[0]);
+            }
+        }
+
+        loadSocketIO(function(err) {
+            if (!err) initSocket();
+        });
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+</body>
+</html>
