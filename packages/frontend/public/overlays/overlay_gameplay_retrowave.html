@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrowave Gameplay Overlay</title>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            background-color: transparent; /* Fundamental para OBS */
+            font-family: 'VT323', monospace;
+            overflow: hidden;
+            display: grid;
+            padding: 20px;
+            gap: 20px;
+            /* 1260px (Juego) + 600px (Panel Derecho) */
+            grid-template-columns: 1260px 600px; 
+            grid-template-rows: 1040px; 
+        }
+
+        .neon-box {
+            background-color: rgba(11, 12, 16, 0.7); /* Fondo oscuro semitransparente */
+            border: 4px solid #00ffff;
+            box-shadow: 
+                0 0 10px #00ffff, 
+                inset 0 0 15px #00ffff;
+            position: relative;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Borde Magenta intermitente decorativo */
+        .neon-box::before {
+            content: '';
+            position: absolute;
+            top: -4px; left: -4px; right: -4px; bottom: -4px;
+            border: 2px solid #ff00ff;
+            border-radius: 12px;
+            z-index: -1;
+            box-shadow: 0 0 20px #ff00ff;
+            opacity: 0.5;
+        }
+
+        .box-header {
+            background: linear-gradient(90deg, rgba(255,0,255,0.8) 0%, rgba(0,255,255,0.2) 100%);
+            color: #fff;
+            font-family: 'Righteous', cursive;
+            padding: 10px 20px;
+            font-size: 24px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #ff00ff;
+            box-shadow: 0 5px 15px rgba(255,0,255,0.3);
+        }
+
+        .game-area {
+            background-color: transparent; /* AQUI VA EL JUEGO EN OBS */
+            /* Cambiamos el color del borde del juego a Magenta para contrastar */
+            border-color: #ff00ff;
+            box-shadow: 0 0 20px #ff00ff, inset 0 0 20px #ff00ff;
+        }
+        
+        .game-area::before { border-color: #00ffff; box-shadow: 0 0 20px #00ffff; }
+
+        .side-panel {
+            display: grid;
+            grid-template-rows: 350px 670px; /* Webcam y Chat */
+            gap: 20px;
+        }
+
+        .webcam-content {
+            flex-grow: 1;
+            background-color: transparent; /* AQUI VA LA WEBCAM */
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px; /* Cuadrícula sutil detrás de la cam por si se apaga */
+        }
+
+        .chat-content {
+            flex-grow: 1;
+            padding: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            /* Fondo con cuadrícula móvil de los 80s */
+            background: 
+                linear-gradient(rgba(11, 12, 16, 0.9), rgba(11, 12, 16, 0.9)),
+                repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(255,0,255,0.2) 20px);
+            background-size: 100% 20px;
+        }
+
+        .chat-msg {
+            font-size: 22px; /* Fuente pixelada necesita ser más grande */
+            margin-bottom: 12px;
+            line-height: 1.2;
+            color: #fff;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+            animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both;
+        }
+
+        @keyframes glitch-anim {
+            0% { transform: translate(-20px, 0) skewX(20deg); opacity: 0; filter: drop-shadow(4px 0 0 #00ffff) drop-shadow(-4px 0 0 #ff00ff); }
+            100% { transform: translate(0, 0) skewX(0); opacity: 1; filter: none; }
+        }
+
+        .user { 
+            color: #00ffff; 
+            text-shadow: 0 0 5px #00ffff;
+            margin-right: 8px;
+        }
+        
+        .msg-text { color: #f0f0f0; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Monitor Izquierdo (Juego) -->
+    <div class="neon-box game-area">
+        <div class="box-header">SYS.GAME_EXE</div>
+        <div style="flex-grow: 1; background: transparent;"></div>
+    </div>
+
+    <!-- Panel Derecho (Webcam + Chat) -->
+    <div class="side-panel">
+        
+        <!-- Webcam -->
+        <div class="neon-box">
+            <div class="box-header" style="background: linear-gradient(90deg, rgba(0,255,255,0.8) 0%, rgba(255,0,255,0.2) 100%); border-bottom-color: #00ffff;">
+                CAM.REC
+            </div>
+            <div class="webcam-content"></div>
+        </div>
+
+        <!-- Chat -->
+        <div class="neon-box">
+            <div class="box-header">NET.CHAT</div>
+            <div class="chat-content" id="chatWrapper">
+                <!-- Mensajes JS inyectados aquí -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MSG = 15;
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            
+            const finalColor = color || '#00ffff'; 
+
+            msgNode.innerHTML = `<span class="user" style="color: ${finalColor}; text-shadow: 0 0 5px ${finalColor};">[${safeUsername}]</span><span class="msg-text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MSG) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        function pushEvent(html) {
+            const node = document.createElement('div');
+            node.className = 'chat-msg';
+            node.style.borderLeft = '4px solid #ff00ff';
+            node.style.paddingLeft = '10px';
+            node.style.fontSize = '18px';
+            node.innerHTML = html;
+            chatWrapper.appendChild(node);
+            if (chatWrapper.children.length > MAX_MSG) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const BACKEND_URL = (params.get('backend') || 'http://localhost:3000').replace(/\/+$/, '');
+        const CHANNEL = params.get('channel');
+
+        if (CHANNEL) {
+            document.title = 'Retrowave Gameplay · ' + CHANNEL;
+        }
+
+        function initSocket() {
+            const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+            socket.on('connect', () => {
+                if (CHANNEL) socket.emit('join:channel', CHANNEL);
+            });
+            socket.on('chat:message', (d) => {
+                appendMessage(
+                    d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo',
+                    d.text || '',
+                    d.user?.color || '#00ffff'
+                );
+            });
+            socket.on('channel:follow', (d) => {
+                pushEvent('⭐ <b style="color:#ff00ff">' + (d.userDisplayName || d.userName || 'Alguien') + '</b> nos sigue!');
+            });
+            socket.on('channel:subscribe', (d) => {
+                pushEvent('🎉 <b style="color:#ff00ff">' + (d.userDisplayName || d.userName || 'Alguien') + '</b> se suscribió!');
+            });
+            socket.on('channel:cheer', (d) => {
+                pushEvent('💎 <b style="color:#ff00ff">' + (d.userDisplayName || d.userName || 'Anónimo') + '</b> animó con ' + (d.bits || 0) + ' bits!');
+            });
+            socket.on('channel:redemption', (d) => {
+                pushEvent('🎯 <b style="color:#ff00ff">' + (d.userDisplayName || d.userName || 'Alguien') + '</b> canjeó <b>' + (d.rewardTitle || '') + '</b>');
+            });
+        }
+
+        function loadSocketIO(cb) {
+            const script = document.createElement('script');
+            script.src = BACKEND_URL + '/socket.io/socket.io.js';
+            script.onload = cb;
+            script.onerror = () => cb(new Error('load failed'));
+            document.head.appendChild(script);
+        }
+
+        loadSocketIO(function(err) {
+            if (!err) initSocket();
+        });
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+</body>
+</html>

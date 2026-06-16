@@ -292,6 +292,43 @@ const OBS_URLS: OBSUrl[] = [
     supportsTheme: false,
     color: '#800000',
   },
+  // ── RetroWave Section ──
+  {
+    id: 'retrowave-start',
+    icon: '🌅',
+    labelKey: 'obs.retrowaveStart',
+    descKey: 'obs.retrowaveStartDesc',
+    mode: 'retrowave-start',
+    supportsTheme: false,
+    color: '#ff00ff',
+  },
+  {
+    id: 'retrowave-gameplay',
+    icon: '🎮',
+    labelKey: 'obs.retrowaveGameplay',
+    descKey: 'obs.retrowaveGameplayDesc',
+    mode: 'retrowave-gameplay',
+    supportsTheme: false,
+    color: '#00ffff',
+  },
+  {
+    id: 'retrowave-just-chatting',
+    icon: '💬',
+    labelKey: 'obs.retrowaveJustChatting',
+    descKey: 'obs.retrowaveJustChattingDesc',
+    mode: 'retrowave-just-chatting',
+    supportsTheme: false,
+    color: '#ff00ff',
+  },
+  {
+    id: 'retrowave-end',
+    icon: '🏁',
+    labelKey: 'obs.retrowaveEnd',
+    descKey: 'obs.retrowaveEndDesc',
+    mode: 'retrowave-end',
+    supportsTheme: false,
+    color: '#ffea00',
+  },
   // ── WoW Alianza Section ──
   {
     id: 'wow-alliance-start',
@@ -498,6 +535,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     { id: 'fortnite', labelKey: 'obs.temaFortnite' },
     { id: '8bits', labelKey: 'obs.tema8bits' },
     { id: 'win95', labelKey: 'obs.temaWin95' },
+    { id: 'retrowave', labelKey: 'obs.temaRetrowave' },
   ];
 
   const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
@@ -571,6 +609,10 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     'win95-gameplay': 'overlay_gameplay_win95.html',
     'win95-just-chatting': 'overlay_just_chatting_win95.html',
     'win95-end': 'pantalla_despedida_win95.html',
+    'retrowave-start': 'pantalla_comienzo_retrowave.html',
+    'retrowave-gameplay': 'overlay_gameplay_retrowave.html',
+    'retrowave-just-chatting': 'overlay_just_chatting_retrowave.html',
+    'retrowave-end': 'pantalla_despedida_retrowave.html',
     'wow-alliance-start': 'wow-alliance-start.html',
     'wow-alliance-webcam': 'wow-alliance-webcam.html',
     'wow-alliance-webcam-labels': 'wow-alliance-webcam-labels.html',
@@ -698,12 +740,14 @@ export function ObsPanel({ channel, backendUrl }: Props) {
           if (selectedTheme === 'wow') return item.id.startsWith('wow-horde-');
           if (selectedTheme === '8bits') return item.id.startsWith('8bits-');
           if (selectedTheme === 'win95') return item.id.startsWith('win95-');
+          if (selectedTheme === 'retrowave') return item.id.startsWith('retrowave-');
           // When no theme is selected, hide theme-specific overlays
           if (item.id.startsWith('dj-')) return false;
           if (item.id.startsWith('wow-alliance-')) return false;
           if (item.id.startsWith('wow-horde-')) return false;
           if (item.id.startsWith('8bits-')) return false;
           if (item.id.startsWith('win95-')) return false;
+          if (item.id.startsWith('retrowave-')) return false;
           return true;
         }).map((item) => {
           const isSocial = item.id === 'social';

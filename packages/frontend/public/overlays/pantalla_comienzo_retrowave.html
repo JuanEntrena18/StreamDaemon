@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrowave Start Screen</title>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            background-color: #0b0c10;
+            overflow: hidden;
+            font-family: 'Righteous', cursive;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Scanlines overlay */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        /* El Sol Retrowave */
+        .retro-sun {
+            position: absolute;
+            bottom: 30%;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: linear-gradient(to bottom, #ffea00 0%, #ff00ff 100%);
+            box-shadow: 0 0 100px #ff00ff, 0 0 200px #ff00ff;
+            -webkit-mask-image: repeating-linear-gradient(
+                to bottom,
+                #000 0%,
+                #000 3%,
+                transparent 3%,
+                transparent 5%
+            );
+            z-index: 1;
+        }
+
+        /* La Cuadrícula en Perspectiva 3D */
+        .grid-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40%;
+            perspective: 600px;
+            z-index: 2;
+        }
+
+        .grid {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            bottom: -50%;
+            left: -50%;
+            background-image: 
+                linear-gradient(transparent 95%, #00ffff 100%),
+                linear-gradient(90deg, transparent 95%, #00ffff 100%);
+            background-size: 60px 60px;
+            transform: rotateX(75deg);
+            animation: moveGrid 2s linear infinite;
+            box-shadow: inset 0 0 100px #00ffff;
+        }
+
+        @keyframes moveGrid {
+            0% { transform: rotateX(75deg) translateY(0); }
+            100% { transform: rotateX(75deg) translateY(60px); }
+        }
+
+        /* Textos e Interfaz */
+        .ui-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            margin-top: -150px;
+        }
+
+        .title {
+            font-size: 100px;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            margin-bottom: 20px;
+            /* Efecto Neón y aberración cromática */
+            text-shadow: 
+                0 0 5px #fff, 
+                0 0 20px #ff00ff, 
+                0 0 40px #ff00ff, 
+                0 0 80px #ff00ff,
+                4px 0px 0px rgba(0,255,255,0.5),
+                -4px 0px 0px rgba(255,0,255,0.5);
+        }
+
+        .timer {
+            font-family: 'VT323', monospace;
+            font-size: 180px;
+            color: #00ffff;
+            text-shadow: 
+                0 0 10px #00ffff, 
+                0 0 30px #00ffff, 
+                0 0 60px #00ffff;
+            animation: pulseText 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseText {
+            0% { opacity: 0.8; text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; }
+            100% { opacity: 1; text-shadow: 0 0 20px #00ffff, 0 0 50px #00ffff, 0 0 80px #00ffff; }
+        }
+
+        .vhs-play {
+            position: absolute;
+            top: 50px;
+            left: 60px;
+            font-family: 'VT323', monospace;
+            font-size: 60px;
+            color: #fff;
+            text-shadow: 2px 2px 0 #00ffff, -2px -2px 0 #ff00ff;
+            z-index: 10;
+            animation: blinkPlay 1s step-end infinite;
+        }
+
+        @keyframes blinkPlay {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="vhs-play">► PLAY</div>
+
+    <div class="retro-sun"></div>
+    
+    <div class="grid-container">
+        <div class="grid"></div>
+    </div>
+
+    <div class="ui-content">
+        <div class="title" id="statusText">SYSTEM INIT</div>
+        <div class="timer" id="timerDisplay">05:00</div>
+    </div>
+
+    <script>
+        const TOTAL_MINUTES = 5;
+        let totalSeconds = TOTAL_MINUTES * 60;
+        const displayEl = document.getElementById('timerDisplay');
+        const statusEl = document.getElementById('statusText');
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function engineTick() {
+            displayEl.textContent = formatTime(totalSeconds);
+            
+            if (totalSeconds > 0) {
+                totalSeconds--;
+                setTimeout(engineTick, 1000);
+            } else {
+                displayEl.textContent = "00:00";
+                statusEl.textContent = "READY TO RIDE";
+                displayEl.style.animation = "none"; // Detener pulso
+                displayEl.style.color = "#ff00ff"; // Cambiar color al terminar
+                displayEl.style.textShadow = "0 0 20px #ff00ff, 0 0 50px #ff00ff";
+            }
+        }
+        
+        engineTick();
+    </script>
+</body>
+</html>

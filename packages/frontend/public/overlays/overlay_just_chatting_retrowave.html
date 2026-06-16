@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrowave Just Chatting Overlay</title>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            background-color: transparent; 
+            font-family: 'VT323', monospace;
+            overflow: hidden;
+            display: grid;
+            padding: 20px;
+            gap: 20px;
+            /* Invertido: 1260px (Main Cam) + 600px (Sidebar) */
+            grid-template-columns: 1260px 600px; 
+            grid-template-rows: 1040px; 
+        }
+
+        .neon-box {
+            background-color: rgba(11, 12, 16, 0.85); 
+            border: 4px solid #ff00ff; /* Magenta predominante para Just Chatting */
+            box-shadow: 0 0 15px #ff00ff, inset 0 0 20px #ff00ff;
+            position: relative;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .neon-box::before {
+            content: '';
+            position: absolute;
+            top: -4px; left: -4px; right: -4px; bottom: -4px;
+            border: 2px solid #00ffff;
+            border-radius: 12px;
+            z-index: -1;
+            box-shadow: 0 0 20px #00ffff;
+            opacity: 0.6;
+        }
+
+        .box-header {
+            background: linear-gradient(90deg, rgba(255,0,255,0.8) 0%, rgba(0,255,255,0.2) 100%);
+            color: #fff;
+            font-family: 'Righteous', cursive;
+            padding: 15px 20px;
+            font-size: 26px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-cam-area {
+            background-color: transparent; /* WEBCAM DE OBS AQUÍ */
+        }
+
+        .side-panel {
+            display: grid;
+            grid-template-rows: 670px 350px; /* Chat arriba, Logo abajo */
+            gap: 20px;
+        }
+
+        .chat-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background: repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(0,255,255,0.1) 20px);
+            background-size: 100% 20px;
+        }
+
+        .logo-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background: radial-gradient(circle, rgba(255,0,255,0.2) 0%, transparent 70%);
+        }
+
+        .user-logo-placeholder {
+            width: 220px;
+            height: 220px;
+            /* INSTRUCCIÓN PARA EL USUARIO:
+               Añade la ruta de tu logo entre las comillas simples abajo.
+               Ejemplo: background-image: url('tu_logo_retrowave.png'); */
+            background-image: url(''); 
+            background-color: rgba(0, 0, 0, 0.5); /* Color de fondo si no hay logo */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border: 4px dashed #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(0,255,255,0.5);
+            margin-bottom: 20px;
+            /* Efecto pulsante para el logo */
+            animation: pulseLogo 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseLogo {
+            0% { box-shadow: 0 0 20px #00ffff, inset 0 0 20px #00ffff; transform: scale(1); }
+            100% { box-shadow: 0 0 50px #00ffff, inset 0 0 50px #00ffff; transform: scale(1.05); border-color: #ff00ff; }
+        }
+
+        .chat-msg {
+            font-size: 24px;
+            margin-bottom: 15px;
+            line-height: 1.3;
+            color: #fff;
+            text-shadow: 1px 1px 0px #000;
+            border-bottom: 1px dotted rgba(255,0,255,0.3);
+            padding-bottom: 8px;
+        }
+
+        .user { font-weight: bold; color: #ff00ff; text-shadow: 0 0 8px #ff00ff; margin-right: 10px; }
+        
+        .rec-indicator {
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000;
+            animation: blinkPlay 1s step-end infinite;
+        }
+
+        @keyframes blinkPlay { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    </style>
+</head>
+<body>
+
+    <!-- Izquierda: Webcam Principal -->
+    <div class="neon-box main-cam-area">
+        <div class="box-header">
+            <span>TRANSMISSION.ON</span>
+            <span class="rec-indicator">● REC</span>
+        </div>
+        <div style="flex-grow: 1; background: transparent;"></div>
+    </div>
+
+    <!-- Derecha: Chat y Logo -->
+    <div class="side-panel">
+        
+        <!-- Chat -->
+        <div class="neon-box" style="border-color: #00ffff;">
+            <div class="box-header" style="background: linear-gradient(90deg, rgba(0,255,255,0.8) 0%, rgba(255,0,255,0.2) 100%); border-bottom-color: #ff00ff;">
+                PUBLIC.COMMS
+            </div>
+            <div class="chat-content" id="chatWrapper"></div>
+        </div>
+
+        <!-- Logo -->
+        <div class="neon-box logo-area">
+            <!-- INSERTA TU LOGO AQUÍ MODIFICANDO EL CSS ARRIBA -->
+            <div class="user-logo-placeholder"></div>
+            <div style="font-family: 'Righteous', cursive; color: #fff; font-size: 20px; letter-spacing: 5px; text-shadow: 0 0 10px #ff00ff;">
+                HOST ONLINE
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MSG = 12;
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#ff00ff';
+
+            msgNode.innerHTML = `<span class="user" style="color: ${finalColor}; text-shadow: 0 0 8px ${finalColor};">${safeUsername}:</span><span class="text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MSG) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        function pushEvent(html) {
+            const node = document.createElement('div');
+            node.className = 'chat-msg';
+            node.style.borderBottom = '1px dashed #00ffff';
+            node.style.fontSize = '20px';
+            node.innerHTML = html;
+            chatWrapper.appendChild(node);
+            if (chatWrapper.children.length > MAX_MSG) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const BACKEND_URL = (params.get('backend') || 'http://localhost:3000').replace(/\/+$/, '');
+        const CHANNEL = params.get('channel');
+
+        if (CHANNEL) {
+            document.title = 'Retrowave Just Chatting · ' + CHANNEL;
+        }
+
+        function initSocket() {
+            const socket = io(BACKEND_URL, { transports: ['websocket', 'polling'] });
+            socket.on('connect', () => {
+                if (CHANNEL) socket.emit('join:channel', CHANNEL);
+            });
+            socket.on('chat:message', (d) => {
+                appendMessage(
+                    d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo',
+                    d.text || '',
+                    d.user?.color || '#ff00ff'
+                );
+            });
+            socket.on('channel:follow', (d) => {
+                pushEvent('⭐ <b style="color:#00ffff">' + (d.userDisplayName || d.userName || 'Alguien') + '</b> nos sigue!');
+            });
+            socket.on('channel:subscribe', (d) => {
+                pushEvent('🎉 <b style="color:#00ffff">' + (d.userDisplayName || d.userName || 'Alguien') + '</b> se suscribió!');
+            });
+            socket.on('channel:cheer', (d) => {
+                pushEvent('💎 <b style="color:#00ffff">' + (d.userDisplayName || d.userName || 'Anónimo') + '</b> animó con ' + (d.bits || 0) + ' bits!');
+            });
+            socket.on('channel:redemption', (d) => {
+                pushEvent('🎯 <b style="color:#00ffff">' + (d.userDisplayName || d.userName || 'Alguien') + '</b> canjeó <b>' + (d.rewardTitle || '') + '</b>');
+            });
+        }
+
+        function loadSocketIO(cb) {
+            const script = document.createElement('script');
+            script.src = BACKEND_URL + '/socket.io/socket.io.js';
+            script.onload = cb;
+            script.onerror = () => cb(new Error('load failed'));
+            document.head.appendChild(script);
+        }
+
+        loadSocketIO(function(err) {
+            if (!err) initSocket();
+        });
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+</body>
+</html>

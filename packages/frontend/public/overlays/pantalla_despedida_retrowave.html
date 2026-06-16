@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrowave Ending Screen</title>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            background-color: #0b0c10;
+            overflow: hidden;
+            font-family: 'Righteous', cursive;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        body::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%; z-index: 100; pointer-events: none;
+        }
+
+        /* Cuadrícula Superior e Inferior para efecto túnel */
+        .grid-floor, .grid-ceil {
+            position: absolute; width: 200%; height: 50%; left: -50%;
+            background-image: linear-gradient(transparent 95%, #ff00ff 100%), linear-gradient(90deg, transparent 95%, #ff00ff 100%);
+            background-size: 50px 50px; z-index: 1;
+        }
+
+        .grid-floor { bottom: 0; transform: perspective(400px) rotateX(70deg); animation: moveGrid 3s linear infinite; box-shadow: inset 0 0 100px #ff00ff;}
+        .grid-ceil { top: 0; transform: perspective(400px) rotateX(-70deg); animation: moveGrid 3s linear infinite reverse; box-shadow: inset 0 0 100px #ff00ff; opacity: 0.3;}
+
+        @keyframes moveGrid { 0% { background-position-y: 0px; } 100% { background-position-y: 50px; } }
+
+        .title-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            margin-top: -200px;
+            margin-bottom: 100px;
+        }
+
+        .main-title {
+            font-size: 110px;
+            color: transparent;
+            -webkit-text-stroke: 2px #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            /* Efecto Cromado relleno */
+            background: linear-gradient(to bottom, #00ffff 0%, #000080 50%, #fff 51%, #ff00ff 100%);
+            -webkit-background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(0,255,255,0.6));
+        }
+
+        .sub-title {
+            font-family: 'VT323', monospace;
+            font-size: 50px;
+            color: #fff;
+            text-shadow: 2px 2px 0 #ff00ff, -2px -2px 0 #00ffff;
+            letter-spacing: 5px;
+            margin-top: 10px;
+        }
+
+        .social-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            width: 80%;
+        }
+
+        .social-sign {
+            background: rgba(11, 12, 16, 0.9);
+            border: 2px solid #00ffff;
+            padding: 20px 40px;
+            border-radius: 5px;
+            box-shadow: 0 0 15px #00ffff, inset 0 0 10px #00ffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 300px;
+            transition: all 0.3s;
+        }
+
+        .social-sign:nth-child(even) {
+            border-color: #ff00ff;
+            box-shadow: 0 0 15px #ff00ff, inset 0 0 10px #ff00ff;
+        }
+
+        .platform {
+            font-family: 'VT323', monospace;
+            font-size: 30px;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .username {
+            font-size: 35px;
+            color: #ffea00;
+            text-shadow: 0 0 10px #ffea00;
+            letter-spacing: 2px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="grid-ceil"></div>
+    <div class="grid-floor"></div>
+
+    <div class="title-container">
+        <div class="main-title">TRANSMISSION ENDED</div>
+        <div class="sub-title">STAY RADICAL</div>
+    </div>
+
+    <div class="social-container">
+        
+        <!-- INSTRUCCIONES: Cambia "@tu_usuario" por tus datos reales -->
+        
+        <div class="social-sign">
+            <span class="platform">TWITCH</span>
+            <span class="username">@tu_usuario</span>
+        </div>
+
+        <div class="social-sign">
+            <span class="platform">X / TWITTER</span>
+            <span class="username">@tu_usuario</span>
+        </div>
+
+        <div class="social-sign">
+            <span class="platform">YOUTUBE</span>
+            <span class="username">@tu_canal</span>
+        </div>
+
+        <div class="social-sign">
+            <span class="platform">INSTAGRAM</span>
+            <span class="username">@tu_usuario</span>
+        </div>
+
+        <div class="social-sign">
+            <span class="platform">TIKTOK</span>
+            <span class="username">@tu_usuario</span>
+        </div>
+
+    </div>
+
+</body>
+</html>
