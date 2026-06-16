@@ -85,7 +85,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupGiveaways(app);
   setEnterGiveaway(enterGiveaway);
   setAddTickets(addTickets);
-  setupChat();
+  await setupChat();
   setupEventSub();
   onAuth(() => { setupChat(); setupEventSub(); });
   setupPredictions(app);

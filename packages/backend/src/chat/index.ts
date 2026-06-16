@@ -9,7 +9,9 @@ let chatClient: ChatClient | null = null;
 let enterGiveawayFn: typeof enterGiveaway | null = null;
 let addTicketsFn: typeof addTickets | null = null;
 
-export function setupChat() {
+const joinedChannels = new Set<string>();
+
+export async function setupChat() {
   if (!authProvider || !currentUser) {
     console.log('⏳ Auth not ready or no user logged in, skipping chat setup');
     return;
@@ -17,10 +19,29 @@ export function setupChat() {
 
   if (chatClient) {
     chatClient.quit();
+    chatClient = null;
   }
 
   chatClient = new ChatClient({ authProvider, channels: [] });
+
+  chatClient.onDisconnect((manually, reason) => {
+    console.log(`❌ Chat client disconnected (manually=${manually}): ${reason?.message || reason}`);
+  });
+
+  chatClient.onAuthenticationSuccess(() => {
+    console.log('🔑 Chat authentication successful');
+  });
+
+  chatClient.onAuthenticationFailure((message, retryCount) => {
+    console.error(`❌ Chat client authentication failed (attempt ${retryCount}): ${message}`);
+  });
+
+  chatClient.onTokenFetchFailure((error) => {
+    console.error('❌ Chat token fetch failed:', error.message);
+  });
+
   chatClient.connect();
+  console.log('💬 Chat client connecting...');
 
   chatClient.onMessage((channel, user, text, msg) => {
     const channelName = channel.replace('#', '');
@@ -44,7 +65,15 @@ export function setupChat() {
     checkMessage(channelName, user, text);
   });
 
-  console.log('💬 Chat client connected');
+  // Re-join all previously joined channels on the new connection
+  for (const ch of joinedChannels) {
+    try {
+      await chatClient.join(ch);
+      console.log(`📡 Re-joined channel: ${ch}`);
+    } catch (err) {
+      console.error(`❌ Failed to re-join channel ${ch}:`, err);
+    }
+  }
 }
 
 function getSubTier(badges: Map<string, string>): number {
@@ -90,22 +119,28 @@ export function getAddTicketsFn() {
   return addTicketsFn;
 }
 
-const joinedChannels = new Set<string>();
-
-export function joinChannel(channel: string) {
-  if (chatClient && !joinedChannels.has(channel)) {
-    joinedChannels.add(channel);
-    chatClient.join(channel);
+export async function joinChannel(channel: string) {
+  if (joinedChannels.has(channel)) return;
+  joinedChannels.add(channel);
+  if (!chatClient) {
+    console.log(`⏳ Channel ${channel} queued (chat client not ready)`);
+    return;
+  }
+  try {
+    await chatClient.join(channel);
     console.log(`📡 Joined channel: ${channel}`);
+  } catch (err) {
+    joinedChannels.delete(channel);
+    console.error(`❌ Failed to join channel ${channel}:`, err);
   }
 }
 
-export function leaveChannel(channel: string) {
-  if (chatClient && joinedChannels.has(channel)) {
-    joinedChannels.delete(channel);
-    chatClient.part(channel);
-    console.log(`📡 Left channel: ${channel}`);
-  }
+export async function leaveChannel(channel: string) {
+  if (!joinedChannels.has(channel)) return;
+  joinedChannels.delete(channel);
+  if (!chatClient) return;
+  chatClient.part(channel);
+  console.log(`📡 Left channel: ${channel}`);
 }
 
 export async function sendMessage(channel: string, message: string) {

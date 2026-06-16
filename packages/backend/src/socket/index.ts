@@ -13,14 +13,14 @@ export function setupSocketIO(app: FastifyInstance) {
   io.on('connection', (socket) => {
     console.log(`⚡ Client connected: ${socket.id}`);
 
-    socket.on('join:channel', (channel: string) => {
+    socket.on('join:channel', async (channel: string) => {
       socket.join(`channel:${channel}`);
-      joinChannel(channel);
+      await joinChannel(channel);
     });
 
-    socket.on('leave:channel', (channel: string) => {
+    socket.on('leave:channel', async (channel: string) => {
       socket.leave(`channel:${channel}`);
-      leaveChannel(channel);
+      await leaveChannel(channel);
     });
 
     socket.on('chat:send', async ({ channel, text }: { channel: string; text: string }) => {
