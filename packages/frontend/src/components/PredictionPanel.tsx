@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '../i18n/context';
+import { apiPost } from '../utils/api';
 
 interface Props {
   channel: string;
   backendUrl: string;
 }
 
-export function PredictionPanel({ channel, backendUrl }: Props) {
+export function PredictionPanel({ channel }: Props) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [options, setOptions] = useState(['', '']);
@@ -33,14 +34,10 @@ export function PredictionPanel({ channel, backendUrl }: Props) {
     if (!title.trim() || validOptions.length < 2 || !channel) return;
 
     setLoading(true);
-    const res = await fetch(`${backendUrl}/predictions/create`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        channelId: channel,
-        title: title.trim(),
-        options: validOptions.map((o) => o.trim()),
-      }),
+    const res = await apiPost('/predictions/create', {
+      channelId: channel,
+      title: title.trim(),
+      options: validOptions.map((o) => o.trim()),
     });
 
     setLoading(false);
