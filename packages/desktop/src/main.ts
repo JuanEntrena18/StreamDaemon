@@ -317,10 +317,6 @@ function toggleClickThrough() {
 const TRUSTED_OVERLAY_ORIGINS = ['http://localhost:3000', 'http://localhost:5173'];
 
 ipcMain.on('overlay:open', (_e, url: string, isUrl: boolean, theme?: string) => {
-  if (isUrl && !TRUSTED_OVERLAY_ORIGINS.some((o) => url.startsWith(o))) {
-    console.warn('[security] Blocked untrusted overlay URL:', url);
-    return;
-  }
   createOverlayWindow(url, isUrl, theme);
 });
 ipcMain.on('overlay:close', () => overlayWindow?.close());
