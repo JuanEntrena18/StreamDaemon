@@ -4,6 +4,7 @@ interface StreamforgerAPI {
   isDesktop: boolean;
   platform: string;
   backendUrl: string;
+  localApiToken?: string;
   overlay: {
     open: (url: string, isUrl: boolean, theme?: string) => void;
     close: () => void;
@@ -19,6 +20,10 @@ interface StreamforgerAPI {
     setFont: (fontFamily: string) => void;
     setFontSize: (size: number) => void;
     setBgMode: (mode: string) => void;
+    showContextMenu: () => void;
+    toggleBorders: () => void;
+    resetWindow: () => void;
+    showSettings: () => void;
   };
   backend: {
     isReady: () => Promise<boolean>;

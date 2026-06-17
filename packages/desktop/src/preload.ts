@@ -21,12 +21,14 @@ contextBridge.exposeInMainWorld('streamforger', {
     setFont: (fontFamily: string) => ipcRenderer.send('overlay:setFont', fontFamily),
     setFontSize: (size: number) => ipcRenderer.send('overlay:setFontSize', size),
     setBgMode: (mode: string) => ipcRenderer.send('overlay:setBgMode', mode),
+    showContextMenu: () => ipcRenderer.send('overlay:showContextMenu'),
+    toggleBorders: () => ipcRenderer.send('overlay:toggleBorders'),
+    resetWindow: () => ipcRenderer.send('overlay:resetWindow'),
+    showSettings: () => ipcRenderer.send('overlay:showSettings'),
   },
 
   auth: {
     login: () => {
-      // Auth is handled by the renderer using window.open.
-      // This is just a stub for compatibility if anything calls it.
       window.open('http://localhost:3000/auth/login', '_blank');
     },
   },

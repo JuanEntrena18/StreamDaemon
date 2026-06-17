@@ -12,6 +12,7 @@ import { ScoreboardOverlay } from './ScoreboardOverlay';
 import { Subnautica2ChatOverlay } from './Subnautica2ChatOverlay';
 import { WowChatOverlay } from './WowChatOverlay';
 import { AllianceChatOverlay } from './AllianceChatOverlay';
+import { CyanChatOverlay } from './CyanChatOverlay';
 import { ChannelNotifications } from './ChannelNotifications';
 
 const LS_KEY = 'streamforger-overlay-settings';
@@ -60,6 +61,8 @@ function OverlayContent({ mode, theme, channel, fontFamily, fontSize, bgMode }: 
       return <ScoreboardOverlay channel={channel} />;
     case 'custom':
       return <CustomOverlay channel={channel} />;
+    case 'cyanchat':
+      return <CyanChatOverlay channel={channel} />;
     case 'chat':
     default:
       if (theme === 'subnautica2') return <Subnautica2ChatOverlay channel={channel} />;

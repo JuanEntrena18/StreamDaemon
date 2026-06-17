@@ -15,6 +15,7 @@ interface Props {
 
 const MODE_LABELS: Record<string, string> = {
   chat: 'Chat',
+  cyanchat: 'Cyan Chat',
   scoreboard: 'Fighter',
   timer: 'Timer',
   giveaway: 'Giveaway',
@@ -67,10 +68,17 @@ export function OverlayControls({ mode, bgMode, fontFamily, fontSize, onBgModeCh
     window.streamforger?.overlay.setAlwaysOnTop?.(next);
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (!isDesktop) return;
+    e.preventDefault();
+    window.streamforger?.overlay.showContextMenu();
+  };
+
   return (
     <>
       <div
         className="overlay-controls"
+        onContextMenu={handleContextMenu}
         {...{ style: {
           position: 'fixed',
           top: 0,
@@ -195,72 +203,139 @@ export function OverlayControls({ mode, bgMode, fontFamily, fontSize, onBgModeCh
         </button>
       </div>
 
-      {/* Settings panel */}
+      {/* Settings panel — expands to full width */}
       {showSettings && (
         <div style={{
           position: 'fixed',
           top: 36,
-          right: 4,
-          width: 220,
+          left: 0,
+          right: 0,
+          bottom: 0,
           background: 'rgba(10,10,26,0.95)',
-          border: '1px solid rgba(255,255,255,0.12)',
-          borderRadius: 8,
-          padding: '12px',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
           zIndex: 999999,
           backdropFilter: 'blur(12px)',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '20px',
+          overflowY: 'auto',
         }}>
-          <div style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
-            {t('overlay.tipografia')}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <h2 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0', margin: 0 }}>
+              ⚙️ Ajustes de ventana
+            </h2>
+            <button
+              onClick={() => setShowSettings(false)}
+              style={{
+                width: 30, height: 30, borderRadius: 6,
+                background: 'rgba(239,68,68,0.15)',
+                border: '1px solid rgba(239,68,68,0.3)',
+                color: '#ef4444', cursor: 'pointer',
+                fontSize: '0.85rem', fontWeight: 700,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >✕</button>
           </div>
-          <select
-            value={fontFamily}
-            onChange={(e) => onFontFamilyChange(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '6px 8px',
-              borderRadius: 6,
-              border: '1px solid rgba(255,255,255,0.12)',
-              background: 'rgba(0,0,0,0.3)',
-              color: '#e2e8f0',
-              fontSize: '0.78rem',
-              fontFamily: 'inherit',
-              outline: 'none',
-              cursor: 'pointer',
-              marginBottom: 8,
-            }}
-          >
-            {FONTS.map((f) => (
-              <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>{f.label}</option>
-            ))}
-          </select>
 
-          <div style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>
-            {t('overlay.tamano')}
+          {/* Section: Tipografía */}
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
+              {t('overlay.tipografia')}
+            </div>
+            <select
+              value={fontFamily}
+              onChange={(e) => onFontFamilyChange(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px 10px',
+                borderRadius: 6,
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(0,0,0,0.3)',
+                color: '#e2e8f0',
+                fontSize: '0.82rem',
+                fontFamily: 'inherit',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              {FONTS.map((f) => (
+                <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>{f.label}</option>
+              ))}
+            </select>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)' }}>A</span>
+
+          {/* Section: Tamaño */}
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
+              {t('overlay.tamano')} ({fontSize}px)
+            </div>
             <input
               type="range"
               min={10}
-              max={24}
+              max={32}
               value={fontSize}
               onChange={(e) => onFontSizeChange(parseInt(e.target.value))}
-              style={{ flex: 1, accentColor: '#7c3aed', cursor: 'pointer' }}
+              style={{ width: '100%', accentColor: '#7c3aed', cursor: 'pointer' }}
             />
-            <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.4)' }}>A</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+              <span>10px</span>
+              <span>32px</span>
+            </div>
           </div>
 
-          {/* Preview */}
-          <div style={{
-            padding: '6px 8px',
-            borderRadius: 6,
-            background: 'rgba(255,255,255,0.04)',
-            fontSize: `${fontSize}px`,
-            color: 'rgba(255,255,255,0.5)',
-            fontFamily,
-            lineHeight: 1.5,
-          }}>
-            <span style={{ color: '#a78bfa', fontWeight: 600 }}>Usuario:</span> Ejemplo de mensaje en el chat
+          {/* Section: Preview */}
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
+              Vista previa
+            </div>
+            <div style={{
+              padding: '10px 12px',
+              borderRadius: 8,
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              fontSize: `${fontSize}px`,
+              color: 'rgba(255,255,255,0.6)',
+              fontFamily,
+              lineHeight: 1.5,
+            }}>
+              <span style={{ color: '#a78bfa', fontWeight: 600 }}>Usuario:</span> Ejemplo de mensaje en el chat
+            </div>
+          </div>
+
+          {/* Quick actions */}
+          <div style={{ marginTop: 'auto', display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => {
+                window.streamforger?.overlay.toggleBorders();
+                setShowSettings(false);
+              }}
+              style={{
+                flex: 1, padding: '10px', borderRadius: 8,
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(0,0,0,0.2)',
+                color: '#e2e8f0', cursor: 'pointer',
+                fontSize: '0.78rem', fontWeight: 600,
+                fontFamily: 'inherit',
+              }}
+            >
+              Eliminar bordes
+            </button>
+            <button
+              onClick={() => {
+                window.streamforger?.overlay.resetWindow();
+                setShowSettings(false);
+              }}
+              style={{
+                flex: 1, padding: '10px', borderRadius: 8,
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(0,0,0,0.2)',
+                color: '#e2e8f0', cursor: 'pointer',
+                fontSize: '0.78rem', fontWeight: 600,
+                fontFamily: 'inherit',
+              }}
+            >
+              Resetear ventana
+            </button>
           </div>
         </div>
       )}

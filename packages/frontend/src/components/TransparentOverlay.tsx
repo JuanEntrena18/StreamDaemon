@@ -11,6 +11,7 @@ export function TransparentOverlay({ channel }: Props) {
 
   const OVERLAY_MODES = [
     { mode: 'channel', icon: '💬', label: t('overlay.chatCanal') },
+    { mode: 'cyanchat', icon: '💬', label: 'Cyan Chat' },
     { mode: 'custom', icon: '🎨', label: t('overlay.overlayPersonalizado') },
     { mode: 'url', icon: '🔗', label: t('overlay.urlPersonalizada') },
   ];
@@ -23,7 +24,7 @@ export function TransparentOverlay({ channel }: Props) {
     { id: 'fortnite', label: t('overlay.temaFortnite'), icon: '🔫', color: '#ff007f' },
   ];
 
-  const [mode, setMode] = useState<'channel' | 'url' | 'custom'>('channel');
+  const [mode, setMode] = useState<'channel' | 'cyanchat' | 'url' | 'custom'>('channel');
   const [isOpen, setIsOpen] = useState(false);
   const [clickThrough, setClickThrough] = useState(true);
   const [selectedTheme, setSelectedTheme] = useState('');
@@ -54,7 +55,11 @@ export function TransparentOverlay({ channel }: Props) {
       setIsOpen(false);
       return;
     }
-    if (mode === 'url' && customUrl) {
+    if (mode === 'cyanchat') {
+      const ccUrl = localStorage.getItem('cyanChatUrl') || `https://chat.johnnycyan.com/?channel=${encodeURIComponent(channel)}`;
+      window.streamforger?.overlay.open(ccUrl, true);
+      setIsOpen(true);
+    } else if (mode === 'url' && customUrl) {
       window.streamforger?.overlay.open(customUrl, true);
       setIsOpen(true);
     } else if (mode === 'custom') {
@@ -82,7 +87,7 @@ export function TransparentOverlay({ channel }: Props) {
     setTimeout(() => clearInterval(interval), 120000);
   };
 
-  const canOpen = (mode === 'url' && customUrl) || (mode === 'channel' && channel) || (mode === 'custom' && channel);
+  const canOpen = (mode === 'cyanchat' && channel) || (mode === 'url' && customUrl) || (mode === 'channel' && channel) || (mode === 'custom' && channel);
 
   return (
     <div style={{ maxWidth: 600 }}>
@@ -133,7 +138,7 @@ export function TransparentOverlay({ channel }: Props) {
           {OVERLAY_MODES.map((m) => (
             <button
               key={m.mode}
-              onClick={() => setMode(m.mode as 'channel' | 'url' | 'custom')}
+              onClick={() => setMode(m.mode as 'channel' | 'cyanchat' | 'url' | 'custom')}
               style={{
                 padding: '0.4rem 1rem',
                 borderRadius: 8,
@@ -153,7 +158,15 @@ export function TransparentOverlay({ channel }: Props) {
           ))}
         </div>
 
-        {mode === 'url' ? (
+        {mode === 'cyanchat' ? (
+          <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: 'rgba(0,217,255,0.06)', border: '1px solid rgba(0,217,255,0.15)', borderRadius: 8 }}>
+            <p style={{ fontSize: '0.8rem', color: 'var(--sf-text-2)', margin: 0, lineHeight: 1.5 }}>
+              Abre Cyan Chat como ventana transparente. La URL se configura desde{' '}
+              <a href="https://chat.johnnycyan.com/" target="_blank" rel="noreferrer" style={{ color: '#22d3ee' }}>chat.johnnycyan.com</a>
+              {' '}y se guarda automáticamente.
+            </p>
+          </div>
+        ) : mode === 'url' ? (
           <div>
             <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
               {t('overlay.urlOverlay')}

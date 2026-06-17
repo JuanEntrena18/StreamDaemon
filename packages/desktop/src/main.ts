@@ -1,6 +1,6 @@
 import {
   app, BrowserWindow, shell, ipcMain,
-  globalShortcut, Menu,
+  globalShortcut, Menu, MenuItem,
 } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,13 +16,10 @@ const isDev = !app.isPackaged;
 Menu.setApplicationMenu(null);
 
 // ── Load backend credentials BEFORE importing the backend ──
-// The backend's config.ts uses `import 'dotenv/config'` which reads
-// from process.cwd() — but Electron's CWD is the desktop package,
-// not the backend package. We manually inject the vars here.
 function loadBackendEnv() {
   const envPath = isDev
-    ? path.resolve(__dirname, '../../backend/.env')           // dev: source tree
-    : path.join(app.getAppPath(), 'extra', 'backend.env');    // prod: extra/
+    ? path.resolve(__dirname, '../../backend/.env')
+    : path.join(app.getAppPath(), 'extra', 'backend.env');
 
   try {
     const raw = readFileSync(envPath, 'utf8');
@@ -33,7 +30,6 @@ function loadBackendEnv() {
       if (eq === -1) continue;
       const key = trimmed.slice(0, eq).trim();
       const val = trimmed.slice(eq + 1).trim();
-      // Only set if not already overridden by the OS environment
       if (!process.env[key]) process.env[key] = val;
     }
     console.log('✅ Backend .env loaded');
@@ -44,12 +40,9 @@ function loadBackendEnv() {
 
 loadBackendEnv();
 
-// Generate a local API token for backend→frontend authentication
 const LOCAL_API_TOKEN = randomBytes(32).toString('hex');
 process.env.LOCAL_API_TOKEN = LOCAL_API_TOKEN;
 
-// Add extra/ to NODE_PATH so `@prisma/client` can resolve `.prisma/client`
-// as a bare specifier when running from the packaged app (asar disabled).
 const extraPath = isDev
   ? path.resolve(__dirname, '../extra')
   : path.join(app.getAppPath(), 'extra');
@@ -64,19 +57,15 @@ const dbPath = isDev
   ? path.resolve(__dirname, '../prisma/streamforger.db')
   : path.join(app.getPath('userData'), 'streamforger.db');
 
-// Ensure the directory for the database exists before Prisma connects
 mkdirSync(path.dirname(dbPath), { recursive: true });
 
 process.env.DATABASE_URL = `file:${dbPath}`;
 
-// In production, the backend serves the frontend — redirect after OAuth must
-// point to the embedded server, not the Vite dev server.
 if (!isDev) {
   process.env.FRONTEND_URL = 'http://localhost:3000';
 }
 
 // ── Frontend dist path ────────────────────────────────────
-// In production, the frontend dist is inside the asar at extra/frontend/dist
 function getFrontendDistDir(): string {
   return isDev
     ? path.resolve(__dirname, '../../frontend/dist')
@@ -89,7 +78,9 @@ function getFrontendPath(...parts: string[]): string {
 
 let mainWindow: BrowserWindow | null = null;
 let overlayWindow: BrowserWindow | null = null;
+let overlaySettingsWindow: BrowserWindow | null = null;
 let overlayIgnoreMouse = true;
+let overlayFrameless = true;
 let mainAlwaysOnTop = false;
 let backendReady = false;
 
@@ -141,7 +132,6 @@ function createMainWindow() {
     }
   });
 
-  // Try loadURL first; fall back to loadFile if backend isn't serving
   const tryLoadURL = (attempts = 5): void => {
     mainWindow!.loadURL(mainUrl).catch(() => {
       if (attempts <= 1) {
@@ -160,7 +150,6 @@ function createMainWindow() {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   }
 
-  // F12 opens DevTools in any focused window (dev + production)
   mainWindow.webContents.on('before-input-event', (_event, input) => {
     if (input.key === 'F12') {
       mainWindow?.webContents.toggleDevTools();
@@ -171,12 +160,14 @@ function createMainWindow() {
 // ── Overlay window ────────────────────────────────────────
 function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: string) {
   if (overlayWindow) overlayWindow.close();
+  if (overlaySettingsWindow) { overlaySettingsWindow.close(); overlaySettingsWindow = null; }
 
   const overlayBaseUrl = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
   const overlayUrl = isUrl
     ? urlOrChannel
     : `${overlayBaseUrl}/overlay.html?mode=chat&channel=${encodeURIComponent(urlOrChannel)}${theme ? `&theme=${encodeURIComponent(theme)}` : ''}`;
 
+  overlayFrameless = true;
   overlayWindow = new BrowserWindow({
     width: 400,
     height: 600,
@@ -185,7 +176,7 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
     alwaysOnTop: true,
     frame: false,
     resizable: true,
-    skipTaskbar: true,
+    skipTaskbar: false,
     hasShadow: false,
     show: false,
     webPreferences: {
@@ -195,7 +186,6 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
     },
   });
 
-  // Posicionar la ventana a la derecha de la principal para que sea visible
   if (mainWindow && !mainWindow.isDestroyed()) {
     const bounds = mainWindow.getBounds();
     overlayWindow.setPosition(bounds.x + bounds.width + 10, bounds.y);
@@ -207,12 +197,9 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
     overlayWindow?.show();
   }).catch((err) => {
     console.error('[overlay] Failed to load overlay URL:', err);
-    // Mostrar la ventana aunque falle la carga para que no quede invisible
     overlayWindow?.show();
   });
 
-  // Arranca con click-through desactivado para que el usuario pueda ver los controles e interactuar.
-  // Puede bloquearlo con el botón 🔓 en la barra o con Ctrl+Shift+T.
   overlayWindow.setIgnoreMouseEvents(false);
 
   overlayWindow.webContents.on('did-finish-load', () => {
@@ -231,7 +218,6 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
     }
   });
 
-  // F12 opens DevTools in overlay window too
   overlayWindow.webContents.on('before-input-event', (_event, input) => {
     if (input.key === 'F12') {
       overlayWindow?.webContents.toggleDevTools();
@@ -241,7 +227,83 @@ function createOverlayWindow(urlOrChannel: string, isUrl: boolean, theme?: strin
   overlayWindow.on('closed', () => {
     overlayWindow = null;
     overlayIgnoreMouse = true;
+    overlayFrameless = true;
+    if (overlaySettingsWindow) { overlaySettingsWindow.close(); overlaySettingsWindow = null; }
   });
+}
+
+function recreateOverlayWindow() {
+  if (!overlayWindow) return;
+  const bounds = overlayWindow.getBounds();
+  overlayFrameless = !overlayFrameless;
+  const currentUrl = overlayWindow.webContents.getURL();
+  overlayWindow.close();
+  overlayWindow = null;
+  overlayWindow = new BrowserWindow({
+    width: bounds.width,
+    height: bounds.height,
+    x: bounds.x,
+    y: bounds.y,
+    transparent: overlayFrameless,
+    backgroundColor: overlayFrameless ? '#00000000' : '#0a0a1a',
+    alwaysOnTop: true,
+    frame: !overlayFrameless,
+    resizable: true,
+    skipTaskbar: false,
+    hasShadow: false,
+    show: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  overlayWindow.loadURL(currentUrl).then(() => overlayWindow?.show()).catch(() => overlayWindow?.show());
+  overlayWindow.setIgnoreMouseEvents(false);
+  overlayWindow.webContents.on('did-finish-load', () => {
+    overlayWindow?.webContents.insertCSS(`
+      body { background: transparent !important; margin: 0; overflow: hidden; }
+      html { background: transparent !important; }
+      #overlay-root { background: transparent !important; width: 100vw; height: 100vh; }
+      :root { --bg-alpha: 0.6; }
+    `);
+  });
+  overlayWindow.webContents.on('before-input-event', (_event: any, input: any) => {
+    if (input.key === 'F12') overlayWindow?.webContents.toggleDevTools();
+  });
+  overlayWindow.on('closed', () => {
+    overlayWindow = null;
+    overlayIgnoreMouse = true;
+    overlayFrameless = true;
+    if (overlaySettingsWindow) { overlaySettingsWindow.close(); overlaySettingsWindow = null; }
+  });
+}
+
+function openOverlaySettingsWindow() {
+  if (!overlayWindow) return;
+  if (overlaySettingsWindow && !overlaySettingsWindow.isDestroyed()) {
+    overlaySettingsWindow.focus();
+    return;
+  }
+  const overlayBaseUrl = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
+  overlaySettingsWindow = new BrowserWindow({
+    width: 360,
+    height: 500,
+    parent: overlayWindow,
+    modal: false,
+    frame: true,
+    resizable: false,
+    skipTaskbar: true,
+    alwaysOnTop: true,
+    title: 'StreamForger - Overlay Settings',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  overlaySettingsWindow.loadURL(`${overlayBaseUrl}/overlay.html?mode=settings`);
+  overlaySettingsWindow.on('closed', () => { overlaySettingsWindow = null; });
 }
 
 function toggleClickThrough() {
@@ -252,7 +314,6 @@ function toggleClickThrough() {
 
 // ── IPC ───────────────────────────────────────────────────
 
-// Overlay controls
 const TRUSTED_OVERLAY_ORIGINS = ['http://localhost:3000', 'http://localhost:5173'];
 
 ipcMain.on('overlay:open', (_e, url: string, isUrl: boolean, theme?: string) => {
@@ -321,6 +382,53 @@ ipcMain.on('overlay:setBgMode', (_e, mode: string) => {
   `).catch(() => {});
 });
 
+// ── Overlay context menu ────────────────────────────────
+ipcMain.on('overlay:showContextMenu', () => {
+  if (!overlayWindow) return;
+  const menu = new Menu();
+  menu.append(new MenuItem({
+    label: overlayFrameless ? 'Mostrar bordes' : 'Eliminar bordes',
+    click: () => recreateOverlayWindow(),
+  }));
+  menu.append(new MenuItem({
+    label: 'Ajustes de ventana',
+    click: () => openOverlaySettingsWindow(),
+  }));
+  menu.append(new MenuItem({ type: 'separator' }));
+  menu.append(new MenuItem({
+    label: 'Resetear ventana',
+    click: () => {
+      if (!overlayWindow) return;
+      const defaultW = 400, defaultH = 600;
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        const bounds = mainWindow.getBounds();
+        overlayWindow.setBounds({ x: bounds.x + bounds.width + 10, y: bounds.y, width: defaultW, height: defaultH });
+      } else {
+        overlayWindow.setBounds({ x: 100, y: 100, width: defaultW, height: defaultH });
+      }
+    },
+  }));
+  menu.popup({ window: overlayWindow });
+});
+
+// Overlay borders toggle (from settings panel)
+ipcMain.on('overlay:toggleBorders', () => recreateOverlayWindow());
+
+// Overlay reset window (from settings panel)
+ipcMain.on('overlay:resetWindow', () => {
+  if (!overlayWindow) return;
+  const defaultW = 400, defaultH = 600;
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    const bounds = mainWindow.getBounds();
+    overlayWindow.setBounds({ x: bounds.x + bounds.width + 10, y: bounds.y, width: defaultW, height: defaultH });
+  } else {
+    overlayWindow.setBounds({ x: 100, y: 100, width: defaultW, height: defaultH });
+  }
+});
+
+// Open overlay settings window
+ipcMain.on('overlay:showSettings', () => openOverlaySettingsWindow());
+
 // Auth: construct OAuth URL from env vars and open in default browser
 ipcMain.on('auth:login', () => {
   const clientId = process.env.TWITCH_CLIENT_ID;
@@ -347,7 +455,6 @@ ipcMain.on('auth:login', () => {
   shell.openExternal(url);
   console.log('🔗 OAuth URL opened in browser');
 
-  // Re-focus the main window after the browser opens (prevents window from appearing minimized)
   setTimeout(() => {
     mainWindow?.focus();
     mainWindow?.show();
@@ -362,14 +469,14 @@ ipcMain.on('get-local-api-token', (event) => {
 // Backend readiness
 ipcMain.handle('backend:isReady', () => backendReady);
 
-// Main window — always-on-top toggle (para gestionar sobre el juego)
+// Main window — always-on-top toggle
 ipcMain.handle('window:getAlwaysOnTop', () => mainAlwaysOnTop);
 ipcMain.on('window:setAlwaysOnTop', (_e, value: boolean) => {
   mainAlwaysOnTop = value;
   mainWindow?.setAlwaysOnTop(value, 'screen-saver');
 });
 
-// Main window — background opacity via CSS (text stays opaque)
+// Main window — background opacity via CSS
 ipcMain.on('window:setOpacity', (_e, value: number) => {
   if (!mainWindow) return;
   const alpha = Math.max(0.1, Math.min(1, value));
@@ -387,7 +494,6 @@ ipcMain.on('window:close',    () => mainWindow?.close());
 app.whenReady().then(async () => {
   globalShortcut.register('CommandOrControl+Shift+T', toggleClickThrough);
 
-  // Load backend credentials, then start the backend, then open the window
   await startBackend();
   createMainWindow();
 });
