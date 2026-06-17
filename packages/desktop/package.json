@@ -10,7 +10,7 @@
     "dev": "tsc && npm run build:preload && wait-on http://localhost:5173 && electron .",
     "build": "tsc && npm run build:preload",
     "build:preload": "tsc -p tsconfig.preload.json && node -e \"require('fs').renameSync('dist/preload.js', 'dist/preload.cjs')\"",
-    "dist": "npm run build --prefix ../frontend && npm run build --prefix ../backend && npx prisma generate --schema=prisma/schema.prisma && npm run build && node -e \"const f=require('fs'); f.rmSync('extra', {recursive: true, force: true}); f.cpSync('../frontend/dist', 'extra/frontend/dist', {recursive: true, force: true, filter: s => !s.includes('.tmp')}); f.cpSync('../backend/.env', 'extra/backend.env', {force: true}); f.cpSync('../../node_modules/.prisma/client', 'extra/.prisma/client', {recursive: true, force: true, filter: s => !s.includes('.tmp')}); f.cpSync('../../node_modules/.prisma/client', 'node_modules/.prisma/client', {recursive: true, force: true, filter: s => !s.includes('.tmp')})\" && electron-builder --win --x64",
+    "dist": "npm run build -w packages/frontend && npm run build -w packages/backend && npx prisma generate --schema=prisma/schema.prisma && npm run build && node -e \"const f=require('fs'); f.rmSync('extra', {recursive: true, force: true}); f.cpSync('../frontend/dist', 'extra/frontend/dist', {recursive: true, force: true, filter: s => !s.includes('.tmp')}); f.cpSync('../backend/.env', 'extra/backend.env', {force: true}); f.cpSync('../../node_modules/.prisma/client', 'extra/.prisma/client', {recursive: true, force: true, filter: s => !s.includes('.tmp')})\" && electron-builder --win --x64",
     "db:generate": "prisma generate"
   },
   "dependencies": {

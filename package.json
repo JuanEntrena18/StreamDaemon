@@ -12,7 +12,7 @@
     "build:desktop": "npm run build -w packages/frontend && npm run build -w packages/backend && npm run dist -w packages/desktop",
     "lint": "eslint packages/",
     "format": "prettier --write \"packages/**/*.{ts,tsx,json,css}\"",
-    "typecheck": "tsc -b packages/*"
+    "typecheck": "npm run build --workspaces --if-present"
   },
   "devDependencies": {
     "concurrently": "^9.0.0",

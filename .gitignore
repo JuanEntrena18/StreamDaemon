@@ -18,4 +18,5 @@ overlayIAfeature.md
 fortnite-overlay.html
 packages/backend/data/fortnite-config.json
 packages/desktop/extra/
+packages/desktop/electron-builder.env
 graphify-out/
