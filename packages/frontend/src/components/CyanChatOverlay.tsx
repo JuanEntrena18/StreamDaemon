@@ -6,17 +6,20 @@ interface Props {
 
 const LS_KEY = 'cyanChatUrl';
 
+function getCyanChatUrl(channel: string): string {
+  const params = new URLSearchParams(window.location.search);
+  const fromParam = params.get('cyanUrl');
+  if (fromParam) return fromParam;
+  const fromLS = localStorage.getItem(LS_KEY);
+  if (fromLS) return fromLS;
+  return `https://chat.johnnycyan.com/?channel=${encodeURIComponent(channel)}`;
+}
+
 export function CyanChatOverlay({ channel }: Props) {
   const [url, setUrl] = useState('');
 
   useEffect(() => {
-    const saved = localStorage.getItem(LS_KEY) || '';
-    if (saved) {
-      setUrl(saved);
-    } else if (channel) {
-      const fallback = `https://chat.johnnycyan.com/?channel=${encodeURIComponent(channel)}`;
-      setUrl(fallback);
-    }
+    setUrl(getCyanChatUrl(channel));
   }, [channel]);
 
   if (!url) {
