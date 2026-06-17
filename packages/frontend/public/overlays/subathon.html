@@ -580,7 +580,7 @@ script.src = './js/socket.io.js';
         updateUptime();
       });
       socket.on('subathon:time-added', (data) => {
-        addFeedItem({ user: data.user, timeAdded: data.amount, note: data.reason, type: 'manual' });
+        addFeedItem({ user: data.user, timeAdded: data.amount, note: data.reason, type: data.type || 'manual' });
         actionsCount++;
         statActions.textContent = actionsCount;
       });

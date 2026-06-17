@@ -51,10 +51,13 @@ function addTime(channel: string, inst: SubathonInstance, action: SubathonAction
   if (inst.state.status === 'stopped' || inst.state.status === 'finished') {
     inst.state.status = 'running';
     inst.startedAt = Date.now();
-    inst.pausedAt = null;
+    inst.pausedAt = Date.now();
     inst.pausedRemaining = inst.state.remaining;
     inst.tickInterval = setInterval(() => tick(channel, inst), 1000);
   } else if (inst.state.status === 'paused') {
+    inst.pausedRemaining = inst.state.remaining;
+  } else if (inst.state.status === 'running') {
+    inst.pausedAt = Date.now();
     inst.pausedRemaining = inst.state.remaining;
   }
 
@@ -62,6 +65,7 @@ function addTime(channel: string, inst: SubathonInstance, action: SubathonAction
     amount: action.timeAdded,
     reason: action.note,
     user: action.user,
+    type: action.type,
     remaining: inst.state.remaining,
   });
   broadcast(channel, inst);
@@ -73,6 +77,32 @@ const DEFAULT_CONFIG = {
   bitsPerUnit: 100,
   maxLimit: 86400,
 };
+
+export function addSubathonTime(channel: string, action: SubathonAction) {
+  let inst = subathons.get(channel);
+  if (!inst) {
+    const state: SubathonState = {
+      status: 'stopped', remaining: 0, totalAdded: 0,
+      maxLimit: DEFAULT_CONFIG.maxLimit,
+      subTime: DEFAULT_CONFIG.subTime,
+      bitTime: DEFAULT_CONFIG.bitTime,
+      bitsPerUnit: DEFAULT_CONFIG.bitsPerUnit,
+      startTime: null, actions: [],
+    };
+    inst = { state, startedAt: 0, pausedAt: null, pausedRemaining: 0, tickInterval: null };
+    subathons.set(channel, inst);
+  }
+
+  if (action.type === 'sub') {
+    action.timeAdded = inst.state.subTime;
+  } else if (action.type === 'bits') {
+    action.timeAdded = Math.floor(action.amount / inst.state.bitsPerUnit) * inst.state.bitTime;
+  } else {
+    action.timeAdded = action.amount;
+  }
+
+  addTime(channel, inst, action);
+}
 
 export function setupSubathon(app: FastifyInstance) {
   app.get('/subathon/:channel', async (req, reply) => {
@@ -159,45 +189,19 @@ export function setupSubathon(app: FastifyInstance) {
       return reply.status(400).send({ error: 'Missing fields' });
     }
 
-    let inst = subathons.get(channel);
-    if (!inst) {
-      const state: SubathonState = {
-        status: 'stopped',
-        remaining: 0,
-        totalAdded: 0,
-        maxLimit: DEFAULT_CONFIG.maxLimit,
-        subTime: DEFAULT_CONFIG.subTime,
-        bitTime: DEFAULT_CONFIG.bitTime,
-        bitsPerUnit: DEFAULT_CONFIG.bitsPerUnit,
-        startTime: null,
-        actions: [],
-      };
-      inst = {
-        state,
-        startedAt: 0,
-        pausedAt: null,
-        pausedRemaining: 0,
-        tickInterval: null,
-      };
-      subathons.set(channel, inst);
-    }
-
-    let timeAdded = amount;
-    if (type === 'sub') timeAdded = inst.state.subTime;
-    else if (type === 'bits') timeAdded = Math.floor(amount / inst.state.bitsPerUnit) * inst.state.bitTime;
-
     const action: SubathonAction = {
       id: crypto.randomUUID(),
       type,
       user,
       amount,
-      timeAdded,
+      timeAdded: 0,
       note: note ?? `${type} reward`,
       timestamp: Date.now(),
     };
 
-    addTime(channel, inst, action);
-    reply.send({ action, remaining: inst.state.remaining });
+    addSubathonTime(channel, action);
+    const inst = subathons.get(channel);
+    reply.send({ action, remaining: inst?.state.remaining ?? 0 });
   });
 
   app.post('/subathon/pause', async (req, reply) => {

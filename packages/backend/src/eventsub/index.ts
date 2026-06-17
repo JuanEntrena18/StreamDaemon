@@ -6,6 +6,8 @@ import { recordEvent } from '../activity/index.js';
 import { getActiveGiveaway } from '../giveaways/index.js';
 import { getAddTicketsFn } from '../chat/index.js';
 import { checkFollow } from '../security/index.js';
+import { addSubathonTime } from '../subathon/index.js';
+import crypto from 'crypto';
 
 let listener: EventSubWsListener | null = null;
 
@@ -66,6 +68,11 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
       recordEvent(channelName, 'sub', e.userDisplayName, `se suscribió (${tierLabel})`);
+      addSubathonTime(channelName, {
+        id: crypto.randomUUID(), type: 'sub',
+        user: e.userDisplayName, amount: 1, timeAdded: 0,
+        note: `${tierLabel} subscription`, timestamp: Date.now(),
+      });
     });
   });
 
@@ -82,6 +89,11 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
       recordEvent(channelName, 'resub', e.userDisplayName, `renovó suscripción (${tierLabel}, ${e.cumulativeMonths} meses)`);
+      addSubathonTime(channelName, {
+        id: crypto.randomUUID(), type: 'sub',
+        user: e.userDisplayName, amount: 1, timeAdded: 0,
+        note: `${tierLabel} resub (${e.cumulativeMonths} meses)`, timestamp: Date.now(),
+      });
     });
   });
 
@@ -98,6 +110,13 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
       recordEvent(channelName, 'gift', gifter, `regaló ${e.amount} suscripción(es) (${tierLabel})`, e.amount);
+      for (let i = 0; i < e.amount; i++) {
+        addSubathonTime(channelName, {
+          id: crypto.randomUUID(), type: 'sub',
+          user: gifter, amount: 1, timeAdded: 0,
+          note: `${tierLabel} gift sub`, timestamp: Date.now(),
+        });
+      }
     });
   });
 
@@ -145,6 +164,11 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
       recordEvent(channelName, 'cheer', user, `donó ${e.bits} bits`, e.bits);
+      addSubathonTime(channelName, {
+        id: crypto.randomUUID(), type: 'bits',
+        user: user ?? 'Anónimo', amount: e.bits, timeAdded: 0,
+        note: `${e.bits} bits`, timestamp: Date.now(),
+      });
     });
   });
 
