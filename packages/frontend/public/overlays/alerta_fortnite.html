@@ -122,12 +122,12 @@
         };
 
         const soundConfig = {};
+        const BACKEND_URL = new URLSearchParams(window.location.search).get('backend') || 'http://localhost:3000';
 
         // ── Socket.IO connection ──
         (function() {
             const urlParams = new URLSearchParams(window.location.search);
             const CHANNEL = urlParams.get('channel') || '';
-            const BACKEND_URL = urlParams.get('backend') || 'http://localhost:3000';
 
             function loadSocketIO(cb) {
                 const script = document.createElement('script');
@@ -204,7 +204,7 @@
             const sKey = soundKeyMap[data.type] || '';
             const sPath = sKey ? soundConfig[sKey] : '';
             if (sPath) {
-                sound.src = sPath;
+                sound.src = BACKEND_URL + '/alert-sounds/file/' + encodeURIComponent(sPath);
                 sound.currentTime = 0;
                 sound.play().catch(err => console.log("Autoplay bloqueado.", err));
             }

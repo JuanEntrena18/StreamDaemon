@@ -7,6 +7,7 @@ import { getIO } from '../socket/index.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.resolve(__dirname, '../../data');
 const CONFIG_FILE = path.join(DATA_DIR, 'alert-sounds.json');
+const SOUNDS_DIR = path.join(DATA_DIR, 'alert-sounds');
 
 export interface AlertSoundsConfig {
   follow: string;
@@ -65,6 +66,53 @@ export function setupAlertSounds(app: FastifyInstance) {
     if (body.redemption !== undefined) sounds.redemption = body.redemption;
     saveConfig();
     reply.send({ ok: true });
+  });
+
+  // Upload an MP3 file for a specific alert type
+  app.put('/alert-sounds/upload/:type', async (req, reply) => {
+    const { type } = req.params as { type: string };
+    const validTypes = ['follow', 'subscribe', 'bits', 'raid', 'redemption'];
+    if (!validTypes.includes(type)) {
+      return reply.status(400).send({ error: `Invalid type: ${type}` });
+    }
+
+    const body = req.body as { data: string };
+    if (!body.data) {
+      return reply.status(400).send({ error: 'Missing file data (base64)' });
+    }
+
+    try {
+      const base64Data = body.data.replace(/^data:audio\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      if (!fs.existsSync(SOUNDS_DIR)) fs.mkdirSync(SOUNDS_DIR, { recursive: true });
+
+      const filename = `${type}.mp3`;
+      fs.writeFileSync(path.join(SOUNDS_DIR, filename), buffer);
+
+      // Store just the filename — frontend/overlays prepend the URL
+      (sounds as any)[type] = filename;
+      saveConfig();
+
+      reply.send({ ok: true, filename, url: `/alert-sounds/file/${filename}` });
+    } catch (e) {
+      reply.status(500).send({ error: 'Failed to save file' });
+    }
+  });
+
+  // Serve uploaded sound files
+  app.get('/alert-sounds/file/:filename', async (req, reply) => {
+    const { filename } = req.params as { filename: string };
+    const filePath = path.join(SOUNDS_DIR, filename);
+
+    if (!fs.existsSync(filePath)) {
+      return reply.status(404).send({ error: 'File not found' });
+    }
+
+    const ext = path.extname(filename).toLowerCase();
+    const mime: Record<string, string> = { '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg' };
+    reply.header('Content-Type', mime[ext] || 'application/octet-stream');
+    reply.header('Cache-Control', 'max-age=86400');
+    return fs.createReadStream(filePath);
   });
 
   // Test endpoint: emits a fake alert event to a channel room so overlays can show it
