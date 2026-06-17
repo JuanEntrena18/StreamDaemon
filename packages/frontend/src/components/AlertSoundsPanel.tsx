@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiGet, apiPut } from '../utils/api';
+import { apiGet, apiPut, apiPost } from '../utils/api';
 import { useTranslation } from '../i18n/context';
 
 interface Props {
@@ -23,11 +23,21 @@ const DEFAULT_SOUNDS: SoundConfig = {
   redemption: '',
 };
 
-export function AlertSoundsPanel({ channel: _channel, backendUrl: _backendUrl }: Props) {
+const TEST_TYPES = [
+  { type: 'follow', label: '🔔 Follower', color: '#06b6d4' },
+  { type: 'subscribe', label: '⭐ Subscriber', color: '#a855f7' },
+  { type: 'donation', label: '💰 Donation', color: '#10b981' },
+  { type: 'raid', label: '⚔️ Raid', color: '#ef4444' },
+  { type: 'bits', label: '🎲 Bits/Cheer', color: '#f59e0b' },
+  { type: 'host', label: '📡 Host', color: '#6366f1' },
+] as const;
+
+export function AlertSoundsPanel({ channel, backendUrl: _backendUrl }: Props) {
   const { t } = useTranslation();
   const [sounds, setSounds] = useState<SoundConfig>({ ...DEFAULT_SOUNDS });
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [testing, setTesting] = useState<string | null>(null);
 
   useEffect(() => {
     apiGet('/alert-sounds').then(async (r) => {
@@ -49,6 +59,17 @@ export function AlertSoundsPanel({ channel: _channel, backendUrl: _backendUrl }:
     setSounds((prev) => ({ ...prev, [key]: value }));
   };
 
+  const testAlert = async (type: string) => {
+    setTesting(type);
+    try {
+      const r = await apiPost('/alert-sounds/test', { type, channel });
+      if (!r.ok) console.warn('Test alert failed:', await r.text());
+    } catch (e) {
+      console.warn('Test alert error:', e);
+    }
+    setTimeout(() => setTesting(null), 2000);
+  };
+
   const fields: { key: keyof SoundConfig; label: string; placeholder: string }[] = [
     { key: 'follow', label: '🔔 Seguidor (follow)', placeholder: 'URL del MP3 para follow...' },
     { key: 'subscribe', label: '⭐ Suscripción (sub)', placeholder: 'URL del MP3 para sub...' },
@@ -56,6 +77,22 @@ export function AlertSoundsPanel({ channel: _channel, backendUrl: _backendUrl }:
     { key: 'raid', label: '⚔️ Raid', placeholder: 'URL del MP3 para raid...' },
     { key: 'redemption', label: '🎯 Canje (redemption)', placeholder: 'URL del MP3 para canje...' },
   ];
+
+  const buttonStyle = (color: string, isTesting: boolean): React.CSSProperties => ({
+    padding: '0.5rem 1rem',
+    borderRadius: 8,
+    border: `1px solid ${color}66`,
+    background: isTesting ? `${color}44` : `${color}18`,
+    color: isTesting ? '#fff' : color,
+    fontSize: '0.8rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    transition: 'all 0.15s ease',
+    flex: 1,
+    minWidth: 120,
+    textAlign: 'center',
+  });
 
   if (loading) {
     return (
@@ -127,6 +164,34 @@ export function AlertSoundsPanel({ channel: _channel, backendUrl: _backendUrl }:
             </span>
           )}
         </div>
+      </div>
+
+      {/* ── Test Alerts ── */}
+      <div className="glass-card" style={{ marginTop: '1.5rem', padding: '1.5rem' }}>
+        <p className="sf-section-title" style={{ marginBottom: '0.75rem' }}>
+          🧪 Probar Alertas
+        </p>
+        <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', marginBottom: '1rem', lineHeight: 1.5 }}>
+          Enviá una alerta de prueba al canal <strong style={{ color: 'var(--sf-text)' }}>#{channel}</strong>.
+          Si tenés un overlay de alertas abierto en OBS, deberías verlo aparecer al instante.
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          {TEST_TYPES.map(({ type, label, color }) => (
+            <button
+              key={type}
+              onClick={() => testAlert(type)}
+              disabled={testing !== null || !channel}
+              style={buttonStyle(color, testing === type)}
+            >
+              {testing === type ? '✅ Enviado' : label}
+            </button>
+          ))}
+        </div>
+        {!channel && (
+          <p style={{ fontSize: '0.75rem', color: '#f87171', marginTop: '0.75rem' }}>
+            Ingresá un canal en la barra superior para poder probar las alertas.
+          </p>
+        )}
       </div>
 
       <div style={{

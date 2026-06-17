@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { getIO } from '../socket/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.resolve(__dirname, '../../data');
@@ -64,5 +65,76 @@ export function setupAlertSounds(app: FastifyInstance) {
     if (body.redemption !== undefined) sounds.redemption = body.redemption;
     saveConfig();
     reply.send({ ok: true });
+  });
+
+  // Test endpoint: emits a fake alert event to a channel room so overlays can show it
+  app.post('/alert-sounds/test', async (req, reply) => {
+    const { type, channel } = req.body as { type: string; channel: string };
+    if (!type || !channel) {
+      return reply.status(400).send({ error: 'Missing type or channel' });
+    }
+
+    const testUser = 'StreamForger_Test';
+    const displayName = 'StreamForger Test';
+
+    switch (type) {
+      case 'follow':
+        getIO().to(`channel:${channel}`).emit('channel:follow', {
+          userDisplayName: displayName,
+          userName: testUser,
+          userId: 'test',
+          timestamp: Date.now(),
+        });
+        break;
+      case 'subscribe':
+        getIO().to(`channel:${channel}`).emit('channel:subscribe', {
+          userDisplayName: displayName,
+          userName: testUser,
+          tier: '1000',
+          isGift: false,
+          timestamp: Date.now(),
+        });
+        break;
+      case 'donation':
+        getIO().to(`channel:${channel}`).emit('channel:redemption', {
+          userDisplayName: displayName,
+          userName: testUser,
+          rewardTitle: 'Donación de prueba',
+          rewardCost: 500,
+          input: '¡Gracias por el stream!',
+          timestamp: Date.now(),
+        });
+        break;
+      case 'raid':
+        getIO().to(`channel:${channel}`).emit('channel:raid', {
+          fromDisplayName: displayName,
+          fromName: testUser,
+          viewerCount: 42,
+          timestamp: Date.now(),
+        });
+        break;
+      case 'bits':
+        getIO().to(`channel:${channel}`).emit('channel:cheer', {
+          userDisplayName: displayName,
+          userName: testUser,
+          bits: 100,
+          message: '¡Toma tus bits!',
+          timestamp: Date.now(),
+        });
+        break;
+      case 'host':
+        // Twitch removed hosting; emit as a follow for backward compatibility
+        getIO().to(`channel:${channel}`).emit('channel:follow', {
+          userDisplayName: displayName + ' (Host)',
+          userName: testUser,
+          userId: 'test',
+          timestamp: Date.now(),
+        });
+        break;
+      default:
+        return reply.status(400).send({ error: `Unknown type: ${type}` });
+    }
+
+    reply.send({ ok: true, type, channel });
   });
 }
