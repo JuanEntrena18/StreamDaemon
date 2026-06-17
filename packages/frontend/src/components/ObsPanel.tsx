@@ -713,6 +713,29 @@ export function ObsPanel({ channel, backendUrl }: Props) {
   const [fnLayout, setFnLayout] = useState('stats');
   const [fnSaved, setFnSaved] = useState(false);
 
+  // Cyan Chat
+  const [cyanChatUrl, setCyanChatUrl] = useState(() => localStorage.getItem('cyanChatUrl') || '');
+  const [cyanChatCopied, setCyanChatCopied] = useState(false);
+
+  const copyCyanChatUrl = async () => {
+    if (!cyanChatUrl) return;
+    try {
+      await navigator.clipboard.writeText(cyanChatUrl);
+      setCyanChatCopied(true);
+      setTimeout(() => setCyanChatCopied(false), 2000);
+    } catch {
+      const el = document.createElement('textarea');
+      el.value = cyanChatUrl;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCyanChatCopied(true);
+      setTimeout(() => setCyanChatCopied(false), 2000);
+    }
+    localStorage.setItem('cyanChatUrl', cyanChatUrl);
+  };
+
   useEffect(() => {
     apiGet('/fortnite/config').then(async (r) => {
       if (!r.ok) return;
@@ -1377,6 +1400,77 @@ export function ObsPanel({ channel, backendUrl }: Props) {
           </div>
         </div>
       )}
+
+      {/* ── Cyan Chat Section ── */}
+      <div className="glass-card" style={{ marginTop: '1.5rem', padding: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+            background: 'rgba(0,217,255,0.15)',
+            border: '1px solid rgba(0,217,255,0.35)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '1.1rem',
+          }}>
+            💬
+          </div>
+          <div>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--sf-text)', margin: 0 }}>
+              {t('obs.cyanChat')}
+            </h4>
+            <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', margin: '0.15rem 0 0 0' }}>
+              {t('obs.cyanChatDesc')}
+            </p>
+          </div>
+        </div>
+
+        <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '1rem', lineHeight: 1.5 }}>
+          {t('obs.cyanChatHelp')}
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {/* Open Cyan Chat button */}
+          <a
+            href={`https://chat.johnnycyan.com/`}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.4rem', alignSelf: 'flex-start',
+              padding: '0.5rem 1.25rem', borderRadius: 8,
+              border: '1px solid rgba(0,217,255,0.35)',
+              background: 'rgba(0,217,255,0.1)', color: '#22d3ee',
+              fontSize: '0.82rem', fontWeight: 600,
+              cursor: 'pointer', textDecoration: 'none', fontFamily: 'inherit',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            {t('obs.cyanChatOpen')} ↗
+          </a>
+
+          {/* URL field */}
+          <div>
+            <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.3rem', display: 'block' }}>
+              {t('obs.cyanChatUrl')}
+            </label>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input
+                type="text"
+                value={cyanChatUrl}
+                onChange={(e) => { setCyanChatUrl(e.target.value); localStorage.setItem('cyanChatUrl', e.target.value); }}
+                placeholder={t('obs.cyanChatUrlPlaceholder')}
+                className="sf-input"
+                style={{ flex: 1, fontSize: '0.78rem', fontFamily: 'monospace' }}
+              />
+              <button
+                onClick={copyCyanChatUrl}
+                className="sf-btn sf-btn-primary"
+                style={{ fontSize: '0.78rem', padding: '0.4rem 0.875rem', whiteSpace: 'nowrap' }}
+              >
+                {cyanChatCopied ? t('obs.copiado') : t('obs.copiar')}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Help note */}
       <div style={{
