@@ -159,6 +159,10 @@ export function ChatPanel({ channel }: Props) {
   const [overlayBgMode, setOverlayBgMode] = useState<'transparent' | 'black'>(() => ls.bgMode ?? 'black');
   const [overlayFont, setOverlayFont] = useState(() => ls.font ?? "'Inter', sans-serif");
   const [overlayFontSize, setOverlayFontSize] = useState(() => ls.fontSize ?? 14);
+  const [overlayMode, setOverlayMode] = useState<'chat' | 'cyanchat'>(() => {
+    const saved = localStorage.getItem('overlayMode');
+    return saved === 'cyanchat' ? 'cyanchat' : 'chat';
+  });
 
   const FONT_OPTIONS = [
     { label: t('chat.fontInter'), value: "'Inter', sans-serif" },
@@ -172,10 +176,17 @@ export function ChatPanel({ channel }: Props) {
   function openOverlayWindow() {
     if (!channel) return;
     if (window.streamforger) {
-      window.streamforger.overlay.open(channel, false, '');
+      if (overlayMode === 'cyanchat') {
+        const ccUrl = localStorage.getItem('cyanChatUrl') || `https://chat.johnnycyan.com/?channel=${encodeURIComponent(channel)}`;
+        window.streamforger.overlay.open(ccUrl, true);
+      } else {
+        window.streamforger.overlay.open(channel, false, '');
+      }
       setOverlayOpen(true);
     } else {
-      const url = `${window.location.origin}/overlay.html?channel=${channel}&mode=chat`;
+      const url = overlayMode === 'cyanchat'
+        ? (localStorage.getItem('cyanChatUrl') || `https://chat.johnnycyan.com/?channel=${encodeURIComponent(channel)}`)
+        : `${window.location.origin}/overlay.html?channel=${channel}&mode=chat`;
       window.open(url, 'streamforger-chat-overlay', 'width=400,height=600,menubar=no,toolbar=no,location=no,status=no');
     }
   }
@@ -217,6 +228,27 @@ export function ChatPanel({ channel }: Props) {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center', marginRight: '0.25rem' }}>
+            {(['chat', 'cyanchat'] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => { setOverlayMode(m); localStorage.setItem('overlayMode', m); }}
+                disabled={overlayOpen}
+                style={{
+                  padding: '0.25rem 0.6rem', borderRadius: 6, border: '1px solid',
+                  borderColor: overlayMode === m ? 'var(--sf-primary)' : 'var(--sf-border)',
+                  background: overlayMode === m ? 'rgba(124,58,237,0.2)' : 'transparent',
+                  color: overlayMode === m ? '#a78bfa' : 'var(--sf-text-3)',
+                  fontSize: '0.72rem', fontWeight: overlayMode === m ? 600 : 400,
+                  cursor: overlayOpen ? 'not-allowed' : 'pointer',
+                  fontFamily: 'inherit', opacity: overlayOpen ? 0.5 : 1,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {m === 'chat' ? 'Chat' : 'Cyan Chat'}
+              </button>
+            ))}
+          </div>
           {!overlayOpen ? (
             <button
               onClick={openOverlayWindow}
