@@ -163,6 +163,7 @@ export function ChatPanel({ channel }: Props) {
     const saved = localStorage.getItem('overlayMode');
     return saved === 'cyanchat' ? 'cyanchat' : 'chat';
   });
+  const [cyanChatUrl, setCyanChatUrl] = useState(() => localStorage.getItem('cyanChatUrl') || '');
 
   const FONT_OPTIONS = [
     { label: t('chat.fontInter'), value: "'Inter', sans-serif" },
@@ -177,15 +178,14 @@ export function ChatPanel({ channel }: Props) {
     if (!channel) return;
     if (window.streamforger) {
       if (overlayMode === 'cyanchat') {
-        const ccUrl = localStorage.getItem('cyanChatUrl') || `https://chat.johnnycyan.com/?channel=${encodeURIComponent(channel)}`;
-        window.streamforger.overlay.open(ccUrl, true);
+        window.streamforger.overlay.open(cyanChatUrl || `https://chat.johnnycyan.com/?channel=${encodeURIComponent(channel)}`, true);
       } else {
         window.streamforger.overlay.open(channel, false, '');
       }
       setOverlayOpen(true);
     } else {
       const url = overlayMode === 'cyanchat'
-        ? (localStorage.getItem('cyanChatUrl') || `https://chat.johnnycyan.com/?channel=${encodeURIComponent(channel)}`)
+        ? (cyanChatUrl || `https://chat.johnnycyan.com/?channel=${encodeURIComponent(channel)}`)
         : `${window.location.origin}/overlay.html?channel=${channel}&mode=chat`;
       window.open(url, 'streamforger-chat-overlay', 'width=400,height=600,menubar=no,toolbar=no,location=no,status=no');
     }
@@ -269,6 +269,41 @@ export function ChatPanel({ channel }: Props) {
           )}
         </div>
       </div>
+
+      {/* Cyan Chat URL config */}
+      {overlayMode === 'cyanchat' && (
+        <div style={{
+          marginBottom: '0.75rem', padding: '0.75rem 1rem',
+          background: 'rgba(0,217,255,0.06)', border: '1px solid rgba(0,217,255,0.15)',
+          borderRadius: 'var(--sf-radius)',
+        }}>
+          <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.3rem', display: 'block' }}>
+            URL de Cyan Chat
+          </label>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <input
+              type="url"
+              value={cyanChatUrl}
+              onChange={(e) => { setCyanChatUrl(e.target.value); localStorage.setItem('cyanChatUrl', e.target.value); }}
+              placeholder="https://chat.johnnycyan.com/chat.html?channel=..."
+              className="sf-input"
+              style={{ flex: 1, fontSize: '0.78rem', fontFamily: 'monospace' }}
+            />
+            <a
+              href="https://chat.johnnycyan.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="sf-btn"
+              style={{ fontSize: '0.72rem', padding: '0.4rem 0.75rem', textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+            >
+              Configurar ↗
+            </a>
+          </div>
+          <p style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', marginTop: '0.3rem', marginBottom: 0 }}>
+            Abrí Cyan Chat, configurá tus opciones, y pegá la URL generada acá.
+          </p>
+        </div>
+      )}
 
       {/* Overlay controls (Electron only) */}
       {overlayOpen && window.streamforger && (
