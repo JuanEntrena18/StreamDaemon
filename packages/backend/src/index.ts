@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 import { config } from './config.js';
 import { setupAuth, onAuth } from './auth/index.js';
 import { requireLocalAuth } from './auth/api-auth.js';
-import { setupChat, setEnterGiveaway, setAddTickets } from './chat/index.js';
+import { setupChat, setEnterGiveaway, setAddTickets, setupChatGreeting } from './chat/index.js';
 import { setupSocketIO } from './socket/index.js';
 import { setupGiveaways, enterGiveaway, addTickets } from './giveaways/index.js';
 import { setupPredictions } from './predictions/index.js';
@@ -87,6 +87,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setEnterGiveaway(enterGiveaway);
   setAddTickets(addTickets);
   await setupChat();
+  setupChatGreeting(app);
   setupEventSub();
   onAuth(() => { setupChat(); setupEventSub(); });
   setupPredictions(app);

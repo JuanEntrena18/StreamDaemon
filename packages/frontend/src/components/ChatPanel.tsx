@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { SOUNDS, setMasterVolume, type SoundKey } from '../utils/sounds';
 import { useTranslation } from '../i18n/context';
+import { apiGet, apiPut } from '../utils/api';
 
 const OVERLAY_LS_KEY = 'streamforger-chat-overlay-settings';
 
@@ -79,6 +80,22 @@ export function ChatPanel({ channel }: Props) {
   const [ttsRate, setTtsRate] = useState(1);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const ttsLastMsgRef = useRef('');
+  const [greetingEnabled, setGreetingEnabled] = useState(false);
+  const [greetingMessage, setGreetingMessage] = useState('¡Bienvenido @{user} al canal!');
+  const [greetingOpen, setGreetingOpen] = useState(false);
+
+  useEffect(() => {
+    if (!channel) return;
+    apiGet(`/chat/greeting-config?channel=${encodeURIComponent(channel)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && typeof data.enabled === 'boolean') {
+          setGreetingEnabled(data.enabled);
+          if (data.message) setGreetingMessage(data.message);
+        }
+      })
+      .catch(() => {});
+  }, [channel]);
 
   useEffect(() => {
     if (!window.speechSynthesis) return;
@@ -683,6 +700,83 @@ export function ChatPanel({ channel }: Props) {
                 style={{ flex: 1, accentColor: '#7c3aed', cursor: 'pointer' }}
               />
               <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 24 }}>{Math.round(ttsVolume * 100)}%</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Greeting config */}
+      <div style={{
+        marginBottom: '0.5rem', padding: '0.6rem 0.75rem',
+        background: greetingEnabled ? 'rgba(16,185,129,0.06)' : 'transparent',
+        border: `1px solid ${greetingEnabled ? 'rgba(16,185,129,0.15)' : 'var(--sf-border)'}`,
+        borderRadius: 'var(--sf-radius-sm)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>
+              {t('chat.greeting')}
+            </span>
+            <button
+              onClick={async () => {
+                const next = !greetingEnabled;
+                setGreetingEnabled(next);
+                await apiPut('/chat/greeting-config', { channel, enabled: next });
+              }}
+              style={{
+                width: 36, height: 18, borderRadius: 99,
+                background: greetingEnabled ? 'var(--sf-primary)' : 'var(--sf-border)',
+                border: 'none', cursor: 'pointer', position: 'relative',
+                transition: 'background 0.2s',
+              }}
+            >
+              <span style={{
+                position: 'absolute', top: 2, left: greetingEnabled ? 18 : 2,
+                width: 14, height: 14, borderRadius: '50%',
+                background: '#fff', transition: 'left 0.2s',
+              }} />
+            </button>
+          </div>
+          <button
+            onClick={() => setGreetingOpen(!greetingOpen)}
+            style={{
+              background: 'none', border: 'none', color: 'var(--sf-text-3)',
+              cursor: 'pointer', fontSize: '0.65rem', fontFamily: 'inherit',
+              padding: '0.1rem 0.4rem', borderRadius: 4,
+              transition: 'transform 0.2s',
+              transform: greetingOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            }}
+          >▼</button>
+        </div>
+        {greetingOpen && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 44 }}>
+                {t('chat.greetingMsg')}
+              </span>
+              <input
+                type="text"
+                value={greetingMessage}
+                onChange={(e) => setGreetingMessage(e.target.value)}
+                onBlur={() => apiPut('/chat/greeting-config', { channel, message: greetingMessage })}
+                placeholder="¡Bienvenido @{user} al canal!"
+                className="sf-input"
+                style={{ flex: 1, fontSize: '0.78rem', fontFamily: 'monospace' }}
+              />
+            </div>
+            {greetingMessage.includes('{user}') && (
+              <div style={{
+                fontSize: '0.68rem', color: 'var(--sf-text-3)',
+                background: 'rgba(124,58,237,0.06)',
+                padding: '0.3rem 0.5rem', borderRadius: 4,
+              }}>
+                {t('chat.greetingPreview')}: <span style={{ color: '#a78bfa' }}>
+                  {greetingMessage.replace(/\{user\}/g, '@' + (channel || 'usuario'))}
+                </span>
+              </div>
+            )}
+            <div style={{ fontSize: '0.62rem', color: 'var(--sf-text-3)', opacity: 0.6 }}>
+              {t('chat.greetingDelay')}
             </div>
           </div>
         )}

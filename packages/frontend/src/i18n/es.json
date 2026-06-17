@@ -93,7 +93,11 @@
     "mensajes": "mensajes",
     "responder": "Responder",
     "timeout5m": "Timeout 5 min",
-    "banear": "Banear"
+    "banear": "Banear",
+    "greeting": "Saludo automático",
+    "greetingMsg": "Mensaje:",
+    "greetingPreview": "Vista previa",
+    "greetingDelay": "⏱ Se envía 30 segundos después de que el usuario entre al chat"
   },
   "dashboard": {
     "title": "Gestor del Stream",

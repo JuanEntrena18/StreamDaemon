@@ -1,15 +1,63 @@
 import { ChatClient } from '@twurple/chat';
+import { FastifyInstance } from 'fastify';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { getIO } from '../socket/index.js';
 import { authProvider, currentUser } from '../auth/index.js';
 import { checkCustomCommand } from '../commands/index.js';
 import { checkMessage } from '../security/index.js';
 import type { enterGiveaway, addTickets } from '../giveaways/index.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = path.resolve(__dirname, '../../data');
+const GREETING_CONFIG_FILE = path.join(DATA_DIR, 'chat-greeting.json');
+
+interface ChannelGreetingConfig {
+  enabled: boolean;
+  message: string;
+}
+
 let chatClient: ChatClient | null = null;
 let enterGiveawayFn: typeof enterGiveaway | null = null;
 let addTicketsFn: typeof addTickets | null = null;
 
 const joinedChannels = new Set<string>();
+
+// Greeting state
+let greetingConfigs: Record<string, ChannelGreetingConfig> = {};
+const pendingGreetings = new Map<string, NodeJS.Timeout>();
+
+const DEFAULT_GREETING_MESSAGE = '¡Bienvenido @{user} al canal!';
+
+function loadGreetingConfigs() {
+  try {
+    if (fs.existsSync(GREETING_CONFIG_FILE)) {
+      greetingConfigs = JSON.parse(fs.readFileSync(GREETING_CONFIG_FILE, 'utf-8'));
+    }
+  } catch (e) {
+    console.error('Failed to load greeting configs:', e);
+  }
+}
+
+function saveGreetingConfigs() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(GREETING_CONFIG_FILE, JSON.stringify(greetingConfigs, null, 2));
+  } catch (e) {
+    console.error('Failed to save greeting configs:', e);
+  }
+}
+
+function getGreetingConfig(channel: string): ChannelGreetingConfig {
+  return greetingConfigs[channel] || { enabled: false, message: DEFAULT_GREETING_MESSAGE };
+}
+
+function setGreetingConfig(channel: string, config: Partial<ChannelGreetingConfig>) {
+  const current = getGreetingConfig(channel);
+  greetingConfigs[channel] = { ...current, ...config };
+  saveGreetingConfigs();
+}
 
 export async function setupChat() {
   if (!authProvider || !currentUser) {
@@ -22,7 +70,9 @@ export async function setupChat() {
     chatClient = null;
   }
 
-  chatClient = new ChatClient({ authProvider, channels: [] });
+  loadGreetingConfigs();
+
+  chatClient = new ChatClient({ authProvider, channels: [], requestMembershipEvents: true });
 
   chatClient.onDisconnect((manually, reason) => {
     console.log(`❌ Chat client disconnected (manually=${manually}): ${reason?.message || reason}`);
@@ -65,7 +115,34 @@ export async function setupChat() {
     checkMessage(channelName, user, text);
   });
 
-  // Re-join all previously joined channels on the new connection
+  chatClient.onJoin((channel, user) => {
+    const channelName = channel.replace('#', '');
+    const config = getGreetingConfig(channelName);
+    if (!config.enabled) return;
+
+    if (user.toLowerCase() === currentUser?.login?.toLowerCase()) return;
+
+    const key = `${channelName}:${user.toLowerCase()}`;
+    if (pendingGreetings.has(key)) return;
+
+    const timer = setTimeout(() => {
+      pendingGreetings.delete(key);
+      const msg = config.message.replace(/\{user\}/g, `@${user}`);
+      sendMessage(channelName, msg);
+    }, 30000);
+    pendingGreetings.set(key, timer);
+  });
+
+  chatClient.onPart((channel, user) => {
+    const channelName = channel.replace('#', '');
+    const key = `${channelName}:${user.toLowerCase()}`;
+    const timer = pendingGreetings.get(key);
+    if (timer) {
+      clearTimeout(timer);
+      pendingGreetings.delete(key);
+    }
+  });
+
   for (const ch of joinedChannels) {
     try {
       await chatClient.join(ch);
@@ -74,6 +151,24 @@ export async function setupChat() {
       console.error(`❌ Failed to re-join channel ${ch}:`, err);
     }
   }
+}
+
+export function setupChatGreeting(app: FastifyInstance) {
+  app.get('/chat/greeting-config', async (req, reply) => {
+    const query = req.query as { channel?: string };
+    if (!query.channel) return reply.status(400).send({ error: 'channel required' });
+    return getGreetingConfig(query.channel);
+  });
+
+  app.put('/chat/greeting-config', async (req, reply) => {
+    const body = req.body as { channel: string; enabled?: boolean; message?: string } | null;
+    if (!body?.channel) return reply.status(400).send({ error: 'channel required' });
+    const updates: Partial<ChannelGreetingConfig> = {};
+    if (typeof body.enabled === 'boolean') updates.enabled = body.enabled;
+    if (typeof body.message === 'string' && body.message.trim()) updates.message = body.message.trim();
+    setGreetingConfig(body.channel, updates);
+    return { ok: true };
+  });
 }
 
 function getSubTier(badges: Map<string, string>): number {
@@ -99,7 +194,6 @@ function handleCommands(channel: string, user: string, text: string, subTier = 0
       break;
   }
 
-  // Check custom commands — respond if matched
   checkCustomCommand(channel, text).then((response) => {
     if (response) {
       sendMessage(channel, response);

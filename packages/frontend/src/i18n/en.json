@@ -93,7 +93,11 @@
     "mensajes": "messages",
     "responder": "Reply",
     "timeout5m": "Timeout 5 min",
-    "banear": "Ban"
+    "banear": "Ban",
+    "greeting": "Auto Greeting",
+    "greetingMsg": "Message:",
+    "greetingPreview": "Preview",
+    "greetingDelay": "⏱ Sent 30 seconds after the user joins chat"
   },
   "dashboard": {
     "title": "Stream Manager",
