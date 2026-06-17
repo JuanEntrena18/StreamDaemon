@@ -177,15 +177,16 @@ export function ChatPanel({ channel }: Props) {
   function openOverlayWindow() {
     if (!channel) return;
     if (window.streamforger) {
+      const baseUrl = window.streamforger.backendUrl || 'http://localhost:3000';
       if (overlayMode === 'cyanchat') {
-        window.streamforger.overlay.open(cyanChatUrl || `https://chat.johnnycyan.com/?channel=${encodeURIComponent(channel)}`, true);
+        window.streamforger.overlay.open(`${baseUrl}/overlay.html?mode=cyanchat&channel=${encodeURIComponent(channel)}`, true);
       } else {
         window.streamforger.overlay.open(channel, false, '');
       }
       setOverlayOpen(true);
     } else {
       const url = overlayMode === 'cyanchat'
-        ? (cyanChatUrl || `https://chat.johnnycyan.com/?channel=${encodeURIComponent(channel)}`)
+        ? `${window.location.origin}/overlay.html?mode=cyanchat&channel=${encodeURIComponent(channel)}`
         : `${window.location.origin}/overlay.html?channel=${channel}&mode=chat`;
       window.open(url, 'streamforger-chat-overlay', 'width=400,height=600,menubar=no,toolbar=no,location=no,status=no');
     }

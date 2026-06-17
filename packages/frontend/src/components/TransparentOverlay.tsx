@@ -56,8 +56,8 @@ export function TransparentOverlay({ channel }: Props) {
       return;
     }
     if (mode === 'cyanchat') {
-      const ccUrl = localStorage.getItem('cyanChatUrl') || `https://chat.johnnycyan.com/?channel=${encodeURIComponent(channel)}`;
-      window.streamforger?.overlay.open(ccUrl, true);
+      const baseUrl = window.streamforger?.backendUrl || 'http://localhost:3000';
+      window.streamforger?.overlay.open(`${baseUrl}/overlay.html?mode=cyanchat&channel=${encodeURIComponent(channel)}`, true);
       setIsOpen(true);
     } else if (mode === 'url' && customUrl) {
       window.streamforger?.overlay.open(customUrl, true);

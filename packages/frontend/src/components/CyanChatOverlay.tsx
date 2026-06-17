@@ -22,7 +22,7 @@ export function CyanChatOverlay({ channel }: Props) {
   if (!url) {
     return (
       <div style={{
-        width: '100vw', height: '100vh',
+        width: '100vw', height: 'calc(100vh - 36px)', marginTop: 36,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem',
         fontFamily: 'sans-serif', textAlign: 'center', padding: 20,
@@ -38,7 +38,8 @@ export function CyanChatOverlay({ channel }: Props) {
       src={url}
       style={{
         width: '100vw',
-        height: '100vh',
+        height: 'calc(100vh - 36px)',
+        marginTop: 36,
         border: 'none',
         background: 'transparent',
       }}
