@@ -32,7 +32,11 @@ export function setupPredictions(app: FastifyInstance) {
       }
 
       try {
-        const prediction = await apiClient.predictions.createPrediction(channelId, {
+        const user = await apiClient.users.getUserByName(channelId);
+        if (!user) {
+          return reply.status(400).send({ error: 'Channel not found' });
+        }
+        const prediction = await apiClient.predictions.createPrediction(user.id, {
           title,
           outcomes: options,
           autoLockAfter: 120,
@@ -67,7 +71,11 @@ export function setupPredictions(app: FastifyInstance) {
       }
 
       try {
-        await apiClient.predictions.resolvePrediction(channelId, predictionId, outcomeId);
+        const user = await apiClient.users.getUserByName(channelId);
+        if (!user) {
+          return reply.status(400).send({ error: 'Channel not found' });
+        }
+        await apiClient.predictions.resolvePrediction(user.id, predictionId, outcomeId);
 
         getIO().to(`channel:${channelId}`).emit('prediction:update', {
           id: predictionId,
