@@ -29,16 +29,30 @@ const ACTION_COLORS: Record<SubathonAction['type'], string> = {
   bits: '#f59e0b',
   redeem: '#10b981',
   manual: '#6366f1',
+  follow: '#22c55e',
+  tip: '#ec4899',
 };
 
 export function SubathonPanel({ channel, backendUrl }: Props) {
   const { t } = useTranslation();
   const [state, setState] = useState<SubathonState | null>(null);
   const [remaining, setRemaining] = useState(0);
-  const [subTime, setSubTime] = useState(300);
-  const [bitTime, setBitTime] = useState(60);
-  const [bitsPerUnit, setBitsPerUnit] = useState(100);
+  const [subTier1Time, setSubTier1Time] = useState(300);
+  const [subTier2Time, setSubTier2Time] = useState(600);
+  const [subTier3Time, setSubTier3Time] = useState(900);
+  const [otherSubTime, setOtherSubTime] = useState(180);
+  const [tipTime, setTipTime] = useState(30);
+  const [cheerBitsPerUnit, setCheerBitsPerUnit] = useState(100);
+  const [cheerTimePerUnit, setCheerTimePerUnit] = useState(60);
+  const [followTime, setFollowTime] = useState(120);
   const [maxLimit, setMaxLimit] = useState(86400);
+  const [alertsEnabled, setAlertsEnabled] = useState(true);
+  const [alertDuration, setAlertDuration] = useState(6);
+  const [primaryColor, setPrimaryColor] = useState('#ef4444');
+  const [accentColor, setAccentColor] = useState('#a78bfa');
+  const [bgColor, setBgColor] = useState('#0a0a0f');
+  const [textColor, setTextColor] = useState('#ffffff');
+  const [fontFamily, setFontFamily] = useState('Inter, system-ui, sans-serif');
 
   const [manualUser, setManualUser] = useState('');
   const [manualTime, setManualTime] = useState(60);
@@ -55,10 +69,22 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
   useSocketEvent('subathon:state', useCallback((data: SubathonState) => {
     setState(data);
     setRemaining(data.remaining);
-    setSubTime(data.subTime);
-    setBitTime(data.bitTime);
-    setBitsPerUnit(data.bitsPerUnit);
+    setSubTier1Time(data.subTier1Time);
+    setSubTier2Time(data.subTier2Time);
+    setSubTier3Time(data.subTier3Time);
+    setOtherSubTime(data.otherSubTime);
+    setTipTime(data.tipTime);
+    setCheerBitsPerUnit(data.cheerBitsPerUnit);
+    setCheerTimePerUnit(data.cheerTimePerUnit);
+    setFollowTime(data.followTime);
     setMaxLimit(data.maxLimit);
+    setAlertsEnabled(data.alertsEnabled);
+    setAlertDuration(data.alertDuration);
+    setPrimaryColor(data.primaryColor);
+    setAccentColor(data.accentColor);
+    setBgColor(data.bgColor);
+    setTextColor(data.textColor);
+    setFontFamily(data.fontFamily);
   }, []));
 
   useSocketEvent('subathon:tick', useCallback((data: { remaining: number }) => {
@@ -77,7 +103,12 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
       .catch(() => {});
   }, [channel, backendUrl]);
 
-  const start = () => apiPost('/subathon/start', { channel, subTime, bitTime, bitsPerUnit, maxLimit, initialTime: 3600 });
+  const start = () => apiPost('/subathon/start', {
+    channel, initialTime: 3600,
+    subTier1Time, subTier2Time, subTier3Time, otherSubTime, tipTime,
+    cheerBitsPerUnit, cheerTimePerUnit, followTime, maxLimit,
+    alertsEnabled, alertDuration, primaryColor, accentColor, bgColor, textColor, fontFamily,
+  });
   const pause = () => apiPost('/subathon/pause', { channel });
   const resume = () => apiPost('/subathon/resume', { channel });
   const stop = () => apiPost('/subathon/stop', { channel });
@@ -88,7 +119,12 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
     setManualTime(60);
     setManualNote('');
   };
-  const updateConfig = () => apiPost('/subathon/config', { channel, subTime, bitTime, bitsPerUnit, maxLimit });
+  const updateConfig = () => apiPost('/subathon/config', {
+    channel,
+    subTier1Time, subTier2Time, subTier3Time, otherSubTime, tipTime,
+    cheerBitsPerUnit, cheerTimePerUnit, followTime, maxLimit,
+    alertsEnabled, alertDuration, primaryColor, accentColor, bgColor, textColor, fontFamily,
+  });
 
   const isRunning = state?.status === 'running';
   const isPaused = state?.status === 'paused';
@@ -180,43 +216,36 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
-        {/* Config */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem', alignItems: 'start' }}>
+        {/* Left column: config, alerts, design */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        {/* Time Config */}
         <div className="glass-card" style={{ padding: '1.25rem' }}>
           <p className="sf-section-title">{t('subathon.config')}</p>
 
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.25rem' }}>
-              {t('subathon.tiempoPorSub')}
-            </label>
-            <input type="number" min={0} step={30} value={subTime}
-              onChange={(e) => setSubTime(parseInt(e.target.value) || 0)}
-              className="sf-input" style={{ width: '100%' }}
-            />
-          </div>
+          {([
+            { key: 'subTier1Time', label: t('subathon.subTier1'), val: subTier1Time, set: setSubTier1Time, step: 30 },
+            { key: 'subTier2Time', label: t('subathon.subTier2'), val: subTier2Time, set: setSubTier2Time, step: 30 },
+            { key: 'subTier3Time', label: t('subathon.subTier3'), val: subTier3Time, set: setSubTier3Time, step: 30 },
+            { key: 'otherSubTime', label: t('subathon.otherSub'), val: otherSubTime, set: setOtherSubTime, step: 30 },
+            { key: 'tipTime', label: t('subathon.tipTime'), val: tipTime, set: setTipTime, step: 10 },
+            { key: 'cheerTimePerUnit', label: t('subathon.cheerTime', { bits: cheerBitsPerUnit }), val: cheerTimePerUnit, set: setCheerTimePerUnit, step: 10 },
+            { key: 'cheerBitsPerUnit', label: t('subathon.cheerBits'), val: cheerBitsPerUnit, set: setCheerBitsPerUnit, step: 50 },
+            { key: 'followTime', label: t('subathon.followTime'), val: followTime, set: setFollowTime, step: 30 },
+          ] as const).map(({ key, label, val, set, step }) => (
+            <div key={key} style={{ marginBottom: '0.6rem' }}>
+              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.2rem' }}>
+                {label}
+              </label>
+              <input type="number" min={0} step={step} value={val}
+                onChange={(e) => set(parseInt(e.target.value) || 0)}
+                className="sf-input" style={{ width: '100%' }}
+              />
+            </div>
+          ))}
 
           <div style={{ marginBottom: '0.75rem' }}>
-            <label style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.25rem' }}>
-              {t('subathon.tiempoPorBits', { bits: bitsPerUnit })}
-            </label>
-            <input type="number" min={0} step={10} value={bitTime}
-              onChange={(e) => setBitTime(parseInt(e.target.value) || 0)}
-              className="sf-input" style={{ width: '100%' }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.25rem' }}>
-              {t('subathon.bitsPorUnidad')}
-            </label>
-            <input type="number" min={1} step={50} value={bitsPerUnit}
-              onChange={(e) => setBitsPerUnit(parseInt(e.target.value) || 100)}
-              className="sf-input" style={{ width: '100%' }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.25rem' }}>
+            <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.2rem' }}>
               {t('subathon.limiteMaxSegundos')}
             </label>
             <input type="number" min={0} step={3600} value={maxLimit}
@@ -224,13 +253,96 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
               className="sf-input" style={{ width: '100%' }}
             />
           </div>
+        </div>
 
-          <button onClick={updateConfig} className="sf-btn" style={{ fontSize: '0.8rem', width: '100%' }}>
+        {/* Dynamic On-Screen Alerts */}
+        <div className="glass-card" style={{ padding: '1.25rem' }}>
+          <p className="sf-section-title">{t('subathon.alertsTitle')}</p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)', marginBottom: '0.75rem' }}>
+            {t('subathon.alertsDesc')}
+          </p>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+            <label style={{ fontSize: '0.78rem', color: 'var(--sf-text)' }}>
+              {t('subathon.alertsEnabled')}
+            </label>
+            <button onClick={() => setAlertsEnabled(!alertsEnabled)}
+              className="sf-btn" style={{
+                fontSize: '0.75rem', padding: '0.3rem 0.8rem',
+                background: alertsEnabled ? 'rgba(167,139,250,0.15)' : 'rgba(255,255,255,0.05)',
+                border: alertsEnabled ? '1px solid rgba(167,139,250,0.3)' : '1px solid rgba(255,255,255,0.1)',
+                color: alertsEnabled ? '#a78bfa' : 'var(--sf-text-3)',
+              }}>
+              {alertsEnabled ? t('subathon.on') : t('subathon.off')}
+            </button>
+          </div>
+
+          <div style={{ marginBottom: '0.6rem' }}>
+            <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.2rem' }}>
+              {t('subathon.alertDuration', { seconds: alertDuration })}
+            </label>
+            <input type="range" min={3} max={15} step={1} value={alertDuration}
+              onChange={(e) => setAlertDuration(parseInt(e.target.value))}
+              style={{ width: '100%', accentColor: '#a78bfa' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--sf-text-3)' }}>
+              <span>3s</span><span>15s</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tailored Design */}
+        <div className="glass-card" style={{ padding: '1.25rem' }}>
+          <p className="sf-section-title">{t('subathon.designTitle')}</p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)', marginBottom: '0.75rem' }}>
+            {t('subathon.designDesc')}
+          </p>
+
+          {([
+            { key: 'primaryColor', label: t('subathon.primaryColor'), val: primaryColor, set: setPrimaryColor },
+            { key: 'accentColor', label: t('subathon.accentColor'), val: accentColor, set: setAccentColor },
+            { key: 'bgColor', label: t('subathon.bgColor'), val: bgColor, set: setBgColor },
+            { key: 'textColor', label: t('subathon.textColor'), val: textColor, set: setTextColor },
+          ] as const).map(({ key, label, val, set }) => (
+            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', minWidth: 100 }}>{label}</label>
+              <input type="color" value={val}
+                onChange={(e) => set(e.target.value)}
+                style={{ width: 36, height: 30, padding: 0, border: 'none', cursor: 'pointer', background: 'transparent' }}
+              />
+              <input type="text" value={val}
+                onChange={(e) => set(e.target.value)}
+                className="sf-input" style={{ width: 120, fontSize: '0.72rem', fontFamily: 'monospace' }}
+              />
+            </div>
+          ))}
+
+          <div style={{ marginBottom: '0.6rem' }}>
+            <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.2rem' }}>
+              {t('subathon.fontFamily')}
+            </label>
+            <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)}
+              className="sf-input" style={{ width: '100%', fontSize: '0.75rem' }}>
+              <option value="Inter, system-ui, sans-serif">Inter (Default)</option>
+              <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+              <option value="'Press Start 2P', cursive">Press Start 2P (Pixel)</option>
+              <option value="'Orbitron', sans-serif">Orbitron (Futuristic)</option>
+              <option value="'Cinzel', serif">Cinzel (Fantasy)</option>
+              <option value="'Luckiest Guy', cursive">Luckiest Guy (Cartoon)</option>
+              <option value="'Share Tech Mono', monospace">Share Tech Mono (Tech)</option>
+              <option value="Arial, sans-serif">Arial</option>
+              <option value="Georgia, serif">Georgia</option>
+              <option value="system-ui, sans-serif">System UI</option>
+            </select>
+          </div>
+
+          <button onClick={updateConfig} className="sf-btn" style={{ fontSize: '0.8rem', width: '100%', marginTop: '0.5rem' }}>
             {t('subathon.guardarConfig')}
           </button>
         </div>
+        </div>
 
-        {/* Add time manually */}
+        {/* Right column: Add time manually */}
         <div className="glass-card" style={{ padding: '1.25rem' }}>
           <p className="sf-section-title">{t('subathon.addTiempo')}</p>
 
@@ -257,7 +369,7 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
 
           <div style={{ marginBottom: '0.75rem' }}>
             <label style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.25rem' }}>
-              Nota (opcional)
+              {t('subathon.notaOpcional')}
             </label>
             <input type="text" value={manualNote}
               onChange={(e) => setManualNote(e.target.value)}

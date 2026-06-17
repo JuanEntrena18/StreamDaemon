@@ -54,6 +54,11 @@ export async function setupEventSub() {
       });
       recordEvent(channelName, 'follow', e.userDisplayName, 'siguió el canal');
       checkFollow(e.userId, e.userName).catch(() => {});
+      addSubathonTime(channelName, {
+        id: crypto.randomUUID(), type: 'follow',
+        user: e.userDisplayName, amount: 1, timeAdded: 0,
+        note: 'New follower', timestamp: Date.now(),
+      });
     });
   });
 
@@ -71,6 +76,7 @@ export async function setupEventSub() {
       addSubathonTime(channelName, {
         id: crypto.randomUUID(), type: 'sub',
         user: e.userDisplayName, amount: 1, timeAdded: 0,
+        tier: e.tier,
         note: `${tierLabel} subscription`, timestamp: Date.now(),
       });
     });
@@ -92,6 +98,7 @@ export async function setupEventSub() {
       addSubathonTime(channelName, {
         id: crypto.randomUUID(), type: 'sub',
         user: e.userDisplayName, amount: 1, timeAdded: 0,
+        tier: e.tier,
         note: `${tierLabel} resub (${e.cumulativeMonths} meses)`, timestamp: Date.now(),
       });
     });
@@ -114,6 +121,7 @@ export async function setupEventSub() {
         addSubathonTime(channelName, {
           id: crypto.randomUUID(), type: 'sub',
           user: gifter, amount: 1, timeAdded: 0,
+          tier: e.tier,
           note: `${tierLabel} gift sub`, timestamp: Date.now(),
         });
       }
@@ -132,7 +140,6 @@ export async function setupEventSub() {
       });
       recordEvent(channelName, 'redemption', e.userDisplayName, `canjeó ${e.rewardTitle} (${e.rewardCost} pts)`);
 
-      // If there's an active giveaway and this reward matches its ticket reward, add tickets
       const active = getActiveGiveaway(channelName);
       console.log(`[Sorteo] Redención de "${e.rewardTitle}" (${e.rewardCost} pts) por ${e.userName}`);
       console.log(`[Sorteo] Sorteo activo:`, active ? `ticketCost=${active.ticketCost}, rewardTitle="${active.ticketRewardTitle}"` : 'ninguno');
@@ -150,6 +157,12 @@ export async function setupEventSub() {
       } else if (active) {
         console.log(`[Sorteo] No coincide: "${e.rewardTitle}" !== "${active.ticketRewardTitle}" o ticketCost=${active.ticketCost}`);
       }
+
+      addSubathonTime(channelName, {
+        id: crypto.randomUUID(), type: 'tip',
+        user: e.userDisplayName, amount: e.rewardCost, timeAdded: 0,
+        note: e.rewardTitle, timestamp: Date.now(),
+      });
     });
   });
 

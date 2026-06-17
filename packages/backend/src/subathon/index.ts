@@ -13,6 +13,16 @@ interface SubathonInstance {
 
 const subathons = new Map<string, SubathonInstance>();
 
+const SUB_TIER_MAP: Record<string, keyof SubathonState> = {
+  '1000': 'subTier1Time',
+  '2000': 'subTier2Time',
+  '3000': 'subTier3Time',
+};
+
+function getTierConfigKey(tier: string): keyof SubathonState {
+  return SUB_TIER_MAP[tier] ?? 'otherSubTime';
+}
+
 function broadcast(channel: string, inst: SubathonInstance) {
   getIO().to(`channel:${channel}`).emit('subathon:state', inst.state);
 }
@@ -72,10 +82,23 @@ function addTime(channel: string, inst: SubathonInstance, action: SubathonAction
 }
 
 const DEFAULT_CONFIG = {
-  subTime: 300,
-  bitTime: 60,
-  bitsPerUnit: 100,
+  subTier1Time: 300,
+  subTier2Time: 600,
+  subTier3Time: 900,
+  otherSubTime: 180,
+  tipTime: 30,
+  cheerBitsPerUnit: 100,
+  cheerTimePerUnit: 60,
+  followTime: 120,
   maxLimit: 86400,
+  alertsEnabled: true,
+  alertDuration: 6,
+  primaryColor: '#ef4444',
+  accentColor: '#a78bfa',
+  bgColor: '#0a0a0f',
+  textColor: '#ffffff',
+  accentTextColor: '#ffffff',
+  fontFamily: 'Inter, system-ui, sans-serif',
 };
 
 export function addSubathonTime(channel: string, action: SubathonAction) {
@@ -83,10 +106,7 @@ export function addSubathonTime(channel: string, action: SubathonAction) {
   if (!inst) {
     const state: SubathonState = {
       status: 'stopped', remaining: 0, totalAdded: 0,
-      maxLimit: DEFAULT_CONFIG.maxLimit,
-      subTime: DEFAULT_CONFIG.subTime,
-      bitTime: DEFAULT_CONFIG.bitTime,
-      bitsPerUnit: DEFAULT_CONFIG.bitsPerUnit,
+      ...DEFAULT_CONFIG,
       startTime: null, actions: [],
     };
     inst = { state, startedAt: 0, pausedAt: null, pausedRemaining: 0, tickInterval: null };
@@ -94,9 +114,15 @@ export function addSubathonTime(channel: string, action: SubathonAction) {
   }
 
   if (action.type === 'sub') {
-    action.timeAdded = inst.state.subTime;
+    const key = getTierConfigKey(action.tier || '1000');
+    action.timeAdded = inst.state[key] as number;
   } else if (action.type === 'bits') {
-    action.timeAdded = Math.floor(action.amount / inst.state.bitsPerUnit) * inst.state.bitTime;
+    const units = Math.floor(action.amount / inst.state.cheerBitsPerUnit);
+    action.timeAdded = units * inst.state.cheerTimePerUnit;
+  } else if (action.type === 'tip') {
+    action.timeAdded = inst.state.tipTime;
+  } else if (action.type === 'follow') {
+    action.timeAdded = inst.state.followTime;
   } else {
     action.timeAdded = action.amount;
   }
@@ -105,59 +131,69 @@ export function addSubathonTime(channel: string, action: SubathonAction) {
 }
 
 export function setupSubathon(app: FastifyInstance) {
+  function defaultState(): SubathonState {
+    return {
+      status: 'stopped', remaining: 0, totalAdded: 0,
+      ...DEFAULT_CONFIG,
+      startTime: null, actions: [],
+    };
+  }
+
   app.get('/subathon/:channel', async (req, reply) => {
     const { channel } = req.params as { channel: string };
     const inst = subathons.get(channel);
-    reply.send(inst?.state ?? {
-      status: 'stopped',
-      remaining: 0,
-      totalAdded: 0,
-      maxLimit: DEFAULT_CONFIG.maxLimit,
-      subTime: DEFAULT_CONFIG.subTime,
-      bitTime: DEFAULT_CONFIG.bitTime,
-      bitsPerUnit: DEFAULT_CONFIG.bitsPerUnit,
-      startTime: null,
-      actions: [],
-    });
+    reply.send(inst?.state ?? defaultState());
   });
 
   app.post('/subathon/start', async (req, reply) => {
-    const { channel, subTime, bitTime, bitsPerUnit, maxLimit, initialTime } = req.body as {
+    const body = req.body as {
       channel: string;
-      subTime?: number;
-      bitTime?: number;
-      bitsPerUnit?: number;
-      maxLimit?: number;
-      initialTime?: number;
+      subTier1Time?: number; subTier2Time?: number; subTier3Time?: number;
+      otherSubTime?: number; tipTime?: number;
+      cheerBitsPerUnit?: number; cheerTimePerUnit?: number;
+      followTime?: number; maxLimit?: number; initialTime?: number;
+      alertsEnabled?: boolean; alertDuration?: number;
+      primaryColor?: string; accentColor?: string; bgColor?: string;
+      textColor?: string; accentTextColor?: string; fontFamily?: string;
     };
-    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
+    if (!body.channel) return reply.status(400).send({ error: 'Missing channel' });
 
-    const existing = subathons.get(channel);
+    const existing = subathons.get(body.channel);
     if (existing?.tickInterval) clearInterval(existing.tickInterval);
 
-    const remaining = Math.min(initialTime ?? 0, maxLimit ?? DEFAULT_CONFIG.maxLimit);
+    const remaining = Math.min(body.initialTime ?? 0, body.maxLimit ?? DEFAULT_CONFIG.maxLimit);
 
     const state: SubathonState = {
       status: remaining > 0 ? 'running' : 'paused',
       remaining,
       totalAdded: remaining,
-      maxLimit: maxLimit ?? DEFAULT_CONFIG.maxLimit,
-      subTime: subTime ?? DEFAULT_CONFIG.subTime,
-      bitTime: bitTime ?? DEFAULT_CONFIG.bitTime,
-      bitsPerUnit: bitsPerUnit ?? DEFAULT_CONFIG.bitsPerUnit,
+      ...DEFAULT_CONFIG,
+      maxLimit: body.maxLimit ?? DEFAULT_CONFIG.maxLimit,
+      subTier1Time: body.subTier1Time ?? DEFAULT_CONFIG.subTier1Time,
+      subTier2Time: body.subTier2Time ?? DEFAULT_CONFIG.subTier2Time,
+      subTier3Time: body.subTier3Time ?? DEFAULT_CONFIG.subTier3Time,
+      otherSubTime: body.otherSubTime ?? DEFAULT_CONFIG.otherSubTime,
+      tipTime: body.tipTime ?? DEFAULT_CONFIG.tipTime,
+      cheerBitsPerUnit: body.cheerBitsPerUnit ?? DEFAULT_CONFIG.cheerBitsPerUnit,
+      cheerTimePerUnit: body.cheerTimePerUnit ?? DEFAULT_CONFIG.cheerTimePerUnit,
+      followTime: body.followTime ?? DEFAULT_CONFIG.followTime,
+      alertsEnabled: body.alertsEnabled ?? DEFAULT_CONFIG.alertsEnabled,
+      alertDuration: body.alertDuration ?? DEFAULT_CONFIG.alertDuration,
+      primaryColor: body.primaryColor ?? DEFAULT_CONFIG.primaryColor,
+      accentColor: body.accentColor ?? DEFAULT_CONFIG.accentColor,
+      bgColor: body.bgColor ?? DEFAULT_CONFIG.bgColor,
+      textColor: body.textColor ?? DEFAULT_CONFIG.textColor,
+      accentTextColor: body.accentTextColor ?? DEFAULT_CONFIG.accentTextColor,
+      fontFamily: body.fontFamily ?? DEFAULT_CONFIG.fontFamily,
       startTime: remaining > 0 ? Date.now() : null,
       actions: [],
     };
 
     if (remaining > 0) {
       state.actions.push({
-        id: crypto.randomUUID(),
-        type: 'manual',
-        user: 'StreamForge',
-        amount: remaining,
-        timeAdded: remaining,
-        note: 'Tiempo inicial',
-        timestamp: Date.now(),
+        id: crypto.randomUUID(), type: 'manual',
+        user: 'StreamForge', amount: remaining, timeAdded: remaining,
+        note: 'Tiempo inicial', timestamp: Date.now(),
       });
     }
 
@@ -170,33 +206,24 @@ export function setupSubathon(app: FastifyInstance) {
     };
 
     if (remaining > 0) {
-      inst.tickInterval = setInterval(() => tick(channel, inst), 1000);
+      inst.tickInterval = setInterval(() => tick(body.channel, inst), 1000);
     }
-    subathons.set(channel, inst);
-    broadcast(channel, inst);
+    subathons.set(body.channel, inst);
+    broadcast(body.channel, inst);
     reply.send(state);
   });
 
   app.post('/subathon/add-time', async (req, reply) => {
     const { channel, type, user, amount, note } = req.body as {
-      channel: string;
-      type: SubathonAction['type'];
-      user: string;
-      amount: number;
-      note?: string;
+      channel: string; type: SubathonAction['type']; user: string; amount: number; note?: string;
     };
     if (!channel || !type || !user || !amount) {
       return reply.status(400).send({ error: 'Missing fields' });
     }
 
     const action: SubathonAction = {
-      id: crypto.randomUUID(),
-      type,
-      user,
-      amount,
-      timeAdded: 0,
-      note: note ?? `${type} reward`,
-      timestamp: Date.now(),
+      id: crypto.randomUUID(), type, user, amount, timeAdded: 0,
+      note: note ?? `${type} reward`, timestamp: Date.now(),
     };
 
     addSubathonTime(channel, action);
@@ -246,28 +273,44 @@ export function setupSubathon(app: FastifyInstance) {
     const existing = subathons.get(channel);
     if (existing?.tickInterval) clearInterval(existing.tickInterval);
     subathons.delete(channel);
-    reply.send({ status: 'stopped', remaining: 0, totalAdded: 0, maxLimit: DEFAULT_CONFIG.maxLimit, subTime: DEFAULT_CONFIG.subTime, bitTime: DEFAULT_CONFIG.bitTime, bitsPerUnit: DEFAULT_CONFIG.bitsPerUnit, startTime: null, actions: [] });
+    reply.send(defaultState());
   });
 
   app.post('/subathon/config', async (req, reply) => {
-    const { channel, subTime, bitTime, bitsPerUnit, maxLimit } = req.body as {
+    const body = req.body as {
       channel: string;
-      subTime?: number;
-      bitTime?: number;
-      bitsPerUnit?: number;
-      maxLimit?: number;
+      subTier1Time?: number; subTier2Time?: number; subTier3Time?: number;
+      otherSubTime?: number; tipTime?: number;
+      cheerBitsPerUnit?: number; cheerTimePerUnit?: number;
+      followTime?: number; maxLimit?: number;
+      alertsEnabled?: boolean; alertDuration?: number;
+      primaryColor?: string; accentColor?: string; bgColor?: string;
+      textColor?: string; accentTextColor?: string; fontFamily?: string;
     };
-    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
+    if (!body.channel) return reply.status(400).send({ error: 'Missing channel' });
 
-    const inst = subathons.get(channel);
+    const inst = subathons.get(body.channel);
     if (!inst) return reply.status(400).send({ error: 'No subathon active' });
 
-    if (subTime !== undefined) inst.state.subTime = subTime;
-    if (bitTime !== undefined) inst.state.bitTime = bitTime;
-    if (bitsPerUnit !== undefined) inst.state.bitsPerUnit = bitsPerUnit;
-    if (maxLimit !== undefined) inst.state.maxLimit = maxLimit;
+    if (body.subTier1Time !== undefined) inst.state.subTier1Time = body.subTier1Time;
+    if (body.subTier2Time !== undefined) inst.state.subTier2Time = body.subTier2Time;
+    if (body.subTier3Time !== undefined) inst.state.subTier3Time = body.subTier3Time;
+    if (body.otherSubTime !== undefined) inst.state.otherSubTime = body.otherSubTime;
+    if (body.tipTime !== undefined) inst.state.tipTime = body.tipTime;
+    if (body.cheerBitsPerUnit !== undefined) inst.state.cheerBitsPerUnit = body.cheerBitsPerUnit;
+    if (body.cheerTimePerUnit !== undefined) inst.state.cheerTimePerUnit = body.cheerTimePerUnit;
+    if (body.followTime !== undefined) inst.state.followTime = body.followTime;
+    if (body.maxLimit !== undefined) inst.state.maxLimit = body.maxLimit;
+    if (body.alertsEnabled !== undefined) inst.state.alertsEnabled = body.alertsEnabled;
+    if (body.alertDuration !== undefined) inst.state.alertDuration = body.alertDuration;
+    if (body.primaryColor !== undefined) inst.state.primaryColor = body.primaryColor;
+    if (body.accentColor !== undefined) inst.state.accentColor = body.accentColor;
+    if (body.bgColor !== undefined) inst.state.bgColor = body.bgColor;
+    if (body.textColor !== undefined) inst.state.textColor = body.textColor;
+    if (body.accentTextColor !== undefined) inst.state.accentTextColor = body.accentTextColor;
+    if (body.fontFamily !== undefined) inst.state.fontFamily = body.fontFamily;
 
-    broadcast(channel, inst);
+    broadcast(body.channel, inst);
     reply.send(inst.state);
   });
 }

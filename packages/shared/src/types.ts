@@ -200,7 +200,7 @@ export type ServerEvent =
   | { type: 'scoreboard:update'; data: ScoreboardState }
   | { type: 'fighter:update'; data: FighterState }
   | { type: 'subathon:tick'; data: { remaining: number; maxLimit: number } }
-  | { type: 'subathon:time-added'; data: { amount: number; reason: string; user: string; remaining: number } }
+  | { type: 'subathon:time-added'; data: { amount: number; reason: string; user: string; remaining: number; type: SubathonAction['type'] } }
   | { type: 'subathon:state'; data: SubathonState };
 
 export interface SubathonState {
@@ -208,19 +208,33 @@ export interface SubathonState {
   remaining: number;
   totalAdded: number;
   maxLimit: number;
-  subTime: number;
-  bitTime: number;
-  bitsPerUnit: number;
+  subTier1Time: number;
+  subTier2Time: number;
+  subTier3Time: number;
+  otherSubTime: number;
+  tipTime: number;
+  cheerBitsPerUnit: number;
+  cheerTimePerUnit: number;
+  followTime: number;
   startTime: number | null;
   actions: SubathonAction[];
+  alertsEnabled: boolean;
+  alertDuration: number;
+  primaryColor: string;
+  accentColor: string;
+  bgColor: string;
+  textColor: string;
+  accentTextColor: string;
+  fontFamily: string;
 }
 
 export interface SubathonAction {
   id: string;
-  type: 'sub' | 'bits' | 'redeem' | 'manual';
+  type: 'sub' | 'bits' | 'redeem' | 'manual' | 'follow' | 'tip';
   user: string;
   amount: number;
   timeAdded: number;
   note: string;
   timestamp: number;
+  tier?: string;
 }

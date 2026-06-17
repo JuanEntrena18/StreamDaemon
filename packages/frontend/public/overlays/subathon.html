@@ -6,13 +6,21 @@
 <title>Subathon Overlay</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
 <style>
+:root {
+  --primary: #ef4444;
+  --accent: #a78bfa;
+  --bg: #0a0a0f;
+  --text: #ffffff;
+  --accent-text: #ffffff;
+  --font-family: 'Inter', system-ui, sans-serif;
+}
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
   width: 1920px; height: 1080px;
   overflow: hidden;
   background: transparent;
-  font-family: 'Inter', system-ui, sans-serif;
-  color: #fff;
+  font-family: var(--font-family);
+  color: var(--text);
   user-select: none;
 }
 
@@ -32,7 +40,7 @@ html, body {
   top: 50%; left: 50%;
   width: 800px; height: 800px;
   transform: translate(-50%, -60%);
-  background: radial-gradient(circle, rgba(239,68,68,0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--primary) 15%, transparent) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -48,7 +56,7 @@ html, body {
   font-weight: 600;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.5);
+  color: color-mix(in srgb, var(--text) 50%, transparent);
   margin-bottom: 12px;
 }
 
@@ -57,17 +65,17 @@ html, body {
   font-size: 7rem;
   font-weight: 800;
   line-height: 1;
-  background: linear-gradient(180deg, #fff 20%, rgba(255,255,255,0.6));
+  background: linear-gradient(180deg, var(--text) 20%, color-mix(in srgb, var(--text) 60%, transparent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: none;
-  filter: drop-shadow(0 0 40px rgba(239,68,68,0.3));
+  filter: drop-shadow(0 0 40px color-mix(in srgb, var(--primary) 30%, transparent));
   transition: filter 0.3s;
 }
 
-.timer.warning { filter: drop-shadow(0 0 40px rgba(239,68,68,0.6)); }
-.timer.critical { filter: drop-shadow(0 0 60px rgba(239,68,68,0.8)); animation: pulse-glow 1s ease-in-out infinite; }
+.timer.warning { filter: drop-shadow(0 0 40px color-mix(in srgb, var(--primary) 60%, transparent)); }
+.timer.critical { filter: drop-shadow(0 0 60px color-mix(in srgb, var(--primary) 80%, transparent)); animation: pulse-glow 1s ease-in-out infinite; }
 
 @keyframes pulse-glow {
   0%, 100% { filter: drop-shadow(0 0 60px rgba(239,68,68,0.8)); }
@@ -322,7 +330,7 @@ html, body {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(239,68,68,0.15), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary) 15%, transparent), transparent);
   animation: scan 8s linear infinite;
   pointer-events: none;
   z-index: 0;
@@ -334,7 +342,7 @@ html, body {
 }
 
 /* ── Corner accents ── */
-.corner { position: absolute; width: 40px; height: 40px; border-color: rgba(239,68,68,0.2); border-style: solid; pointer-events: none; z-index: 0; }
+.corner { position: absolute; width: 40px; height: 40px; border-color: color-mix(in srgb, var(--primary) 20%, transparent); border-style: solid; pointer-events: none; z-index: 0; }
 .corner-tl { top: 20px; left: 20px; border-width: 2px 0 0 2px; }
 .corner-tr { top: 20px; right: 20px; border-width: 2px 2px 0 0; }
 .corner-bl { bottom: 20px; left: 20px; border-width: 0 0 2px 2px; }
@@ -354,6 +362,73 @@ html, body {
   border-radius: 4px;
 }
 #demo-badge.show { display: block; }
+
+/* ── Dynamic On-Screen Alerts ── */
+.alert-container {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  width: 800px;
+}
+
+.alert-popup {
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 12px;
+  padding: 16px 28px;
+  text-align: center;
+  animation: alert-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow: 0 0 40px color-mix(in srgb, var(--accent) 20%, transparent), 0 8px 32px rgba(0,0,0,0.5);
+  backdrop-filter: blur(12px);
+  max-width: 100%;
+}
+
+.alert-popup.alert-out {
+  animation: alert-out 0.6s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+
+.alert-user {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.alert-action {
+  font-size: 1.05rem;
+  font-weight: 600;
+  opacity: 0.85;
+  margin-bottom: 2px;
+}
+
+.alert-time {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+@keyframes alert-in {
+  0% { opacity: 0; transform: translateY(30px) scale(0.9); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes alert-out {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-30px) scale(0.9); }
+}
+
+/* ── Alert type accent colours ── */
+.alert-popup.type-sub { border-color: color-mix(in srgb, #9147ff 50%, transparent); box-shadow: 0 0 40px color-mix(in srgb, #9147ff 25%, transparent); }
+.alert-popup.type-bits { border-color: color-mix(in srgb, #f59e0b 50%, transparent); box-shadow: 0 0 40px color-mix(in srgb, #f59e0b 25%, transparent); }
+.alert-popup.type-follow { border-color: color-mix(in srgb, #22c55e 50%, transparent); box-shadow: 0 0 40px color-mix(in srgb, #22c55e 25%, transparent); }
+.alert-popup.type-tip { border-color: color-mix(in srgb, #ec4899 50%, transparent); box-shadow: 0 0 40px color-mix(in srgb, #ec4899 25%, transparent); }
+.alert-popup.type-manual { border-color: color-mix(in srgb, #6366f1 50%, transparent); box-shadow: 0 0 40px color-mix(in srgb, #6366f1 25%, transparent); }
+.alert-popup.type-redeem { border-color: color-mix(in srgb, #10b981 50%, transparent); box-shadow: 0 0 40px color-mix(in srgb, #10b981 25%, transparent); }
 </style>
 </head>
 <body>
@@ -426,6 +501,9 @@ html, body {
 
   <div class="config-hint" id="configHint">Subathon · StreamForger</div>
   <div id="demo-badge">🧪 MODO PRUEBA</div>
+
+  <!-- Dynamic On-Screen Alerts -->
+  <div class="alert-container" id="alertContainer"></div>
 </div>
 
 <script>
@@ -439,9 +517,14 @@ let state = {
   remaining: 0,
   totalAdded: 0,
   maxLimit: 86400,
-  subTime: 300,
-  bitTime: 60,
-  bitsPerUnit: 100,
+  subTier1Time: 300,
+  subTier2Time: 600,
+  subTier3Time: 900,
+  otherSubTime: 180,
+  tipTime: 30,
+  cheerBitsPerUnit: 100,
+  cheerTimePerUnit: 60,
+  followTime: 120,
   startTime: null,
   actions: [],
 };
@@ -495,13 +578,65 @@ function progressColor(ratio) {
 }
 
 function typeColor(type) {
-  const colors = { sub: '#9147ff', bits: '#f59e0b', redeem: '#10b981', manual: '#6366f1' };
+  const colors = { sub: '#9147ff', bits: '#f59e0b', redeem: '#10b981', manual: '#6366f1', follow: '#22c55e', tip: '#ec4899' };
   return colors[type] || '#6366f1';
 }
 
 function typeLabel(type) {
-  const labels = { sub: 'Sub', bits: 'Bits', redeem: 'Canjeo', manual: 'Manual' };
+  const labels = { sub: 'Sub', bits: 'Bits', redeem: 'Canjeo', manual: 'Manual', follow: 'Follow', tip: 'Tip' };
   return labels[type] || type;
+}
+
+// ── Apply Design from state ──
+const root = document.documentElement;
+const alertContainer = document.getElementById('alertContainer');
+
+function applyDesign() {
+  root.style.setProperty('--primary', state.primaryColor || '#ef4444');
+  root.style.setProperty('--accent', state.accentColor || '#a78bfa');
+  root.style.setProperty('--bg', state.bgColor || '#0a0a0f');
+  root.style.setProperty('--text', state.textColor || '#ffffff');
+  root.style.setProperty('--accent-text', state.accentTextColor || '#ffffff');
+  root.style.setProperty('--font-family', state.fontFamily || 'Inter, system-ui, sans-serif');
+}
+
+// ── Dynamic On-Screen Alert Queue ──
+let alertQueue = [];
+let alertPlaying = false;
+
+function queueAlert(action) {
+  if (!state.alertsEnabled) return;
+  alertQueue.push(action);
+  if (!alertPlaying) playNextAlert();
+}
+
+function playNextAlert() {
+  if (alertQueue.length === 0) { alertPlaying = false; return; }
+  alertPlaying = true;
+  const action = alertQueue.shift();
+  showAlert(action);
+}
+
+function showAlert(action) {
+  const durationMs = (state.alertDuration || 6) * 1000;
+  const dotColor = typeColor(action.type);
+
+  const popup = document.createElement('div');
+  popup.className = `alert-popup type-${action.type}`;
+  popup.innerHTML = `
+    <div class="alert-user" style="color:${dotColor}">${action.user}</div>
+    <div class="alert-action">${typeLabel(action.type)}${action.note ? ' · ' + action.note : ''}</div>
+    <div class="alert-time" style="color:${dotColor}">+${fmtDuration(action.timeAdded)} añadidos</div>
+  `;
+  alertContainer.appendChild(popup);
+
+  setTimeout(() => {
+    popup.classList.add('alert-out');
+    setTimeout(() => {
+      if (popup.parentNode) popup.parentNode.removeChild(popup);
+      playNextAlert();
+    }, 600);
+  }, durationMs);
 }
 
 // ── Update display ──
@@ -553,16 +688,13 @@ function addFeedItem(action) {
 // ── Socket.IO ──
 function connectSocket() {
   const script = document.createElement('script');
-  script.onload = () => cb();
-script.src = './js/socket.io.js';
-  script.src = './js/socket.io.js';
-script.src = './js/socket.io.js';
-  script.onerror = () => {
+  script.onload = () => {
     const socket = io(SOCKET_URL, { transports: ['websocket'] });
     socket.on('connect', () => {
       socket.emit('join:channel', channel);
       socket.on('subathon:state', (data) => {
         state = data;
+        applyDesign();
         actionsCount = data.actions.length;
         subsCount = data.actions.filter(a => a.type === 'sub').length;
         bitsCount = data.actions.filter(a => a.type === 'bits').length;
@@ -581,6 +713,7 @@ script.src = './js/socket.io.js';
       });
       socket.on('subathon:time-added', (data) => {
         addFeedItem({ user: data.user, timeAdded: data.amount, note: data.reason, type: data.type || 'manual' });
+        queueAlert({ user: data.user, timeAdded: data.amount, note: data.reason, type: data.type || 'manual' });
         actionsCount++;
         statActions.textContent = actionsCount;
       });
@@ -589,6 +722,10 @@ script.src = './js/socket.io.js';
       console.error('Socket connection error:', err.message);
     });
   };
+  script.onerror = () => {
+    console.error('Failed to load socket.io client');
+  };
+  script.src = './js/socket.io.js';
   document.head.appendChild(script);
 }
 
@@ -601,7 +738,7 @@ function demoAction() {
   const type = Math.random() < 0.3 ? 'sub' : 'bits';
   const isSub = type === 'sub';
   const amount = isSub ? 1 : Math.floor(Math.random() * 5) * 100 + 100;
-  const timeAdded = isSub ? state.subTime : Math.floor(amount / state.bitsPerUnit) * state.bitTime;
+  const timeAdded = isSub ? state.subTier1Time : Math.floor(amount / state.cheerBitsPerUnit) * state.cheerTimePerUnit;
 
   if (isSub) subsCount++;
   else bitsCount++;
@@ -620,6 +757,7 @@ function demoAction() {
   statSubs.textContent = subsCount;
   statBits.textContent = bitsCount;
   addFeedItem(action);
+  queueAlert(action);
   updateDisplay();
 }
 
@@ -628,9 +766,17 @@ function initDemo() {
   state.totalAdded = 36000;
   state.maxLimit = 86400;
   state.startTime = Date.now();
-  state.subTime = 300;
-  state.bitTime = 60;
-  state.bitsPerUnit = 100;
+  state.subTier1Time = 300;
+  state.cheerBitsPerUnit = 100;
+  state.cheerTimePerUnit = 60;
+  state.alertsEnabled = true;
+  state.alertDuration = 6;
+  state.primaryColor = '#ef4444';
+  state.accentColor = '#a78bfa';
+  state.bgColor = '#0a0a0f';
+  state.textColor = '#ffffff';
+  state.fontFamily = 'Inter, system-ui, sans-serif';
+  applyDesign();
 
   statActions.textContent = '0';
   statSubs.textContent = '0';
