@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSG Fullscreen Alert</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: transparent;
+            overflow: hidden; font-family: 'Share Tech Mono', monospace;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #alert-container {
+            position: relative; text-align: center;
+            opacity: 0; filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        #alert-container.show { opacity: 1; filter: blur(0); animation: glitch 0.3s forwards; }
+        #alert-container.hide { opacity: 0; filter: blur(20px) brightness(0); }
+
+        @keyframes glitch {
+            0% { transform: translate(5px, 5px); }
+            50% { transform: translate(-5px, -5px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .bsg-panel {
+            background: rgba(10, 15, 10, 0.9);
+            border: 2px solid #f44336;
+            clip-path: polygon(30px 0, calc(100% - 30px) 0, 100% 30px, 100% calc(100% - 30px), calc(100% - 30px) 100%, 30px 100%, 0 calc(100% - 30px), 0 30px);
+            padding: 40px 100px;
+            box-shadow: 0 0 30px rgba(244, 67, 54, 0.4), inset 0 0 20px rgba(244, 67, 54, 0.2);
+        }
+
+        .alert-warning {
+            color: #f44336; font-size: 24px; letter-spacing: 5px; margin-bottom: 20px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 50% { opacity: 0.3; } }
+
+        #alert-user { 
+            font-size: 60px; color: #ffb300; font-weight: bold; letter-spacing: 5px; 
+            margin-bottom: 20px; text-shadow: 0 0 10px #ffb300;
+        }
+        
+        .brackets::before { content: '[ '; color: #4caf50; }
+        .brackets::after { content: ' ]'; color: #4caf50; }
+
+        #alert-extra { font-size: 24px; color: #4caf50; }
+
+    </style>
+</head>
+<body>
+
+    <!-- AUDIO -->
+    <audio id="alert-sound" src="tactical_beep.mp3" preload="auto"></audio>
+
+    <div id="alert-container">
+        <div class="bsg-panel">
+            <div class="alert-warning" id="alert-type">CONTACTO DRADIS DETECTADO</div>
+            <div id="alert-user" class="brackets">USUARIO</div>
+            <div id="alert-extra"></div>
+        </div>
+    </div>
+
+    <script>
+        const queue = [];
+        let isPlaying = false;
+        const container = document.getElementById('alert-container');
+        const sound = document.getElementById('alert-sound');
+        
+        const elType = document.getElementById('alert-type');
+        const elUser = document.getElementById('alert-user');
+        const elExtra = document.getElementById('alert-extra');
+
+        const alertDic = {
+            'FOLLOWER': 'NUEVO CONTACTO DRADIS',
+            'SUBSCRIBER': 'NUEVO PILOTO ASIGNADO',
+            'DONATION': 'SUMINISTROS RECIBIDOS',
+            'RAID': 'SALTO FTL MÚLTIPLE (RAID)',
+            'BITS': 'CARGA DE TYLIUM',
+            'HOST': 'RETRANSMISIÓN ESTELAR'
+        };
+
+        const soundKeyMap = {
+            'FOLLOWER': 'follow',
+            'SUBSCRIBER': 'subscribe',
+            'BITS': 'bits',
+            'RAID': 'raid',
+            'DONATION': 'redemption'
+        };
+
+        const soundConfig = {};
+
+        // ── Socket.IO connection ──
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const CHANNEL = urlParams.get('channel') || '';
+            const BACKEND_URL = urlParams.get('backend') || 'http://localhost:3000';
+
+            function loadSocketIO(cb) {
+                const script = document.createElement('script');
+                script.onload = () => cb();
+                script.onerror = () => { setTimeout(() => loadSocketIO(cb), 2000); };
+                script.src = './js/socket.io.js';
+                document.head.appendChild(script);
+            }
+
+            function initSocket() {
+                const socket = io(BACKEND_URL, { transports: ['websocket'] });
+
+                socket.on('connect', () => {
+                    if (CHANNEL) socket.emit('join:channel', CHANNEL);
+                    fetch(BACKEND_URL + '/alert-sounds')
+                        .then(r => r.json())
+                        .then(cfg => { Object.assign(soundConfig, cfg); })
+                        .catch(() => {});
+                });
+
+                socket.on('channel:follow', ({ userDisplayName }) => {
+                    playAlert('FOLLOWER', userDisplayName);
+                });
+                socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+                    if (isGift) return;
+                    playAlert('SUBSCRIBER', userDisplayName, tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3');
+                });
+                socket.on('channel:subscription-message', ({ userDisplayName, cumulativeMonths }) => {
+                    playAlert('SUBSCRIBER', userDisplayName, cumulativeMonths + ' meses');
+                });
+                socket.on('channel:subgift', ({ gifterDisplayName, amount }) => {
+                    playAlert('SUBSCRIBER', gifterDisplayName, 'x' + amount + ' subs');
+                });
+                socket.on('channel:cheer', ({ userDisplayName, bits }) => {
+                    playAlert('BITS', userDisplayName, bits + ' bits');
+                });
+                socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+                    playAlert('DONATION', userDisplayName, rewardTitle);
+                });
+                socket.on('channel:raid', ({ fromDisplayName, viewerCount }) => {
+                    playAlert('RAID', fromDisplayName, viewerCount + ' espectadores');
+                });
+
+                socket.on('connect_error', (err) => console.error('Socket connect error:', err));
+            }
+
+            loadSocketIO(initSocket);
+        })();
+
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.action === 'NEW_ALERT') {
+                queue.push(e.data);
+                processQueue();
+            }
+        });
+
+        function playAlert(type, username, amount) {
+            queue.push({ type, username, amount });
+            processQueue();
+        }
+
+        function processQueue() {
+            if (isPlaying || queue.length === 0) return;
+            isPlaying = true;
+            
+            const data = queue.shift();
+            
+            elType.textContent = alertDic[data.type] || 'ALERTA TÁCTICA';
+            elUser.textContent = data.username.toUpperCase();
+            elExtra.textContent = data.amount ? data.amount : '';
+
+            const sKey = soundKeyMap[data.type] || '';
+            const sPath = sKey ? soundConfig[sKey] : '';
+            if (sPath) {
+                sound.src = sPath;
+                sound.currentTime = 0;
+                sound.play().catch(() => {});
+            }
+
+            container.classList.remove('hide');
+            container.classList.add('show');
+
+            setTimeout(() => {
+                container.classList.remove('show');
+                container.classList.add('hide');
+                
+                setTimeout(() => { isPlaying = false; processQueue(); }, 500);
+            }, 7500);
+        }
+    </script>
+</body>
+</html>

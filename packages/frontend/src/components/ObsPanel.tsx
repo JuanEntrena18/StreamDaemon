@@ -128,6 +128,15 @@ const OBS_URLS: OBSUrl[] = [
     color: '#00D4FF',
   },
   {
+    id: 'fortnite-alerts',
+    icon: '🔔',
+    labelKey: 'obs.fortniteAlerts',
+    descKey: 'obs.fortniteAlertsDesc',
+    mode: 'fortnite-alerts',
+    supportsTheme: false,
+    color: '#00D4FF',
+  },
+  {
     id: 'alerts',
     icon: '🔔',
     labelKey: 'obs.alertas',
@@ -273,6 +282,15 @@ const OBS_URLS: OBSUrl[] = [
     supportsTheme: false,
     color: '#ff00ff',
   },
+  {
+    id: '8bits-alerts',
+    icon: '🔔',
+    labelKey: 'obs.b8bitsAlerts',
+    descKey: 'obs.b8bitsAlertsDesc',
+    mode: '8bits-alerts',
+    supportsTheme: false,
+    color: '#ffff00',
+  },
   // ── Retro Win95 Section ──
   {
     id: 'win95-start',
@@ -327,6 +345,15 @@ const OBS_URLS: OBSUrl[] = [
     mode: 'win95-chat-standalone',
     supportsTheme: false,
     color: '#c0c0c0',
+  },
+  {
+    id: 'win95-alerts',
+    icon: '🔔',
+    labelKey: 'obs.bwin95Alerts',
+    descKey: 'obs.bwin95AlertsDesc',
+    mode: 'win95-alerts',
+    supportsTheme: false,
+    color: '#000080',
   },
   // ── RetroWave Section ──
   {
@@ -383,6 +410,15 @@ const OBS_URLS: OBSUrl[] = [
     supportsTheme: false,
     color: '#00ffff',
   },
+  {
+    id: 'retrowave-alerts',
+    icon: '🔔',
+    labelKey: 'obs.retrowaveAlerts',
+    descKey: 'obs.retrowaveAlertsDesc',
+    mode: 'retrowave-alerts',
+    supportsTheme: false,
+    color: '#ff00ff',
+  },
   // ── Tactical Sci-Fi Section ──
   {
     id: 'tactical-start',
@@ -437,6 +473,15 @@ const OBS_URLS: OBSUrl[] = [
     mode: 'tactical-chat-standalone',
     supportsTheme: false,
     color: '#ffb300',
+  },
+  {
+    id: 'tactical-alerts',
+    icon: '🔔',
+    labelKey: 'obs.tacticalAlerts',
+    descKey: 'obs.tacticalAlertsDesc',
+    mode: 'tactical-alerts',
+    supportsTheme: false,
+    color: '#4caf50',
   },
   // ── WoW Alianza Section ──
   {
@@ -584,6 +629,15 @@ const OBS_URLS: OBSUrl[] = [
     supportsTheme: false,
     color: '#8b0000',
   },
+  {
+    id: 'wow-horde-alerts-fullscreen',
+    icon: '🔔',
+    labelKey: 'obs.hordaAlertsFullscreen',
+    descKey: 'obs.hordaAlertsFullscreenDesc',
+    mode: 'wow-horde-alerts-fullscreen',
+    supportsTheme: false,
+    color: '#ff2222',
+  },
 ];
 
 interface SocialLink {
@@ -700,24 +754,28 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     '8bits-end': '8bits-pantalla_despedida.html',
     '8bits-fullscreen': 'overlay_pantalla_completa_retro_8_bits_nochat_.html',
     '8bits-chat-standalone': 'chat_independiente_retro_8_bits.html',
+    '8bits-alerts': 'alerta_retro_8_bits.html',
     'win95-start': 'pantalla_comienzo_win95.html',
     'win95-gameplay': 'overlay_gameplay_win95.html',
     'win95-just-chatting': 'overlay_just_chatting_win95.html',
     'win95-end': 'pantalla_despedida_win95.html',
     'win95-fullscreen': 'overlay_pantalla_completa_retro_95_nochat_.html',
     'win95-chat-standalone': 'chat_independiente_retro_95.html',
+    'win95-alerts': 'alerta_windows_95.html',
     'retrowave-start': 'pantalla_comienzo_retrowave.html',
     'retrowave-gameplay': 'overlay_gameplay_retrowave.html',
     'retrowave-just-chatting': 'overlay_just_chatting_retrowave.html',
     'retrowave-end': 'pantalla_despedida_retrowave.html',
     'retrowave-fullscreen': 'overlay_pantalla_completa_retrowave_nochat_.html',
     'retrowave-chat-standalone': 'chat_independiente_retrowave.html',
+    'retrowave-alerts': 'alerta_retrowave.html',
     'tactical-start': 'pantalla_de_inicio_t_ctica.html',
     'tactical-gameplay': 'hud_gameplay_monitor.html',
     'tactical-just-chatting': 'hud_just_chatting.html',
     'tactical-end': 'pantalla_despedida_t_ctica.html',
     'tactical-fullscreen': 'overlay_pantalla_completa_sci_fi_nochat_.html',
     'tactical-chat-standalone': 'chat_independiente_sci_fi.html',
+    'tactical-alerts': 'alerta_sci_fi_t_ctica_bsg.html',
     'wow-alliance-start': 'wow-alliance-start.html',
     'wow-alliance-webcam': 'wow-alliance-webcam.html',
     'wow-alliance-webcam-labels': 'wow-alliance-webcam-labels.html',
@@ -733,7 +791,9 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     'wow-horde-just-chatting': 'overlay_just_chatting_horda.html',
     'wow-horde-end': 'pantalla_despedida_horda.html',
     'wow-horde-fullscreen': 'overlay_pantalla_completa_nochat_horda.html',
+    'fortnite-alerts': 'alerta_fortnite.html',
     'wow-horde-chat-standalone': 'chat_independiente_horda.html',
+    'wow-horde-alerts-fullscreen': 'alerta_horda.html',
   };
 
   function buildUrl(mode: string, supportsTheme: boolean): string {
@@ -841,7 +901,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
       {/* URL Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
         {OBS_URLS.filter((item) => {
-          if (selectedTheme === 'fortnite') return item.id === 'fortnite';
+          if (selectedTheme === 'fortnite') return item.id === 'fortnite' || item.id === 'fortnite-alerts';
           if (selectedTheme === 'subnautica2') return item.id === 'subnautica2_standalone';
           if (selectedTheme === 'dj') return item.id.startsWith('dj-');
           if (selectedTheme === 'alliance') return item.id.startsWith('wow-alliance-');

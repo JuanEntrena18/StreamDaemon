@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortnite Fullscreen Alert</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: transparent;
+            overflow: hidden; font-family: 'Luckiest Guy', cursive;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #alert-wrapper {
+            position: relative;
+            opacity: 0; transform: scale(0.5) translateY(100px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efecto rebote (bounce) */
+        }
+
+        #alert-wrapper.show { opacity: 1; transform: scale(1) translateY(0); }
+        #alert-wrapper.hide { opacity: 0; transform: scale(0.5) translateY(100px); transition: all 0.3s ease-in; }
+
+        /* Contenedor inclinado estilo Victory Royale */
+        .victory-banner {
+            background: linear-gradient(180deg, #00d2ff 0%, #0077ff 100%);
+            border-top: 6px solid #ffffff;
+            border-bottom: 6px solid #ffffff;
+            padding: 20px 80px;
+            transform: skewX(-15deg); /* Inclinación del cartel */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255,255,255,0.3);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative;
+        }
+
+        /* Corregir la inclinación para los textos (para que no se vean torcidos) */
+        .content-fix {
+            transform: skewX(15deg);
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center;
+        }
+
+        /* Estilos de Texto Fortnite */
+        #alert-type { 
+            font-size: 35px; color: #ffffff; letter-spacing: 3px; 
+            text-transform: uppercase; margin-bottom: 5px;
+            text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 5px 10px rgba(0,0,0,0.5);
+        }
+        
+        #alert-user { 
+            font-size: 90px; color: #fffb00; /* Amarillo Victoria */
+            letter-spacing: 5px; text-transform: uppercase; line-height: 1;
+            /* Contorno negro grueso característico */
+            -webkit-text-stroke: 3px #000;
+            text-shadow: 5px 5px 0 rgba(0,0,0,0.8), 0 0 20px rgba(255, 251, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        #alert-extra { 
+            font-size: 40px; color: #00ffff; 
+            text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+        }
+
+        /* Rayos de fondo (opcional para más impacto) */
+        .sunburst {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 800px; height: 800px;
+            background: repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.1) 0deg 15deg, transparent 15deg 30deg);
+            border-radius: 50%; z-index: -1;
+            animation: spin 20s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <!-- INSTRUCCIONES AUDIO: Cambia "tu_audio.mp3" por la ruta de tu efecto de sonido -->
+    <audio id="alert-sound" src="tu_audio.mp3" preload="auto"></audio>
+
+    <div id="alert-wrapper">
+        <div class="sunburst"></div>
+        <div class="victory-banner">
+            <div class="content-fix">
+                <div id="alert-type">TIPO DE EVENTO</div>
+                <div id="alert-user">USUARIO</div>
+                <div id="alert-extra"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const queue = [];
+        let isPlaying = false;
+        const container = document.getElementById('alert-wrapper');
+        const sound = document.getElementById('alert-sound');
+        
+        const elType = document.getElementById('alert-type');
+        const elUser = document.getElementById('alert-user');
+        const elExtra = document.getElementById('alert-extra');
+
+        // Diccionario de Eventos - Terminología Battle Royale
+        const alertDic = {
+            'FOLLOWER': 'NUEVO MIEMBRO DEL ESCUADRÓN',
+            'SUBSCRIBER': 'PASE DE BATALLA OBTENIDO',
+            'DONATION': 'ENTREGA DE SUMINISTROS',
+            'RAID': 'EMBOSCADA ENEMIGA',
+            'BITS': 'PAVOS (V-BUCKS) RECIBIDOS',
+            'HOST': 'GRIETA ACTIVADA'
+        };
+
+        const soundKeyMap = {
+            'FOLLOWER': 'follow',
+            'SUBSCRIBER': 'subscribe',
+            'BITS': 'bits',
+            'RAID': 'raid',
+            'DONATION': 'redemption'
+        };
+
+        const soundConfig = {};
+
+        // ── Socket.IO connection ──
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const CHANNEL = urlParams.get('channel') || '';
+            const BACKEND_URL = urlParams.get('backend') || 'http://localhost:3000';
+
+            function loadSocketIO(cb) {
+                const script = document.createElement('script');
+                script.onload = () => cb();
+                script.onerror = () => { setTimeout(() => loadSocketIO(cb), 2000); };
+                script.src = './js/socket.io.js';
+                document.head.appendChild(script);
+            }
+
+            function initSocket() {
+                const socket = io(BACKEND_URL, { transports: ['websocket'] });
+
+                socket.on('connect', () => {
+                    if (CHANNEL) socket.emit('join:channel', CHANNEL);
+                    fetch(BACKEND_URL + '/alert-sounds')
+                        .then(r => r.json())
+                        .then(cfg => { Object.assign(soundConfig, cfg); })
+                        .catch(() => {});
+                });
+
+                socket.on('channel:follow', ({ userDisplayName }) => {
+                    playAlert('FOLLOWER', userDisplayName);
+                });
+                socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+                    if (isGift) return;
+                    playAlert('SUBSCRIBER', userDisplayName, tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3');
+                });
+                socket.on('channel:subscription-message', ({ userDisplayName, cumulativeMonths }) => {
+                    playAlert('SUBSCRIBER', userDisplayName, cumulativeMonths + ' meses');
+                });
+                socket.on('channel:subgift', ({ gifterDisplayName, amount }) => {
+                    playAlert('SUBSCRIBER', gifterDisplayName, 'x' + amount + ' subs');
+                });
+                socket.on('channel:cheer', ({ userDisplayName, bits }) => {
+                    playAlert('BITS', userDisplayName, bits + ' bits');
+                });
+                socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+                    playAlert('DONATION', userDisplayName, rewardTitle);
+                });
+                socket.on('channel:raid', ({ fromDisplayName, viewerCount }) => {
+                    playAlert('RAID', fromDisplayName, viewerCount + ' espectadores');
+                });
+
+                socket.on('connect_error', (err) => console.error('Socket connect error:', err));
+            }
+
+            loadSocketIO(initSocket);
+        })();
+
+        window.addEventListener('message', (e) => {
+            const data = e.data;
+            if (data && data.action === 'NEW_ALERT') {
+                queue.push(data);
+                processQueue();
+            }
+        });
+
+        function playAlert(type, username, amount) {
+            queue.push({ type, username, amount });
+            processQueue();
+        }
+
+        function processQueue() {
+            if (isPlaying || queue.length === 0) return;
+            isPlaying = true;
+            
+            const data = queue.shift();
+            
+            elType.textContent = alertDic[data.type] || 'ALERTA DE SISTEMA';
+            elUser.textContent = data.username.toUpperCase();
+            elExtra.textContent = data.amount ? data.amount : '';
+
+            // Reproducir sonido configurable
+            const sKey = soundKeyMap[data.type] || '';
+            const sPath = sKey ? soundConfig[sKey] : '';
+            if (sPath) {
+                sound.src = sPath;
+                sound.currentTime = 0;
+                sound.play().catch(err => console.log("Autoplay bloqueado.", err));
+            }
+
+            // Entrar
+            container.classList.remove('hide');
+            container.classList.add('show');
+
+            // Salir a los 7.5s
+            setTimeout(() => {
+                container.classList.remove('show');
+                container.classList.add('hide');
+                
+                setTimeout(() => {
+                    isPlaying = false;
+                    processQueue();
+                }, 400);
+            }, 7500);
+        }
+
+        // Test temporal - Quitar comentarios para probar en navegador
+        /*
+        setTimeout(() => {
+            window.postMessage({ action: 'NEW_ALERT', type: 'FOLLOWER', username: 'Ninja_Gamer' }, '*');
+        }, 1000);
+        */
+    </script>
+</body>
+</html>

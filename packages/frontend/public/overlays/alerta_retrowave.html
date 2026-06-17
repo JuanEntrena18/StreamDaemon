@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrowave Fullscreen Alert</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: transparent;
+            overflow: hidden; font-family: 'Orbitron', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #alert-container {
+            position: relative; text-align: center;
+            opacity: 0; transform: perspective(500px) rotateX(30deg) translateY(200px);
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        #alert-container.show { opacity: 1; transform: perspective(500px) rotateX(0deg) translateY(0); }
+        #alert-container.hide { opacity: 0; transform: perspective(500px) rotateX(-30deg) translateY(-200px); }
+
+        .sun-bg {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 400px; height: 400px; background: linear-gradient(to bottom, #ff00ff, #ffaa00);
+            border-radius: 50%; z-index: -1;
+            mask-image: repeating-linear-gradient(to bottom, black 0%, black 8%, transparent 8%, transparent 10%);
+            -webkit-mask-image: repeating-linear-gradient(to bottom, black 0%, black 8%, transparent 8%, transparent 10%);
+            box-shadow: 0 0 50px #ff00ff;
+        }
+
+        #alert-type { font-size: 35px; color: #00ffff; text-shadow: 0 0 10px #00ffff; letter-spacing: 10px; margin-bottom: 10px; }
+        
+        #alert-user { 
+            font-size: 80px; font-weight: 900;
+            background: linear-gradient(to bottom, #ffffff 30%, #ff00ff 70%);
+            -webkit-background-clip: text; color: transparent;
+            text-transform: uppercase; margin-bottom: 10px;
+            text-shadow: 0px 5px 15px rgba(255, 0, 255, 0.8);
+            filter: drop-shadow(0 0 10px #ff00ff);
+        }
+
+        #alert-extra { font-size: 30px; color: #ffff00; text-shadow: 0 0 10px #ffff00; }
+
+    </style>
+</head>
+<body>
+
+    <!-- AUDIO -->
+    <audio id="alert-sound" src="synth_bell.mp3" preload="auto"></audio>
+
+    <div id="alert-container">
+        <div class="sun-bg"></div>
+        <div id="alert-type">NUEVA CONEXIÓN</div>
+        <div id="alert-user">USUARIO</div>
+        <div id="alert-extra"></div>
+    </div>
+
+    <script>
+        const queue = [];
+        let isPlaying = false;
+        const container = document.getElementById('alert-container');
+        const sound = document.getElementById('alert-sound');
+        
+        const elType = document.getElementById('alert-type');
+        const elUser = document.getElementById('alert-user');
+        const elExtra = document.getElementById('alert-extra');
+
+        const alertDic = {
+            'FOLLOWER': 'RADAR CONTACT',
+            'SUBSCRIBER': 'NEON RIDER SUBSCRIBED',
+            'DONATION': 'CREDITS RECEIVED',
+            'RAID': 'SYNTHWAVE INVASION',
+            'BITS': 'DATA FRAGMENTS',
+            'HOST': 'SIGNAL BOOSTED'
+        };
+
+        const soundKeyMap = {
+            'FOLLOWER': 'follow',
+            'SUBSCRIBER': 'subscribe',
+            'BITS': 'bits',
+            'RAID': 'raid',
+            'DONATION': 'redemption'
+        };
+
+        const soundConfig = {};
+
+        // ── Socket.IO connection ──
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const CHANNEL = urlParams.get('channel') || '';
+            const BACKEND_URL = urlParams.get('backend') || 'http://localhost:3000';
+
+            function loadSocketIO(cb) {
+                const script = document.createElement('script');
+                script.onload = () => cb();
+                script.onerror = () => { setTimeout(() => loadSocketIO(cb), 2000); };
+                script.src = './js/socket.io.js';
+                document.head.appendChild(script);
+            }
+
+            function initSocket() {
+                const socket = io(BACKEND_URL, { transports: ['websocket'] });
+
+                socket.on('connect', () => {
+                    if (CHANNEL) socket.emit('join:channel', CHANNEL);
+                    fetch(BACKEND_URL + '/alert-sounds')
+                        .then(r => r.json())
+                        .then(cfg => { Object.assign(soundConfig, cfg); })
+                        .catch(() => {});
+                });
+
+                socket.on('channel:follow', ({ userDisplayName }) => {
+                    playAlert('FOLLOWER', userDisplayName);
+                });
+                socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+                    if (isGift) return;
+                    playAlert('SUBSCRIBER', userDisplayName, tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3');
+                });
+                socket.on('channel:subscription-message', ({ userDisplayName, cumulativeMonths }) => {
+                    playAlert('SUBSCRIBER', userDisplayName, cumulativeMonths + ' months');
+                });
+                socket.on('channel:subgift', ({ gifterDisplayName, amount }) => {
+                    playAlert('SUBSCRIBER', gifterDisplayName, 'x' + amount + ' subs');
+                });
+                socket.on('channel:cheer', ({ userDisplayName, bits }) => {
+                    playAlert('BITS', userDisplayName, bits + ' bits');
+                });
+                socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+                    playAlert('DONATION', userDisplayName, rewardTitle);
+                });
+                socket.on('channel:raid', ({ fromDisplayName, viewerCount }) => {
+                    playAlert('RAID', fromDisplayName, viewerCount + ' viewers');
+                });
+
+                socket.on('connect_error', (err) => console.error('Socket connect error:', err));
+            }
+
+            loadSocketIO(initSocket);
+        })();
+
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.action === 'NEW_ALERT') {
+                queue.push(e.data);
+                processQueue();
+            }
+        });
+
+        function playAlert(type, username, amount) {
+            queue.push({ type, username, amount });
+            processQueue();
+        }
+
+        function processQueue() {
+            if (isPlaying || queue.length === 0) return;
+            isPlaying = true;
+            
+            const data = queue.shift();
+            
+            elType.textContent = alertDic[data.type] || 'INCOMING';
+            elUser.textContent = data.username;
+            elExtra.textContent = data.amount ? data.amount : '';
+
+            const sKey = soundKeyMap[data.type] || '';
+            const sPath = sKey ? soundConfig[sKey] : '';
+            if (sPath) {
+                sound.src = sPath;
+                sound.currentTime = 0;
+                sound.play().catch(() => {});
+            }
+
+            container.classList.remove('hide');
+            container.classList.add('show');
+
+            setTimeout(() => {
+                container.classList.remove('show');
+                container.classList.add('hide');
+                
+                setTimeout(() => { isPlaying = false; processQueue(); }, 500);
+            }, 7500);
+        }
+    </script>
+</body>
+</html>

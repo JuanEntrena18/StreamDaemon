@@ -30,6 +30,7 @@
     "scoreboardTab": "Scoreboard",
     "gameOverlaysTab": "Spiel-Overlays",
     "bitrateTab": "Bitrate-Rechner",
+    "alertSoundsTab": "Alert-Sounds",
     "configTab": "Einstellungen"
   },
   "app": {

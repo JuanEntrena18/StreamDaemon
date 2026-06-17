@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Win95 Fullscreen Alert</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: transparent;
+            overflow: hidden; font-family: "Arial", sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #alert-container {
+            opacity: 0; transform: scale(0.9);
+            transition: all 0.2s;
+        }
+
+        #alert-container.show { opacity: 1; transform: scale(1); }
+        #alert-container.hide { opacity: 0; transform: scale(0.9); }
+
+        .win95-window {
+            background: #c0c0c0; border: 3px outset #dfdfdf;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5); width: 600px;
+        }
+
+        .title-bar {
+            background: #000080; color: #fff; padding: 5px 10px; font-weight: bold; font-size: 18px;
+            display: flex; justify-content: space-between;
+        }
+
+        .content { padding: 30px; text-align: center; }
+        
+        .icon-warning {
+            display: inline-block; width: 50px; height: 50px;
+            background: yellow; border-radius: 50%; color: black;
+            font-size: 40px; font-weight: bold; line-height: 50px;
+            border: 3px solid black; margin-bottom: 20px;
+        }
+
+        #alert-type { font-size: 24px; font-weight: bold; color: #000; margin-bottom: 10px; }
+        #alert-user { font-size: 35px; color: #000080; margin-bottom: 20px; }
+        #alert-extra { font-size: 20px; color: #000; margin-bottom: 30px; }
+
+        .progress-bar-container {
+            width: 100%; height: 25px; border: 2px inset #dfdfdf; background: #fff;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 100%; background: #000080; width: 0%;
+        }
+
+        /* La animación dura 8s exactos, que es el tiempo total de la alerta */
+        .progress-bar.animate { animation: fillBar 8s linear forwards; }
+        @keyframes fillBar { to { width: 100%; } }
+
+        .btn-ok {
+            background: #c0c0c0; border: 3px outset #dfdfdf;
+            padding: 5px 30px; font-size: 18px; font-weight: bold; font-family: "Arial";
+        }
+    </style>
+</head>
+<body>
+
+    <!-- AUDIO -->
+    <audio id="alert-sound" src="win95_chord.mp3" preload="auto"></audio>
+
+    <div id="alert-container">
+        <div class="win95-window">
+            <div class="title-bar">
+                <span>System_Alert.exe</span>
+                <span>X</span>
+            </div>
+            <div class="content">
+                <div class="icon-warning">!</div>
+                <div id="alert-type">NOTIFICACIÓN DE SISTEMA</div>
+                <div id="alert-user">USUARIO</div>
+                <div id="alert-extra"></div>
+                
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+
+                <button class="btn-ok">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const queue = [];
+        let isPlaying = false;
+        const container = document.getElementById('alert-container');
+        const progressBar = document.getElementById('progressBar');
+        const sound = document.getElementById('alert-sound');
+        
+        const elType = document.getElementById('alert-type');
+        const elUser = document.getElementById('alert-user');
+        const elExtra = document.getElementById('alert-extra');
+
+        const alertDic = {
+            'FOLLOWER': 'Nuevo Seguidor Detectado',
+            'SUBSCRIBER': 'Suscripción Instalada Correctamente',
+            'DONATION': 'Transferencia de Archivos Completada',
+            'RAID': 'Tráfico de Red Entrante (RAID)',
+            'BITS': 'Paquetes de Datos Recibidos',
+            'HOST': 'Conexión Remota Establecida (HOST)'
+        };
+
+        const soundKeyMap = {
+            'FOLLOWER': 'follow',
+            'SUBSCRIBER': 'subscribe',
+            'BITS': 'bits',
+            'RAID': 'raid',
+            'DONATION': 'redemption'
+        };
+
+        const soundConfig = {};
+
+        // ── Socket.IO connection ──
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const CHANNEL = urlParams.get('channel') || '';
+            const BACKEND_URL = urlParams.get('backend') || 'http://localhost:3000';
+
+            function loadSocketIO(cb) {
+                const script = document.createElement('script');
+                script.onload = () => cb();
+                script.onerror = () => { setTimeout(() => loadSocketIO(cb), 2000); };
+                script.src = './js/socket.io.js';
+                document.head.appendChild(script);
+            }
+
+            function initSocket() {
+                const socket = io(BACKEND_URL, { transports: ['websocket'] });
+
+                socket.on('connect', () => {
+                    if (CHANNEL) socket.emit('join:channel', CHANNEL);
+                    fetch(BACKEND_URL + '/alert-sounds')
+                        .then(r => r.json())
+                        .then(cfg => { Object.assign(soundConfig, cfg); })
+                        .catch(() => {});
+                });
+
+                socket.on('channel:follow', ({ userDisplayName }) => {
+                    playAlert('FOLLOWER', userDisplayName);
+                });
+                socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+                    if (isGift) return;
+                    playAlert('SUBSCRIBER', userDisplayName, tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3');
+                });
+                socket.on('channel:subscription-message', ({ userDisplayName, cumulativeMonths }) => {
+                    playAlert('SUBSCRIBER', userDisplayName, cumulativeMonths + ' meses');
+                });
+                socket.on('channel:subgift', ({ gifterDisplayName, amount }) => {
+                    playAlert('SUBSCRIBER', gifterDisplayName, 'x' + amount + ' subs');
+                });
+                socket.on('channel:cheer', ({ userDisplayName, bits }) => {
+                    playAlert('BITS', userDisplayName, bits + ' bits');
+                });
+                socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+                    playAlert('DONATION', userDisplayName, rewardTitle);
+                });
+                socket.on('channel:raid', ({ fromDisplayName, viewerCount }) => {
+                    playAlert('RAID', fromDisplayName, viewerCount + ' espectadores');
+                });
+
+                socket.on('connect_error', (err) => console.error('Socket connect error:', err));
+            }
+
+            loadSocketIO(initSocket);
+        })();
+
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.action === 'NEW_ALERT') {
+                queue.push(e.data);
+                processQueue();
+            }
+        });
+
+        function playAlert(type, username, amount) {
+            queue.push({ type, username, amount });
+            processQueue();
+        }
+
+        function processQueue() {
+            if (isPlaying || queue.length === 0) return;
+            isPlaying = true;
+            
+            const data = queue.shift();
+            
+            elType.textContent = alertDic[data.type] || 'Alerta de Sistema';
+            elUser.textContent = data.username;
+            elExtra.textContent = data.amount ? data.amount : '';
+
+            const sKey = soundKeyMap[data.type] || '';
+            const sPath = sKey ? soundConfig[sKey] : '';
+            if (sPath) {
+                sound.src = sPath;
+                sound.currentTime = 0;
+                sound.play().catch(() => {});
+            }
+
+            container.classList.remove('hide');
+            container.classList.add('show');
+            
+            // Reiniciar animación de barra
+            progressBar.classList.remove('animate');
+            void progressBar.offsetWidth; // trigger reflow
+            progressBar.classList.add('animate');
+
+            setTimeout(() => {
+                container.classList.remove('show');
+                container.classList.add('hide');
+                
+                setTimeout(() => { isPlaying = false; processQueue(); }, 500);
+            }, 7500);
+        }
+    </script>
+</body>
+</html>
