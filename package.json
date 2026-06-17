@@ -5,6 +5,7 @@
     "packages/*"
   ],
   "scripts": {
+    "postinstall": "npx prisma generate --schema=packages/desktop/prisma/schema.prisma",
     "predev": "npm run build -w packages/shared",
     "dev": "concurrently -n api,web -c blue,green \"npm run dev -w packages/backend\" \"npm run dev -w packages/frontend\"",
     "dev:desktop": "concurrently -n vite,electron -c green,cyan --kill-others \"npm run dev -w packages/frontend\" \"npm run dev -w packages/desktop\"",
