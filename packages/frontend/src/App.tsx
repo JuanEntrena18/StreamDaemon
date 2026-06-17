@@ -89,7 +89,7 @@ export function App() {
         { id: 'timer' as Tab,      icon: '⏱️', label: s('temporizadorTab') },
         { id: 'scoreboard' as Tab, icon: '🏆', label: s('scoreboardTab') },
         { id: 'bitrate' as Tab,   icon: '📊', label: s('bitrateTab') },
-        { id: 'alertsounds' as Tab, icon: '🔊', label: s('alertSoundsTab') },
+        { id: 'alertsounds' as Tab, icon: '🔊', label: s('alertsoundsTab') },
       ]},
       { id: 'config', label: s('configuracion'), items: [{ id: 'config' as Tab, icon: '⚙️', label: s('configTab') }] },
     ] as NavSection[];
