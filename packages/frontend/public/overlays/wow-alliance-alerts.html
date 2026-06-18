@@ -249,10 +249,22 @@
     <div id="particles-container"></div>
   </div>
 
+  <audio id="alert-sound" preload="auto"></audio>
+
   <script>
     const params = new URLSearchParams(window.location.search);
     const username = params.get('username') || 'Alianza';
     const DURATION = parseInt(params.get('duration') || '8', 10) * 1000;
+
+    const sound = document.getElementById('alert-sound');
+    const soundConfig = {};
+    const soundKeyMap = {
+      follow: 'follow',
+      sub: 'subscribe',
+      donate: 'redemption',
+      cheer: 'bits',
+      raid: 'raid',
+    };
     document.title = `StreamForge – WoW Alianza Alertas · ${username}`;
 
     const TYPES = {
@@ -376,6 +388,15 @@
       container.appendChild(card);
       requestAnimationFrame(() => card.classList.add('visible'));
 
+      // Play sound
+      const sKey = soundKeyMap[type] || '';
+      const sPath = sKey ? soundConfig[sKey] : '';
+      if (sPath) {
+        sound.src = BACKEND_URL + '/alert-sounds/file/' + encodeURIComponent(sPath);
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+      }
+
       setTimeout(() => {
         if (particleInterval) clearInterval(particleInterval);
         card.classList.remove('visible');
@@ -395,6 +416,10 @@
       const socket = io(BACKEND_URL, { transports: ['websocket'] });
       socket.on('connect', () => {
         if (CHANNEL) socket.emit('join:channel', CHANNEL);
+        fetch(BACKEND_URL + '/alert-sounds')
+          .then(r => r.json())
+          .then(cfg => { Object.assign(soundConfig, cfg); })
+          .catch(() => {});
       });
       socket.on('connect_error', (err) => {
         console.error('Socket connection error:', err.message);

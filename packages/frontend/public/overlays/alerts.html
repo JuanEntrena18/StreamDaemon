@@ -213,6 +213,8 @@
 
 <canvas id="confetti"></canvas>
 
+<audio id="alert-sound" preload="auto"></audio>
+
 <div id="alert-center"></div>
 
 <div id="demo-badge">🧪 MODO PRUEBA</div>
@@ -241,6 +243,18 @@ const BACKEND_URL = new URLSearchParams(location.search).get('backend') || 'http
 const queue = [];
 let busy = false;
 const SHOW_DURATION = 5000;
+
+const sound = document.getElementById('alert-sound');
+const soundConfig = {};
+const soundKeyMap = {
+  follow: 'follow',
+  sub: 'subscribe',
+  resub: 'subscribe',
+  subgift: 'subscribe',
+  bits: 'bits',
+  raid: 'raid',
+  redemption: 'redemption',
+};
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -291,6 +305,15 @@ function render({ type, user, detail, msg }) {
     ${msg    ? `<div class="alert-msg">"${escHtml(msg)}"</div>` : ''}
   `;
   zone.appendChild(card);
+
+  // Play sound
+  const sKey = soundKeyMap[type] || '';
+  const sPath = sKey ? soundConfig[sKey] : '';
+  if (sPath) {
+    sound.src = BACKEND_URL + '/alert-sounds/file/' + encodeURIComponent(sPath);
+    sound.currentTime = 0;
+    sound.play().catch(() => {});
+  }
 
   // Confetti burst
   confettiBurst(type);
@@ -365,6 +388,10 @@ function initSocket() {
 
   socket.on('connect', () => {
     if (CHANNEL) socket.emit('join:channel', CHANNEL);
+    fetch(BACKEND_URL + '/alert-sounds')
+      .then(r => r.json())
+      .then(cfg => { Object.assign(soundConfig, cfg); })
+      .catch(() => {});
   });
   socket.on('connect_error', (err) => {
     console.error('Socket connection error:', err.message);
