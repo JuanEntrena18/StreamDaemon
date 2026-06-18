@@ -58,7 +58,7 @@ export function SplashScreen({ onReady }: Props) {
         }} />
 
         <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--sf-text-2)', lineHeight: 1.8 }}>
-          <div>v0.2.0</div>
+          <div>v0.2.1</div>
           <div>by Cyber Haute Couture</div>
         </div>
 
