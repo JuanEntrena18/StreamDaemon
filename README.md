@@ -31,9 +31,9 @@ Disponible en dos modos:
 - **🔐 Autenticación OAuth** — Login con Twitch. En navegador: flujo Authorization Code Grant con redirect. En escritorio: flujo **Device Code Grant** (el usuario ve un código en la app y lo ingresa en twitch.tv/activate). Tokens persistidos con refresco automático. Logout completo.
 - **🖥️ Dashboard premium** — Interfaz con sidebar de navegación, glassmorphism, animaciones Framer Motion, paleta violeta/índigo, badge de usuario Twitch y estado de conexión en tiempo real.
 - **📊 Fortnite Stats Overlay** — Panel configurable en el overlay de Fortnite que muestra kills, wins, partidas, K/D y win rate desde la API de [fortnite-api.com](https://fortnite-api.com). Cada usuario registra su propia API Key desde el panel. Cache de 5 min.
-- **🧮 Calculadora de Bitrate** — Calcula el bitrate óptimo para tu stream con recomendación automática según tu velocidad de subida. Ingresá tu upload (o medilo con fast.com) y la herramienta sugiere la mejor resolución, FPS y bitrate. Ajuste manual fino con selectores de resolución (1080p/900p/720p/480p/personalizada), FPS (60/30/24), BPP, audio y % de uso de subida. Muestra comparación "tu conexión vs. lo necesario" y advertencia del límite de 6000 kbps de Twitch. Incluye guía paso a paso de configuración en OBS con los valores calculados. Sin backend — 100% client-side.
+- **🧮 Calculadora de Bitrate** — Calcula el bitrate óptimo para tu stream con recomendación automática según tu velocidad de subida. Introduce tu upload (o mídelo con fast.com) y la herramienta sugiere la mejor resolución, FPS y bitrate. Ajuste manual fino con selectores de resolución (1080p/900p/720p/480p/personalizada), FPS (60/30/24), BPP, audio y % de uso de subida. Muestra comparación "tu conexión vs. lo necesario" y advertencia del límite de 6000 kbps de Twitch. Incluye guía paso a paso de configuración en OBS con los valores calculados. Sin backend — 100% client-side.
 - **📋 Feed de actividad** — Registro cronológico de follows, subs, bits y raids en el canal con filtros y persistencia en archivo.
-- **🎮 Editor de stream integrado** — Cambiá título, juego y tags del directo desde el dashboard con buscador de juegos y selector de tags.
+- **🎮 Editor de stream integrado** — Cambia título, juego y tags del directo desde el dashboard con buscador de juegos y selector de tags.
 
 ---
 
