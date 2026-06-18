@@ -104,7 +104,7 @@ Panel (Vite): `http://localhost:5173` · API: `http://localhost:3000`
 Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 
 | Overlay | URL |
-|---|---|---|
+|---|---|
 | Chat | `http://localhost:3000/overlay.html?mode=chat&channel=tucanal` |
 | Sorteos | `http://localhost:3000/overlay.html?mode=giveaway&channel=tucanal` |
 | Predicciones | `http://localhost:3000/overlay.html?mode=prediction&channel=tucanal` |
@@ -124,11 +124,11 @@ Agrega un navegador **Browser Source** en OBS y usa las siguientes URLs:
 
 > Los overlays HTML independientes solo muestran datos reales del backend. Para vista previa con datos simulados añade `&demo=true` a la URL. Cuando el modo demo está activo se muestra un badge **🧪 MODO PRUEBA** permanente en pantalla.
 
-Para cambiar el tema visual del chat agrega `&theme=subnautica2`, `&theme=poe2`, `&theme=wow`, `&theme=alliance`, `&theme=8bits`, `&theme=win95`, `&theme=retrowave` o `&theme=tactical`. También puedes usar overlays HTML independientes por tema seleccionándolos desde el panel de control.
+Para cambiar el tema visual del chat añade `&theme=subnautica2`, `&theme=poe2`, `&theme=wow`, `&theme=alliance`, `&theme=8bits`, `&theme=win95`, `&theme=retrowave` o `&theme=tactical`. También puedes usar overlays HTML independientes por tema seleccionándolos desde el panel de control.
 
 > En la ventana transparente de escritorio, los ajustes de tipografía, tamaño y modo de fondo se pueden modificar desde la barra de control superior (⚙) o desde el panel de Chat en la aplicación. La configuración persiste entre sesiones.
 
-> En **modo desarrollo** (`npm run dev`), usá `localhost:5173` en lugar de `localhost:3000`. El overlay de Fortnite necesita el parámetro `&backend=http://localhost:3000` en ese caso (se agrega automáticamente al copiar la URL desde el panel).
+> En **modo desarrollo** (`npm run dev`), usa `localhost:5173` en lugar de `localhost:3000`. El overlay de Fortnite necesita el parámetro `&backend=http://localhost:3000` en ese caso (se añade automáticamente al copiar la URL desde el panel).
 
 > **Arquitectura de conexión Socket.IO en overlays standalone:** Fastify v5 intercepta todas las peticiones HTTP a `localhost:3000`, incluyendo `/socket.io/socket.io.js` (cliente) y los POST de polling de Socket.IO, devolviendo 404/401 antes de que el handler de Socket.IO pueda procesarlos. La solución: (1) usar solo transporte WebSocket (`transports: ['websocket']`) — Fastify no intercepta el upgrade HTTP que WebSocket utiliza, (2) servir el cliente Socket.IO desde Vite (`/overlays/js/socket.io.js`) copiado de `node_modules/socket.io/client-dist/`, y (3) asignar `script.onload / onerror` **antes** de `script.src` para evitar race conditions con la caché del navegador.
 
@@ -194,11 +194,11 @@ StreamForge/
 
 ## 🤝 Contribuir
 
-1. Hacé fork del proyecto
-2. Creá una rama (`git checkout -b feature/mi-feature`)
-3. Hacé commit (`git commit -m 'feat: agregar mi feature'`)
-4. Hacé push (`git push origin feature/mi-feature`)
-5. Abrí un Pull Request
+1. Haz fork del proyecto
+2. Crea una rama (`git checkout -b feature/mi-feature`)
+3. Haz commit (`git commit -m 'feat: añadir mi feature'`)
+4. Haz push (`git push origin feature/mi-feature`)
+5. Abre un Pull Request
 
 ---
 
