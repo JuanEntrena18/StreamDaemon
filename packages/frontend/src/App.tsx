@@ -21,12 +21,13 @@ import { SubathonPanel } from './components/SubathonPanel';
 import { SplashScreen } from './components/SplashScreen';
 import { SecurityPanel } from './components/SecurityPanel';
 import { BitrateCalculatorPanel } from './components/BitrateCalculatorPanel';
+import { VerticalStreamingPanel } from './components/VerticalStreamingPanel';
 import { AlertSoundsPanel } from './components/AlertSoundsPanel';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config' | 'bitrate' | 'alertsounds';
+type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config' | 'bitrate' | 'vertical' | 'alertsounds';
 
 export function App() {
   const { t, locale, setLocale } = useTranslation();
@@ -88,8 +89,11 @@ export function App() {
         { id: 'hud' as Tab,        icon: '📊', label: s('hudTab') },
         { id: 'timer' as Tab,      icon: '⏱️', label: s('temporizadorTab') },
         { id: 'scoreboard' as Tab, icon: '🏆', label: s('scoreboardTab') },
-        { id: 'bitrate' as Tab,   icon: '📊', label: s('bitrateTab') },
         { id: 'alertsounds' as Tab, icon: '🔊', label: s('alertsoundsTab') },
+      ]},
+      { id: 'utilidades-section', label: s('utilidades'), items: [
+        { id: 'bitrate' as Tab,  icon: '🧮', label: s('bitrateTab') },
+        { id: 'vertical' as Tab, icon: '📱', label: s('verticalTab') },
       ]},
       { id: 'config', label: s('configuracion'), items: [{ id: 'config' as Tab, icon: '⚙️', label: s('configTab') }] },
     ] as NavSection[];
@@ -410,6 +414,7 @@ export function App() {
                 {activeTab === 'scoreboard'  && <ScoreboardPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'obs'         && <ObsPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'bitrate'    && <BitrateCalculatorPanel channel={channel} backendUrl={BACKEND_URL} />}
+                {activeTab === 'vertical'   && <VerticalStreamingPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'alertsounds' && <AlertSoundsPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'config'      && <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />}
               </motion.div>

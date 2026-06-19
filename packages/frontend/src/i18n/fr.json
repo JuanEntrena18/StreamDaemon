@@ -8,6 +8,7 @@
     "mod": "MOD",
     "comandos": "COMMANDES",
     "herramientas": "Outils",
+    "utilidades": "UTILITAIRES",
     "configuracion": "Configuration",
     "gestorTab": "Gestion du Stream",
     "trackerTab": "Twitch Tracker",
@@ -30,6 +31,7 @@
     "scoreboardTab": "Scoreboard",
     "gameOverlaysTab": "Overlays Jeux",
     "bitrateTab": "Calculateur de Débit",
+    "verticalTab": "Streaming Vertical",
     "alertsoundsTab": "Sons d'Alertes",
     "configTab": "Configuration"
   },
