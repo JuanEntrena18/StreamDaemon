@@ -1,23 +1,21 @@
 import { FastifyInstance } from 'fastify';
 import { authProvider, currentUser } from '../auth/index.js';
-import { config } from '../config.js';
 
-const GQL_CLIENT_ID = process.env.TWITCH_CLIENT_ID || config.TWITCH_CLIENT_ID || '';
+// gql.twitch.tv only accepts tokens issued against Twitch's own web Client-ID.
+// The developer's app Client-ID works for Helix API but not for the internal GQL endpoint.
+const TWITCH_WEB_CLIENT_ID = 'kimne78kx3ncx6brgo4mv6wki5h1ko';
 
 async function queryGQL(query: string, variables: Record<string, unknown>) {
   if (!authProvider || !currentUser) throw new Error('Not authenticated');
   const token = await authProvider.getAccessTokenForUser(currentUser.id);
   const accessToken = token?.accessToken;
 
-  if (!GQL_CLIENT_ID) {
-    throw new Error('TWITCH_CLIENT_ID is not configured');
-  }
   if (!accessToken) {
     throw new Error('No OAuth token available');
   }
 
   const headers: Record<string, string> = {
-    'Client-ID': GQL_CLIENT_ID,
+    'Client-ID': TWITCH_WEB_CLIENT_ID,
     'Authorization': `OAuth ${accessToken}`,
     'Content-Type': 'application/json',
   };
@@ -33,7 +31,12 @@ async function queryGQL(query: string, variables: Record<string, unknown>) {
     throw new Error(`GQL HTTP ${res.status}: ${text}`);
   }
 
-  return res.json();
+  const json = await res.json();
+  if (json?.errors) {
+    throw new Error(`GQL error: ${JSON.stringify(json.errors)}`);
+  }
+
+  return json;
 }
 
 export function setupAchievements(app: FastifyInstance) {
@@ -78,12 +81,6 @@ export function setupAchievements(app: FastifyInstance) {
       `;
 
       const data = await queryGQL(query, {});
-
-      if (data?.errors) {
-        req.log.error({ gqlErrors: data.errors }, 'GQL achievements query returned errors');
-        return reply.status(500).send({ error: 'Failed to fetch achievements', details: data.errors });
-      }
-
       const userData = data?.data?.currentUser;
       if (!userData) {
         req.log.error({ gqlResponse: data }, 'GQL achievements query missing user data');
