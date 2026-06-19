@@ -2,19 +2,36 @@ import { FastifyInstance } from 'fastify';
 import { authProvider, currentUser } from '../auth/index.js';
 import { config } from '../config.js';
 
+const GQL_CLIENT_ID = process.env.TWITCH_CLIENT_ID || config.TWITCH_CLIENT_ID || '';
+
 async function queryGQL(query: string, variables: Record<string, unknown>) {
   if (!authProvider || !currentUser) throw new Error('Not authenticated');
   const token = await authProvider.getAccessTokenForUser(currentUser.id);
+  const accessToken = token?.accessToken;
+
+  if (!GQL_CLIENT_ID) {
+    throw new Error('TWITCH_CLIENT_ID is not configured');
+  }
+  if (!accessToken) {
+    throw new Error('No OAuth token available');
+  }
+
+  const headers: Record<string, string> = {
+    'Client-ID': GQL_CLIENT_ID,
+    'Authorization': `OAuth ${accessToken}`,
+    'Content-Type': 'application/json',
+  };
 
   const res = await fetch('https://gql.twitch.tv/gql', {
     method: 'POST',
-    headers: {
-      'Client-ID': config.TWITCH_CLIENT_ID,
-      'Authorization': `OAuth ${token?.accessToken}`,
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({ query, variables }),
   });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`GQL HTTP ${res.status}: ${text}`);
+  }
 
   return res.json();
 }
