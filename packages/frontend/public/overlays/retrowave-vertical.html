@@ -164,6 +164,9 @@ body, html {
     socket.on('channel:chat', (d) => {
       appendMessage(d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo', d.text || '', d.user?.color || '#ff00aa');
     });
+    socket.on('chat:message', (d) => {
+      appendMessage(d.user?.displayName || 'Anónimo', d.text || '', d.user?.color || '#ff00aa');
+    });
     socket.on('channel:follow', (d) => { pushEvent('&#9733; <b>'+(d.userDisplayName||d.userName||'Alguien')+'</b> nos sigue!'); });
     socket.on('channel:subscribe', (d) => { pushEvent('&#127881; <b>'+(d.userDisplayName||d.userName||'Alguien')+'</b> se suscribi&oacute;!'); });
     socket.on('channel:cheer', (d) => { pushEvent('&#128142; <b>'+(d.userDisplayName||d.userName||'An&oacute;nimo')+'</b> anim&oacute; con '+(d.bits||0)+' bits!'); });
