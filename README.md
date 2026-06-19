@@ -20,6 +20,7 @@ Available in two modes:
 - **🎁 Interactive Giveaways** — `!giveaway` chat command to participate. Control panel with canvas wheel, spin duration selector (10/15/20s) and bulk name import. Dedicated overlay with live participant list and animated wheel with giant winner display.
 - **📊 Predictions** — Twitch Predictions API integration. Create polls from the control panel with automatic resolution.
 - **📈 Twitch Tracker** — Historical channel stats with period selector (7d, 30d, 90d, all time). Aggregate metric cards (hours, peak viewers, followers), last stream summary with views, followers, subs, bits and estimated revenue. Interactive SVG chart of stream evolution. Expandable recent streams list with detailed metrics. Multi-factor smart advice engine (frequency, duration, audience, monetization) with optional local Ollama AI integration.
+- **🏆 Twitch Achievements** — Real-time progress tracking toward Affiliate, Partner, and Build a Community milestones via Twitch's internal GraphQL API. Progress bars with current/goal counts, completion status, invitation status, and badge display. Integrated under the Statistics section alongside Twitch Tracker.
 - **📊 Stream HUD** — Live stats panel (viewers, followers, subs, uptime, game) with auto-polling and informative overlay.
 - **⏱️ Timer** — Configurable countdown from the panel with start, pause, resume and reset. Overlay with progress bar, visual alert in the last 30s and "Time's up" status.
 - **🏆 Scoreboard & Fighter Overlay** — Live tournament scoreboard with players and scores. **Fighter Overlay**: fighting game overlay with animated health bars (spring physics), character portraits, rounds, server-synced countdown timer and WIN/KO announcements. Ideal for fighting games, 1v1 battle royale or head-to-head competitions.
@@ -169,6 +170,7 @@ StreamForge/
 │   │   ├── activity/      # Channel activity feed
 │   │   ├── commands/      # Custom chat commands
 │   │   ├── tracker/       # Twitch Tracker (stats, streams, advice engine)
+│   │   ├── achievements/  # Twitch Achievements (GQL API)
 │   │   ├── security/      # Anti-Bots (follow bot detection, spam filter, auto-ban)
 │   │   └── fortnite/      # Fortnite stats (config + API)
 │   ├── frontend/
@@ -209,6 +211,7 @@ StreamForge/
 | Feature | Description |
 |---|---|
 | **🎮 Stream Deck integration** | Native Elgato Stream Deck plugin to control StreamForger from physical buttons: start/stop Subathon, launch giveaway, ban user, change stream title and more |
+| **🎤 Twitch EventSub enhancements** | More EventSub subscription types: Hype Train, Channel Points Automatic Rewards, Stream Online/Offline notifications with configurable actions |
 | **🎬 TikTok clip management** | Create, edit and automatically export stream clips to TikTok with vertical format, auto-captions and scheduled publishing |
 
 ---

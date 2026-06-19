@@ -23,6 +23,7 @@ import { setupCommands } from './commands/index.js';
 import { setupFortnite } from './fortnite/index.js';
 import { setupSecurity } from './security/index.js';
 import { setupAlertSounds } from './alert-sounds/index.js';
+import { setupAchievements } from './achievements/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -102,6 +103,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupFortnite(app);
   setupSecurity(app);
   setupAlertSounds(app);
+  setupAchievements(app);
 
   app.get('/health', async () => ({ status: 'ok', timestamp: Date.now() }));
 

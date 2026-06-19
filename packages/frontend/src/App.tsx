@@ -23,13 +23,14 @@ import { SecurityPanel } from './components/SecurityPanel';
 import { BitrateCalculatorPanel } from './components/BitrateCalculatorPanel';
 import { VerticalStreamingPanel } from './components/VerticalStreamingPanel';
 import { AlertSoundsPanel } from './components/AlertSoundsPanel';
+import { AchievementsPanel } from './components/AchievementsPanel';
 import { TtsProvider } from './contexts/TtsContext';
 import { TtsManager } from './components/TtsManager';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config' | 'bitrate' | 'vertical' | 'alertsounds';
+type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config' | 'bitrate' | 'vertical' | 'alertsounds' | 'achievements';
 
 export function App() {
   const { t, locale, setLocale } = useTranslation();
@@ -78,7 +79,10 @@ export function App() {
     const s = (k: string) => t(`nav.${k}`);
     return [
       { id: 'gestor', label: s('gestorDelStream'), items: [{ id: 'dashboard' as Tab, icon: '📡', label: s('gestorTab') }] },
-      { id: 'tracker-section', label: s('estadisticas'), items: [{ id: 'tracker' as Tab, icon: '📈', label: s('trackerTab') }] },
+      { id: 'tracker-section', label: s('estadisticas'), items: [
+        { id: 'tracker' as Tab, icon: '📈', label: s('trackerTab') },
+        { id: 'achievements' as Tab, icon: '🏆', label: s('achievementsTab') },
+      ]},
       { id: 'chat-section', label: s('chat'), items: [{ id: 'chat' as Tab, icon: '💬', label: s('chatTab') }] },
       { id: 'security-section', label: s('seguridad'), items: [{ id: 'security' as Tab, icon: '🔒', label: s('antiBotsTab') }] },
       { id: 'mod-section', label: s('mod'), items: [{ id: 'mod' as Tab, icon: '🛡️', label: s('moderacionTab') }] },
@@ -420,6 +424,7 @@ export function App() {
                 {activeTab === 'bitrate'    && <BitrateCalculatorPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'vertical'   && <VerticalStreamingPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'alertsounds' && <AlertSoundsPanel channel={channel} backendUrl={BACKEND_URL} />}
+                {activeTab === 'achievements' && <AchievementsPanel channel={channel} backendUrl={BACKEND_URL} />}
                 {activeTab === 'config'      && <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />}
               </motion.div>
             </AnimatePresence>
