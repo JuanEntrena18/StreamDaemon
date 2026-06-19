@@ -901,7 +901,10 @@
     "invitationStatus": "Einladungsstatus",
     "affiliate": "Affiliate",
     "partner": "Partner",
-    "community": "Community"
+    "community": "Community",
+    "viewCount": "Gesamtaufrufe",
+    "apiNote": "Twitch stellt nicht alle Erfolgsdaten über die API bereit. Klicken Sie unten, um Ihren vollständigen Fortschritt auf Twitch zu sehen.",
+    "viewOnTwitch": "Auf Twitch ansehen"
   },
   "common": {
     "save": "Speichern",

@@ -1,49 +1,25 @@
 import { FastifyInstance } from 'fastify';
 import { authProvider, currentUser } from '../auth/index.js';
+import { config } from '../config.js';
 
-// Twitch's internal GQL endpoint (gql.twitch.tv) requires both a web Client-ID
-// and its own OAuth token (not the developer app token). Since we can't use GQL
-// directly, we compute achievement progress from the Helix API instead.
-const TWITCH_WEB_CLIENT_ID = 'kimne78kx3ncx6brgo4mv6wki5h1ko';
-
-async function getIntegrityToken(): Promise<string> {
-  const res = await fetch('https://gql.twitch.tv/integrity', {
-    headers: { 'Client-ID': TWITCH_WEB_CLIENT_ID },
-  });
-  if (!res.ok) throw new Error(`Integrity API: HTTP ${res.status}`);
-  const data = await res.json() as { token: string };
-  return data.token;
-}
-
-async function queryGQL(query: string, variables: Record<string, unknown>) {
+async function helixGet(path: string) {
   if (!authProvider || !currentUser) throw new Error('Not authenticated');
   const token = await authProvider.getAccessTokenForUser(currentUser.id);
-  const accessToken = token?.accessToken;
-  if (!accessToken) throw new Error('No OAuth token available');
+  if (!token?.accessToken) throw new Error('No OAuth token available');
 
-  const integrity = await getIntegrityToken();
-
-  const res = await fetch('https://gql.twitch.tv/gql', {
-    method: 'POST',
+  const res = await fetch(`https://api.twitch.tv/helix${path}`, {
     headers: {
-      'Client-ID': TWITCH_WEB_CLIENT_ID,
-      'Authorization': `OAuth ${accessToken}`,
-      'Client-Integrity': integrity,
-      'Content-Type': 'application/json',
+      'Client-ID': config.TWITCH_CLIENT_ID,
+      'Authorization': `Bearer ${token.accessToken}`,
     },
-    body: JSON.stringify({ query, variables }),
   });
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(`GQL HTTP ${res.status}: ${text}`);
+    throw new Error(`Helix HTTP ${res.status}: ${text}`);
   }
 
-  const json = await res.json();
-  if (json?.errors) {
-    throw new Error(`GQL error: ${JSON.stringify(json.errors)}`);
-  }
-
+  const json = await res.json() as { data?: unknown[] };
   return json;
 }
 
@@ -54,52 +30,27 @@ export function setupAchievements(app: FastifyInstance) {
     }
 
     try {
-      const query = `
-        query GetAchievements {
-          currentUser {
-            login
-            displayName
-            profileImageURL(width: 300)
-            quests {
-              pathToAffiliate {
-                averageViewers { current goal }
-                badgeURL
-                completedAt
-                followers { current goal }
-                hoursStreamed { current goal }
-                uniqueDaysStreamed { current goal }
-                affiliateInvitationStatus
-              }
-              pathToPartner {
-                averageViewers30 { current goal }
-                averageViewers60 { current goal }
-                uniqueDaysStreamed { current goal }
-                completedAt
-                affiliateInvitationStatus
-              }
-              buildACommunity {
-                enabled { current goal }
-                communityServer { current goal }
-                hostedCommunityEvents { current goal }
-                completedAt
-              }
-            }
-          }
-        }
-      `;
+      const [userRes, followsRes] = await Promise.allSettled([
+        helixGet(`/users?id=${currentUser.id}`),
+        helixGet(`/channels/followers?broadcaster_id=${currentUser.id}&moderator_id=${currentUser.id}&first=1`),
+      ]);
 
-      const data = await queryGQL(query, {});
-      const userData = data?.data?.currentUser;
-      if (!userData) {
-        req.log.error({ gqlResponse: data }, 'GQL achievements query missing user data');
-        return reply.status(500).send({ error: 'Failed to fetch achievements', details: 'No user data in GQL response' });
-      }
+      const userData = userRes.status === 'fulfilled'
+        ? (userRes.value.data as Array<{ id: string; login: string; display_name: string; profile_image_url: string; view_count: number }>)?.[0]
+        : null;
+
+      const followCount = followsRes.status === 'fulfilled'
+        ? (followsRes.value as unknown as { total: number })?.total ?? null
+        : null;
 
       return reply.send({
         userId: currentUser.id,
-        displayName: userData.displayName ?? currentUser.displayName,
-        avatarUrl: userData.profileImageURL ?? null,
-        quests: userData.quests ?? null,
+        login: currentUser.login,
+        displayName: userData?.display_name ?? currentUser.displayName,
+        avatarUrl: userData?.profile_image_url ?? null,
+        viewCount: userData?.view_count ?? null,
+        followers: followCount,
+        twitchAchievementsUrl: `https://www.twitch.tv/${currentUser.login}/achievements`,
       });
     } catch (err) {
       req.log.error(err, 'Achievements fetch failed');

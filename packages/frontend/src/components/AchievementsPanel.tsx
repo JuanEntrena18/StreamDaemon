@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n/context';
-import type { AchievementsResponse } from '@streamforger/shared';
+
+interface AchievementsData {
+  userId: string;
+  login: string;
+  displayName: string;
+  avatarUrl: string | null;
+  viewCount: number | null;
+  followers: number | null;
+  twitchAchievementsUrl: string;
+}
 
 interface Props {
   channel: string;
@@ -9,7 +18,7 @@ interface Props {
 
 export function AchievementsPanel({ channel, backendUrl }: Props) {
   const { t } = useTranslation();
-  const [data, setData] = useState<AchievementsResponse | null>(null);
+  const [data, setData] = useState<AchievementsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -46,7 +55,7 @@ export function AchievementsPanel({ channel, backendUrl }: Props) {
     );
   }
 
-  if (!data?.quests) {
+  if (!data) {
     return (
       <div style={{ maxWidth: 700 }}>
         <h2>{t('achievements.title')}</h2>
@@ -54,37 +63,6 @@ export function AchievementsPanel({ channel, backendUrl }: Props) {
       </div>
     );
   }
-
-  const { quests } = data;
-
-  function QuestBar({ label, current, goal }: { label: string; current: number; goal: number }) {
-    const pct = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
-    const done = current >= goal && goal > 0;
-    return (
-      <div style={{ marginBottom: '0.75rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.25rem' }}>
-          <span style={{ color: 'var(--sf-text-2)' }}>{label}</span>
-          <span style={{ color: 'var(--sf-text)', fontWeight: 600 }}>{current} / {goal}</span>
-        </div>
-        <div style={{ height: 8, background: 'var(--sf-border)', borderRadius: 99, overflow: 'hidden' }}>
-          <div style={{
-            width: `${pct}%`, height: '100%',
-            background: done
-              ? 'linear-gradient(90deg, #22c55e, #16a34a)'
-              : 'linear-gradient(90deg, var(--sf-primary), #6366f1)',
-            borderRadius: 99, transition: 'width 0.5s ease',
-          }} />
-        </div>
-      </div>
-    );
-  }
-
-  const badge = (completed: string | null | undefined) => {
-    if (completed) {
-      return <span style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', padding: '0.2rem 0.6rem', borderRadius: 99, fontSize: '0.75rem', fontWeight: 600 }}>✓ {t('achievements.completed')}</span>;
-    }
-    return <span style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--sf-text-3)', padding: '0.2rem 0.6rem', borderRadius: 99, fontSize: '0.75rem' }}>{t('achievements.inProgress')}</span>;
-  };
 
   return (
     <div style={{ maxWidth: 700 }}>
@@ -97,55 +75,59 @@ export function AchievementsPanel({ channel, backendUrl }: Props) {
       </div>
       <p style={{ marginBottom: '1.5rem', color: 'var(--sf-text-2)' }}>{t('achievements.subtitle')}</p>
 
-      {/* ── Affiliate Status ── */}
-      {quests.pathToAffiliate && (
-        <div className="sf-card" style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0, fontSize: '1rem' }}>{t('achievements.pathToAffiliate')}</h3>
-            {badge(quests.pathToAffiliate.completedAt)}
-          </div>
-          {quests.pathToAffiliate.affiliateInvitationStatus && (
-            <p style={{ fontSize: '0.8rem', color: 'var(--sf-text-3)', marginBottom: '0.75rem' }}>
-              {t('achievements.invitationStatus')}: {quests.pathToAffiliate.affiliateInvitationStatus}
-            </p>
-          )}
-          <QuestBar label={t('achievements.avgViewers')} current={quests.pathToAffiliate.averageViewers.current} goal={quests.pathToAffiliate.averageViewers.goal} />
-          <QuestBar label={t('achievements.followers')} current={quests.pathToAffiliate.followers.current} goal={quests.pathToAffiliate.followers.goal} />
-          <QuestBar label={t('achievements.hoursStreamed')} current={quests.pathToAffiliate.hoursStreamed.current} goal={quests.pathToAffiliate.hoursStreamed.goal} />
-          <QuestBar label={t('achievements.uniqueDays')} current={quests.pathToAffiliate.uniqueDaysStreamed.current} goal={quests.pathToAffiliate.uniqueDaysStreamed.goal} />
+      <div className="sf-card" style={{ marginBottom: '1.5rem', padding: '1.5rem' }}>
+        <h3 style={{ margin: '0 0 1rem', fontSize: '1rem' }}>{t('achievements.pathToAffiliate')}</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <MetricRow label={t('achievements.followers')} current={data.followers ?? 0} goal={50} />
+          <MetricRow label={t('achievements.viewCount')} current={data.viewCount ?? 0} goal={50000} />
         </div>
-      )}
+      </div>
 
-      {/* ── Partner Status ── */}
-      {quests.pathToPartner && (
-        <div className="sf-card" style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0, fontSize: '1rem' }}>{t('achievements.pathToPartner')}</h3>
-            {badge(quests.pathToPartner.completedAt)}
-          </div>
-          {quests.pathToPartner.affiliateInvitationStatus && (
-            <p style={{ fontSize: '0.8rem', color: 'var(--sf-text-3)', marginBottom: '0.75rem' }}>
-              {t('achievements.invitationStatus')}: {quests.pathToPartner.affiliateInvitationStatus}
-            </p>
-          )}
-          <QuestBar label={t('achievements.avgViewers30')} current={quests.pathToPartner.averageViewers30.current} goal={quests.pathToPartner.averageViewers30.goal} />
-          <QuestBar label={t('achievements.avgViewers60')} current={quests.pathToPartner.averageViewers60.current} goal={quests.pathToPartner.averageViewers60.goal} />
-          <QuestBar label={t('achievements.uniqueDays')} current={quests.pathToPartner.uniqueDaysStreamed.current} goal={quests.pathToPartner.uniqueDaysStreamed.goal} />
-        </div>
-      )}
+      <div className="sf-card" style={{ padding: '1.5rem', background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)' }}>
+        <p style={{ fontSize: '0.85rem', color: 'var(--sf-text-2)', lineHeight: 1.6, marginBottom: '0.75rem' }}>
+          {t('achievements.apiNote')}
+        </p>
+        <a
+          href={data.twitchAchievementsUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="sf-btn"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+            background: 'linear-gradient(135deg, #9147ff 0%, #6441a5 100%)',
+            color: '#fff', padding: '0.6rem 1.25rem', textDecoration: 'none',
+            fontSize: '0.85rem', fontWeight: 600,
+            boxShadow: '0 2px 12px rgba(145,71,255,0.35)',
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
+          </svg>
+          {t('achievements.viewOnTwitch')}
+        </a>
+      </div>
+    </div>
+  );
+}
 
-      {/* ── Build a Community ── */}
-      {quests.buildACommunity && (
-        <div className="sf-card" style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0, fontSize: '1rem' }}>{t('achievements.buildCommunity')}</h3>
-            {badge(quests.buildACommunity.completedAt)}
-          </div>
-          <QuestBar label={t('achievements.enabled')} current={quests.buildACommunity.enabled.current} goal={quests.buildACommunity.enabled.goal} />
-          <QuestBar label={t('achievements.communityServer')} current={quests.buildACommunity.communityServer.current} goal={quests.buildACommunity.communityServer.goal} />
-          <QuestBar label={t('achievements.hostedEvents')} current={quests.buildACommunity.hostedCommunityEvents.current} goal={quests.buildACommunity.hostedCommunityEvents.goal} />
-        </div>
-      )}
+function MetricRow({ label, current, goal }: { label: string; current: number; goal: number }) {
+  const pct = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
+  const done = current >= goal && goal > 0;
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.25rem' }}>
+        <span style={{ color: 'var(--sf-text-2)' }}>{label}</span>
+        <span style={{ color: 'var(--sf-text)', fontWeight: 600 }}>{current.toLocaleString()} / {goal.toLocaleString()}</span>
+      </div>
+      <div style={{ height: 8, background: 'var(--sf-border)', borderRadius: 99, overflow: 'hidden' }}>
+        <div style={{
+          width: `${pct}%`, height: '100%',
+          background: done
+            ? 'linear-gradient(90deg, #22c55e, #16a34a)'
+            : 'linear-gradient(90deg, var(--sf-primary), #6366f1)',
+          borderRadius: 99, transition: 'width 0.5s ease',
+        }} />
+      </div>
     </div>
   );
 }
