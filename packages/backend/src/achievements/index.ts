@@ -1,28 +1,36 @@
 import { FastifyInstance } from 'fastify';
 import { authProvider, currentUser } from '../auth/index.js';
 
-// gql.twitch.tv only accepts tokens issued against Twitch's own web Client-ID.
-// The developer's app Client-ID works for Helix API but not for the internal GQL endpoint.
+// Twitch's internal GQL endpoint (gql.twitch.tv) requires both a web Client-ID
+// and its own OAuth token (not the developer app token). Since we can't use GQL
+// directly, we compute achievement progress from the Helix API instead.
 const TWITCH_WEB_CLIENT_ID = 'kimne78kx3ncx6brgo4mv6wki5h1ko';
+
+async function getIntegrityToken(): Promise<string> {
+  const res = await fetch('https://gql.twitch.tv/integrity', {
+    headers: { 'Client-ID': TWITCH_WEB_CLIENT_ID },
+  });
+  if (!res.ok) throw new Error(`Integrity API: HTTP ${res.status}`);
+  const data = await res.json() as { token: string };
+  return data.token;
+}
 
 async function queryGQL(query: string, variables: Record<string, unknown>) {
   if (!authProvider || !currentUser) throw new Error('Not authenticated');
   const token = await authProvider.getAccessTokenForUser(currentUser.id);
   const accessToken = token?.accessToken;
+  if (!accessToken) throw new Error('No OAuth token available');
 
-  if (!accessToken) {
-    throw new Error('No OAuth token available');
-  }
-
-  const headers: Record<string, string> = {
-    'Client-ID': TWITCH_WEB_CLIENT_ID,
-    'Authorization': `OAuth ${accessToken}`,
-    'Content-Type': 'application/json',
-  };
+  const integrity = await getIntegrityToken();
 
   const res = await fetch('https://gql.twitch.tv/gql', {
     method: 'POST',
-    headers,
+    headers: {
+      'Client-ID': TWITCH_WEB_CLIENT_ID,
+      'Authorization': `OAuth ${accessToken}`,
+      'Client-Integrity': integrity,
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify({ query, variables }),
   });
 
