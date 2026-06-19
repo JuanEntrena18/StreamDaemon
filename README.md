@@ -12,11 +12,11 @@ Available in two modes:
 
 ## ✨ Features
 
-- **🎨 Standalone themed overlays** — 51 standalone overlays in pure HTML+CSS+JS (no React) for multiple games and styles: Subnautica 2, Fortnite, Animated Alerts, Subathon, **Retro 8-bit**, **Retro Win95**, **RetroWave**, **Tactical Sci-Fi** and **WoW Horde/Alliance**. Each overlay includes particle Canvas, CSS animations, real-time event queue and Socket.IO connection with WebSocket-only transport. The Socket.IO client is served from `/overlays/js/socket.io.js` (Vite) to prevent Fastify v5 from intercepting the download. Loaded as static files (`/overlays/`) in OBS.
+- **🎨 Standalone themed overlays** — 51 standalone overlays in pure HTML+CSS+JS (no React) for multiple games and styles: Subnautica 2, Fortnite, Animated Alerts, Subathon, **Retro 8-bit**, **Retro Win95**, **RetroWave**, **Tactical Sci-Fi**, **WoW Horde/Alliance** and **12 vertical (1080×1920)** variants with orientation selector in the OBS panel. Each overlay includes particle Canvas, CSS animations, real-time event queue and Socket.IO connection with WebSocket-only transport. The Socket.IO client is served from `/overlays/js/socket.io.js` (Vite) to prevent Fastify v5 from intercepting the download. Loaded as static files (`/overlays/`) in OBS.
 - **📱 Vertical Streaming (Dual Format)** — Complete setup guide for Twitch's new Dual Format streaming. Covers Aitum Vertical and SE.Live plugins, Enhanced Broadcasting, system requirements, OBS configuration steps, and mobile-first design tips. Includes **12 dedicated vertical overlays (1080×1920)** — 6 fullscreen and 6 alert variants for all styled themes (Fortnite, 8-bit, Win95, RetroWave, Tactical Sci-Fi, Horde), compatible with OBS Browser Source.
 - **🔴 Subathon** — Live extendable timer: viewers add time through subscriptions (+5 min), bits (+1 min per 100 bits), tips, follows or channel rewards. Configurable max limit (12/24h). Control panel with start/pause/resume/stop, manual time addition, action history, and dedicated OBS overlay with countdown, progress bar, statistics and activity feed.
 - **📡 Unified Stream Manager** — Dashboard combining stream preview (iframe embed with multi-parent support for Electron and browser), title/game editor, live stats (viewers, followers, subs, uptime) and channel activity feed with filters — all in one screen.
-- **💬 Live Chat** — Twitch IRC chat with real-time forwarding to overlays via Socket.IO. Includes message sending, reply (↩ @user), moderation (timeout/ban), role badges, notification sound selector with volume control, **TTS (text-to-speech)** with voice selection, speed and volume.
+- **💬 Live Chat** — Twitch IRC chat with real-time forwarding to overlays via Socket.IO. Includes message sending, reply (↩ @user), moderation (timeout/ban), role badges, notification sound selector with volume control, **TTS (text-to-speech)** with voice selection, speed and volume. TTS continues reading messages even when browsing other sections of the app.
 - **🎁 Interactive Giveaways** — `!giveaway` chat command to participate. Control panel with canvas wheel, spin duration selector (10/15/20s) and bulk name import. Dedicated overlay with live participant list and animated wheel with giant winner display.
 - **📊 Predictions** — Twitch Predictions API integration. Create polls from the control panel with automatic resolution.
 - **📈 Twitch Tracker** — Historical channel stats with period selector (7d, 30d, 90d, all time). Aggregate metric cards (hours, peak viewers, followers), last stream summary with views, followers, subs, bits and estimated revenue. Interactive SVG chart of stream evolution. Expandable recent streams list with detailed metrics. Multi-factor smart advice engine (frequency, duration, audience, monetization) with optional local Ollama AI integration.
@@ -172,8 +172,13 @@ StreamForge/
 │   │   ├── security/      # Anti-Bots (follow bot detection, spam filter, auto-ban)
 │   │   └── fortnite/      # Fortnite stats (config + API)
 │   ├── frontend/
-│   │   ├── src/components/  # Dashboard (App, Chat, Giveaway, etc.)
-│   │   └── public/overlays/ # 51 standalone HTML overlays
+│   │   ├── src/
+│   │   │   ├── components/    # Dashboard (App, ChatPanel, TtsManager, etc.)
+│   │   │   ├── contexts/      # React contexts (TtsContext)
+│   │   │   ├── hooks/         # Custom hooks (useSocket, useAuthStatus)
+│   │   │   ├── i18n/          # Translations (es, en, de, fr, it)
+│   │   │   └── utils/         # Utilities (api, sounds, tts)
+│   │   └── public/overlays/   # 51 standalone HTML overlays
 │   │       ├── js/
 │   │       │   └── socket.io.js  # Socket.IO client (non-minified, v4.8.3)
 │   │       ├── subnautica2.html
@@ -203,7 +208,6 @@ StreamForge/
 
 | Feature | Description |
 |---|---|
-| **🌍 Multi-language translation** | Frontend translated to English, French, German and Italian with automatic browser language detection |
 | **🎮 Stream Deck integration** | Native Elgato Stream Deck plugin to control StreamForger from physical buttons: start/stop Subathon, launch giveaway, ban user, change stream title and more |
 | **🎬 TikTok clip management** | Create, edit and automatically export stream clips to TikTok with vertical format, auto-captions and scheduled publishing |
 
