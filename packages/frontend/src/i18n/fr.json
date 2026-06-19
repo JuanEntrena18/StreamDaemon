@@ -96,7 +96,11 @@
     "mensajes": "messages",
     "responder": "Répondre",
     "timeout5m": "Timeout 5 min",
-    "banear": "Bannir"
+    "banear": "Bannir",
+    "ttsFilterOwn": "Exclure mes messages",
+    "ttsFilterLinks": "Exclure les messages avec liens",
+    "ttsFilterBots": "Exclure les messages de bots",
+    "ttsBotPlaceholder": "Noms des bots, séparés par des virgules (ex: nightbot, streamelements)"
   },
   "dashboard": {
     "title": "Gestion du Stream",

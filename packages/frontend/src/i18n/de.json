@@ -96,7 +96,11 @@
     "mensajes": "Nachrichten",
     "responder": "Antworten",
     "timeout5m": "Timeout 5 Min",
-    "banear": "Bannen"
+    "banear": "Bannen",
+    "ttsFilterOwn": "Eigene Nachrichten ausschließen",
+    "ttsFilterLinks": "Nachrichten mit Links ausschließen",
+    "ttsFilterBots": "Bot-Nachrichten ausschließen",
+    "ttsBotPlaceholder": "Bot-Namen, durch Kommas getrennt (z.B. nightbot, streamelements)"
   },
   "dashboard": {
     "title": "Stream-Manager",

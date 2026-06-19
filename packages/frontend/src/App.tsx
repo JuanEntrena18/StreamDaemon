@@ -24,7 +24,7 @@ import { BitrateCalculatorPanel } from './components/BitrateCalculatorPanel';
 import { VerticalStreamingPanel } from './components/VerticalStreamingPanel';
 import { AlertSoundsPanel } from './components/AlertSoundsPanel';
 import { AchievementsPanel } from './components/AchievementsPanel';
-import { TtsProvider } from './contexts/TtsContext';
+import { TtsProvider, useTts } from './contexts/TtsContext';
 import { TtsManager } from './components/TtsManager';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
@@ -108,6 +108,7 @@ export function App() {
   return (
     <TtsProvider>
       <TtsManager />
+      <TtsUserSync />
       <div
         style={{
           height: '100vh',
@@ -434,6 +435,15 @@ export function App() {
     </div>
     </TtsProvider>
   );
+}
+
+function TtsUserSync() {
+  const { user } = useAuthStatus();
+  const { setCurrentUserId } = useTts();
+  useEffect(() => {
+    setCurrentUserId(user?.id ?? null);
+  }, [user?.id, setCurrentUserId]);
+  return null;
 }
 
 function winBtnStyle(color: string): React.CSSProperties {

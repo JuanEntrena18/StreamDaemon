@@ -100,7 +100,11 @@
     "greeting": "Auto Greeting",
     "greetingMsg": "Message:",
     "greetingPreview": "Preview",
-    "greetingDelay": "⏱ Sent 30 seconds after the user joins chat"
+    "greetingDelay": "⏱ Sent 30 seconds after the user joins chat",
+    "ttsFilterOwn": "Exclude my messages",
+    "ttsFilterLinks": "Exclude messages with links",
+    "ttsFilterBots": "Exclude bot messages",
+    "ttsBotPlaceholder": "Bot usernames, comma separated (e.g. nightbot, streamelements)"
   },
   "dashboard": {
     "title": "Stream Manager",

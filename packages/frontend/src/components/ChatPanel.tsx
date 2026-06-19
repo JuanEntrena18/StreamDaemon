@@ -294,7 +294,7 @@ export function ChatPanel({ channel }: Props) {
             </a>
           </div>
           <p style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', marginTop: '0.3rem', marginBottom: 0 }}>
-            Abrí Cyan Chat, configurá tus opciones, y pegá la URL generada acá.
+            Abre Cyan Chat, configura tus opciones y pega la URL que se genera aquí.
           </p>
         </div>
       )}
@@ -677,6 +677,32 @@ export function ChatPanel({ channel }: Props) {
                 style={{ flex: 1, accentColor: '#7c3aed', cursor: 'pointer' }}
               />
               <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 24 }}>{Math.round(tts.volume * 100)}%</span>
+            </div>
+            <div style={{ borderTop: '1px solid var(--sf-border)', paddingTop: '0.35rem', marginTop: '0.15rem' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem 1rem', marginBottom: '0.35rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: 'var(--sf-text-2)', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={tts.filters.excludeOwn} onChange={(e) => tts.setFilters({ ...tts.filters, excludeOwn: e.target.checked })} style={{ accentColor: '#7c3aed', cursor: 'pointer' }} />
+                  {t('chat.ttsFilterOwn')}
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: 'var(--sf-text-2)', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={tts.filters.excludeLinks} onChange={(e) => tts.setFilters({ ...tts.filters, excludeLinks: e.target.checked })} style={{ accentColor: '#7c3aed', cursor: 'pointer' }} />
+                  {t('chat.ttsFilterLinks')}
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: 'var(--sf-text-2)', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={tts.filters.excludeBots} onChange={(e) => tts.setFilters({ ...tts.filters, excludeBots: e.target.checked })} style={{ accentColor: '#7c3aed', cursor: 'pointer' }} />
+                  {t('chat.ttsFilterBots')}
+                </label>
+              </div>
+              {tts.filters.excludeBots && (
+                <input
+                  type="text"
+                  value={tts.filters.botNames}
+                  onChange={(e) => tts.setFilters({ ...tts.filters, botNames: e.target.value })}
+                  placeholder={t('chat.ttsBotPlaceholder')}
+                  className="sf-input"
+                  style={{ width: '100%', fontSize: '0.65rem', padding: '0.2rem 0.4rem' }}
+                />
+              )}
             </div>
           </div>
         )}

@@ -96,7 +96,11 @@
     "mensajes": "messaggi",
     "responder": "Rispondi",
     "timeout5m": "Timeout 5 min",
-    "banear": "Banna"
+    "banear": "Banna",
+    "ttsFilterOwn": "Escludere i miei messaggi",
+    "ttsFilterLinks": "Escludere messaggi con link",
+    "ttsFilterBots": "Escludere messaggi dei bot",
+    "ttsBotPlaceholder": "Nomi bot, separati da virgola (es: nightbot, streamelements)"
   },
   "dashboard": {
     "title": "Gestione Stream",
