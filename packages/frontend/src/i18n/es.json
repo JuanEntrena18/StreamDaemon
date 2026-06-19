@@ -48,6 +48,8 @@
     "hash": "#",
     "placeholderCanal": "canal de twitch...",
     "conectarTwitch": "Conectar Twitch",
+    "authSuccessTitle": "Login exitoso",
+    "authSuccessMsg": "Ya puedes cerrar esta pestaña.",
     "conectado": "Conectado",
     "desconectado": "Desconectado"
   },

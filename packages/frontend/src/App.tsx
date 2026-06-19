@@ -37,9 +37,20 @@ export function App() {
   const [backendReady, setBackendReady] = useState(false);
   const onReady = useCallback(() => setBackendReady(true), []);
   const { connected } = useSocket();
-  const { authenticated, user, loading: authLoading } = useAuthStatus();
+  const { authenticated, user, loading: authLoading, refresh } = useAuthStatus();
   const [channel, setChannel] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('chat');
+
+  // Handle ?auth=success from browser login redirect
+  const [showAuthSuccess, setShowAuthSuccess] = useState(false);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auth') === 'success') {
+      refresh();
+      setShowAuthSuccess(true);
+      setTimeout(() => window.close(), 2000);
+    }
+  }, []);
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
 
   const userLogin = user?.login;
@@ -109,6 +120,24 @@ export function App() {
     <TtsProvider>
       <TtsManager />
       <TtsUserSync />
+      {showAuthSuccess && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
+        }}>
+          <div style={{
+            textAlign: 'center', color: 'var(--sf-text)',
+            padding: '2rem', maxWidth: 400,
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
+            <h2 style={{ margin: '0 0 0.5rem', fontWeight: 700 }}>{t('app.authSuccessTitle') || 'Login exitoso'}</h2>
+            <p style={{ color: 'var(--sf-text-2)', fontSize: '0.9rem' }}>
+              {t('app.authSuccessMsg') || 'Ya puedes cerrar esta pestaña.'}
+            </p>
+          </div>
+        </div>
+      )}
       <div
         style={{
           height: '100vh',

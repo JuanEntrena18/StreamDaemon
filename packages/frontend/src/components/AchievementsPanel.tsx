@@ -20,8 +20,13 @@ export function AchievementsPanel({ channel, backendUrl }: Props) {
     fetch(`${backendUrl}/achievements`)
       .then((r) => r.json())
       .then((d) => {
-        if (d.error) { setError(d.error); setData(null); }
-        else { setData(d); }
+        if (d.error) {
+          const msg = d.details ? `${d.error}: ${JSON.stringify(d.details)}` : d.error;
+          setError(msg);
+          setData(null);
+        } else {
+          setData(d);
+        }
         setLoading(false);
       })
       .catch(() => { setError('Connection error'); setLoading(false); });

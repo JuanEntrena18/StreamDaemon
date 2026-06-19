@@ -27,8 +27,8 @@ export function setupAchievements(app: FastifyInstance) {
 
     try {
       const query = `
-        query GetAchievements($channelID: ID!) {
-          user(id: $channelID) {
+        query GetAchievements {
+          currentUser {
             login
             displayName
             profileImageURL(width: 300)
@@ -60,11 +60,17 @@ export function setupAchievements(app: FastifyInstance) {
         }
       `;
 
-      const data = await queryGQL(query, { channelID: currentUser.id });
-      const userData = data?.data?.user;
+      const data = await queryGQL(query, {});
 
+      if (data?.errors) {
+        req.log.error({ gqlErrors: data.errors }, 'GQL achievements query returned errors');
+        return reply.status(500).send({ error: 'Failed to fetch achievements', details: data.errors });
+      }
+
+      const userData = data?.data?.currentUser;
       if (!userData) {
-        return reply.status(500).send({ error: 'Failed to fetch achievements', details: data?.errors });
+        req.log.error({ gqlResponse: data }, 'GQL achievements query missing user data');
+        return reply.status(500).send({ error: 'Failed to fetch achievements', details: 'No user data in GQL response' });
       }
 
       return reply.send({
@@ -75,7 +81,8 @@ export function setupAchievements(app: FastifyInstance) {
       });
     } catch (err) {
       req.log.error(err, 'Achievements fetch failed');
-      return reply.status(500).send({ error: 'Failed to fetch achievements' });
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      return reply.status(500).send({ error: 'Failed to fetch achievements', details: msg });
     }
   });
 }
