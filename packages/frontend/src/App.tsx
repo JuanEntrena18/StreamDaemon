@@ -23,6 +23,8 @@ import { SecurityPanel } from './components/SecurityPanel';
 import { BitrateCalculatorPanel } from './components/BitrateCalculatorPanel';
 import { VerticalStreamingPanel } from './components/VerticalStreamingPanel';
 import { AlertSoundsPanel } from './components/AlertSoundsPanel';
+import { TtsProvider } from './contexts/TtsContext';
+import { TtsManager } from './components/TtsManager';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
@@ -100,11 +102,13 @@ export function App() {
   }
 
   return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
+    <TtsProvider>
+      <TtsManager />
+      <div
+        style={{
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
         background: 'var(--sf-bg)',
         position: 'relative',
         overflow: 'hidden',
@@ -423,6 +427,7 @@ export function App() {
         </main>
       </div>
     </div>
+    </TtsProvider>
   );
 }
 

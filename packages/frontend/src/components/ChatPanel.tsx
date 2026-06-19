@@ -4,6 +4,8 @@ import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { SOUNDS, setMasterVolume, type SoundKey } from '../utils/sounds';
 import { useTranslation } from '../i18n/context';
 import { apiGet, apiPut } from '../utils/api';
+import { useTts } from '../contexts/TtsContext';
+import { getVoices } from '../utils/tts';
 
 const OVERLAY_LS_KEY = 'streamforger-chat-overlay-settings';
 
@@ -19,23 +21,6 @@ function saveOverlaySettings(settings: Record<string, unknown>) {
   try {
     localStorage.setItem(OVERLAY_LS_KEY, JSON.stringify(settings));
   } catch {}
-}
-
-function getVoices(): SpeechSynthesisVoice[] {
-  return window.speechSynthesis?.getVoices()?.filter((v) => v.lang.startsWith('es') || v.lang.startsWith('en')) ?? [];
-}
-
-function speak(text: string, voiceURI: string | null, rate: number, volume: number) {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  if (voiceURI) {
-    const found = getVoices().find((v) => v.voiceURI === voiceURI);
-    if (found) utterance.voice = found;
-  }
-  utterance.rate = rate;
-  utterance.volume = volume;
-  window.speechSynthesis.speak(utterance);
 }
 
 interface Props {
@@ -74,12 +59,8 @@ export function ChatPanel({ channel }: Props) {
   const menuRef = useRef<HTMLDivElement>(null);
   const lastSoundRef = useRef(0);
   const [soundVolume, setSoundVolume] = useState(1);
-  const [ttsVolume, setTtsVolume] = useState(1);
-  const [ttsEnabled, setTtsEnabled] = useState(false);
-  const [ttsVoiceURI, setTtsVoiceURI] = useState<string | null>(null);
-  const [ttsRate, setTtsRate] = useState(1);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const ttsLastMsgRef = useRef('');
+  const tts = useTts();
   const [greetingEnabled, setGreetingEnabled] = useState(false);
   const [greetingMessage, setGreetingMessage] = useState('¡Bienvenido @{user} al canal!');
   const [greetingOpen, setGreetingOpen] = useState(false);
@@ -117,11 +98,7 @@ export function ChatPanel({ channel }: Props) {
   useSocketEvent('chat:message', useCallback((msg: ChatMsg) => {
     setMessages((prev) => [...prev.slice(-MAX_MSGS + 1), msg]);
     playSound();
-    if (ttsEnabled && msg.text !== ttsLastMsgRef.current) {
-      ttsLastMsgRef.current = msg.text;
-      speak(msg.text, ttsVoiceURI, ttsRate, ttsVolume);
-    }
-  }, [playSound, ttsEnabled, ttsVoiceURI, ttsRate, ttsVolume]));
+  }, [playSound]));
 
   useEffect(() => {
     if (listRef.current) {
@@ -618,30 +595,30 @@ export function ChatPanel({ channel }: Props) {
       {/* TTS Controls */}
       <div style={{
         marginBottom: '0.5rem', padding: '0.6rem 0.75rem',
-        background: ttsEnabled ? 'rgba(124,58,237,0.06)' : 'transparent',
-        border: `1px solid ${ttsEnabled ? 'rgba(124,58,237,0.15)' : 'var(--sf-border)'}`,
+        background: tts.enabled ? 'rgba(124,58,237,0.06)' : 'transparent',
+        border: `1px solid ${tts.enabled ? 'rgba(124,58,237,0.15)' : 'var(--sf-border)'}`,
         borderRadius: 'var(--sf-radius-sm)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>{t('chat.tts')}</span>
             <button
-              onClick={() => { setTtsEnabled(!ttsEnabled); if (ttsEnabled) window.speechSynthesis?.cancel(); }}
+              onClick={() => { tts.setEnabled(!tts.enabled); if (tts.enabled) window.speechSynthesis?.cancel(); }}
               style={{
                 width: 36, height: 18, borderRadius: 99,
-                background: ttsEnabled ? 'var(--sf-primary)' : 'var(--sf-border)',
+                background: tts.enabled ? 'var(--sf-primary)' : 'var(--sf-border)',
                 border: 'none', cursor: 'pointer', position: 'relative',
                 transition: 'background 0.2s',
               }}
             >
               <span style={{
-                position: 'absolute', top: 2, left: ttsEnabled ? 18 : 2,
+                position: 'absolute', top: 2, left: tts.enabled ? 18 : 2,
                 width: 14, height: 14, borderRadius: '50%',
                 background: '#fff', transition: 'left 0.2s',
               }} />
             </button>
           </div>
-          {ttsEnabled && window.speechSynthesis && (
+          {tts.enabled && window.speechSynthesis && (
             <button
               onClick={() => window.speechSynthesis.cancel()}
               style={{
@@ -652,13 +629,13 @@ export function ChatPanel({ channel }: Props) {
             >{t('chat.detener')}</button>
           )}
         </div>
-        {ttsEnabled && window.speechSynthesis && (
+        {tts.enabled && window.speechSynthesis && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>{t('chat.voz')}</span>
               <select
-                value={ttsVoiceURI ?? ''}
-                onChange={(e) => setTtsVoiceURI(e.target.value || null)}
+                value={tts.voiceURI ?? ''}
+                onChange={(e) => tts.setVoiceURI(e.target.value || null)}
                 style={{
                   flex: 1, padding: '0.2rem 0.4rem', borderRadius: 4,
                   border: '1px solid var(--sf-border)',
@@ -682,11 +659,11 @@ export function ChatPanel({ channel }: Props) {
                 min={0.5}
                 max={2}
                 step={0.1}
-                value={ttsRate}
-                onChange={(e) => setTtsRate(parseFloat(e.target.value))}
+                value={tts.rate}
+                onChange={(e) => tts.setRate(parseFloat(e.target.value))}
                 style={{ flex: 1, accentColor: '#7c3aed', cursor: 'pointer' }}
               />
-              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 24 }}>{ttsRate.toFixed(1)}x</span>
+              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 24 }}>{tts.rate.toFixed(1)}x</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>{t('chat.volumen')}</span>
@@ -695,11 +672,11 @@ export function ChatPanel({ channel }: Props) {
                 min={0}
                 max={1}
                 step={0.05}
-                value={ttsVolume}
-                onChange={(e) => setTtsVolume(parseFloat(e.target.value))}
+                value={tts.volume}
+                onChange={(e) => tts.setVolume(parseFloat(e.target.value))}
                 style={{ flex: 1, accentColor: '#7c3aed', cursor: 'pointer' }}
               />
-              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 24 }}>{Math.round(ttsVolume * 100)}%</span>
+              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 24 }}>{Math.round(tts.volume * 100)}%</span>
             </div>
           </div>
         )}
