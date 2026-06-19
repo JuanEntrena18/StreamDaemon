@@ -638,6 +638,115 @@ const OBS_URLS: OBSUrl[] = [
     supportsTheme: false,
     color: '#ff2222',
   },
+  // ── Vertical Overlays (1080×1920) ──
+  {
+    id: 'fortnite-vertical',
+    icon: '📱',
+    labelKey: 'obs.fortniteVertical',
+    descKey: 'obs.fortniteVerticalDesc',
+    mode: 'fortnite-vertical',
+    supportsTheme: false,
+    color: '#00D4FF',
+  },
+  {
+    id: 'fortnite-alerts-vertical',
+    icon: '🔔',
+    labelKey: 'obs.fortniteAlertsV',
+    descKey: 'obs.fortniteAlertsVDesc',
+    mode: 'fortnite-alerts-vertical',
+    supportsTheme: false,
+    color: '#00D4FF',
+  },
+  {
+    id: '8bits-vertical',
+    icon: '📱',
+    labelKey: 'obs.b8bitsVertical',
+    descKey: 'obs.b8bitsVerticalDesc',
+    mode: '8bits-vertical',
+    supportsTheme: false,
+    color: '#00ff41',
+  },
+  {
+    id: '8bits-alerts-vertical',
+    icon: '🔔',
+    labelKey: 'obs.b8bitsAlertsV',
+    descKey: 'obs.b8bitsAlertsVDesc',
+    mode: '8bits-alerts-vertical',
+    supportsTheme: false,
+    color: '#ff00ff',
+  },
+  {
+    id: 'win95-vertical',
+    icon: '📱',
+    labelKey: 'obs.win95Vertical',
+    descKey: 'obs.win95VerticalDesc',
+    mode: 'win95-vertical',
+    supportsTheme: false,
+    color: '#008080',
+  },
+  {
+    id: 'win95-alerts-vertical',
+    icon: '🔔',
+    labelKey: 'obs.win95AlertsV',
+    descKey: 'obs.win95AlertsVDesc',
+    mode: 'win95-alerts-vertical',
+    supportsTheme: false,
+    color: '#000080',
+  },
+  {
+    id: 'retrowave-vertical',
+    icon: '📱',
+    labelKey: 'obs.retrowaveVertical',
+    descKey: 'obs.retrowaveVerticalDesc',
+    mode: 'retrowave-vertical',
+    supportsTheme: false,
+    color: '#ff00ff',
+  },
+  {
+    id: 'retrowave-alerts-vertical',
+    icon: '🔔',
+    labelKey: 'obs.retrowaveAlertsV',
+    descKey: 'obs.retrowaveAlertsVDesc',
+    mode: 'retrowave-alerts-vertical',
+    supportsTheme: false,
+    color: '#ff00ff',
+  },
+  {
+    id: 'tactical-vertical',
+    icon: '📱',
+    labelKey: 'obs.tacticalVertical',
+    descKey: 'obs.tacticalVerticalDesc',
+    mode: 'tactical-vertical',
+    supportsTheme: false,
+    color: '#ffb300',
+  },
+  {
+    id: 'tactical-alerts-vertical',
+    icon: '🔔',
+    labelKey: 'obs.tacticalAlertsV',
+    descKey: 'obs.tacticalAlertsVDesc',
+    mode: 'tactical-alerts-vertical',
+    supportsTheme: false,
+    color: '#4caf50',
+  },
+  {
+    id: 'wow-horde-vertical',
+    icon: '📱',
+    labelKey: 'obs.hordeVertical',
+    descKey: 'obs.hordeVerticalDesc',
+    mode: 'wow-horde-vertical',
+    supportsTheme: false,
+    color: '#cc0000',
+  },
+  {
+    id: 'wow-horde-alerts-vertical',
+    icon: '🔔',
+    labelKey: 'obs.hordeAlertsV',
+    descKey: 'obs.hordeAlertsVDesc',
+    mode: 'wow-horde-alerts-vertical',
+    supportsTheme: false,
+    color: '#ff2222',
+  },
 ];
 
 interface SocialLink {
@@ -693,6 +802,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
   ];
 
   const [selectedTheme, setSelectedTheme] = useState('');
+  const [orientation, setOrientation] = useState<'all' | 'horizontal' | 'vertical'>('all');
   const [copied, setCopied] = useState<string | null>(null);
   const [socialExpanded, setSocialExpanded] = useState(false);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(DEFAULT_SOCIAL_LINKS);
@@ -794,6 +904,18 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     'fortnite-alerts': 'alerta_fortnite.html',
     'wow-horde-chat-standalone': 'chat_independiente_horda.html',
     'wow-horde-alerts-fullscreen': 'alerta_horda.html',
+    'fortnite-vertical': 'fortnite-vertical.html',
+    '8bits-vertical': '8bits-vertical.html',
+    'win95-vertical': 'win95-vertical.html',
+    'retrowave-vertical': 'retrowave-vertical.html',
+    'tactical-vertical': 'tactical-vertical.html',
+    'wow-horde-vertical': 'horde-vertical.html',
+    'fortnite-alerts-vertical': 'alerta_fortnite_vertical.html',
+    '8bits-alerts-vertical': 'alerta_retro_8_bits_vertical.html',
+    'win95-alerts-vertical': 'alerta_windows_95_vertical.html',
+    'retrowave-alerts-vertical': 'alerta_retrowave_vertical.html',
+    'tactical-alerts-vertical': 'alerta_sci_fi_t_ctica_bsg_vertical.html',
+    'wow-horde-alerts-vertical': 'alerta_horda_vertical.html',
   };
 
   function buildUrl(mode: string, supportsTheme: boolean): string {
@@ -855,6 +977,293 @@ export function ObsPanel({ channel, backendUrl }: Props) {
     );
   }
 
+  function renderOverlayCard(item: OBSUrl) {
+    const isSocial = item.id === 'social';
+    const url = isSocial ? buildSocialUrl() : buildUrl(item.mode, item.supportsTheme);
+    const isCopied = copied === item.id;
+
+    return (
+      <div key={item.id}>
+        <div
+          className="glass-card"
+          style={{ padding: '1.25rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}
+        >
+          <div style={{
+            width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+            background: `${item.color}22`,
+            border: `1px solid ${item.color}44`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '1.25rem',
+          }}>
+            {item.icon}
+          </div>
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+              <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--sf-text)' }}>{t(item.labelKey)}</span>
+              {item.supportsTheme && selectedTheme && (
+                <span className="sf-badge sf-badge-violet" style={{ fontSize: '0.6rem' }}>
+                  {t(THEMES.find((th) => th.id === selectedTheme)?.labelKey ?? '')}
+                </span>
+              )}
+            </div>
+            <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '0.625rem' }}>
+              {t(item.descKey)}
+            </p>
+            {item.id === 'custom' && (
+              <div style={{ marginBottom: '0.5rem' }}>
+                <input
+                  id="custom-game-input"
+                  type="text"
+                  value={customGame}
+                  onChange={(e) => setCustomGame(e.target.value)}
+                  placeholder="Nombre del juego (opcional)"
+                  className="sf-input"
+                  style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem', maxWidth: 280 }}
+                />
+              </div>
+            )}
+            <code style={{
+              fontSize: '0.72rem',
+              color: 'var(--sf-text-2)',
+              background: 'rgba(0,0,0,0.3)',
+              padding: '0.3rem 0.6rem',
+              borderRadius: 6,
+              display: 'block',
+              overflowX: 'auto',
+              whiteSpace: 'nowrap',
+              border: '1px solid var(--sf-border)',
+            }}>
+              {url}
+            </code>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flexShrink: 0 }}>
+            <button
+              id={`copy-${item.id}`}
+              onClick={() => copyToClipboard(item.id, url)}
+              className={`sf-btn ${isCopied ? 'sf-btn-ghost' : 'sf-btn-primary'}`}
+              style={{ minWidth: 90, fontSize: '0.78rem', padding: '0.45rem 0.875rem' }}
+            >
+              {isCopied ? t('obs.copiado') : t('obs.copiar')}
+            </button>
+
+            {isSocial && (
+              <button
+                id="social-configure-btn"
+                onClick={() => setSocialExpanded((v) => !v)}
+                style={{
+                  padding: '0.45rem 0.875rem',
+                  borderRadius: 'var(--sf-radius-sm)',
+                  border: `1px solid ${socialExpanded ? item.color + '88' : 'var(--sf-border)'}`,
+                  background: socialExpanded ? `${item.color}18` : 'transparent',
+                  color: socialExpanded ? '#22d3ee' : 'var(--sf-text-3)',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  transition: 'all 0.15s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  justifyContent: 'center',
+                }}
+              >
+                {socialExpanded ? '▲' : '▼'} {t('obs.configurar')}
+              </button>
+            )}
+
+            {item.id.endsWith('-end') && (
+              <button
+                id={`endsocial-configure-btn-${item.id}`}
+                onClick={() => setEndSocialExpanded(endSocialExpanded === item.id ? null : item.id)}
+                style={{
+                  padding: '0.45rem 0.875rem',
+                  borderRadius: 'var(--sf-radius-sm)',
+                  border: `1px solid ${endSocialExpanded === item.id ? '#10b98188' : 'var(--sf-border)'}`,
+                  background: endSocialExpanded === item.id ? 'rgba(16,185,129,0.1)' : 'transparent',
+                  color: endSocialExpanded === item.id ? '#34d399' : 'var(--sf-text-3)',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  transition: 'all 0.15s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  justifyContent: 'center',
+                }}
+              >
+                {endSocialExpanded === item.id ? '▲' : '▼'} {t('obs.configurar')}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {item.id.endsWith('-end') && (
+          <AnimatePresence>
+            {endSocialExpanded === item.id && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div
+                  style={{
+                    marginTop: 4,
+                    padding: '1.25rem',
+                    background: 'rgba(16,185,129,0.04)',
+                    border: '1px solid rgba(16,185,129,0.15)',
+                    borderTop: 'none',
+                    borderRadius: '0 0 var(--sf-radius) var(--sf-radius)',
+                  }}
+                >
+                  <p className="sf-section-title" style={{ marginBottom: '1rem', color: '#34d399' }}>
+                    Redes Sociales · Pantalla de Despedida
+                  </p>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '1rem', lineHeight: 1.5 }}>
+                    Ingresa tu nombre de usuario en cada red y desactiva las que no quieras mostrar.
+                  </p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                    {endScreenSocials.map((social, idx) => (
+                      <div key={social.platform} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <button
+                          onClick={() => {
+                            const next = [...endScreenSocials];
+                            next[idx] = { ...next[idx], visible: !next[idx].visible };
+                            setEndScreenSocials(next);
+                          }}
+                          style={{
+                            width: 22, height: 22, borderRadius: 4, flexShrink: 0, cursor: 'pointer',
+                            background: social.visible ? `${social.color}44` : 'transparent',
+                            border: `2px solid ${social.visible ? social.color : 'var(--sf-border)'}`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '0.65rem', color: social.visible ? '#fff' : 'transparent',
+                            transition: 'all 0.15s ease', fontFamily: 'inherit',
+                          }}
+                          title={social.visible ? 'Ocultar' : 'Mostrar'}
+                        >
+                          {social.visible ? '✓' : ''}
+                        </button>
+
+                        <div style={{
+                          width: 32, height: 32, borderRadius: 8,
+                          background: `${social.color}22`,
+                          border: `1px solid ${social.color}44`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '1rem', flexShrink: 0,
+                        }}>
+                          {social.icon}
+                        </div>
+
+                        <span style={{
+                          fontSize: '0.78rem', fontWeight: 600,
+                          color: social.visible ? 'var(--sf-text-2)' : 'var(--sf-text-3)',
+                          width: 100, flexShrink: 0,
+                        }}>
+                          {social.label}
+                        </span>
+
+                        <input
+                          type="text"
+                          value={social.username}
+                          onChange={(e) => {
+                            const next = [...endScreenSocials];
+                            next[idx] = { ...next[idx], username: e.target.value };
+                            setEndScreenSocials(next);
+                          }}
+                          placeholder="@tu_usuario"
+                          className="sf-input"
+                          style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem', opacity: social.visible ? 1 : 0.4 }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
+
+        {isSocial && (
+          <AnimatePresence>
+            {socialExpanded && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div
+                  style={{
+                    marginTop: 4,
+                    padding: '1.25rem',
+                    background: 'rgba(6,182,212,0.04)',
+                    border: '1px solid rgba(6,182,212,0.15)',
+                    borderTop: 'none',
+                    borderRadius: '0 0 var(--sf-radius) var(--sf-radius)',
+                  }}
+                >
+                  <p className="sf-section-title" style={{ marginBottom: '1rem', color: '#22d3ee' }}>
+                    {t('obs.socialUrls')}
+                  </p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                    {socialLinks.map((link) => (
+                      <div key={link.platform} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{
+                          width: 32, height: 32, borderRadius: 8,
+                          background: `${link.color}22`,
+                          border: `1px solid ${link.color}44`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '1rem', flexShrink: 0,
+                        }}>
+                          {link.icon}
+                        </div>
+
+                        <span style={{
+                          fontSize: '0.78rem', fontWeight: 600,
+                          color: 'var(--sf-text-2)', width: 90, flexShrink: 0,
+                        }}>
+                          {t(link.labelKey)}
+                        </span>
+
+                        <input
+                          id={`social-url-${link.platform}`}
+                          type="url"
+                          value={link.url}
+                          onChange={(e) => updateSocialLink(link.platform, e.target.value)}
+                          placeholder={t(link.placeholderKey)}
+                          className="sf-input"
+                          style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem' }}
+                        />
+
+                        <div style={{
+                          width: 8, height: 8, borderRadius: '50%',
+                          background: link.url.trim() ? '#10b981' : 'var(--sf-border)',
+                          boxShadow: link.url.trim() ? '0 0 6px #10b981' : 'none',
+                          flexShrink: 0, transition: 'all 0.2s ease',
+                        }} />
+                      </div>
+                    ))}
+                  </div>
+
+                  <p style={{ marginTop: '1rem', fontSize: '0.72rem', color: 'var(--sf-text-3)', lineHeight: 1.5 }}>
+                    {t('obs.socialHelp')}<span style={{ color: '#10b981' }}>●</span>) se incluirán en la URL del overlay.
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: 720 }}>
       {/* Header */}
@@ -864,7 +1273,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
         </h2>
         <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem', lineHeight: 1.6 }}>
           {t('obs.obsInstructions')} <strong style={{ color: 'var(--sf-text)' }}>{t('obs.browserSource')}</strong>.
-          {' '}{t('obs.resolucionRecomendada')} <code style={{ background: 'rgba(124,58,237,0.15)', padding: '0.1rem 0.4rem', borderRadius: 4, color: '#a78bfa' }}>1920×1080</code>
+          {' '}          {t('obs.resolucionRecomendada')} <code style={{ background: 'rgba(124,58,237,0.15)', padding: '0.1rem 0.4rem', borderRadius: 4, color: '#a78bfa' }}>1920×1080</code> / <code style={{ background: 'rgba(6,182,212,0.15)', padding: '0.1rem 0.4rem', borderRadius: 4, color: '#22d3ee' }}>1080×1920</code>
         </p>
       </div>
 
@@ -898,372 +1307,99 @@ export function ObsPanel({ channel, backendUrl }: Props) {
         </div>
       </div>
 
+      {/* Orientation selector */}
+      <div className="glass-card" style={{ padding: '0.75rem 1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--sf-text-2)', whiteSpace: 'nowrap' }}>
+          {t('obs.orientacion')}
+        </span>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {[
+            { id: 'all', labelKey: 'obs.orientationAll' },
+            { id: 'horizontal', labelKey: 'obs.orientationHorizontal' },
+            { id: 'vertical', labelKey: 'obs.orientationVertical' },
+          ].map((o) => (
+            <button
+              key={o.id}
+              onClick={() => setOrientation(o.id as any)}
+              style={{
+                padding: '0.3rem 0.75rem',
+                borderRadius: 99,
+                border: '1px solid',
+                borderColor: orientation === o.id ? '#22d3ee' : 'var(--sf-border)',
+                background: orientation === o.id ? 'rgba(6,182,212,0.15)' : 'transparent',
+                color: orientation === o.id ? '#22d3ee' : 'var(--sf-text-3)',
+                fontSize: '0.78rem',
+                fontWeight: orientation === o.id ? 600 : 400,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {t(o.labelKey)}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* URL Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-        {OBS_URLS.filter((item) => {
-          if (selectedTheme === 'fortnite') return item.id === 'fortnite' || item.id === 'fortnite-alerts';
-          if (selectedTheme === 'subnautica2') return item.id === 'subnautica2_standalone';
-          if (selectedTheme === 'dj') return item.id.startsWith('dj-');
-          if (selectedTheme === 'alliance') return item.id.startsWith('wow-alliance-');
-          if (selectedTheme === 'wow') return item.id.startsWith('wow-horde-');
-          if (selectedTheme === '8bits') return item.id.startsWith('8bits-');
-          if (selectedTheme === 'win95') return item.id.startsWith('win95-');
-          if (selectedTheme === 'retrowave') return item.id.startsWith('retrowave-');
-          if (selectedTheme === 'tactical') return item.id.startsWith('tactical-');
-          // When no theme is selected, hide theme-specific overlays
-          if (item.id.startsWith('dj-')) return false;
-          if (item.id.startsWith('wow-alliance-')) return false;
-          if (item.id.startsWith('wow-horde-')) return false;
-          if (item.id.startsWith('8bits-')) return false;
-          if (item.id.startsWith('win95-')) return false;
-          if (item.id.startsWith('retrowave-')) return false;
-          if (item.id.startsWith('tactical-')) return false;
-          return true;
-        }).map((item) => {
-          const isSocial = item.id === 'social';
-          const url = isSocial ? buildSocialUrl() : buildUrl(item.mode, item.supportsTheme);
-          const isCopied = copied === item.id;
+        {(() => {
+          const filtered = OBS_URLS.filter((item) => {
+            if (selectedTheme === 'fortnite') return item.id === 'fortnite' || item.id === 'fortnite-alerts' || item.id === 'fortnite-vertical' || item.id === 'fortnite-alerts-vertical';
+            if (selectedTheme === 'subnautica2') return item.id === 'subnautica2_standalone';
+            if (selectedTheme === 'dj') return item.id.startsWith('dj-');
+            if (selectedTheme === 'alliance') return item.id.startsWith('wow-alliance-');
+            if (selectedTheme === 'wow') return item.id.startsWith('wow-horde-');
+            if (selectedTheme === '8bits') return item.id.startsWith('8bits-');
+            if (selectedTheme === 'win95') return item.id.startsWith('win95-');
+            if (selectedTheme === 'retrowave') return item.id.startsWith('retrowave-');
+            if (selectedTheme === 'tactical') return item.id.startsWith('tactical-');
+            // Always show vertical items regardless of theme selection
+            if (item.id.endsWith('-vertical')) return true;
+            // When no theme is selected, hide theme-specific overlays
+            if (item.id.startsWith('dj-')) return false;
+            if (item.id.startsWith('wow-alliance-')) return false;
+            if (item.id.startsWith('wow-horde-')) return false;
+            if (item.id.startsWith('8bits-')) return false;
+            if (item.id.startsWith('win95-')) return false;
+            if (item.id.startsWith('retrowave-')) return false;
+            if (item.id.startsWith('tactical-')) return false;
+            if (item.id.startsWith('fortnite-')) return false;
+            return true;
+          });
+
+          const orientationFiltered = orientation === 'all' ? filtered
+            : filtered.filter(i => orientation === 'vertical' ? i.id.endsWith('-vertical') : !i.id.endsWith('-vertical'));
+
+          const hItems = orientationFiltered.filter(i => !i.id.endsWith('-vertical'));
+          const vItems = orientationFiltered.filter(i => i.id.endsWith('-vertical'));
 
           return (
-            <div key={item.id}>
-              <div
-                className="glass-card"
-                style={{ padding: '1.25rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}
-              >
-                {/* Icon */}
-                <div style={{
-                  width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-                  background: `${item.color}22`,
-                  border: `1px solid ${item.color}44`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '1.25rem',
-                }}>
-                  {item.icon}
-                </div>
-
-                {/* Info */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                    <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--sf-text)' }}>{t(item.labelKey)}</span>
-                    {item.supportsTheme && selectedTheme && (
-                      <span className="sf-badge sf-badge-violet" style={{ fontSize: '0.6rem' }}>
-                        {t(THEMES.find((th) => th.id === selectedTheme)?.labelKey ?? '')}
-                      </span>
-                    )}
+            <>
+              {hItems.length > 0 && (
+                <>
+                  <div className="glass-card" style={{ padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(124,58,237,0.06)', borderColor: 'rgba(124,58,237,0.15)' }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--sf-text)' }}>{t('obs.orientationHorizontal')}</span>
+                    <code style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', borderRadius: 4, background: 'rgba(124,58,237,0.1)', color: '#a78bfa' }}>1920×1080</code>
                   </div>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '0.625rem' }}>
-                    {t(item.descKey)}
-                  </p>
-                  {item.id === 'custom' && (
-                    <div style={{ marginBottom: '0.5rem' }}>
-                      <input
-                        id="custom-game-input"
-                        type="text"
-                        value={customGame}
-                        onChange={(e) => setCustomGame(e.target.value)}
-                        placeholder="Nombre del juego (opcional)"
-                        className="sf-input"
-                        style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem', maxWidth: 280 }}
-                      />
-                    </div>
-                  )}
-                  <code style={{
-                    fontSize: '0.72rem',
-                    color: 'var(--sf-text-2)',
-                    background: 'rgba(0,0,0,0.3)',
-                    padding: '0.3rem 0.6rem',
-                    borderRadius: 6,
-                    display: 'block',
-                    overflowX: 'auto',
-                    whiteSpace: 'nowrap',
-                    border: '1px solid var(--sf-border)',
-                  }}>
-                    {url}
-                  </code>
-                </div>
-
-                {/* Action buttons */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flexShrink: 0 }}>
-                  <button
-                    id={`copy-${item.id}`}
-                    onClick={() => copyToClipboard(item.id, url)}
-                    className={`sf-btn ${isCopied ? 'sf-btn-ghost' : 'sf-btn-primary'}`}
-                    style={{ minWidth: 90, fontSize: '0.78rem', padding: '0.45rem 0.875rem' }}
-                  >
-                    {isCopied ? t('obs.copiado') : t('obs.copiar')}
-                  </button>
-
-                  {/* Configure button for social */}
-                  {isSocial && (
-                    <button
-                      id="social-configure-btn"
-                      onClick={() => setSocialExpanded((v) => !v)}
-                      style={{
-                        padding: '0.45rem 0.875rem',
-                        borderRadius: 'var(--sf-radius-sm)',
-                        border: `1px solid ${socialExpanded ? item.color + '88' : 'var(--sf-border)'}`,
-                        background: socialExpanded ? `${item.color}18` : 'transparent',
-                        color: socialExpanded ? '#22d3ee' : 'var(--sf-text-3)',
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        fontFamily: 'inherit',
-                        transition: 'all 0.15s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      {socialExpanded ? '▲' : '▼'} {t('obs.configurar')}
-                    </button>
-                  )}
-
-                  {/* Configure button for end screen socials */}
-                  {item.id.endsWith('-end') && (
-                    <button
-                      id={`endsocial-configure-btn-${item.id}`}
-                      onClick={() => setEndSocialExpanded(endSocialExpanded === item.id ? null : item.id)}
-                      style={{
-                        padding: '0.45rem 0.875rem',
-                        borderRadius: 'var(--sf-radius-sm)',
-                        border: `1px solid ${endSocialExpanded === item.id ? '#10b98188' : 'var(--sf-border)'}`,
-                        background: endSocialExpanded === item.id ? 'rgba(16,185,129,0.1)' : 'transparent',
-                        color: endSocialExpanded === item.id ? '#34d399' : 'var(--sf-text-3)',
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        fontFamily: 'inherit',
-                        transition: 'all 0.15s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      {endSocialExpanded === item.id ? '▲' : '▼'} {t('obs.configurar')}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* ── End screen social sub-menu ── */}
-              {item.id.endsWith('-end') && (
-                <AnimatePresence>
-                  {endSocialExpanded === item.id && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.22, ease: 'easeOut' }}
-                      style={{ overflow: 'hidden' }}
-                    >
-                      <div
-                        style={{
-                          marginTop: 4,
-                          padding: '1.25rem',
-                          background: 'rgba(16,185,129,0.04)',
-                          border: '1px solid rgba(16,185,129,0.15)',
-                          borderTop: 'none',
-                          borderRadius: '0 0 var(--sf-radius) var(--sf-radius)',
-                        }}
-                      >
-                        <p
-                          className="sf-section-title"
-                          style={{ marginBottom: '1rem', color: '#34d399' }}
-                        >
-                          Redes Sociales · Pantalla de Despedida
-                        </p>
-                        <p style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '1rem', lineHeight: 1.5 }}>
-                          Ingresa tu nombre de usuario en cada red y desactiva las que no quieras mostrar.
-                        </p>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-                          {endScreenSocials.map((social, idx) => (
-                            <div
-                              key={social.platform}
-                              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
-                            >
-                              {/* Visibility toggle */}
-                              <button
-                                onClick={() => {
-                                  const next = [...endScreenSocials];
-                                  next[idx] = { ...next[idx], visible: !next[idx].visible };
-                                  setEndScreenSocials(next);
-                                }}
-                                style={{
-                                  width: 22, height: 22, borderRadius: 4, flexShrink: 0, cursor: 'pointer',
-                                  background: social.visible ? `${social.color}44` : 'transparent',
-                                  border: `2px solid ${social.visible ? social.color : 'var(--sf-border)'}`,
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  fontSize: '0.65rem', color: social.visible ? '#fff' : 'transparent',
-                                  transition: 'all 0.15s ease', fontFamily: 'inherit',
-                                }}
-                                title={social.visible ? 'Ocultar' : 'Mostrar'}
-                              >
-                                {social.visible ? '✓' : ''}
-                              </button>
-
-                              {/* Platform badge */}
-                              <div
-                                style={{
-                                  width: 32, height: 32, borderRadius: 8,
-                                  background: `${social.color}22`,
-                                  border: `1px solid ${social.color}44`,
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  fontSize: '1rem', flexShrink: 0,
-                                }}
-                              >
-                                {social.icon}
-                              </div>
-
-                              {/* Label */}
-                              <span
-                                style={{
-                                  fontSize: '0.78rem', fontWeight: 600,
-                                  color: social.visible ? 'var(--sf-text-2)' : 'var(--sf-text-3)',
-                                  width: 100, flexShrink: 0,
-                                }}
-                              >
-                                {social.label}
-                              </span>
-
-                              {/* Username input */}
-                              <input
-                                type="text"
-                                value={social.username}
-                                onChange={(e) => {
-                                  const next = [...endScreenSocials];
-                                  next[idx] = { ...next[idx], username: e.target.value };
-                                  setEndScreenSocials(next);
-                                }}
-                                placeholder="@tu_usuario"
-                                className="sf-input"
-                                style={{
-                                  fontSize: '0.78rem', padding: '0.4rem 0.75rem',
-                                  opacity: social.visible ? 1 : 0.4,
-                                }}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  {hItems.map((item) => renderOverlayCard(item))}
+                </>
               )}
-
-              {/* ── Social sub-menu ── */}
-              {isSocial && (
-                <AnimatePresence>
-                  {socialExpanded && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.22, ease: 'easeOut' }}
-                      style={{ overflow: 'hidden' }}
-                    >
-                      <div
-                        style={{
-                          marginTop: 4,
-                          padding: '1.25rem',
-                          background: 'rgba(6,182,212,0.04)',
-                          border: '1px solid rgba(6,182,212,0.15)',
-                          borderTop: 'none',
-                          borderRadius: '0 0 var(--sf-radius) var(--sf-radius)',
-                        }}
-                      >
-                        <p
-                          className="sf-section-title"
-                          style={{ marginBottom: '1rem', color: '#22d3ee' }}
-                        >
-                          {t('obs.socialUrls')}
-                        </p>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-                          {socialLinks.map((link) => (
-                            <div
-                              key={link.platform}
-                              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
-                            >
-                              {/* Platform badge */}
-                              <div
-                                style={{
-                                  width: 32,
-                                  height: 32,
-                                  borderRadius: 8,
-                                  background: `${link.color}22`,
-                                  border: `1px solid ${link.color}44`,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontSize: '1rem',
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {link.icon}
-                              </div>
-
-                              {/* Label */}
-                              <span
-                                style={{
-                                  fontSize: '0.78rem',
-                                  fontWeight: 600,
-                                  color: 'var(--sf-text-2)',
-                                  width: 90,
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {t(link.labelKey)}
-                              </span>
-
-                              {/* URL input */}
-                              <input
-                                id={`social-url-${link.platform}`}
-                                type="url"
-                                value={link.url}
-                                onChange={(e) => updateSocialLink(link.platform, e.target.value)}
-                                placeholder={t(link.placeholderKey)}
-                                className="sf-input"
-                                style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem' }}
-                              />
-
-                              {/* Active indicator */}
-                              <div
-                                style={{
-                                  width: 8,
-                                  height: 8,
-                                  borderRadius: '50%',
-                                  background: link.url.trim() ? '#10b981' : 'var(--sf-border)',
-                                  boxShadow: link.url.trim() ? '0 0 6px #10b981' : 'none',
-                                  flexShrink: 0,
-                                  transition: 'all 0.2s ease',
-                                }}
-                              />
-                            </div>
-                          ))}
-                        </div>
-
-                        <p
-                          style={{
-                            marginTop: '1rem',
-                            fontSize: '0.72rem',
-                            color: 'var(--sf-text-3)',
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {t('obs.socialHelp')}<span style={{ color: '#10b981' }}>●</span>) se incluirán en la URL del overlay.
-                        </p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+              {vItems.length > 0 && (
+                <>
+                  <div className="glass-card" style={{ padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(6,182,212,0.06)', borderColor: 'rgba(6,182,212,0.15)' }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--sf-text)' }}>{t('obs.orientationVertical')}</span>
+                    <code style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', borderRadius: 4, background: 'rgba(6,182,212,0.1)', color: '#22d3ee' }}>1080×1920</code>
+                  </div>
+                  {vItems.map((item) => renderOverlayCard(item))}
+                </>
               )}
-            </div>
+            </>
           );
-        })}
+        })()}
       </div>
+
+
 
       {/* Fortnite config */}
       {selectedTheme === 'fortnite' && (

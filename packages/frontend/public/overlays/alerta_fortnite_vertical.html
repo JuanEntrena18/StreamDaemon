@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortnite Vertical Alert</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: transparent;
+            overflow: hidden; font-family: 'Barlow Condensed', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #alert-wrapper {
+            position: relative;
+            opacity: 0; transform: scale(0.5) translateY(100px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #alert-wrapper.show { opacity: 1; transform: scale(1) translateY(0); }
+        #alert-wrapper.hide { opacity: 0; transform: scale(0.5) translateY(100px); transition: all 0.3s ease-in; }
+
+        .victory-banner {
+            background: linear-gradient(180deg, #1a0a3e 0%, #2d1b69 50%, #1a0a3e 100%);
+            border: 6px solid #ffd700;
+            padding: 40px 60px;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.4), inset 0 0 60px rgba(100, 50, 200, 0.3);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative; width: 750px;
+        }
+
+        .victory-banner::before {
+            content: ''; position: absolute; inset: -8px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            animation: borderGlow 2s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes borderGlow {
+            0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+            100% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.6); }
+        }
+
+        #alert-type {
+            font-size: 40px; color: #a78bfa; letter-spacing: 4px;
+            text-transform: uppercase; margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(167, 139, 250, 0.5);
+        }
+
+        #alert-user {
+            font-size: 100px; color: #ffd700;
+            letter-spacing: 4px; text-transform: uppercase; line-height: 1;
+            -webkit-text-stroke: 2px #000;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.6), 4px 4px 0 rgba(0,0,0,0.8);
+            margin-bottom: 15px;
+        }
+
+        #alert-extra {
+            font-size: 45px; color: #00d4ff;
+            text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+
+        .sunburst {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 900px; height: 900px;
+            background: repeating-conic-gradient(from 0deg, rgba(255, 215, 0, 0.08) 0deg 15deg, transparent 15deg 30deg);
+            border-radius: 50%; z-index: -1;
+            animation: spin 20s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <audio id="alert-sound" preload="auto"></audio>
+
+    <div id="alert-wrapper">
+        <div class="sunburst"></div>
+        <div class="victory-banner">
+            <div id="alert-type">TIPO DE EVENTO</div>
+            <div id="alert-user">USUARIO</div>
+            <div id="alert-extra"></div>
+        </div>
+    </div>
+
+    <script>
+        const queue = [];
+        let isPlaying = false;
+        const container = document.getElementById('alert-wrapper');
+        const sound = document.getElementById('alert-sound');
+
+        const elType = document.getElementById('alert-type');
+        const elUser = document.getElementById('alert-user');
+        const elExtra = document.getElementById('alert-extra');
+
+        const alertDic = {
+            'FOLLOWER': 'NUEVO MIEMBRO DEL ESCUADRÓN',
+            'SUBSCRIBER': 'PASE DE BATALLA OBTENIDO',
+            'DONATION': 'ENTREGA DE SUMINISTROS',
+            'RAID': 'EMBOSCADA ENEMIGA',
+            'BITS': 'PAVOS RECIBIDOS'
+        };
+
+        const soundKeyMap = {
+            'FOLLOWER': 'follow',
+            'SUBSCRIBER': 'subscribe',
+            'BITS': 'bits',
+            'RAID': 'raid',
+            'DONATION': 'redemption'
+        };
+
+        const soundConfig = {};
+        const BACKEND_URL = new URLSearchParams(window.location.search).get('backend') || 'http://localhost:3000';
+
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const CHANNEL = urlParams.get('channel') || '';
+
+            function loadSocketIO(cb) {
+                const script = document.createElement('script');
+                script.onload = () => cb();
+                script.onerror = () => { setTimeout(() => loadSocketIO(cb), 2000); };
+                script.src = './js/socket.io.js';
+                document.head.appendChild(script);
+            }
+
+            function initSocket() {
+                const socket = io(BACKEND_URL, { transports: ['websocket'] });
+
+                socket.on('connect', () => {
+                    if (CHANNEL) socket.emit('join:channel', CHANNEL);
+                    fetch(BACKEND_URL + '/alert-sounds')
+                        .then(r => r.json())
+                        .then(cfg => { Object.assign(soundConfig, cfg); })
+                        .catch(() => {});
+                });
+
+                socket.on('channel:follow', ({ userDisplayName }) => {
+                    playAlert('FOLLOWER', userDisplayName);
+                });
+                socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+                    if (isGift) return;
+                    playAlert('SUBSCRIBER', userDisplayName, tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3');
+                });
+                socket.on('channel:subscription-message', ({ userDisplayName, cumulativeMonths }) => {
+                    playAlert('SUBSCRIBER', userDisplayName, cumulativeMonths + ' meses');
+                });
+                socket.on('channel:subgift', ({ gifterDisplayName, amount }) => {
+                    playAlert('SUBSCRIBER', gifterDisplayName, 'x' + amount + ' subs');
+                });
+                socket.on('channel:cheer', ({ userDisplayName, bits }) => {
+                    playAlert('BITS', userDisplayName, bits + ' bits');
+                });
+                socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+                    playAlert('DONATION', userDisplayName, rewardTitle);
+                });
+                socket.on('channel:raid', ({ fromDisplayName, viewerCount }) => {
+                    playAlert('RAID', fromDisplayName, viewerCount + ' espectadores');
+                });
+
+                socket.on('connect_error', (err) => console.error('Socket connect error:', err));
+            }
+
+            loadSocketIO(initSocket);
+        })();
+
+        window.addEventListener('message', (e) => {
+            const data = e.data;
+            if (data && data.action === 'NEW_ALERT') {
+                queue.push(data);
+                processQueue();
+            }
+        });
+
+        function playAlert(type, username, amount) {
+            queue.push({ type, username, amount });
+            processQueue();
+        }
+
+        function processQueue() {
+            if (isPlaying || queue.length === 0) return;
+            isPlaying = true;
+
+            const data = queue.shift();
+
+            elType.textContent = alertDic[data.type] || 'ALERTA DE SISTEMA';
+            elUser.textContent = data.username.toUpperCase();
+            elExtra.textContent = data.amount ? data.amount : '';
+
+            const sKey = soundKeyMap[data.type] || '';
+            const sPath = sKey ? soundConfig[sKey] : '';
+            if (sPath) {
+                sound.src = BACKEND_URL + '/alert-sounds/file/' + encodeURIComponent(sPath);
+                sound.currentTime = 0;
+                sound.play().catch(err => console.log("Autoplay bloqueado.", err));
+            }
+
+            container.classList.remove('hide');
+            container.classList.add('show');
+
+            setTimeout(() => {
+                container.classList.remove('show');
+                container.classList.add('hide');
+
+                setTimeout(() => {
+                    isPlaying = false;
+                    processQueue();
+                }, 400);
+            }, 7500);
+        }
+    </script>
+</body>
+</html>

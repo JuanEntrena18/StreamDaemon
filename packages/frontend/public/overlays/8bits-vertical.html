@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – 8-Bit Vertical</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 1080px; height: 1920px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Press Start 2P', monospace;
+    -webkit-font-smoothing: none;
+    image-rendering: pixelated;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    position: relative;
+  }
+
+  /* Pixel grid background */
+  #bg-grid {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #top-section {
+    position: relative;
+    width: 100%;
+    height: 960px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    z-index: 1;
+  }
+
+  /* CRT Monitor frame */
+  #crt-frame {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    background: #0a0a0a;
+    border: 8px solid #fff;
+    box-shadow:
+      inset -6px -6px 0 #5C5C5C,
+      inset 6px 6px 0 #7C7C7C,
+      8px 8px 0 rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -40px;
+  }
+
+  #crt-frame::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.08) 0px,
+      rgba(0,0,0,0.08) 2px,
+      transparent 2px,
+      transparent 4px
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  #crt-frame::after {
+    content: '■';
+    position: absolute;
+    bottom: 12px; right: 16px;
+    color: #00ff00;
+    font-size: 14px;
+    opacity: 0.5;
+    z-index: 3;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  .crt-label {
+    position: absolute;
+    top: -22px;
+    left: 30px;
+    background: #000;
+    padding: 4px 16px;
+    color: #ffff00;
+    font-size: 14px;
+    border: 2px solid #fff;
+    z-index: 3;
+    letter-spacing: 2px;
+  }
+
+  #crt-screen {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Scanline overlay animation for CRT */
+  #scanlines {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,255,0,0.03) 3px,
+      rgba(0,255,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 3;
+    animation: scanMove 8s linear infinite;
+  }
+
+  @keyframes scanMove {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(8px); }
+  }
+
+  /* HUD stats - top of CRT */
+  #hud-pixel {
+    position: absolute;
+    top: 16px; left: 50%; transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 5;
+  }
+
+  .pixel-pill {
+    background: #000;
+    border: 3px solid #fff;
+    padding: 6px 14px;
+    text-align: center;
+    min-width: 80px;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+  }
+
+  .pixel-pill-label {
+    font-size: 7px;
+    color: #ffff00;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .pixel-pill-value {
+    font-size: 14px;
+    color: #fff;
+    text-shadow: 2px 2px 0 #ff00ff;
+  }
+
+  #separator {
+    width: 100%;
+    height: 8px;
+    background: repeating-linear-gradient(
+      90deg,
+      #fff 0px,
+      #fff 16px,
+      #000 16px,
+      #000 32px
+    );
+    flex-shrink: 0;
+    z-index: 1;
+  }
+
+  #bottom-section {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 30px 30px;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  /* Stream info bar */
+  #stream-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid #fff;
+    flex-shrink: 0;
+  }
+
+  #live-indicator {
+    color: #ff0055;
+    font-size: 10px;
+    animation: blinker 1s step-end infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes blinker {
+    50% { opacity: 0; }
+  }
+
+  #game-label-8bit {
+    color: #ffff00;
+    font-size: 10px;
+    text-shadow: 2px 2px 0 #ff0055;
+  }
+
+  #title-text-8bit {
+    color: rgba(255,255,255,0.7);
+    font-size: 8px;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* RPG Dialog Box for chat */
+  #rpg-chat {
+    flex: 1;
+    background: #000;
+    border: 6px solid #fff;
+    box-shadow:
+      inset -4px -4px 0 #5C5C5C,
+      inset 4px 4px 0 #7C7C7C;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+    position: relative;
+  }
+
+  #rpg-chat::before {
+    content: 'WORLD CHAT';
+    position: absolute;
+    top: -16px;
+    left: 30px;
+    background: #000;
+    padding: 2px 14px;
+    color: #E52521;
+    font-size: 10px;
+    border: 2px solid #fff;
+    z-index: 5;
+  }
+
+  #rpg-chat-msgs {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #rpg-chat-msgs::-webkit-scrollbar {
+    width: 10px;
+    background: #000;
+    border-left: 3px solid #fff;
+  }
+
+  #rpg-chat-msgs::-webkit-scrollbar-thumb {
+    background: #fff;
+    border: 2px solid #000;
+  }
+
+  .rpg-msg {
+    font-size: 10px;
+    line-height: 1.8;
+    word-break: break-word;
+    animation: msgIn 0.3s steps(3);
+  }
+
+  @keyframes msgIn {
+    0% { opacity: 0; transform: translateX(10px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+
+  .rpg-msg .un { color: #E52521; }
+  .rpg-msg .txt { color: #fff; }
+
+  .rpg-event {
+    font-size: 8px;
+    line-height: 1.6;
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    background: rgba(248, 184, 0, 0.1);
+    border-left: 4px solid #F8B800;
+    animation: notifIn 0.4s steps(4);
+  }
+
+  @keyframes notifIn {
+    0% { opacity: 0; transform: translateX(20px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Alert zone */
+  #alert-zone {
+    position: absolute;
+    top: 60px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    gap: 10px;
+    pointer-events: none;
+    z-index: 20;
+    width: 80%;
+  }
+
+  .alert-card-pixel {
+    background: #000;
+    border: 4px solid #fff;
+    box-shadow: 6px 6px 0 #ff0055, -4px -4px 0 #00ffff;
+    padding: 16px 24px;
+    text-align: center;
+    min-width: 280px;
+    width: 100%;
+    animation: pixelAlertIn 0.4s steps(4) forwards,
+               pixelAlertOut 0.4s steps(4) 4.6s forwards;
+  }
+
+  @keyframes pixelAlertIn {
+    0% { opacity: 0; transform: scale(0.5) translateY(20px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes pixelAlertOut {
+    0% { opacity: 1; transform: scale(1) translateY(0); }
+    100% { opacity: 0; transform: scale(0.5) translateY(-20px); }
+  }
+
+  .alert-pixel-type {
+    font-size: 10px;
+    color: #ffff00;
+    margin-bottom: 6px;
+    animation: blinker 0.8s step-end infinite;
+  }
+
+  .alert-pixel-user {
+    font-size: 20px;
+    color: #fff;
+    text-shadow: 3px 3px 0 #ff0055;
+    margin-bottom: 4px;
+  }
+
+  .alert-pixel-detail {
+    font-size: 12px;
+    color: #00ffff;
+  }
+
+  .alert-pixel-msg {
+    font-size: 10px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  #offline-notice {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: #000;
+    border: 3px solid #ff0055;
+    padding: 10px 20px;
+    font-size: 8px;
+    color: #ff0055;
+    display: none;
+    z-index: 50;
+  }
+  #offline-notice.show { display: block; }
+
+  #demo-badge {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+    background: #000;
+    border: 2px solid #ffff00;
+    padding: 4px 14px;
+    font-size: 8px;
+    color: #ffff00;
+    display: none;
+    z-index: 55;
+  }
+  #demo-badge.show { display: block; }
+</style>
+</head>
+<body>
+
+<div id="bg-grid"></div>
+
+<div id="top-section">
+  <div id="hud-pixel">
+    <div class="pixel-pill">
+      <div class="pixel-pill-label">VIEWERS</div>
+      <div class="pixel-pill-value" id="val-viewers">--</div>
+    </div>
+    <div class="pixel-pill">
+      <div class="pixel-pill-label">FOLLOWS</div>
+      <div class="pixel-pill-value" id="val-followers">--</div>
+    </div>
+    <div class="pixel-pill">
+      <div class="pixel-pill-label">SUBS</div>
+      <div class="pixel-pill-value" id="val-subs">--</div>
+    </div>
+  </div>
+
+  <div id="crt-frame">
+    <div class="crt-label">PLAYER 1 CAM</div>
+    <div id="scanlines"></div>
+    <div id="crt-screen"></div>
+  </div>
+</div>
+
+<div id="separator"></div>
+
+<div id="bottom-section">
+  <div id="stream-info">
+    <div id="live-indicator">> LIVE</div>
+    <div id="game-label-8bit">GAME</div>
+    <div id="title-text-8bit">Connecting...</div>
+  </div>
+
+  <div id="rpg-chat">
+    <div id="rpg-chat-msgs"></div>
+  </div>
+
+  <div id="alert-zone"></div>
+</div>
+
+<div id="offline-notice">> CONNECTION LOST</div>
+<div id="demo-badge">> DEMO MODE</div>
+
+<script>
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var CHANNEL = params.get('channel') || '';
+  var BACKEND_URL = params.get('backend') || 'http://localhost:3000';
+  var DEMO_MODE = params.get('demo') === 'true';
+
+  function fmtNum(n) {
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+    return String(n);
+  }
+
+  function applyHud(data) {
+    document.getElementById('val-viewers').textContent = fmtNum(data.viewers ?? 0);
+    document.getElementById('val-followers').textContent = fmtNum(data.followers ?? 0);
+    document.getElementById('val-subs').textContent = fmtNum(data.subscribers ?? 0);
+    var titleEl = document.getElementById('title-text-8bit');
+    if (data.streamTitle) titleEl.textContent = data.streamTitle;
+    if (data.gameName) document.getElementById('game-label-8bit').textContent = data.gameName;
+  }
+
+  var alertQueue = [];
+  var alertBusy = false;
+  var ALERT_DURATION = 5200;
+
+  function enqueueAlert(cfg) {
+    alertQueue.push(cfg);
+    if (!alertBusy) processAlertQueue();
+  }
+
+  function processAlertQueue() {
+    if (!alertQueue.length) { alertBusy = false; return; }
+    alertBusy = true;
+    var cfg = alertQueue.shift();
+    showAlert(cfg);
+    setTimeout(processAlertQueue, ALERT_DURATION + 300);
+  }
+
+  function showAlert(_a) {
+    var type = _a.type, user = _a.user, detail = _a.detail, msg = _a.msg;
+    var zone = document.getElementById('alert-zone');
+    var card = document.createElement('div');
+    card.className = 'alert-card-pixel';
+    var typeLabels = { follow: 'NEW PLAYER JOINED', sub: 'LEVEL UP!', bits: 'BONUS STAGE', cheer: 'BONUS STAGE', redemption: 'ITEM UNLOCKED' };
+    card.innerHTML =
+      '<div class="alert-pixel-type">> ' + (typeLabels[type] || type.toUpperCase()) + '</div>' +
+      '<div class="alert-pixel-user">' + escHtml(user) + '</div>' +
+      (detail ? '<div class="alert-pixel-detail">' + escHtml(detail) + '</div>' : '') +
+      (msg ? '<div class="alert-pixel-msg">' + escHtml(msg) + '</div>' : '');
+    zone.appendChild(card);
+    setTimeout(function() { if (card.parentNode) card.parentNode.removeChild(card); }, ALERT_DURATION + 100);
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  var MAX_CHAT_MSGS = 20;
+
+  function addChatMessage(displayName, text, color) {
+    var container = document.getElementById('rpg-chat-msgs');
+    if (!container) return;
+    var row = document.createElement('div');
+    row.className = 'rpg-msg';
+    row.innerHTML = '<span class="un" style="color:' + (color || '#E52521') + '">[' + escHtml(displayName) + ']</span><br><span class="txt">' + escHtml(text) + '</span>';
+    container.appendChild(row);
+    if (container.children.length > MAX_CHAT_MSGS) container.removeChild(container.firstChild);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function pushEvent(html) {
+    var container = document.getElementById('rpg-chat-msgs');
+    if (!container) return;
+    var node = document.createElement('div');
+    node.className = 'rpg-event';
+    node.innerHTML = html;
+    container.appendChild(node);
+    var events = container.querySelectorAll('.rpg-event');
+    if (events.length > 3) {
+      if (events[0]) events[0].remove();
+    }
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function initSocket() {
+    var socket;
+    try {
+      socket = io(BACKEND_URL, { transports: ['websocket'] });
+    } catch (e) {
+      document.getElementById('offline-notice').classList.add('show');
+      return;
+    }
+    socket.on('connect', function() {
+      document.getElementById('offline-notice').classList.remove('show');
+      if (CHANNEL) socket.emit('join:channel', CHANNEL);
+      fetch(BACKEND_URL + '/hud/' + CHANNEL)
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(d) { if (d) applyHud(d); })
+        .catch(function() {});
+    });
+    socket.on('connect_error', function() {
+      document.getElementById('offline-notice').classList.add('show');
+    });
+    socket.on('disconnect', function() {
+      document.getElementById('offline-notice').classList.add('show');
+    });
+    socket.on('hud:update', applyHud);
+    socket.on('channel:chat', function(d) {
+      addChatMessage(d.user?.displayName || d.userDisplayName || 'Anonimo', d.text || '', d.user?.color || '#E52521');
+    });
+    socket.on('chat:message', function(d) {
+      addChatMessage(d.user?.displayName || 'Anonimo', d.text || '', d.user?.color || '#E52521');
+    });
+    socket.on('channel:follow', function(d) {
+      var name = d.userDisplayName || d.userName || 'Alguien';
+      pushEvent('<b style="color:#ff00ff">' + escHtml(name) + '</b> joined the game!');
+      enqueueAlert({ type: 'follow', user: name });
+    });
+    socket.on('channel:subscribe', function(d) {
+      if (d.isGift) return;
+      var name = d.userDisplayName || d.userName || 'Alguien';
+      var tier = d.tier === '1000' ? '1' : d.tier === '2000' ? '2' : '3';
+      pushEvent('<b style="color:#ffff00">' + escHtml(name) + '</b> leveled up! (Tier ' + tier + ')');
+      enqueueAlert({ type: 'sub', user: name, detail: 'Tier ' + tier });
+    });
+    socket.on('channel:cheer', function(d) {
+      var name = d.userDisplayName || d.userName || 'Anonimo';
+      pushEvent('<b style="color:#00ffff">' + escHtml(name) + '</b> dropped ' + (d.bits || 0) + ' coins!');
+      enqueueAlert({ type: 'bits', user: name, detail: (d.bits || 0) + ' bits' });
+    });
+  }
+
+  function startDemo() {
+    applyHud({ viewers: 87, followers: 1234, subscribers: 56, streamTitle: '8-Bit Adventure!', gameName: 'RETRO GAME' });
+    setTimeout(function() { addChatMessage('PixelWarrior', 'Let\'s gooo!', '#E52521'); }, 3000);
+    setTimeout(function() { addChatMessage('BlockMaster', 'gg wp', '#00ffff'); }, 7000);
+    setTimeout(function() { enqueueAlert({ type: 'follow', user: 'PixelWarrior' }); }, 2500);
+    setTimeout(function() { enqueueAlert({ type: 'sub', user: 'BlockMaster', detail: 'Tier 1' }); }, 8000);
+    setTimeout(function() { enqueueAlert({ type: 'bits', user: 'RetroFan', detail: '100 bits' }); }, 14000);
+  }
+
+  function loadSocketIO(cb) {
+    var script = document.createElement('script');
+    script.onload = function() { cb(); };
+    script.onerror = function() { setTimeout(function() { loadSocketIO(cb); }, 2000); };
+    script.src = './js/socket.io.js';
+    document.head.appendChild(script);
+  }
+
+  loadSocketIO(function() { initSocket(); });
+
+  if (DEMO_MODE) {
+    document.getElementById('demo-badge').classList.add('show');
+    startDemo();
+  }
+})();
+</script>
+</body>
+</html>

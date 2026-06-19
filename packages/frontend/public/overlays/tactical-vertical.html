@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tactical Vertical Overlay</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body, html {
+  width: 1080px; height: 1920px; background-color: transparent;
+  overflow: hidden; font-family: 'Share Tech Mono', monospace;
+  position: relative;
+}
+.grid-bg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background-image:
+    linear-gradient(rgba(45,212,191,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45,212,191,0.06) 1px, transparent 1px);
+  background-size: 40px 40px; z-index: 0;
+}
+.scanlines {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(to bottom, transparent, transparent 50%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.15));
+  background-size: 100% 3px; pointer-events: none; z-index: 100;
+}
+.container {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; flex-direction: column; padding: 20px; gap: 16px; z-index: 1;
+}
+.top-section {
+  flex: 0 0 55%; display: flex; flex-direction: column; gap: 10px;
+}
+.hud-frame {
+  flex: 1;
+  background: rgba(10,14,39,0.82);
+  border: 2px solid #2dd4bf;
+  clip-path: polygon(24px 0, calc(100% - 24px) 0, 100% 24px, 100% calc(100% - 24px), calc(100% - 24px) 100%, 24px 100%, 0 calc(100% - 24px), 0 24px);
+  display: flex; flex-direction: column; overflow: hidden;
+  position: relative;
+}
+.hud-frame::before {
+  content: ''; position: absolute; top: 24px; left: 0; width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, #ff8c00, transparent);
+}
+.hud-header {
+  background: #2dd4bf; color: #0a0e27; padding: 8px 20px;
+  font-size: 18px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 3px; border-bottom: 2px solid #2dd4bf;
+}
+.webcam-area {
+  flex: 1; background: transparent; position: relative;
+}
+.telemetry {
+  display: flex; gap: 8px; padding: 8px 14px;
+  background: rgba(10,14,39,0.9);
+  border-top: 1px solid rgba(45,212,191,0.3);
+  justify-content: space-between; font-size: 12px;
+}
+.telemetry span { color: #34d399; letter-spacing: 1px; }
+.telemetry .label { color: #ff8c00; }
+.telemetry .val { color: #2dd4bf; }
+.bottom-section {
+  flex: 0 0 calc(45% - 16px); display: flex; flex-direction: column;
+}
+.comms-frame {
+  flex: 1;
+  background: rgba(10,14,39,0.85);
+  border: 2px solid #cc0000;
+  clip-path: polygon(24px 0, calc(100% - 24px) 0, 100% 24px, 100% calc(100% - 24px), calc(100% - 24px) 100%, 24px 100%, 0 calc(100% - 24px), 0 24px);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.comms-header {
+  background: #cc0000; color: #fff; padding: 8px 20px;
+  font-size: 16px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 2px; border-bottom: 2px solid #cc0000;
+}
+.chat-content {
+  flex: 1; padding: 14px; display: flex; flex-direction: column;
+  justify-content: flex-end; overflow: hidden;
+}
+.chat-msg {
+  margin-bottom: 8px; font-size: 15px; line-height: 1.3;
+  border-left: 3px solid #34d399; padding-left: 10px;
+  animation: slideIn 0.2s ease-out forwards;
+  background: rgba(52,211,153,0.04);
+}
+@keyframes slideIn {
+  from { transform: translateX(16px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.chat-user { color: #cc0000; font-weight: 700; margin-right: 4px; }
+.chat-text { color: #e0e0e0; }
+.timestamp { color: #555; font-size: 12px; margin-right: 6px; }
+.event-msg { border-left-color: #ff8c00; color: #ff8c00; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="scanlines"></div>
+<div class="container">
+  <div class="top-section">
+    <div class="hud-frame">
+      <div class="hud-header">TACTICAL FEED :: ACTIVE</div>
+      <div class="webcam-area"></div>
+      <div class="telemetry">
+        <span><span class="label">SYS:</span> <span class="val">ONLINE</span></span>
+        <span><span class="label">SIG:</span> <span class="val">98.7%</span></span>
+        <span><span class="label">UPTIME:</span> <span class="val" id="uptimeVal">00:00:00</span></span>
+        <span><span class="label">VIEWERS:</span> <span class="val" id="viewerVal">--</span></span>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-section">
+    <div class="comms-frame">
+      <div class="comms-header">COMMS :: INCOMING</div>
+      <div class="chat-content" id="chatWrapper"></div>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const CHANNEL = params.get('channel') || '';
+  const BACKEND_URL = params.get('backend') || 'http://localhost:3000';
+  const chatWrapper = document.getElementById('chatWrapper');
+  const MAX_MSG = 16;
+
+  function pad(n) { return n.toString().padStart(2,'0'); }
+  setInterval(function() {
+    const el = document.getElementById('uptimeVal');
+    if (el) {
+      const t = new Date(); el.textContent = pad(t.getHours())+':'+pad(t.getMinutes())+':'+pad(t.getSeconds());
+    }
+  }, 1000);
+
+  function appendMessage(username, text, color) {
+    const el = document.createElement('div');
+    el.className = 'chat-msg';
+    const su = username.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const st = text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const c = color || '#cc0000';
+    const d = new Date();
+    const ts = pad(d.getHours())+pad(d.getMinutes());
+    el.innerHTML = '<span class="timestamp">['+ts+']</span><span class="chat-user" style="color:'+c+';">'+su+':</span><span class="chat-text">'+st+'</span>';
+    chatWrapper.appendChild(el);
+    if (chatWrapper.children.length > MAX_MSG) chatWrapper.removeChild(chatWrapper.firstChild);
+  }
+
+  function pushEvent(html) {
+    const el = document.createElement('div');
+    el.className = 'chat-msg event-msg';
+    el.innerHTML = html;
+    chatWrapper.appendChild(el);
+    if (chatWrapper.children.length > MAX_MSG) chatWrapper.removeChild(chatWrapper.firstChild);
+  }
+
+  function loadSocketIO(cb) {
+    const script = document.createElement('script');
+    script.onload = () => cb();
+    script.onerror = () => { setTimeout(() => loadSocketIO(cb), 2000); };
+    script.src = './js/socket.io.js';
+    document.head.appendChild(script);
+  }
+
+  function initSocket() {
+    const socket = io(BACKEND_URL, { transports: ['websocket'] });
+    socket.on('connect', () => { if (CHANNEL) socket.emit('join:channel', CHANNEL); });
+    socket.on('channel:chat', (d) => {
+      appendMessage(d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo', d.text || '', d.user?.color || '#cc0000');
+    });
+    socket.on('channel:follow', (d) => { pushEvent('&#9733; <b>'+(d.userDisplayName||d.userName||'Alguien')+'</b> nos sigue!'); });
+    socket.on('channel:subscribe', (d) => { pushEvent('&#127881; <b>'+(d.userDisplayName||d.userName||'Alguien')+'</b> se suscribi&oacute;!'); });
+    socket.on('channel:cheer', (d) => { pushEvent('&#128142; <b>'+(d.userDisplayName||d.userName||'An&oacute;nimo')+'</b> anim&oacute; con '+(d.bits||0)+' bits!'); });
+  }
+
+  loadSocketIO(initSocket);
+})();
+</script>
+</body>
+</html>

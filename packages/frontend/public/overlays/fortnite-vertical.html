@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – Fortnite Vertical</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --blue:    #00D4FF;
+    --yellow:  #FFD700;
+    --purple:  #C84BFF;
+    --dark:    #0A0E1A;
+    --panel:   rgba(10, 14, 26, 0.85);
+    --stroke:  rgba(0, 212, 255, 0.3);
+  }
+
+  html, body {
+    width: 1080px; height: 1920px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+
+  body {
+    display: flex; flex-direction: column;
+  }
+
+  #bg {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #0A0E1A 0%, #121830 40%, #1a1040 70%, #0A0E1A 100%);
+    z-index: -2;
+    pointer-events: none;
+  }
+
+  #bg::before {
+    content: '';
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-image:
+      url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0L80 23.1v46.2L40 92.4 0 69.3V23.1z' fill='none' stroke='%2300D4FF' stroke-width='0.4' opacity='0.08'/%3E%3C/svg%3E");
+    background-size: 120px 120px;
+    background-position: center;
+    pointer-events: none;
+    animation: hexFloat 60s linear infinite;
+  }
+
+  @keyframes hexFloat {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-120px); }
+  }
+
+  #particles {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .scan-line {
+    position: absolute; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--blue) 50%, transparent 100%);
+    opacity: 0.12;
+    animation: scan 10s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes scan {
+    from { top: 0; }
+    to { top: 1920px; }
+  }
+
+  .corner {
+    position: absolute;
+    width: 40px; height: 40px;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .corner svg { width: 100%; height: 100%; }
+  .corner.tl { top: 0; left: 0; }
+  .corner.tr { top: 0; right: 0; transform: scaleX(-1); }
+  .corner.bl { bottom: 0; left: 0; transform: scaleY(-1); }
+  .corner.br { bottom: 0; right: 0; transform: scale(-1,-1); }
+
+  #top-section {
+    position: relative;
+    width: 100%;
+    height: 960px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #webcam-frame {
+    position: relative;
+    width: 720px;
+    height: 540px;
+    background: var(--panel);
+    border: 2px solid var(--stroke);
+    clip-path: polygon(1% 0, 99% 0, 100% 3%, 100% 97%, 99% 100%, 1% 100%, 0 97%, 0 3%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -60px;
+  }
+
+  #webcam-frame::before {
+    content: '';
+    position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
+    clip-path: polygon(1% 0, 99% 0, 100% 3%, 100% 97%, 99% 100%, 1% 100%, 0 97%, 0 3%);
+    border: 1px solid var(--blue);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  #webcam-label {
+    position: absolute;
+    top: 10px; left: 20px;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--blue);
+    background: rgba(10,14,26,0.7);
+    padding: 4px 12px;
+    clip-path: polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%);
+  }
+
+  #webcam-placeholder {
+    width: 100%; height: 100%;
+    background: transparent;
+  }
+
+  /* Fortnite Stats overlay on top of webcam area */
+  #fn-stats {
+    position: absolute;
+    bottom: 20px; left: 20px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  #fn-stats.visible { opacity: 1; }
+
+  .fn-stat-group {
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    padding: 10px 18px;
+    clip-path: polygon(3% 0, 100% 0, 100% 88%, 97% 100%, 0 100%, 0 12%);
+    min-width: 220px;
+  }
+
+  .fn-stat-title {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(0,212,255,0.2);
+  }
+
+  .fn-stat-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 3px 0;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+  }
+
+  .fn-stat-label { color: rgba(255,255,255,0.55); font-weight: 600; }
+  .fn-stat-value { color: var(--blue); font-weight: 900; font-size: 17px; }
+  .fn-stat-value.yellow { color: var(--yellow); }
+  .fn-stat-value.purple { color: var(--purple); }
+
+  /* HUD stats bar */
+  #hud-bar {
+    position: absolute;
+    top: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px;
+    z-index: 10;
+  }
+
+  .hud-pill {
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%, 0 25%);
+    padding: 6px 16px;
+    text-align: center;
+    min-width: 90px;
+  }
+
+  .hud-pill-label {
+    font-size: 9px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    line-height: 1;
+  }
+
+  .hud-pill-value {
+    font-size: 22px; font-weight: 900;
+    color: #fff;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .hud-pill-value.blue   { color: var(--blue); }
+  .hud-pill-value.yellow { color: var(--yellow); }
+  .hud-pill-value.purple { color: var(--purple); }
+
+  #separator {
+    width: 100%; height: 4px;
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    opacity: 0.3;
+    flex-shrink: 0;
+  }
+
+  #bottom-section {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 30px 30px;
+    overflow: hidden;
+  }
+
+  /* Stream info bar */
+  #stream-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0,212,255,0.12);
+    flex-shrink: 0;
+  }
+
+  #live-badge {
+    background: #FF3B3B;
+    padding: 4px 12px;
+    font-size: 12px; font-weight: 900;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #fff;
+    clip-path: polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%);
+    flex-shrink: 0;
+    animation: pulse-live 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse-live {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.65; }
+  }
+
+  #game-label {
+    font-size: 13px; font-weight: 700;
+    color: var(--yellow);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    flex-shrink: 0;
+  }
+
+  #title-text {
+    font-size: 12px; font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Chat area */
+  #fn-chat {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    clip-path: polygon(1% 0, 99% 0, 100% 2%, 100% 98%, 99% 100%, 1% 100%, 0 98%, 0 2%);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  #fn-chat-header {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--blue);
+    padding: 10px 18px 6px;
+    border-bottom: 1px solid rgba(0,212,255,0.12);
+    flex-shrink: 0;
+  }
+
+  #fn-chat-msgs {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 18px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  #fn-chat-msgs::-webkit-scrollbar {
+    width: 4px;
+  }
+  #fn-chat-msgs::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  #fn-chat-msgs::-webkit-scrollbar-thumb {
+    background: var(--blue);
+    border-radius: 2px;
+  }
+
+  .fn-chat-msg {
+    font-size: 14px;
+    line-height: 1.4;
+    padding: 3px 0;
+    word-break: break-word;
+  }
+  .fn-chat-msg .un { font-weight: 700; }
+  .fn-chat-msg .txt { color: rgba(255,255,255,0.8); }
+
+  /* Alert zone in bottom section */
+  #alert-zone {
+    position: absolute;
+    top: 80px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    gap: 12px;
+    pointer-events: none;
+    z-index: 20;
+    width: 80%;
+  }
+
+  .alert-card {
+    background: var(--panel);
+    border: 2px solid var(--blue);
+    padding: 14px 30px;
+    clip-path: polygon(0 0, 97% 0, 100% 10%, 100% 100%, 3% 100%, 0 90%);
+    text-align: center;
+    min-width: 320px;
+    width: 100%;
+    animation: alert-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+               alert-out 0.4s ease-in 4.6s forwards;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .alert-card::before {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,212,255,0.08), transparent);
+    animation: shimmer 2s 0.4s ease-in-out infinite;
+  }
+
+  .alert-card.sub   { border-color: var(--purple); }
+  .alert-card.sub::before { background: linear-gradient(90deg, transparent, rgba(200,75,255,0.1), transparent); }
+  .alert-card.bits  { border-color: var(--yellow); }
+  .alert-card.bits::before { background: linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent); }
+  .alert-card.cheer { border-color: var(--yellow); }
+
+  @keyframes shimmer {
+    0%   { left: -60%; }
+    100% { left: 160%; }
+  }
+
+  @keyframes alert-in {
+    from { opacity: 0; transform: scale(0.7) translateY(30px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes alert-out {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to   { opacity: 0; transform: scale(0.8) translateY(-20px); }
+  }
+
+  .alert-type {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: var(--blue); margin-bottom: 3px;
+  }
+  .alert-card.sub   .alert-type { color: var(--purple); }
+  .alert-card.bits  .alert-type { color: var(--yellow); }
+  .alert-card.cheer .alert-type { color: var(--yellow); }
+
+  .alert-user {
+    font-size: 28px; font-weight: 900;
+    color: #fff; line-height: 1;
+    letter-spacing: 1px;
+  }
+
+  .alert-detail {
+    font-size: 13px; font-weight: 600;
+    color: rgba(255,255,255,0.65);
+    margin-top: 4px; letter-spacing: 1px;
+  }
+
+  .alert-msg {
+    font-size: 11px; font-weight: 400;
+    color: rgba(255,255,255,0.5);
+    margin-top: 3px;
+    font-style: italic;
+  }
+
+  #offline-notice {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: rgba(255,59,59,0.15);
+    border: 1px solid rgba(255,59,59,0.4);
+    padding: 6px 20px;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,120,120,0.85);
+    display: none;
+    z-index: 50;
+  }
+  #offline-notice.show { display: block; }
+
+  #demo-badge {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.4);
+    padding: 4px 16px;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 2px;
+    color: #fbbf24;
+    display: none;
+    z-index: 55;
+  }
+  #demo-badge.show { display: block; }
+</style>
+</head>
+<body>
+
+<div id="bg"></div>
+<canvas id="particles"></canvas>
+<div class="scan-line"></div>
+
+<div class="corner tl">
+  <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polyline points="0,40 0,0 40,0" stroke="#00D4FF" stroke-width="2" opacity="0.6"/>
+    <polyline points="0,32 0,0 32,0" stroke="#00D4FF" stroke-width="1" opacity="0.25"/>
+  </svg>
+</div>
+<div class="corner tr">
+  <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polyline points="0,40 0,0 40,0" stroke="#00D4FF" stroke-width="2" opacity="0.6"/>
+    <polyline points="0,32 0,0 32,0" stroke="#00D4FF" stroke-width="1" opacity="0.25"/>
+  </svg>
+</div>
+<div class="corner bl">
+  <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polyline points="0,40 0,0 40,0" stroke="#00D4FF" stroke-width="2" opacity="0.6"/>
+    <polyline points="0,32 0,0 32,0" stroke="#00D4FF" stroke-width="1" opacity="0.25"/>
+  </svg>
+</div>
+<div class="corner br">
+  <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polyline points="0,40 0,0 40,0" stroke="#00D4FF" stroke-width="2" opacity="0.6"/>
+    <polyline points="0,32 0,0 32,0" stroke="#00D4FF" stroke-width="1" opacity="0.25"/>
+  </svg>
+</div>
+
+<div id="top-section">
+  <div id="hud-bar">
+    <div class="hud-pill">
+      <div class="hud-pill-label">Viewers</div>
+      <div class="hud-pill-value blue" id="val-viewers">–</div>
+    </div>
+    <div class="hud-pill">
+      <div class="hud-pill-label">Followers</div>
+      <div class="hud-pill-value yellow" id="val-followers">–</div>
+    </div>
+    <div class="hud-pill">
+      <div class="hud-pill-label">Subs</div>
+      <div class="hud-pill-value purple" id="val-subs">–</div>
+    </div>
+    <div class="hud-pill">
+      <div class="hud-pill-label">Uptime</div>
+      <div class="hud-pill-value" id="val-uptime">00:00</div>
+    </div>
+  </div>
+
+  <div id="webcam-frame">
+    <div id="webcam-label">Live Camera</div>
+    <div id="webcam-placeholder"></div>
+  </div>
+
+  <div id="fn-stats">
+    <div class="fn-stat-group">
+      <div class="fn-stat-title">Fortnite Stats</div>
+      <div class="fn-stat-row"><span class="fn-stat-label">Kills</span><span class="fn-stat-value" id="fn-kills">—</span></div>
+      <div class="fn-stat-row"><span class="fn-stat-label">Wins</span><span class="fn-stat-value yellow" id="fn-wins">—</span></div>
+      <div class="fn-stat-row"><span class="fn-stat-label">Matches</span><span class="fn-stat-value" id="fn-matches">—</span></div>
+      <div class="fn-stat-row"><span class="fn-stat-label">K/D</span><span class="fn-stat-value purple" id="fn-kd">—</span></div>
+      <div class="fn-stat-row"><span class="fn-stat-label">Win Rate</span><span class="fn-stat-value" id="fn-winrate">—</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="separator"></div>
+
+<div id="bottom-section">
+  <div id="stream-info">
+    <div id="live-badge">Live</div>
+    <div id="game-label">Fortnite</div>
+    <div id="title-text">Conectando…</div>
+  </div>
+
+  <div id="fn-chat">
+    <div id="fn-chat-header">Chat en vivo</div>
+    <div id="fn-chat-msgs"></div>
+  </div>
+
+  <div id="alert-zone"></div>
+</div>
+
+<div id="offline-notice">Sin conexion con StreamForge</div>
+<div id="demo-badge">MODO PRUEBA</div>
+
+<script>
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const CHANNEL = params.get('channel') || '';
+  const BACKEND_URL = params.get('backend') || 'http://localhost:3000';
+  const DEMO_MODE = params.get('demo') === 'true';
+  const EPIC_USER = params.get('epic') || '';
+  const STATS_MODE = params.get('mode') || 'overall';
+
+  let uptimeSeconds = 0;
+  let uptimeInterval = null;
+
+  function fmtNum(n) {
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+    return String(n);
+  }
+
+  function fmtTime(s) {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    return [h, m].map(v => String(v).padStart(2, '0')).join(':');
+  }
+
+  function applyHud(data) {
+    document.getElementById('val-viewers').textContent = fmtNum(data.viewers ?? 0);
+    document.getElementById('val-followers').textContent = fmtNum(data.followers ?? 0);
+    document.getElementById('val-subs').textContent = fmtNum(data.subscribers ?? 0);
+    const titleEl = document.getElementById('title-text');
+    if (data.streamTitle) titleEl.textContent = data.streamTitle;
+    if (data.gameName) document.getElementById('game-label').textContent = data.gameName;
+    if (data.uptimeSeconds != null) {
+      uptimeSeconds = data.uptimeSeconds;
+      document.getElementById('val-uptime').textContent = fmtTime(uptimeSeconds);
+    }
+    if (!uptimeInterval && data.isLive) {
+      uptimeInterval = setInterval(() => {
+        uptimeSeconds++;
+        document.getElementById('val-uptime').textContent = fmtTime(uptimeSeconds);
+      }, 1000);
+    }
+  }
+
+  const alertQueue = [];
+  let alertBusy = false;
+  const ALERT_DURATION = 5200;
+
+  function enqueueAlert(cfg) {
+    alertQueue.push(cfg);
+    if (!alertBusy) processAlertQueue();
+  }
+
+  function processAlertQueue() {
+    if (!alertQueue.length) { alertBusy = false; return; }
+    alertBusy = true;
+    const cfg = alertQueue.shift();
+    showAlert(cfg);
+    setTimeout(processAlertQueue, ALERT_DURATION + 300);
+  }
+
+  function showAlert({ type, user, detail, msg }) {
+    const zone = document.getElementById('alert-zone');
+    const card = document.createElement('div');
+    card.className = 'alert-card ' + type;
+    const typeLabels = {
+      follow: 'NUEVO FOLLOWER',
+      sub: 'NUEVO SUB',
+      resub: 'RESUB',
+      subgift: 'GIFTED SUB',
+      bits: 'BITS',
+      cheer: 'CHEER',
+      redemption: 'CANJEO',
+    };
+    card.innerHTML =
+      '<div class="alert-type">' + (typeLabels[type] || type.toUpperCase()) + '</div>' +
+      '<div class="alert-user">' + escHtml(user) + '</div>' +
+      (detail ? '<div class="alert-detail">' + escHtml(detail) + '</div>' : '') +
+      (msg ? '<div class="alert-msg">' + escHtml(msg) + '</div>' : '');
+    zone.appendChild(card);
+    setTimeout(() => { if (card.parentNode) card.parentNode.removeChild(card); }, ALERT_DURATION + 100);
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  async function fetchFnStats() {
+    if (!EPIC_USER) return;
+    try {
+      const r = await fetch(BACKEND_URL + '/fortnite/stats/' + encodeURIComponent(EPIC_USER) + '?mode=' + STATS_MODE);
+      if (!r.ok) return;
+      const data = await r.json();
+      document.getElementById('fn-kills').textContent = fmtNum(data.kills ?? 0);
+      document.getElementById('fn-wins').textContent = fmtNum(data.wins ?? 0);
+      document.getElementById('fn-matches').textContent = fmtNum(data.matches ?? 0);
+      document.getElementById('fn-kd').textContent = (data.kd ?? 0).toFixed(2);
+      document.getElementById('fn-winrate').textContent = (data.winRate ?? 0).toFixed(1) + '%';
+      document.getElementById('fn-stats').classList.add('visible');
+    } catch (e) {}
+  }
+
+  const MAX_CHAT_MSGS = 40;
+
+  function addChatMessage(displayName, text, color) {
+    const container = document.getElementById('fn-chat-msgs');
+    if (!container) return;
+    const row = document.createElement('div');
+    row.className = 'fn-chat-msg';
+    row.innerHTML = '<span class="un" style="color:' + (color || '#00D4FF') + '">' + escHtml(displayName) + '</span> <span class="txt">' + escHtml(text) + '</span>';
+    container.appendChild(row);
+    if (container.children.length > MAX_CHAT_MSGS) container.removeChild(container.firstChild);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function initSocket() {
+    let socket;
+    try {
+      socket = io(BACKEND_URL, { transports: ['websocket'] });
+    } catch (e) {
+      document.getElementById('offline-notice').classList.add('show');
+      return;
+    }
+    socket.on('connect', () => {
+      document.getElementById('offline-notice').classList.remove('show');
+      if (CHANNEL) socket.emit('join:channel', CHANNEL);
+      fetch(BACKEND_URL + '/hud/start-poll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channel: CHANNEL, interval: 10 })
+      }).catch(() => {});
+      fetch(BACKEND_URL + '/hud/' + CHANNEL)
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d) applyHud(d); })
+        .catch(() => {});
+    });
+    socket.on('connect_error', () => {
+      document.getElementById('offline-notice').classList.add('show');
+    });
+    socket.on('disconnect', () => {
+      document.getElementById('offline-notice').classList.add('show');
+    });
+    socket.on('hud:update', applyHud);
+    socket.on('channel:follow', ({ userDisplayName }) => {
+      enqueueAlert({ type: 'follow', user: userDisplayName });
+    });
+    socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+      if (isGift) return;
+      const tierLabel = tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3';
+      enqueueAlert({ type: 'sub', user: userDisplayName, detail: tierLabel });
+    });
+    socket.on('channel:subscription-message', ({ userDisplayName, cumulativeMonths }) => {
+      enqueueAlert({ type: 'resub', user: userDisplayName, detail: cumulativeMonths + ' meses' });
+    });
+    socket.on('channel:subgift', ({ gifterDisplayName, amount }) => {
+      enqueueAlert({ type: 'subgift', user: gifterDisplayName, detail: 'x ' + amount + ' subs' });
+    });
+    socket.on('channel:cheer', ({ userDisplayName, bits, message }) => {
+      enqueueAlert({ type: 'bits', user: userDisplayName, detail: bits.toLocaleString() + ' bits', msg: message || undefined });
+    });
+    socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+      enqueueAlert({ type: 'redemption', user: userDisplayName, detail: rewardTitle });
+    });
+    socket.on('channel:chat', ({ user, text }) => {
+      addChatMessage(user.displayName || user.username || 'Anonimo', text, user.color);
+    });
+    socket.on('chat:message', ({ user, text }) => {
+      addChatMessage(user.displayName || 'Anonimo', text, user.color);
+    });
+  }
+
+  function startDemo() {
+    applyHud({ viewers: 247, followers: 5830, subscribers: 182, uptimeSeconds: 4520, streamTitle: 'RANKED SOLO · Bo9 con subs', gameName: 'Fortnite', isLive: true });
+    const demoStats = { kills: 15842, wins: 423, matches: 2310, kd: 3.28, winRate: 18.3 };
+    document.getElementById('fn-kills').textContent = fmtNum(demoStats.kills);
+    document.getElementById('fn-wins').textContent = fmtNum(demoStats.wins);
+    document.getElementById('fn-matches').textContent = fmtNum(demoStats.matches);
+    document.getElementById('fn-kd').textContent = demoStats.kd.toFixed(2);
+    document.getElementById('fn-winrate').textContent = demoStats.winRate.toFixed(1) + '%';
+    document.getElementById('fn-stats').classList.add('visible');
+    setTimeout(function() { addChatMessage('QuantumSniper99', 'Vamos con todo esta rankeds', '#FFD700'); }, 3000);
+    setTimeout(function() { addChatMessage('NoRecoilKing', 'tira pa\'lante maestro', '#C84BFF'); }, 7000);
+    setTimeout(function() { addChatMessage('StormRider', 'oieee que juegazoooo', '#00D4FF'); }, 12000);
+    setTimeout(function() { enqueueAlert({ type: 'follow', user: 'QuantumSniper99' }); }, 2500);
+    setTimeout(function() { enqueueAlert({ type: 'sub', user: 'NoRecoilKing', detail: 'Tier 1' }); }, 8000);
+    setTimeout(function() { enqueueAlert({ type: 'bits', user: 'StormRider', detail: '500 bits', msg: 'Vamos que los tiramos!' }); }, 14000);
+  }
+
+  function loadSocketIO(cb) {
+    const script = document.createElement('script');
+    script.onload = function() { cb(); };
+    script.onerror = function() { setTimeout(function() { loadSocketIO(cb); }, 2000); };
+    script.src = './js/socket.io.js';
+    document.head.appendChild(script);
+  }
+
+  loadSocketIO(function() { initSocket(); });
+
+  if (DEMO_MODE) {
+    document.getElementById('demo-badge').classList.add('show');
+    startDemo();
+  }
+  fetchFnStats();
+  setInterval(fetchFnStats, 5 * 60 * 1000);
+
+  (function initParticles() {
+    var canvas = document.getElementById('particles');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    canvas.width = 1080;
+    canvas.height = 1920;
+    var COUNT = 40;
+    var colors = ['#00D4FF', '#C84BFF', '#FFD700'];
+    var particles = [];
+    for (var i = 0; i < COUNT; i++) {
+      particles.push({
+        x: Math.random() * 1080,
+        y: Math.random() * 1920,
+        r: Math.random() * 1.4 + 0.3,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: Math.random() * 0.4 + 0.1
+      });
+    }
+    function tick() {
+      ctx.clearRect(0, 0, 1080, 1920);
+      ctx.strokeStyle = 'rgba(0,212,255,0.03)';
+      ctx.lineWidth = 0.5;
+      for (var x = 0; x <= 1080; x += 80) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 1920); ctx.stroke();
+      }
+      for (var y = 0; y <= 1920; y += 80) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1080, y); ctx.stroke();
+      }
+      particles.forEach(function(p) {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = 1080;
+        if (p.x > 1080) p.x = 0;
+        if (p.y < 0) p.y = 1920;
+        if (p.y > 1920) p.y = 0;
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(tick);
+    }
+    tick();
+  })();
+})();
+</script>
+</body>
+</html>

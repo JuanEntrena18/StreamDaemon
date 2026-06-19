@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retrowave Vertical Overlay</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body, html {
+  width: 1080px; height: 1920px; background-color: transparent;
+  overflow: hidden; font-family: 'Orbitron', sans-serif;
+  position: relative;
+}
+.scanlines {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(to bottom, transparent, transparent 50%, rgba(255,0,255,0.04) 50%, rgba(255,0,255,0.04));
+  background-size: 100% 6px; pointer-events: none; z-index: 100;
+}
+.sun-bg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 55%;
+  background: radial-gradient(ellipse at 50% 80%, #fbbf24 0%, #ff00aa 30%, #0a0030 70%);
+  opacity: 0.6; z-index: 0;
+}
+.grid-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 55%;
+  background-image:
+    linear-gradient(rgba(0,255,255,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,255,0.08) 1px, transparent 1px);
+  background-size: 60px 60px;
+  perspective: 600px; transform: rotateX(40deg); transform-origin: 50% 100%;
+  z-index: 1;
+}
+.container {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; flex-direction: column; padding: 24px; gap: 20px; z-index: 2;
+}
+.top-section {
+  flex: 0 0 55%; display: flex; align-items: center; justify-content: center;
+}
+.webcam-frame {
+  width: 100%; height: 100%;
+  background: rgba(10,5,20,0.75);
+  border: 3px solid #00ffff;
+  box-shadow: 0 0 20px #00ffff, inset 0 0 15px rgba(0,255,255,0.3);
+  border-radius: 8px;
+  display: flex; flex-direction: column; overflow: hidden;
+  position: relative;
+}
+.webcam-frame::before {
+  content: ''; position: absolute;
+  top: -3px; left: -3px; right: -3px; bottom: -3px;
+  border: 2px solid #ff00aa; border-radius: 10px;
+  box-shadow: 0 0 25px #ff00aa; opacity: 0.5; pointer-events: none;
+}
+.box-header {
+  background: linear-gradient(90deg, #ff00aa, #00ffff);
+  color: #fff; padding: 12px 20px; font-size: 16px;
+  text-transform: uppercase; text-align: center;
+  letter-spacing: 3px; text-shadow: 0 0 8px #000;
+  font-weight: 700;
+}
+.webcam-area {
+  flex: 1; background: transparent;
+  background-image:
+    linear-gradient(rgba(0,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,255,0.06) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+.bottom-section {
+  flex: 0 0 calc(45% - 20px); display: flex; flex-direction: column;
+}
+.chat-frame {
+  flex: 1;
+  background: rgba(10,5,20,0.85);
+  border: 3px solid #00ffff;
+  box-shadow: 0 0 20px #00ffff, inset 0 0 10px rgba(0,255,255,0.3);
+  border-radius: 8px;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.chat-frame::before {
+  content: ''; position: absolute;
+  top: -3px; left: -3px; right: -3px; bottom: -3px;
+  border: 2px solid #ff00aa; border-radius: 10px;
+  box-shadow: 0 0 25px #ff00aa; opacity: 0.5; pointer-events: none;
+}
+.chat-content {
+  flex: 1; padding: 16px; display: flex; flex-direction: column;
+  justify-content: flex-end; overflow: hidden;
+  background:
+    linear-gradient(rgba(10,5,20,0.95), rgba(10,5,20,0.95)),
+    repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(255,0,170,0.15) 20px);
+  background-size: 100% 20px;
+}
+.chat-msg {
+  margin-bottom: 10px; font-size: 15px; line-height: 1.4;
+  animation: glowIn 0.3s ease-out forwards;
+}
+@keyframes glowIn {
+  from { filter: blur(4px); opacity: 0; transform: translateY(8px); }
+  to { filter: blur(0); opacity: 1; transform: translateY(0); }
+}
+.chat-user { color: #ff00aa; font-weight: 700; text-shadow: 0 0 6px #ff00aa; }
+.chat-text { color: #fff; text-shadow: 0 0 3px rgba(255,255,255,0.3); }
+.event-msg { border-left: 3px solid #fbbf24; padding-left: 10px; color: #fbbf24; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+<div class="sun-bg"></div>
+<div class="grid-overlay"></div>
+<div class="container">
+  <div class="top-section">
+    <div class="webcam-frame">
+      <div class="box-header">LIVE_FEED.SYS</div>
+      <div class="webcam-area"></div>
+    </div>
+  </div>
+  <div class="bottom-section">
+    <div class="chat-frame">
+      <div class="box-header" style="background:linear-gradient(90deg,#00ffff,#ff00aa);">NET.CHAT</div>
+      <div class="chat-content" id="chatWrapper"></div>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const CHANNEL = params.get('channel') || '';
+  const BACKEND_URL = params.get('backend') || 'http://localhost:3000';
+  const chatWrapper = document.getElementById('chatWrapper');
+  const MAX_MSG = 18;
+
+  function appendMessage(username, text, color) {
+    const el = document.createElement('div');
+    el.className = 'chat-msg';
+    const su = username.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const st = text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const c = color || '#ff00aa';
+    el.innerHTML = '<span class="chat-user" style="color:'+c+';text-shadow:0 0 6px '+c+';">'+su+':</span> <span class="chat-text">'+st+'</span>';
+    chatWrapper.appendChild(el);
+    if (chatWrapper.children.length > MAX_MSG) chatWrapper.removeChild(chatWrapper.firstChild);
+  }
+
+  function pushEvent(html) {
+    const el = document.createElement('div');
+    el.className = 'chat-msg event-msg';
+    el.innerHTML = html;
+    chatWrapper.appendChild(el);
+    if (chatWrapper.children.length > MAX_MSG) chatWrapper.removeChild(chatWrapper.firstChild);
+  }
+
+  function loadSocketIO(cb) {
+    const script = document.createElement('script');
+    script.onload = () => cb();
+    script.onerror = () => { setTimeout(() => loadSocketIO(cb), 2000); };
+    script.src = './js/socket.io.js';
+    document.head.appendChild(script);
+  }
+
+  function initSocket() {
+    const socket = io(BACKEND_URL, { transports: ['websocket'] });
+    socket.on('connect', () => { if (CHANNEL) socket.emit('join:channel', CHANNEL); });
+    socket.on('channel:chat', (d) => {
+      appendMessage(d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo', d.text || '', d.user?.color || '#ff00aa');
+    });
+    socket.on('channel:follow', (d) => { pushEvent('&#9733; <b>'+(d.userDisplayName||d.userName||'Alguien')+'</b> nos sigue!'); });
+    socket.on('channel:subscribe', (d) => { pushEvent('&#127881; <b>'+(d.userDisplayName||d.userName||'Alguien')+'</b> se suscribi&oacute;!'); });
+    socket.on('channel:cheer', (d) => { pushEvent('&#128142; <b>'+(d.userDisplayName||d.userName||'An&oacute;nimo')+'</b> anim&oacute; con '+(d.bits||0)+' bits!'); });
+  }
+
+  loadSocketIO(initSocket);
+})();
+</script>
+</body>
+</html>

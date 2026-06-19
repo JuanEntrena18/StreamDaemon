@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8-Bit Vertical Alert</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: transparent;
+            overflow: hidden; font-family: 'Press Start 2P', monospace;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #alert-container {
+            position: relative; text-align: center;
+            opacity: 0; transform: translateY(-100px);
+        }
+
+        #alert-container.show {
+            animation: pixelDrop 0.5s steps(5) forwards;
+        }
+
+        #alert-container.hide {
+            animation: pixelUp 0.5s steps(5) forwards;
+        }
+
+        @keyframes pixelDrop {
+            0% { opacity: 0; transform: translateY(-100px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pixelUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-100px); }
+        }
+
+        .pixel-box {
+            background: #000; border: 8px solid #fff;
+            box-shadow: 15px 15px 0 #ff0055, -15px -15px 0 #00ffff;
+            padding: 50px 40px; display: inline-block;
+            max-width: 700px;
+        }
+
+        #alert-type { font-size: 22px; color: #ffff00; margin-bottom: 25px; animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        #alert-user { font-size: 55px; color: #fff; text-shadow: 6px 6px #ff0055; margin-bottom: 25px; }
+        #alert-extra { font-size: 26px; color: #00ffff; }
+
+    </style>
+</head>
+<body>
+
+    <audio id="alert-sound" preload="auto"></audio>
+
+    <div id="alert-container">
+        <div class="pixel-box">
+            <div id="alert-type">EVENTO</div>
+            <div id="alert-user">JUGADOR</div>
+            <div id="alert-extra"></div>
+        </div>
+    </div>
+
+    <script>
+        const queue = [];
+        let isPlaying = false;
+        const container = document.getElementById('alert-container');
+        const sound = document.getElementById('alert-sound');
+
+        const elType = document.getElementById('alert-type');
+        const elUser = document.getElementById('alert-user');
+        const elExtra = document.getElementById('alert-extra');
+
+        const alertDic = {
+            'FOLLOWER': 'NEW PLAYER JOINED',
+            'SUBSCRIBER': 'LEVEL UP! (SUB)',
+            'DONATION': 'COIN INSERTED',
+            'RAID': 'BOSS RAID INCOMING',
+            'BITS': 'BONUS STAGE'
+        };
+
+        const soundKeyMap = {
+            'FOLLOWER': 'follow',
+            'SUBSCRIBER': 'subscribe',
+            'BITS': 'bits',
+            'RAID': 'raid',
+            'DONATION': 'redemption'
+        };
+
+        const soundConfig = {};
+        const BACKEND_URL = new URLSearchParams(window.location.search).get('backend') || 'http://localhost:3000';
+
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const CHANNEL = urlParams.get('channel') || '';
+
+            function loadSocketIO(cb) {
+                const script = document.createElement('script');
+                script.onload = () => cb();
+                script.onerror = () => { setTimeout(() => loadSocketIO(cb), 2000); };
+                script.src = './js/socket.io.js';
+                document.head.appendChild(script);
+            }
+
+            function initSocket() {
+                const socket = io(BACKEND_URL, { transports: ['websocket'] });
+
+                socket.on('connect', () => {
+                    if (CHANNEL) socket.emit('join:channel', CHANNEL);
+                    fetch(BACKEND_URL + '/alert-sounds')
+                        .then(r => r.json())
+                        .then(cfg => { Object.assign(soundConfig, cfg); })
+                        .catch(() => {});
+                });
+
+                socket.on('channel:follow', ({ userDisplayName }) => {
+                    playAlert('FOLLOWER', userDisplayName);
+                });
+                socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+                    if (isGift) return;
+                    playAlert('SUBSCRIBER', userDisplayName, tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3');
+                });
+                socket.on('channel:subscription-message', ({ userDisplayName, cumulativeMonths }) => {
+                    playAlert('SUBSCRIBER', userDisplayName, cumulativeMonths + ' months');
+                });
+                socket.on('channel:subgift', ({ gifterDisplayName, amount }) => {
+                    playAlert('SUBSCRIBER', gifterDisplayName, 'x' + amount + ' subs');
+                });
+                socket.on('channel:cheer', ({ userDisplayName, bits }) => {
+                    playAlert('BITS', userDisplayName, bits + ' bits');
+                });
+                socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+                    playAlert('DONATION', userDisplayName, rewardTitle);
+                });
+                socket.on('channel:raid', ({ fromDisplayName, viewerCount }) => {
+                    playAlert('RAID', fromDisplayName, viewerCount + ' viewers');
+                });
+
+                socket.on('connect_error', (err) => console.error('Socket connect error:', err));
+            }
+
+            loadSocketIO(initSocket);
+        })();
+
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.action === 'NEW_ALERT') {
+                queue.push(e.data);
+                processQueue();
+            }
+        });
+
+        function playAlert(type, username, amount) {
+            queue.push({ type, username, amount });
+            processQueue();
+        }
+
+        function processQueue() {
+            if (isPlaying || queue.length === 0) return;
+            isPlaying = true;
+
+            const data = queue.shift();
+
+            elType.textContent = alertDic[data.type] || 'SYSTEM ALERT';
+            elUser.textContent = data.username.toUpperCase();
+            elExtra.textContent = data.amount ? data.amount : '';
+
+            const sKey = soundKeyMap[data.type] || '';
+            const sPath = sKey ? soundConfig[sKey] : '';
+            if (sPath) {
+                sound.src = BACKEND_URL + '/alert-sounds/file/' + encodeURIComponent(sPath);
+                sound.currentTime = 0;
+                sound.play().catch(() => {});
+            }
+
+            container.classList.remove('hide');
+            container.classList.add('show');
+
+            setTimeout(() => {
+                container.classList.remove('show');
+                container.classList.add('hide');
+
+                setTimeout(() => { isPlaying = false; processQueue(); }, 500);
+            }, 7500);
+        }
+    </script>
+</body>
+</html>

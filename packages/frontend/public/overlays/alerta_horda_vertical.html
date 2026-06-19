@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horde Vertical Alert</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: transparent;
+            overflow: hidden; font-family: 'Cinzel', serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #alert-container {
+            position: relative;
+            display: flex; flex-direction: column; align-items: center;
+            opacity: 0; transform: scale(3);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #alert-container.show { opacity: 1; transform: scale(1); animation: screenShake 0.5s ease-out; }
+        #alert-container.hide { opacity: 0; transform: translateY(200px) scale(0.8); transition: all 0.5s ease-in; }
+
+        @keyframes screenShake {
+            0% { transform: scale(1) translate(0, 0); }
+            20% { transform: scale(1) translate(-10px, 10px); }
+            40% { transform: scale(1) translate(10px, -10px); }
+            60% { transform: scale(1) translate(-10px, -10px); }
+            80% { transform: scale(1) translate(10px, 10px); }
+            100% { transform: scale(1) translate(0, 0); }
+        }
+
+        .horde-banner {
+            background: linear-gradient(to bottom, #2a0000, #0a0000);
+            border: 5px solid #7a0000;
+            border-top: 8px solid #ffd700;
+            border-bottom: 8px solid #ffd700;
+            box-shadow: 0 0 60px rgba(255, 0, 0, 0.5), inset 0 0 30px #000;
+            padding: 50px 60px; text-align: center;
+            position: relative; width: 750px;
+        }
+
+        .horde-banner::before {
+            content: '⚔'; position: absolute; top: -30px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 40px; color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            background: #0a0000; padding: 0 20px;
+        }
+
+        .fire-ember {
+            position: absolute; bottom: 10px; left: 10%; width: 80%; height: 4px;
+            background: linear-gradient(to right, transparent, #ff6600, #ffaa00, #ff6600, transparent);
+            filter: blur(3px);
+            animation: emberPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes emberPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        #alert-type {
+            font-size: 32px; color: #ff6666; letter-spacing: 8px;
+            margin-top: 10px; text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(255, 102, 102, 0.5);
+        }
+        #alert-user {
+            font-size: 75px; color: #ffffff;
+            text-shadow: 0 0 25px #ff0000, 4px 4px 0 #000;
+            font-weight: 900; margin: 15px 0;
+        }
+        #alert-extra {
+            font-size: 28px; color: #ffd700; font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        }
+
+    </style>
+</head>
+<body>
+
+    <audio id="alert-sound" preload="auto"></audio>
+
+    <div id="alert-container">
+        <div class="horde-banner">
+            <div class="fire-ember"></div>
+            <div id="alert-type">TIPO DE ALERTA</div>
+            <div id="alert-user">NOMBRE_USUARIO</div>
+            <div id="alert-extra"></div>
+        </div>
+    </div>
+
+    <script>
+        const queue = [];
+        let isPlaying = false;
+        const container = document.getElementById('alert-container');
+        const sound = document.getElementById('alert-sound');
+
+        const elType = document.getElementById('alert-type');
+        const elUser = document.getElementById('alert-user');
+        const elExtra = document.getElementById('alert-extra');
+
+        const alertDic = {
+            'FOLLOWER': 'NUEVO RECLUTA',
+            'SUBSCRIBER': 'NUEVO GUERRERO DE SANGRE',
+            'DONATION': 'TRIBUTO A LA HORDA',
+            'RAID': 'INCURSIÓN ALIADA',
+            'BITS': 'BOTÍN DE GUERRA'
+        };
+
+        const soundKeyMap = {
+            'FOLLOWER': 'follow',
+            'SUBSCRIBER': 'subscribe',
+            'BITS': 'bits',
+            'RAID': 'raid',
+            'DONATION': 'redemption'
+        };
+
+        const soundConfig = {};
+        const BACKEND_URL = new URLSearchParams(window.location.search).get('backend') || 'http://localhost:3000';
+
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const CHANNEL = urlParams.get('channel') || '';
+
+            function loadSocketIO(cb) {
+                const script = document.createElement('script');
+                script.onload = () => cb();
+                script.onerror = () => { setTimeout(() => loadSocketIO(cb), 2000); };
+                script.src = './js/socket.io.js';
+                document.head.appendChild(script);
+            }
+
+            function initSocket() {
+                const socket = io(BACKEND_URL, { transports: ['websocket'] });
+
+                socket.on('connect', () => {
+                    if (CHANNEL) socket.emit('join:channel', CHANNEL);
+                    fetch(BACKEND_URL + '/alert-sounds')
+                        .then(r => r.json())
+                        .then(cfg => { Object.assign(soundConfig, cfg); })
+                        .catch(() => {});
+                });
+
+                socket.on('channel:follow', ({ userDisplayName }) => {
+                    playAlert('FOLLOWER', userDisplayName);
+                });
+                socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+                    if (isGift) return;
+                    playAlert('SUBSCRIBER', userDisplayName, tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3');
+                });
+                socket.on('channel:subscription-message', ({ userDisplayName, cumulativeMonths }) => {
+                    playAlert('SUBSCRIBER', userDisplayName, cumulativeMonths + ' meses');
+                });
+                socket.on('channel:subgift', ({ gifterDisplayName, amount }) => {
+                    playAlert('SUBSCRIBER', gifterDisplayName, 'x' + amount + ' subs');
+                });
+                socket.on('channel:cheer', ({ userDisplayName, bits }) => {
+                    playAlert('BITS', userDisplayName, bits + ' bits');
+                });
+                socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+                    playAlert('DONATION', userDisplayName, rewardTitle);
+                });
+                socket.on('channel:raid', ({ fromDisplayName, viewerCount }) => {
+                    playAlert('RAID', fromDisplayName, viewerCount + ' espectadores');
+                });
+
+                socket.on('connect_error', (err) => console.error('Socket connect error:', err));
+            }
+
+            loadSocketIO(initSocket);
+        })();
+
+        window.addEventListener('message', (e) => {
+            const data = e.data;
+            if (data && data.action === 'NEW_ALERT') {
+                queue.push(data);
+                processQueue();
+            }
+        });
+
+        function playAlert(type, username, amount) {
+            queue.push({ type, username, amount });
+            processQueue();
+        }
+
+        function processQueue() {
+            if (isPlaying || queue.length === 0) return;
+            isPlaying = true;
+
+            const data = queue.shift();
+
+            elType.textContent = alertDic[data.type] || 'ALERTA DE SISTEMA';
+            elUser.textContent = data.username.toUpperCase();
+            elExtra.textContent = data.amount ? data.amount : '';
+
+            const sKey = soundKeyMap[data.type] || '';
+            const sPath = sKey ? soundConfig[sKey] : '';
+            if (sPath) {
+                sound.src = BACKEND_URL + '/alert-sounds/file/' + encodeURIComponent(sPath);
+                sound.currentTime = 0;
+                sound.play().catch(err => console.log("Autoplay bloqueado hasta interacción.", err));
+            }
+
+            container.classList.remove('hide');
+            container.classList.add('show');
+
+            setTimeout(() => {
+                container.classList.remove('show');
+                container.classList.add('hide');
+
+                setTimeout(() => {
+                    isPlaying = false;
+                    processQueue();
+                }, 500);
+            }, 7500);
+        }
+    </script>
+</body>
+</html>

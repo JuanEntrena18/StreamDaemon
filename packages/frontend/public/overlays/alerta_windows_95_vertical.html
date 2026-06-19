@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Win95 Vertical Alert</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: transparent;
+            overflow: hidden; font-family: 'Courier New', monospace;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #alert-container {
+            opacity: 0; transform: scale(0.9);
+            transition: all 0.2s;
+        }
+
+        #alert-container.show { opacity: 1; transform: scale(1); }
+        #alert-container.hide { opacity: 0; transform: scale(0.9); }
+
+        .win95-window {
+            background: #c0c0c0; border: 3px outset #dfdfdf;
+            box-shadow: 8px 8px 20px rgba(0,0,0,0.5); width: 700px;
+        }
+
+        .title-bar {
+            background: #000080; color: #fff; padding: 8px 12px;
+            font-weight: bold; font-size: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .title-bar-buttons { display: flex; gap: 4px; }
+        .title-bar-buttons span {
+            display: inline-block; width: 20px; height: 20px;
+            background: #c0c0c0; border: 2px outset #dfdfdf;
+            text-align: center; line-height: 16px; font-size: 14px; color: #000;
+            cursor: default;
+        }
+
+        .content {
+            padding: 40px 30px; text-align: center;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .icon-warning {
+            display: inline-block; width: 60px; height: 60px;
+            background: #ff0; border-radius: 50%; color: #000;
+            font-size: 44px; font-weight: bold; line-height: 60px;
+            border: 4px solid #000; margin-bottom: 25px;
+        }
+
+        #alert-type {
+            font-size: 28px; font-weight: bold; color: #000; margin-bottom: 15px;
+        }
+        #alert-user {
+            font-size: 42px; color: #000080; font-weight: bold; margin-bottom: 25px;
+        }
+        #alert-extra {
+            font-size: 24px; color: #000; margin-bottom: 30px;
+        }
+
+        .progress-bar-container {
+            width: 100%; max-width: 500px; height: 28px;
+            border: 2px inset #dfdfdf; background: #fff;
+            margin-bottom: 25px;
+        }
+
+        .progress-bar {
+            height: 100%; background: #000080; width: 0%;
+        }
+
+        .progress-bar.animate { animation: fillBar 8s linear forwards; }
+        @keyframes fillBar { to { width: 100%; } }
+
+        .btn-ok {
+            background: #c0c0c0; border: 3px outset #dfdfdf;
+            padding: 8px 40px; font-size: 20px; font-weight: bold;
+            font-family: 'Courier New', monospace; cursor: default;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="alert-sound" preload="auto"></audio>
+
+    <div id="alert-container">
+        <div class="win95-window">
+            <div class="title-bar">
+                <span>System_Alert.exe</span>
+                <div class="title-bar-buttons">
+                    <span>?</span>
+                    <span>X</span>
+                </div>
+            </div>
+            <div class="content">
+                <div class="icon-warning">!</div>
+                <div id="alert-type">NOTIFICACIÓN DE SISTEMA</div>
+                <div id="alert-user">USUARIO</div>
+                <div id="alert-extra"></div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+
+                <button class="btn-ok">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const queue = [];
+        let isPlaying = false;
+        const container = document.getElementById('alert-container');
+        const progressBar = document.getElementById('progressBar');
+        const sound = document.getElementById('alert-sound');
+
+        const elType = document.getElementById('alert-type');
+        const elUser = document.getElementById('alert-user');
+        const elExtra = document.getElementById('alert-extra');
+
+        const alertDic = {
+            'FOLLOWER': 'Nuevo Seguidor Detectado',
+            'SUBSCRIBER': 'Suscripción Instalada Correctamente',
+            'DONATION': 'Transferencia de Archivos Completada',
+            'RAID': 'Tráfico de Red Entrante (RAID)',
+            'BITS': 'Paquetes de Datos Recibidos'
+        };
+
+        const soundKeyMap = {
+            'FOLLOWER': 'follow',
+            'SUBSCRIBER': 'subscribe',
+            'BITS': 'bits',
+            'RAID': 'raid',
+            'DONATION': 'redemption'
+        };
+
+        const soundConfig = {};
+        const BACKEND_URL = new URLSearchParams(window.location.search).get('backend') || 'http://localhost:3000';
+
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const CHANNEL = urlParams.get('channel') || '';
+
+            function loadSocketIO(cb) {
+                const script = document.createElement('script');
+                script.onload = () => cb();
+                script.onerror = () => { setTimeout(() => loadSocketIO(cb), 2000); };
+                script.src = './js/socket.io.js';
+                document.head.appendChild(script);
+            }
+
+            function initSocket() {
+                const socket = io(BACKEND_URL, { transports: ['websocket'] });
+
+                socket.on('connect', () => {
+                    if (CHANNEL) socket.emit('join:channel', CHANNEL);
+                    fetch(BACKEND_URL + '/alert-sounds')
+                        .then(r => r.json())
+                        .then(cfg => { Object.assign(soundConfig, cfg); })
+                        .catch(() => {});
+                });
+
+                socket.on('channel:follow', ({ userDisplayName }) => {
+                    playAlert('FOLLOWER', userDisplayName);
+                });
+                socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+                    if (isGift) return;
+                    playAlert('SUBSCRIBER', userDisplayName, tier === '1000' ? 'Tier 1' : tier === '2000' ? 'Tier 2' : 'Tier 3');
+                });
+                socket.on('channel:subscription-message', ({ userDisplayName, cumulativeMonths }) => {
+                    playAlert('SUBSCRIBER', userDisplayName, cumulativeMonths + ' meses');
+                });
+                socket.on('channel:subgift', ({ gifterDisplayName, amount }) => {
+                    playAlert('SUBSCRIBER', gifterDisplayName, 'x' + amount + ' subs');
+                });
+                socket.on('channel:cheer', ({ userDisplayName, bits }) => {
+                    playAlert('BITS', userDisplayName, bits + ' bits');
+                });
+                socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+                    playAlert('DONATION', userDisplayName, rewardTitle);
+                });
+                socket.on('channel:raid', ({ fromDisplayName, viewerCount }) => {
+                    playAlert('RAID', fromDisplayName, viewerCount + ' espectadores');
+                });
+
+                socket.on('connect_error', (err) => console.error('Socket connect error:', err));
+            }
+
+            loadSocketIO(initSocket);
+        })();
+
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.action === 'NEW_ALERT') {
+                queue.push(e.data);
+                processQueue();
+            }
+        });
+
+        function playAlert(type, username, amount) {
+            queue.push({ type, username, amount });
+            processQueue();
+        }
+
+        function processQueue() {
+            if (isPlaying || queue.length === 0) return;
+            isPlaying = true;
+
+            const data = queue.shift();
+
+            elType.textContent = alertDic[data.type] || 'Alerta de Sistema';
+            elUser.textContent = data.username;
+            elExtra.textContent = data.amount ? data.amount : '';
+
+            const sKey = soundKeyMap[data.type] || '';
+            const sPath = sKey ? soundConfig[sKey] : '';
+            if (sPath) {
+                sound.src = BACKEND_URL + '/alert-sounds/file/' + encodeURIComponent(sPath);
+                sound.currentTime = 0;
+                sound.play().catch(() => {});
+            }
+
+            container.classList.remove('hide');
+            container.classList.add('show');
+
+            progressBar.classList.remove('animate');
+            void progressBar.offsetWidth;
+            progressBar.classList.add('animate');
+
+            setTimeout(() => {
+                container.classList.remove('show');
+                container.classList.add('hide');
+
+                setTimeout(() => { isPlaying = false; processQueue(); }, 500);
+            }, 7500);
+        }
+    </script>
+</body>
+</html>

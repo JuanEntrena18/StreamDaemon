@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horde Vertical Overlay</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Roboto:wght@400;700&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body, html {
+  width: 1080px; height: 1920px; background-color: transparent;
+  overflow: hidden; font-family: 'Roboto', sans-serif;
+  position: relative;
+}
+.ember-bg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(ellipse at 50% 30%, rgba(112,0,0,0.3) 0%, #0a0505 70%);
+  z-index: 0;
+}
+.ember-particles {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  overflow: hidden; z-index: 0; pointer-events: none;
+}
+.ember {
+  position: absolute; bottom: -10px; width: 4px; height: 4px;
+  background: #ffc800; border-radius: 50%;
+  box-shadow: 0 0 6px #ff8c00, 0 0 12px #cc0000;
+  animation: rise linear infinite;
+  opacity: 0;
+}
+@keyframes rise {
+  0% { transform: translateX(0) translateY(0); opacity: 0; }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.4; }
+  100% { transform: translateX(var(--dx)) translateY(-1950px); opacity: 0; }
+}
+.ember:nth-child(1) { left: 10%; --dx: 20px; animation-duration: 6s; animation-delay: 0s; }
+.ember:nth-child(2) { left: 25%; --dx: -15px; animation-duration: 8s; animation-delay: 1.2s; width: 3px; height: 3px; }
+.ember:nth-child(3) { left: 40%; --dx: 30px; animation-duration: 7s; animation-delay: 0.5s; }
+.ember:nth-child(4) { left: 55%; --dx: -25px; animation-duration: 9s; animation-delay: 2s; width: 5px; height: 5px; background: #ff6600; }
+.ember:nth-child(5) { left: 70%; --dx: 15px; animation-duration: 6.5s; animation-delay: 0.8s; }
+.ember:nth-child(6) { left: 85%; --dx: -20px; animation-duration: 7.5s; animation-delay: 1.8s; width: 3px; height: 3px; }
+.ember:nth-child(7) { left: 50%; --dx: 10px; animation-duration: 8.5s; animation-delay: 3s; background: #ffc800; }
+.ember:nth-child(8) { left: 15%; --dx: -30px; animation-duration: 5.5s; animation-delay: 0.3s; width: 4px; height: 4px; background: #ff4400; }
+.ember:nth-child(9) { left: 65%; --dx: 25px; animation-duration: 7.2s; animation-delay: 1.5s; }
+.ember:nth-child(10) { left: 35%; --dx: -10px; animation-duration: 6.8s; animation-delay: 2.5s; width: 3px; height: 3px; }
+.container {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; flex-direction: column; padding: 20px; gap: 16px; z-index: 1;
+}
+.top-section {
+  flex: 0 0 55%; display: flex; flex-direction: column;
+}
+.banner-frame {
+  flex: 1;
+  background: rgba(10,5,5,0.85);
+  border: 4px solid #3a0000;
+  box-shadow: 0 0 20px rgba(255,0,0,0.15), inset 0 0 40px rgba(0,0,0,0.9);
+  display: flex; flex-direction: column; overflow: hidden;
+  position: relative;
+}
+.banner-frame::before, .banner-frame::after {
+  content: ''; position: absolute;
+  width: 10px; height: 10px; background: #555;
+  border-radius: 50%;
+  box-shadow: inset -2px -2px 4px #000, 1px 1px 2px rgba(255,0,0,0.5);
+  z-index: 10;
+}
+.banner-frame::before { top: 10px; left: 10px; }
+.banner-frame::after { top: 10px; right: 10px; }
+.banner-header {
+  font-family: 'Cinzel', serif;
+  background: linear-gradient(to right, #4a0000, #8b0000, #4a0000);
+  color: #fff; padding: 12px 20px; font-size: 20px;
+  letter-spacing: 3px; text-transform: uppercase;
+  border-bottom: 3px solid #ff1a1a;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center;
+  text-shadow: 2px 2px 4px #000;
+  font-weight: 700;
+}
+.banner-header .shield {
+  display: inline-block; margin-right: 10px;
+  color: #cc0000; font-size: 24px;
+}
+.webcam-area {
+  flex: 1; background: transparent;
+  box-shadow: inset 0 0 60px rgba(0,0,0,1);
+}
+.battle-stats {
+  display: flex; gap: 4px; padding: 8px 16px;
+  background: rgba(10,5,5,0.95);
+  border-top: 2px solid #4a0000;
+  justify-content: space-between; font-size: 13px;
+  font-family: 'Cinzel', serif;
+}
+.battle-stats .stat { text-align: center; }
+.battle-stats .stat .label { color: #700000; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+.battle-stats .stat .val { color: #ffc800; font-weight: 700; text-shadow: 0 0 8px rgba(255,200,0,0.5); }
+.bottom-section {
+  flex: 0 0 calc(45% - 16px); display: flex; flex-direction: column;
+}
+.council-frame {
+  flex: 1;
+  background: rgba(10,5,5,0.88);
+  border: 4px solid #3a0000;
+  box-shadow: 0 0 20px rgba(255,0,0,0.1), inset 0 0 30px rgba(0,0,0,0.9);
+  display: flex; flex-direction: column; overflow: hidden;
+  position: relative;
+}
+.council-frame::before, .council-frame::after {
+  content: ''; position: absolute;
+  width: 10px; height: 10px; background: #555;
+  border-radius: 50%;
+  box-shadow: inset -2px -2px 4px #000, 1px 1px 2px rgba(255,0,0,0.5);
+  z-index: 10;
+}
+.council-frame::before { top: 10px; left: 10px; }
+.council-frame::after { top: 10px; right: 10px; }
+.council-header {
+  font-family: 'Cinzel', serif;
+  background: linear-gradient(to right, #4a0000, #8b0000, #4a0000);
+  color: #fff; padding: 12px 20px; font-size: 18px;
+  letter-spacing: 3px; text-transform: uppercase;
+  border-bottom: 3px solid #ff1a1a;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center;
+  text-shadow: 2px 2px 4px #000;
+  font-weight: 700;
+}
+.chat-content {
+  flex: 1; padding: 16px; display: flex; flex-direction: column;
+  justify-content: flex-end; overflow: hidden;
+  background: radial-gradient(circle at center, rgba(30,0,0,0.4) 0%, rgba(10,0,0,0.9) 100%);
+}
+.chat-msg {
+  font-size: 16px; line-height: 1.4; margin-bottom: 10px;
+  padding: 10px; background: rgba(20,0,0,0.7);
+  border-left: 3px solid #ff1a1a; color: #e0e0e0;
+  animation: slideIn 0.3s cubic-bezier(.25,.46,.45,.94) forwards;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.5); word-wrap: break-word;
+}
+@keyframes slideIn {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.chat-user { font-weight: 700; color: #ff4444; margin-right: 8px; text-shadow: 1px 1px 2px #000; }
+.chat-text { color: #fff; }
+.event-msg { border-left-color: #ffc800; color: #ffc800; }
+</style>
+</head>
+<body>
+<div class="ember-bg"></div>
+<div class="ember-particles">
+  <div class="ember"></div><div class="ember"></div><div class="ember"></div><div class="ember"></div><div class="ember"></div>
+  <div class="ember"></div><div class="ember"></div><div class="ember"></div><div class="ember"></div><div class="ember"></div>
+</div>
+<div class="container">
+  <div class="top-section">
+    <div class="banner-frame">
+      <div class="banner-header"><span class="shield">&#9876;</span> Ojo de Kilrogg</div>
+      <div class="webcam-area"></div>
+      <div class="battle-stats">
+        <div class="stat"><div class="label">Salud</div><div class="val">100%</div></div>
+        <div class="stat"><div class="label">Energ&iacute;a</div><div class="val">100%</div></div>
+        <div class="stat"><div class="label">Aliados</div><div class="val" id="viewerStat">--</div></div>
+        <div class="stat"><div class="label">Oro</div><div class="val">12,450</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-section">
+    <div class="council-frame">
+      <div class="council-header">&#9881; Consejo de Guerra</div>
+      <div class="chat-content" id="chatWrapper"></div>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const CHANNEL = params.get('channel') || '';
+  const BACKEND_URL = params.get('backend') || 'http://localhost:3000';
+  const chatWrapper = document.getElementById('chatWrapper');
+  const MAX_MSG = 14;
+
+  function appendMessage(username, text, color) {
+    const el = document.createElement('div');
+    el.className = 'chat-msg';
+    const su = username.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const st = text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const c = color || '#ff4444';
+    el.innerHTML = '<span class="chat-user" style="color:'+c+';">'+su+':</span><span class="chat-text">'+st+'</span>';
+    chatWrapper.appendChild(el);
+    if (chatWrapper.children.length > MAX_MSG) chatWrapper.removeChild(chatWrapper.firstChild);
+  }
+
+  function pushEvent(html) {
+    const el = document.createElement('div');
+    el.className = 'chat-msg event-msg';
+    el.innerHTML = html;
+    chatWrapper.appendChild(el);
+    if (chatWrapper.children.length > MAX_MSG) chatWrapper.removeChild(chatWrapper.firstChild);
+  }
+
+  function loadSocketIO(cb) {
+    const script = document.createElement('script');
+    script.onload = () => cb();
+    script.onerror = () => { setTimeout(() => loadSocketIO(cb), 2000); };
+    script.src = './js/socket.io.js';
+    document.head.appendChild(script);
+  }
+
+  function initSocket() {
+    const socket = io(BACKEND_URL, { transports: ['websocket'] });
+    socket.on('connect', () => { if (CHANNEL) socket.emit('join:channel', CHANNEL); });
+    socket.on('channel:chat', (d) => {
+      appendMessage(d.user?.displayName || d.userDisplayName || d.userName || 'Anónimo', d.text || '', d.user?.color || '#ff4444');
+    });
+    socket.on('channel:follow', (d) => { pushEvent('&#9733; <b>'+(d.userDisplayName||d.userName||'Alguien')+'</b> nos sigue!'); });
+    socket.on('channel:subscribe', (d) => { pushEvent('&#127881; <b>'+(d.userDisplayName||d.userName||'Alguien')+'</b> se suscribi&oacute;!'); });
+    socket.on('channel:cheer', (d) => { pushEvent('&#128142; <b>'+(d.userDisplayName||d.userName||'An&oacute;nimo')+'</b> anim&oacute; con '+(d.bits||0)+' bits!'); });
+  }
+
+  loadSocketIO(initSocket);
+})();
+</script>
+</body>
+</html>
