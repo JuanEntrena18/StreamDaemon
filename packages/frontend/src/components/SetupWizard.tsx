@@ -18,7 +18,7 @@ export function markSetupComplete() {
 
 export function SetupWizard({ onComplete }: Props) {
   const { t } = useTranslation();
-  const { authenticated, user, loading: authLoading, login, loginBrowser, deviceState, cancelDeviceLogin } = useAuthStatus();
+  const { authenticated, user, loading: authLoading, login, deviceState, cancelDeviceLogin } = useAuthStatus();
 
   const handleFinish = () => {
     markSetupComplete();
@@ -142,15 +142,6 @@ export function SetupWizard({ onComplete }: Props) {
                               </svg>
                               {t('setup.connectDeviceCode')}
                             </button>
-                            {!authLoading && (
-                              <button
-                                onClick={loginBrowser}
-                                className="sf-btn sf-btn-ghost"
-                                style={{ fontSize: '0.75rem', padding: '0.5rem 0.75rem' }}
-                              >
-                                {t('setup.loginBrowser')}
-                              </button>
-                            )}
                           </div>
                         </div>
                       )}
