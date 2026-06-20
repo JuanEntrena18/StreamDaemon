@@ -24,7 +24,7 @@ import { BitrateCalculatorPanel } from './components/BitrateCalculatorPanel';
 import { VerticalStreamingPanel } from './components/VerticalStreamingPanel';
 import { AlertSoundsPanel } from './components/AlertSoundsPanel';
 import { AchievementsPanel } from './components/AchievementsPanel';
-import { SetupWizard, isSetupComplete, markSetupComplete } from './components/SetupWizard';
+import { SetupWizard, isSetupComplete } from './components/SetupWizard';
 import { TtsProvider, useTts } from './contexts/TtsContext';
 import { TtsManager } from './components/TtsManager';
 
