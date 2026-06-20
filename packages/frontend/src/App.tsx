@@ -33,6 +33,21 @@ const isDesktop = typeof window.streamforger !== 'undefined';
 
 type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config' | 'bitrate' | 'vertical' | 'alertsounds' | 'achievements';
 
+const APP_VERSION = '0.2.4';
+
+// Clear stale localStorage keys when version changes
+try {
+  const storedVer = localStorage.getItem('streamforger-version');
+  if (storedVer !== APP_VERSION) {
+    const preserve = ['streamforger-version'];
+    const keys = Object.keys(localStorage);
+    for (const k of keys) {
+      if (!preserve.includes(k)) localStorage.removeItem(k);
+    }
+    localStorage.setItem('streamforger-version', APP_VERSION);
+  }
+} catch {}
+
 export function App() {
   const { t, locale, setLocale } = useTranslation();
   const [backendReady, setBackendReady] = useState(false);

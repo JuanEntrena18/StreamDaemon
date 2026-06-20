@@ -4,7 +4,7 @@ import {
 } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { readFileSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'fs';
 import { createRequire } from 'module';
 import { randomBytes } from 'crypto';
 const _require = createRequire(import.meta.url);
@@ -60,6 +60,33 @@ const dbPath = isDev
 mkdirSync(path.dirname(dbPath), { recursive: true });
 
 process.env.DATABASE_URL = `file:${dbPath}`;
+
+// ── Version migration: clear old data on version change ────
+const APP_VERSION = '0.2.4';
+const versionMarkerPath = path.join(app.getPath('userData'), '.streamforger-version');
+
+function runVersionMigration() {
+  const dataDir = path.dirname(dbPath);
+  const oldVersion = existsSync(versionMarkerPath) ? readFileSync(versionMarkerPath, 'utf8').trim() : '';
+
+  if (oldVersion !== APP_VERSION) {
+    console.log(`🔄 Version migration: ${oldVersion || '(none)'} → ${APP_VERSION}`);
+
+    // Delete old configs to prevent stale data issues
+    try { rmSync(dbPath, { force: true }); console.log('  ✓ Database deleted'); } catch {}
+    const soundsDir = path.join(path.dirname(dbPath), 'data');
+    try { rmSync(path.join(soundsDir, 'alert-sounds.json'), { force: true }); console.log('  ✓ Alert sounds config deleted'); } catch {}
+    try { rmSync(path.join(soundsDir, 'alert-sounds'), { recursive: true, force: true }); console.log('  ✓ Alert sounds files deleted'); } catch {}
+
+    // Write current version marker
+    writeFileSync(versionMarkerPath, APP_VERSION, 'utf8');
+    console.log(`✅ Version marker written: ${APP_VERSION}`);
+  } else {
+    console.log(`✓ Version unchanged (${APP_VERSION}), skipping migration`);
+  }
+}
+
+runVersionMigration();
 
 if (!isDev) {
   process.env.FRONTEND_URL = 'http://localhost:3000';
