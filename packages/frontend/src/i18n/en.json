@@ -935,5 +935,20 @@
     "edit": "Edit",
     "confirm": "Confirm",
     "back": "Back"
+  },
+  "setup": {
+    "welcome": "Welcome to StreamForger",
+    "description": "Set up your account in a few steps to start using all the tools.",
+    "twitch": "Connect Twitch",
+    "youtube": "Connect YouTube",
+    "tiktok": "Connect TikTok",
+    "comingSoon": "Coming soon",
+    "connectTwitchDesc": "Connect your Twitch account to use chat, giveaways, subathon, achievements and more.",
+    "connectDeviceCode": "Connect with code",
+    "loginBrowser": "Browser login",
+    "youtubeDesc": "Stream simultaneously and manage your YouTube channel.",
+    "tiktokDesc": "Stream simultaneously and manage your TikTok account.",
+    "start": "Start using StreamForger",
+    "connectFirst": "Connect Twitch first"
   }
 }

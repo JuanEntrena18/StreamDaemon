@@ -24,6 +24,7 @@ import { BitrateCalculatorPanel } from './components/BitrateCalculatorPanel';
 import { VerticalStreamingPanel } from './components/VerticalStreamingPanel';
 import { AlertSoundsPanel } from './components/AlertSoundsPanel';
 import { AchievementsPanel } from './components/AchievementsPanel';
+import { SetupWizard, isSetupComplete, markSetupComplete } from './components/SetupWizard';
 import { TtsProvider, useTts } from './contexts/TtsContext';
 import { TtsManager } from './components/TtsManager';
 
@@ -40,6 +41,7 @@ export function App() {
   const { authenticated, user, loading: authLoading, refresh } = useAuthStatus();
   const [channel, setChannel] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('chat');
+  const [setupComplete, setSetupComplete] = useState(isSetupComplete);
 
   // Handle ?auth=success from browser login redirect
   const [showAuthSuccess, setShowAuthSuccess] = useState(false);
@@ -77,6 +79,7 @@ export function App() {
   }, [channel, socket]);
 
   if (!backendReady) return <SplashScreen onReady={onReady} />;
+  if (!setupComplete) return <SetupWizard onComplete={() => setSetupComplete(true)} />;
 
   function toggleAlwaysOnTop() {
     const next = !alwaysOnTop;
