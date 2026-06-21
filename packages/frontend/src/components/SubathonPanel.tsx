@@ -3,6 +3,7 @@ import { useTranslation } from '../i18n/context';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import type { SubathonState, SubathonAction } from '@streamforger/shared';
+import styles from './SubathonPanel.module.css';
 
 interface Props {
   channel: string;
@@ -136,46 +137,37 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
   const barColor = progress > 0.75 ? '#ef4444' : progress > 0.5 ? '#f59e0b' : '#a78bfa';
 
   return (
-    <div style={{ maxWidth: 700 }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
+    <div className={styles.container}>
+      <div className="mb-5">
+        <h2 className="sf-heading">
           {t('subathon.title')}
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
+        <p className="text-sm text-muted">
           {t('subathon.subtitle')}
         </p>
       </div>
 
       {/* Timer display */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem', textAlign: 'center' }}>
-        <div style={{
-          fontSize: '3.5rem', fontWeight: 800, color: 'var(--sf-text)',
-          fontVariantNumeric: 'tabular-nums', lineHeight: 1.1,
-          marginBottom: '0.25rem',
-        }}>
+      <div className="glass-card sf-card text-center mb-5">
+        <div className={styles.timerValue}>
           {formatTime(remaining)}
         </div>
 
-        <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '0.75rem' }}>
+        <div className={styles.timerMaxLabel}>
           {t('subathon.limiteMaximo', { duration: formatDuration(maxLimit) })}
         </div>
 
         {/* Progress bar */}
         {(isActive || isFinished) && (
-          <div style={{
-            width: '100%', height: 6, borderRadius: 99, overflow: 'hidden',
-            background: 'rgba(255,255,255,0.08)', marginBottom: '0.5rem',
-            position: 'relative',
-          }}>
-            <div style={{
-              width: `${Math.min(progress * 100, 100)}%`, height: '100%',
+          <div className={styles.progressTrack}>
+            <div className={styles.progressFill} style={{
+              width: `${Math.min(progress * 100, 100)}%`,
               background: barColor,
-              borderRadius: 99, transition: 'width 1s linear, background 1s',
             }} />
           </div>
         )}
 
-        <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '1rem' }}>
+        <div className={styles.statusText}>
           {isRunning && t('subathon.corriendo')}
           {isPaused && t('subathon.pausado')}
           {isFinished && t('subathon.tiempoCumplido')}
@@ -184,18 +176,14 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
         </div>
 
         {/* Controls */}
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div className="flex-center flex-wrap">
           {(isStopped || isFinished) && (
             <button onClick={start} className="sf-btn sf-btn-primary" style={{ fontSize: '0.85rem' }}>
               {t('subathon.iniciar')}
             </button>
           )}
           {isRunning && (
-            <button onClick={pause} className="sf-btn" style={{
-              fontSize: '0.85rem',
-              background: 'rgba(245,158,11,0.15)', color: '#fbbf24',
-              border: '1px solid rgba(245,158,11,0.3)',
-            }}>
+            <button onClick={pause} className={styles.controlBtnWarning}>
               {t('subathon.pausar')}
             </button>
           )}
@@ -205,22 +193,18 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
             </button>
           )}
           {isActive && (
-            <button onClick={stop} className="sf-btn" style={{
-              fontSize: '0.85rem',
-              background: 'rgba(239,68,68,0.15)', color: '#ef4444',
-              border: '1px solid rgba(239,68,68,0.3)',
-            }}>
+            <button onClick={stop} className={styles.controlBtnDanger}>
               {t('subathon.detener')}
             </button>
           )}
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem', alignItems: 'start' }}>
+      <div className="grid-2" style={{ gap: '1.25rem', marginBottom: '1.25rem', alignItems: 'start' }}>
         {/* Left column: config, alerts, design */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div className="flex-col flex-col--gap-lg">
         {/* Time Config */}
-        <div className="glass-card" style={{ padding: '1.25rem' }}>
+        <div className="glass-card sf-card--tight">
           <p className="sf-section-title">{t('subathon.config')}</p>
 
           {([
@@ -233,68 +217,61 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
             { key: 'cheerBitsPerUnit', label: t('subathon.cheerBits'), val: cheerBitsPerUnit, set: setCheerBitsPerUnit, step: 50 },
             { key: 'followTime', label: t('subathon.followTime'), val: followTime, set: setFollowTime, step: 30 },
           ] as const).map(({ key, label, val, set, step }) => (
-            <div key={key} style={{ marginBottom: '0.6rem' }}>
-              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.2rem' }}>
-                {label}
-              </label>
+            <div key={key} className={styles.configField}>
+              <label className={styles.configLabel}>{label}</label>
               <input type="number" min={0} step={step} value={val}
                 onChange={(e) => set(parseInt(e.target.value) || 0)}
-                className="sf-input" style={{ width: '100%' }}
+                className="sf-input w-full"
               />
             </div>
           ))}
 
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.2rem' }}>
+          <div className={styles.configField}>
+            <label className={styles.configLabel}>
               {t('subathon.limiteMaxSegundos')}
             </label>
             <input type="number" min={0} step={3600} value={maxLimit}
               onChange={(e) => setMaxLimit(parseInt(e.target.value) || 0)}
-              className="sf-input" style={{ width: '100%' }}
+              className="sf-input w-full"
             />
           </div>
         </div>
 
         {/* Dynamic On-Screen Alerts */}
-        <div className="glass-card" style={{ padding: '1.25rem' }}>
+        <div className="glass-card sf-card--tight">
           <p className="sf-section-title">{t('subathon.alertsTitle')}</p>
-          <p style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)', marginBottom: '0.75rem' }}>
+          <p className={styles.designDesc}>
             {t('subathon.alertsDesc')}
           </p>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-            <label style={{ fontSize: '0.78rem', color: 'var(--sf-text)' }}>
+          <div className="flex-row flex-row--gap-md mb-3">
+            <label className={styles.alertsToggle}>
               {t('subathon.alertsEnabled')}
             </label>
             <button onClick={() => setAlertsEnabled(!alertsEnabled)}
-              className="sf-btn" style={{
-                fontSize: '0.75rem', padding: '0.3rem 0.8rem',
-                background: alertsEnabled ? 'rgba(167,139,250,0.15)' : 'rgba(255,255,255,0.05)',
-                border: alertsEnabled ? '1px solid rgba(167,139,250,0.3)' : '1px solid rgba(255,255,255,0.1)',
-                color: alertsEnabled ? '#a78bfa' : 'var(--sf-text-3)',
-              }}>
+              className={alertsEnabled ? styles.alertsBtnOn : styles.alertsBtnOff}>
               {alertsEnabled ? t('subathon.on') : t('subathon.off')}
             </button>
           </div>
 
-          <div style={{ marginBottom: '0.6rem' }}>
-            <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.2rem' }}>
+          <div className={styles.configField}>
+            <label className={styles.configLabel}>
               {t('subathon.alertDuration', { seconds: alertDuration })}
             </label>
             <input type="range" min={3} max={15} step={1} value={alertDuration}
               onChange={(e) => setAlertDuration(parseInt(e.target.value))}
               style={{ width: '100%', accentColor: '#a78bfa' }}
             />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--sf-text-3)' }}>
+            <div className={styles.rangeLabels}>
               <span>3s</span><span>15s</span>
             </div>
           </div>
         </div>
 
         {/* Tailored Design */}
-        <div className="glass-card" style={{ padding: '1.25rem' }}>
+        <div className="glass-card sf-card--tight">
           <p className="sf-section-title">{t('subathon.designTitle')}</p>
-          <p style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)', marginBottom: '0.75rem' }}>
+          <p className={styles.designDesc}>
             {t('subathon.designDesc')}
           </p>
 
@@ -304,25 +281,25 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
             { key: 'bgColor', label: t('subathon.bgColor'), val: bgColor, set: setBgColor },
             { key: 'textColor', label: t('subathon.textColor'), val: textColor, set: setTextColor },
           ] as const).map(({ key, label, val, set }) => (
-            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', minWidth: 100 }}>{label}</label>
+            <div key={key} className={styles.colorRow}>
+              <label className={styles.colorLabel}>{label}</label>
               <input type="color" value={val}
                 onChange={(e) => set(e.target.value)}
-                style={{ width: 36, height: 30, padding: 0, border: 'none', cursor: 'pointer', background: 'transparent' }}
+                className={styles.colorInput}
               />
               <input type="text" value={val}
                 onChange={(e) => set(e.target.value)}
-                className="sf-input" style={{ width: 120, fontSize: '0.72rem', fontFamily: 'monospace' }}
+                className={`sf-input ${styles.colorTextInput}`}
               />
             </div>
           ))}
 
-          <div style={{ marginBottom: '0.6rem' }}>
-            <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.2rem' }}>
+          <div className={styles.configField}>
+            <label className={styles.configLabel}>
               {t('subathon.fontFamily')}
             </label>
             <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)}
-              className="sf-input" style={{ width: '100%', fontSize: '0.75rem' }}>
+              className="sf-input w-full text-xs">
               <option value="Inter, system-ui, sans-serif">Inter (Default)</option>
               <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
               <option value="'Press Start 2P', cursive">Press Start 2P (Pixel)</option>
@@ -336,50 +313,50 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
             </select>
           </div>
 
-          <button onClick={updateConfig} className="sf-btn" style={{ fontSize: '0.8rem', width: '100%', marginTop: '0.5rem' }}>
+          <button onClick={updateConfig} className="sf-btn w-full text-sm mt-2">
             {t('subathon.guardarConfig')}
           </button>
         </div>
         </div>
 
         {/* Right column: Add time manually */}
-        <div className="glass-card" style={{ padding: '1.25rem' }}>
+        <div className="glass-card sf-card--tight">
           <p className="sf-section-title">{t('subathon.addTiempo')}</p>
 
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.25rem' }}>
+          <div className="mb-3">
+            <label className={styles.manualLabel}>
               {t('subathon.usuario')}
             </label>
             <input type="text" value={manualUser}
               onChange={(e) => setManualUser(e.target.value)}
               placeholder={t('subathon.viewerPlaceholder')}
-              className="sf-input" style={{ width: '100%' }}
+              className="sf-input w-full"
             />
           </div>
 
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.25rem' }}>
+          <div className="mb-3">
+            <label className={styles.manualLabel}>
               {t('subathon.tiempoSegundos')}
             </label>
             <input type="number" min={1} step={30} value={manualTime}
               onChange={(e) => setManualTime(parseInt(e.target.value) || 0)}
-              className="sf-input" style={{ width: '100%' }}
+              className="sf-input w-full"
             />
           </div>
 
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)', display: 'block', marginBottom: '0.25rem' }}>
+          <div className="mb-3">
+            <label className={styles.manualLabel}>
               {t('subathon.notaOpcional')}
             </label>
             <input type="text" value={manualNote}
               onChange={(e) => setManualNote(e.target.value)}
               placeholder={t('subathon.razonPlaceholder')}
-              className="sf-input" style={{ width: '100%' }}
+              className="sf-input w-full"
             />
           </div>
 
           <button onClick={addTime} disabled={!manualUser || manualTime <= 0}
-            className="sf-btn sf-btn-primary" style={{ fontSize: '0.8rem', width: '100%' }}>
+            className="sf-btn sf-btn-primary w-full text-sm">
             {t('subathon.añadirTiempo')}
           </button>
         </div>
@@ -387,26 +364,17 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
 
       {/* Actions log */}
       {state && state.actions.length > 0 && (
-        <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
+        <div className="glass-card sf-card--tight mb-5">
           <p className="sf-section-title">{t('subathon.historial')}</p>
-          <div style={{ maxHeight: 250, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          <div className={styles.logContainer}>
             {state.actions.map((a) => (
-              <div key={a.id} style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.4rem 0.6rem', borderRadius: 6,
-                background: 'rgba(255,255,255,0.03)', fontSize: '0.78rem',
-              }}>
-                <span style={{
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: ACTION_COLORS[a.type], flexShrink: 0,
-                }} />
-                <span style={{ color: 'var(--sf-text)', fontWeight: 600, minWidth: 80 }}>
-                  {a.user}
-                </span>
-                <span style={{ color: ACTION_COLORS[a.type], fontWeight: 600 }}>
+              <div key={a.id} className={styles.logRow}>
+                <span className={styles.logDot} style={{ background: ACTION_COLORS[a.type] }} />
+                <span className={styles.logUser}>{a.user}</span>
+                <span className={styles.logAmount} style={{ color: ACTION_COLORS[a.type] }}>
                   +{formatDuration(a.timeAdded)}
                 </span>
-                <span style={{ color: 'var(--sf-text-3)' }}>
+                <span className={styles.logNote}>
                   {t('subathon.' + a.type)}
                   {a.note && ` · ${a.note}`}
                 </span>
@@ -417,14 +385,9 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
       )}
 
       {/* Overlay URL */}
-      <div className="glass-card" style={{ padding: '1.25rem' }}>
+      <div className="glass-card sf-card--tight">
         <p className="sf-section-title">{t('subathon.overlayUrl')}</p>
-        <div style={{
-          padding: '0.75rem 1rem', borderRadius: 6,
-          background: 'rgba(0,0,0,0.3)', border: '1px solid var(--sf-border)',
-          fontSize: '0.78rem', fontFamily: 'monospace', color: '#a78bfa',
-          wordBreak: 'break-all',
-        }}>
+        <div className={styles.urlBox}>
           {OVERLAY_BASE_URL}/overlays/subathon.html?channel={channel}
         </div>
       </div>

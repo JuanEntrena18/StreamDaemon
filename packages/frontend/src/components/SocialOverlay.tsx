@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import type { SocialLink } from '@streamforger/shared';
+import styles from './SocialOverlay.module.css';
 
 const DEFAULT_LINKS: SocialLink[] = [
   { platform: 'twitter',   url: 'https://x.com/',         label: 'Twitter / X' },
@@ -70,7 +71,7 @@ export function SocialOverlay() {
   const color = PLATFORM_COLORS[current?.platform ?? ''] ?? '#ffffff';
 
   return (
-    <div style={{ position: 'fixed', bottom: 40, right: 40 }}>
+    <div className={styles.container}>
       <AnimatePresence mode="wait">
         {visible && current && (
           <motion.a
@@ -82,72 +83,38 @@ export function SocialOverlay() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 60, scale: 0.9 }}
             transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
+            className={styles.card}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-              padding: '12px 22px',
-              borderRadius: 14,
-              textDecoration: 'none',
               background: 'rgba(0,0,0,0.75)',
               border: 'var(--theme-border)',
               boxShadow: `var(--theme-glow), 0 0 0 1px ${color}33`,
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              minWidth: 220,
             }}
           >
-            {/* Platform icon */}
             <div
+              className={styles.iconBox}
               style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
                 background: `${color}22`,
                 border: `1px solid ${color}55`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.35rem',
-                flexShrink: 0,
                 boxShadow: `0 0 10px ${color}44`,
               }}
             >
               {PLATFORM_EMOJIS[current.platform] ?? '🌐'}
             </div>
 
-            {/* Text */}
-            <div>
-              <div
-                style={{
-                  fontSize: '0.65rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  color: color,
-                  marginBottom: 2,
-                  opacity: 0.85,
-                }}
-              >
+            <div className={styles.textWrap}>
+              <div className={styles.platformLabel} style={{ color }}>
                 {t('socialOverlay.sigueme')}
               </div>
-              <div
-                style={{
-                  fontSize: '1.05rem',
-                  fontWeight: 700,
-                  color: '#ffffff',
-                  lineHeight: 1.2,
-                }}
-              >
+              <div className={styles.linkLabel}>
                 {current.label}
               </div>
             </div>
 
-            {/* Arrow */}
             <motion.div
               animate={{ x: [0, 4, 0] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-              style={{ marginLeft: 'auto', color: color, fontSize: '1.1rem', opacity: 0.7 }}
+              className={styles.arrow}
+              style={{ color }}
             >
               →
             </motion.div>

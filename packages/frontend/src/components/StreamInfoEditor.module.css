@@ -1,0 +1,99 @@
+.container {
+  max-width: 600px;
+}
+
+.header {
+  margin-bottom: 1.75rem;
+}
+
+.heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: var(--sf-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subtitle {
+  color: var(--sf-text-2);
+  font-size: 0.875rem;
+}
+
+.card {
+  padding: 1.5rem;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.statusDot--live {
+  background: #34d399;
+}
+
+.statusDot--offline {
+  background: #6b7280;
+}
+
+.statusLabel {
+  font-size: 0.78rem;
+  color: var(--sf-text-2);
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.fieldLabel {
+  font-size: 0.78rem;
+  color: var(--sf-text-2);
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.saveBtn {
+  font-size: 0.85rem;
+  padding: 0.5rem 1.25rem;
+}
+
+.savedText {
+  font-size: 0.78rem;
+  color: #34d399;
+}
+
+.errorText {
+  font-size: 0.78rem;
+  color: #f87171;
+}
+
+.infoCard {
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+.infoLines {
+  font-size: 0.82rem;
+  color: var(--sf-text-2);
+  line-height: 1.8;
+}
+
+.infoLabel {
+  color: var(--sf-text);
+}

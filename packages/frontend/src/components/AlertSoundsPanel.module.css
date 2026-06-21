@@ -1,0 +1,162 @@
+.container {
+  max-width: 600px;
+}
+
+.header {
+  margin-bottom: 1.75rem;
+}
+
+.heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: var(--sf-text);
+}
+
+.subtitle {
+  color: var(--sf-text-2);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.loadingText {
+  color: var(--sf-text-2);
+  font-size: 0.85rem;
+}
+
+.configCard {
+  padding: 1.5rem;
+}
+
+.soundsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.soundRow {
+  display: flex;
+  flex-direction: column;
+}
+
+.soundLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--sf-text);
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.soundActions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadBtn {
+  min-width: 140px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.fileName {
+  font-size: 0.78rem;
+  color: var(--sf-text-2);
+  font-family: monospace;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.smallBtn {
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid var(--sf-border);
+  background: transparent;
+  color: var(--sf-text-3);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.playBtn {
+  color: #22d3ee;
+}
+
+.playBtn--playing {
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.removeBtn {
+  color: #f87171;
+}
+
+.noSound {
+  font-size: 0.78rem;
+  color: var(--sf-text-3);
+  font-style: italic;
+}
+
+.testCard {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+}
+
+.testTitle {
+  margin-bottom: 0.75rem;
+}
+
+.testDesc {
+  font-size: 0.82rem;
+  color: var(--sf-text-2);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.testButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.testBtn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.testNote {
+  font-size: 0.75rem;
+  color: #f87171;
+  margin-top: 0.75rem;
+}
+
+.inputBtn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  text-align: center;
+  min-width: 140px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}

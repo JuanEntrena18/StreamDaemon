@@ -61,7 +61,9 @@ Aplicación modular para creadores de contenido que permite gestionar el canal d
 
 ### Sistema de Diseño
 
-El dashboard usa un sistema de tokens CSS definidos en `index.css`:
+El dashboard usa tokens CSS + clases utilitarias + CSS Modules:
+
+**Tokens CSS** definidos en `index.css`:
 
 | Token | Valor | Uso |
 |---|---|---|
@@ -72,11 +74,15 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 | `--sf-success` | `#10b981` | Verde esmeralda (conectado) |
 | `--sf-danger` | `#ef4444` | Rojo (desconectado) |
 
+**Clases utilitarias** en `index.css` (flex, typography, spacing, cards, badges, pills, toggles, etc.) para sustituir estilos inline repetitivos.
+
+**CSS Modules** (`*.module.css`) por componente — estilos encapsulados que reemplazan ~1.190 estilos `style={{}}` inline. Solo se mantienen inline los valores verdaderamente dinámicos (colores de usuario, posiciones de toggle, accent-color de ranges).
+
 ### Componentes del Dashboard
 
 | Componente | Descripción |
 |---|---|
-| `App.tsx` | Layout principal con sidebar state management, header + tab transitions, ?auth=success handler y version migration |
+| `App.tsx` + `App.module.css` | Layout principal con sidebar state management, header + tab transitions, ?auth=success handler y version migration |
 | `StreamDashboard.tsx` | Gestor unificado: preview embed, editor título/juego, stats en vivo, feed actividad con filtros |
 | `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación, selector sonido con volumen, **TTS (voz, velocidad, volumen)**, overlay controls (tamaño, opacidad, tipografía, fondo negro/transparente) |
 | `SecurityPanel.tsx` | Anti-Bots: estadísticas, toggles de protección, escaneo manual, lista blanca, log de detecciones con acciones ban/unban/whitelist por fila, tarjeta de ayuda del sistema |
@@ -92,7 +98,9 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 | `CommandsPanel.tsx` | Comandos personalizados: crear, editar, toggle, cooldown |
 | `ObsPanel.tsx` | URLs OBS con copiar al portapapeles y selector de overlays standalone |
 | `ConfigPanel.tsx` | Config: conexión Twitch OAuth, logout, acerca de |
-| `Sidebar.tsx` | Barra lateral colapsable con 8 secciones (GESTOR, ESTADÍSTICAS, SEGURIDAD, Chat, MOD, COMANDOS, Herramientas, Config). Se colapsa a 56px mostrando solo iconos con animación Framer Motion. En < 768px se convierte en drawer overlay con botón hamburguesa. Estado persistido en localStorage |
+| `Sidebar.tsx` + `Sidebar.module.css` | Barra lateral colapsable con 8 secciones (GESTOR, ESTADÍSTICAS, SEGURIDAD, Chat, MOD, COMANDOS, Herramientas, Config). Se colapsa a 56px mostrando solo iconos con animación Framer Motion. En < 768px se convierte en drawer overlay con botón hamburguesa. Estado persistido en localStorage |
+
+> Todos los componentes del dashboard y overlays tienen su `*.module.css` correspondiente. Consultar el listado completo de archivos en el repositorio.
 
 ---
 
@@ -324,3 +332,4 @@ twitch_overlay/
 | **43** | **Socket.IO en overlays temáticos** — Todos los overlays con chat (gameplay y just chatting) conectados al backend via Socket.IO para mensajes, follows, subs, cheers y redemptions | ✅ |
 | **44** | **Socket.IO standalone fix** — Corrección de conexión Socket.IO en 39 overlays standalone: WebSocket-only transport para evitar interceptación de Fastify v5, cliente Socket.IO local (`/overlays/js/socket.io.js`), orden correcto de `script.onload` para evitar race condition, y handler `connect_error` en todos los overlays | ✅ |
 | **45** | **🗂️ Sidebar colapsable/responsive** — Sidebar extraída a componente propio con colapso a 56px (solo iconos), animación Framer Motion, modo drawer en < 768px con overlay + backdrop blur y botón hamburguesa. Estado persistido en localStorage | ✅ |
+| **46** | **🎨 CSS Modules migration** — Migración de ~1.190 estilos inline (`style={{}}`) a CSS Modules (`*.module.css`) + clases utilitarias en `index.css`. 32 componentes migrados. Solo se mantienen inline valores dinámicos (colores de usuario, posiciones de toggle, accent-color). Se añadieron clases reutilizables: `.flex-row`, `.flex-col`, `.sf-heading`, `.sf-label`, `.sf-card`, `.sf-chip`, `.sf-pill-selector__pill`, `.sf-toggle`, etc. | ✅ |

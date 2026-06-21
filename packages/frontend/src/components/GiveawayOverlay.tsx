@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import type { GiveawayData, GiveawayEntryData } from '@streamforger/shared';
+import styles from './GiveawayOverlay.module.css';
 
 interface Props {
   channel: string;
@@ -155,62 +156,30 @@ export function GiveawayOverlay({ channel }: Props) {
   const hasGiveaway = giveaway && giveaway.status === 'active';
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0,
-      background: 'rgba(0,0,0,0.82)',
-      display: 'flex', flexDirection: 'column',
-      overflow: 'hidden',
-      fontFamily: "'Inter', system-ui, sans-serif",
-    }}>
+    <div className={styles.container} style={{ background: 'rgba(0,0,0,0.82)' }}>
       {!hasGiveaway && !spinning && !winner ? (
-        <div style={{
-          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'rgba(255,255,255,0.3)', fontSize: '1.2rem', fontWeight: 500,
-        }}>
+        <div className={styles.waiting}>
           {t('overlay.esperandoSorteo')}
         </div>
       ) : (
-        <div style={{
-          flex: 1, display: 'grid',
-          gridTemplateColumns: '1fr 1.2fr',
-          gap: 0, height: '100%',
-        }}>
-          {/* ── Left: Participants ── */}
-          <div style={{
-            display: 'flex', flexDirection: 'column',
-            borderRight: '1px solid rgba(255,255,255,0.08)',
-            padding: '2rem',
-            overflow: 'hidden',
-          }}>
-            <div style={{
-              fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase',
-              letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)',
-              marginBottom: '0.5rem',
-            }}>
+        <div className={styles.grid}>
+          <div className={styles.leftPanel}>
+            <div className={styles.participantsHeader}>
               {t('overlay.participantes', { n: participants.length, total: totalTickets })}
             </div>
             {hasGiveaway && (
               <>
-                <div style={{
-                  fontSize: '1.4rem', fontWeight: 700, color: '#a78bfa',
-                  marginBottom: '0.5rem', lineHeight: 1.2,
-                }}>
+                <div className={styles.prizeName}>
                   {giveaway.prize}
                 </div>
                 {giveaway.ticketCost > 0 && (
-                  <div style={{
-                    fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)',
-                    marginBottom: '1rem',
-                  }}>
+                  <div className={styles.prizeMeta}>
                     {giveaway.ticketCost} pts/boleto · {giveaway.ticketRewardTitle}
                   </div>
                 )}
               </>
             )}
-            <div style={{
-              flex: 1, overflowY: 'auto', display: 'flex',
-              flexDirection: 'column', gap: '0.35rem',
-            }}>
+            <div className={styles.participantsList}>
               <AnimatePresence>
                 {participants.map((name) => {
                   const t = tickets.find((t) => t.user === name);
@@ -223,19 +192,10 @@ export function GiveawayOverlay({ channel }: Props) {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2 }}
-                      style={{
-                        padding: '0.4rem 0.75rem',
-                        background: 'rgba(255,255,255,0.04)',
-                        borderRadius: 6,
-                        fontSize: '0.85rem',
-                        color: 'rgba(255,255,255,0.8)',
-                        fontWeight: 500,
-                        borderLeft: '3px solid #7c3aed',
-                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      }}
+                      className={styles.participantItem}
                     >
                       <span>@{name}</span>
-                      <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>
+                      <span className={styles.participantTickets}>
                         {ticketCount} b ({prob}%)
                       </span>
                     </motion.div>
@@ -245,51 +205,25 @@ export function GiveawayOverlay({ channel }: Props) {
             </div>
           </div>
 
-          {/* ── Right: Wheel ── */}
-          <div style={{
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            padding: '2rem',
-          }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              marginBottom: '1rem',
-            }}>
-              <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+          <div className={styles.rightPanel}>
+            <div className={styles.spinControls}>
+              <span className={styles.spinLabel}>
                 {t('overlay.giro')}
               </span>
               {[10, 15, 20].map((s) => (
                 <button
                   key={s}
                   onClick={() => setSpinDuration(s)}
-                  style={{
-                    padding: '0.2rem 0.55rem', borderRadius: 99, border: '1px solid',
-                    borderColor: spinDuration === s ? '#a78bfa' : 'rgba(255,255,255,0.15)',
-                    background: spinDuration === s ? 'rgba(124,58,237,0.25)' : 'transparent',
-                    color: spinDuration === s ? '#a78bfa' : 'rgba(255,255,255,0.5)',
-                    fontSize: '0.7rem', fontWeight: spinDuration === s ? 600 : 400,
-                    cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s',
-                    lineHeight: 1,
-                  }}
+                  className={`${styles.durationBtn} ${spinDuration === s ? styles['durationBtn--active'] : styles['durationBtn--inactive']}`}
                 >
                   {s}s
                 </button>
               ))}
             </div>
 
-            <div style={{
-              position: 'relative',
-              width: 'min(280px, 80%)',
-              aspectRatio: '1',
-              marginBottom: '1rem',
-            }}>
+            <div className={styles.wheelContainer}>
               {participants.length < 2 ? (
-                <div style={{
-                  width: '100%', height: '100%', borderRadius: '50%',
-                  border: '2px dashed rgba(255,255,255,0.15)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem',
-                }}>
+                <div className={styles.wheelPlaceholder}>
                   {t('overlay.esperandoParticipantes')}
                 </div>
               ) : (
@@ -298,38 +232,21 @@ export function GiveawayOverlay({ channel }: Props) {
                     ref={wheelRef}
                     width={280}
                     height={280}
-                    style={{ width: '100%', height: '100%', borderRadius: '50%' }}
+                    className={styles.wheelCanvas}
                   />
-                  <div style={{
-                    position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%)',
-                    width: 0, height: 0,
-                    borderLeft: '10px solid transparent',
-                    borderRight: '10px solid transparent',
-                    borderTop: '14px solid rgba(255,255,255,0.9)',
-                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
-                    zIndex: 2,
-                  }} />
+                  <div className={styles.wheelPointer} />
                 </>
               )}
             </div>
 
-            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginBottom: '0.75rem' }}>
+            <div className={styles.totalTickets}>
               {totalTickets > 0 ? `${totalTickets} ${t('overlay.boletosTotal')}` : ''}
             </div>
 
             <button
               onClick={spinWheelManually}
               disabled={participants.length < 2 || spinning}
-              style={{
-                padding: '0.6rem 2rem', borderRadius: 99, border: 'none',
-                background: spinning
-                  ? 'rgba(255,255,255,0.1)'
-                  : 'linear-gradient(135deg, #7c3aed, #6366f1)',
-                color: '#fff', fontSize: '0.85rem', fontWeight: 600,
-                cursor: participants.length < 2 || spinning ? 'default' : 'pointer',
-                fontFamily: 'inherit', transition: 'all 0.15s',
-                opacity: participants.length < 2 ? 0.4 : 1,
-              }}
+              className={`${styles.spinBtn} ${participants.length < 2 || spinning ? styles['spinBtn--disabled'] : styles['spinBtn--active']}`}
             >
               {spinning ? t('overlay.girando') : t('overlay.girarRuleta')}
             </button>
@@ -344,19 +261,13 @@ export function GiveawayOverlay({ channel }: Props) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
-            style={{
-              position: 'fixed', inset: 0,
-              background: 'rgba(0,0,0,0.88)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexDirection: 'column',
-              zIndex: 100,
-            }}
+            className={styles.winnerOverlay}
           >
             <motion.div
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.4 }}
-              style={{ fontSize: '1rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginBottom: '0.5rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+              className={styles.winnerLabel}
             >
               {t('overlay.ganador')}
             </motion.div>
@@ -364,7 +275,7 @@ export function GiveawayOverlay({ channel }: Props) {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.4 }}
-              style={{ fontSize: '3.5rem', fontWeight: 800, color: '#a78bfa', textAlign: 'center', lineHeight: 1.2, marginBottom: '0.5rem' }}
+              className={styles.winnerName}
             >
               @{winner.winner}
             </motion.div>
@@ -372,7 +283,7 @@ export function GiveawayOverlay({ channel }: Props) {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.4 }}
-              style={{ fontSize: '1.4rem', fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}
+              className={styles.winnerPrize}
             >
               {winner.prize}
             </motion.div>

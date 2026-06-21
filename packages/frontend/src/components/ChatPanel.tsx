@@ -6,6 +6,7 @@ import { useTranslation } from '../i18n/context';
 import { apiGet, apiPut } from '../utils/api';
 import { useTts } from '../contexts/TtsContext';
 import { getVoices } from '../utils/tts';
+import styles from './ChatPanel.module.css';
 
 const OVERLAY_LS_KEY = 'streamforger-chat-overlay-settings';
 
@@ -106,7 +107,6 @@ export function ChatPanel({ channel }: Props) {
     }
   }, [messages]);
 
-  // Close menu on outside click
   useEffect(() => {
     if (!menuMsg) return;
     const handler = (e: MouseEvent) => {
@@ -209,35 +209,28 @@ export function ChatPanel({ channel }: Props) {
     }
   }
 
+  function pillClasses(active: boolean, extra?: string) {
+    return `${styles.pillBtn} ${active ? styles['pillBtn--active'] : ''} ${extra || ''}`;
+  }
+
   return (
-    <div style={{ maxWidth: 700 }}>
+    <div className={styles.container}>
       {/* Header */}
-      <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <div className="flex-between mb-4">
         <div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h2 className="sf-heading flex-row--gap-sm">
             {t('chat.title')}
           </h2>
-          <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-            {t('chat.subtitle')}
-          </p>
+          <p className="text-sm text-muted">{t('chat.subtitle')}</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
-          <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center', marginRight: '0.25rem' }}>
+        <div className="flex-row--gap-sm" style={{ flexShrink: 0 }}>
+          <div className="flex-row--gap-sm" style={{ marginRight: '0.25rem' }}>
             {(['chat', 'cyanchat'] as const).map((m) => (
               <button
                 key={m}
                 onClick={() => { setOverlayMode(m); localStorage.setItem('overlayMode', m); }}
                 disabled={overlayOpen}
-                style={{
-                  padding: '0.25rem 0.6rem', borderRadius: 6, border: '1px solid',
-                  borderColor: overlayMode === m ? 'var(--sf-primary)' : 'var(--sf-border)',
-                  background: overlayMode === m ? 'rgba(124,58,237,0.2)' : 'transparent',
-                  color: overlayMode === m ? '#a78bfa' : 'var(--sf-text-3)',
-                  fontSize: '0.72rem', fontWeight: overlayMode === m ? 600 : 400,
-                  cursor: overlayOpen ? 'not-allowed' : 'pointer',
-                  fontFamily: 'inherit', opacity: overlayOpen ? 0.5 : 1,
-                  transition: 'all 0.15s ease',
-                }}
+                className={pillClasses(overlayMode === m)}
               >
                 {m === 'chat' ? 'Chat' : 'Cyan Chat'}
               </button>
@@ -266,15 +259,9 @@ export function ChatPanel({ channel }: Props) {
 
       {/* Cyan Chat URL config */}
       {overlayMode === 'cyanchat' && (
-        <div style={{
-          marginBottom: '0.75rem', padding: '0.75rem 1rem',
-          background: 'rgba(0,217,255,0.06)', border: '1px solid rgba(0,217,255,0.15)',
-          borderRadius: 'var(--sf-radius)',
-        }}>
-          <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.3rem', display: 'block' }}>
-            URL de Cyan Chat
-          </label>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className={styles.cyanChatBox}>
+          <label className="sf-label mb-2">{t('chat.cyanUrl') || 'URL de Cyan Chat'}</label>
+          <div className="flex-row--gap-sm">
             <input
               type="url"
               value={cyanChatUrl}
@@ -304,41 +291,29 @@ export function ChatPanel({ channel }: Props) {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          style={{
-            marginBottom: '0.75rem', padding: '0.75rem 1rem',
-            background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)',
-            borderRadius: 'var(--sf-radius)', overflow: 'hidden',
-          }}
+          className={styles.overlayControlBox}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--sf-text-2)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              {t('chat.controlOverlay')}
-            </span>
+          <div className="flex-between mb-2">
+            <span className="sf-section-title" style={{ margin: 0 }}>{t('chat.controlOverlay')}</span>
             <button onClick={closeOverlayWindow} className="sf-btn sf-btn-danger" style={{ fontSize: '0.72rem', padding: '0.2rem 0.6rem' }}>
               {t('chat.cerrar')}
             </button>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div className="flex-wrap mb-1">
             {/* Size presets */}
-            <div style={{ display: 'flex', gap: '0.25rem' }}>
+            <div className="flex-row--gap-sm">
               {(['sm', 'md', 'lg'] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => changeOverlaySize(s)}
-                  style={{
-                    padding: '0.25rem 0.6rem', borderRadius: 4, border: '1px solid',
-                    borderColor: overlaySize === s ? 'var(--sf-primary)' : 'var(--sf-border)',
-                    background: overlaySize === s ? 'rgba(124,58,237,0.2)' : 'transparent',
-                    color: overlaySize === s ? '#a78bfa' : 'var(--sf-text-3)',
-                    fontSize: '0.68rem', fontWeight: overlaySize === s ? 600 : 400,
-                    cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase',
-                  }}
+                  className={pillClasses(overlaySize === s, styles['pillBtn--sm'])}
+                  style={{ textTransform: 'uppercase' }}
                 >{s === 'sm' ? t('chat.small') : s === 'md' ? t('chat.medium') : t('chat.large')}</button>
               ))}
             </div>
             {/* Opacity */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flex: 1, maxWidth: 180 }}>
-              <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)' }}>{t('chat.opacidad')}</span>
+            <div className="flex-row--gap-sm" style={{ flex: 1, maxWidth: 180 }}>
+              <span className="text-dim" style={{ fontSize: '0.68rem' }}>{t('chat.opacidad')}</span>
               <input
                 type="range"
                 min={0.1}
@@ -350,7 +325,7 @@ export function ChatPanel({ channel }: Props) {
               />
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+          <div className="flex-row--gap-sm flex-wrap mt-2">
             {/* Background mode */}
             <button
               onClick={() => {
@@ -359,13 +334,7 @@ export function ChatPanel({ channel }: Props) {
                 saveOverlaySettings({ ...loadOverlaySettings(), bgMode: next });
                 window.streamforger?.overlay.setBgMode?.(next);
               }}
-              style={{
-                padding: '0.25rem 0.6rem', borderRadius: 4, border: '1px solid',
-                borderColor: 'var(--sf-border)',
-                background: 'transparent',
-                color: 'var(--sf-text-3)',
-                fontSize: '0.68rem', cursor: 'pointer', fontFamily: 'inherit',
-              }}
+              className={`${styles.pillBtn} ${styles['pillBtn--sm']}`}
             >
               {overlayBgMode === 'transparent' ? t('chat.fondoTransparente') : t('chat.fondoNegro')}
             </button>
@@ -390,7 +359,7 @@ export function ChatPanel({ channel }: Props) {
             </select>
 
             {/* Font size */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <div className="flex-row--gap-sm">
               <span style={{ fontSize: '0.6rem', color: 'var(--sf-text-3)' }}>A</span>
               <input
                 type="range"
@@ -406,7 +375,7 @@ export function ChatPanel({ channel }: Props) {
                 style={{ width: 60, accentColor: '#7c3aed', cursor: 'pointer' }}
               />
               <span style={{ fontSize: '0.9rem', color: 'var(--sf-text-3)' }}>A</span>
-              <span style={{ fontSize: '0.6rem', color: 'var(--sf-text-3)', minWidth: 16 }}>{overlayFontSize}</span>
+              <span className="text-dim" style={{ fontSize: '0.6rem', minWidth: 16 }}>{overlayFontSize}</span>
             </div>
           </div>
         </motion.div>
@@ -414,21 +383,12 @@ export function ChatPanel({ channel }: Props) {
 
       {/* Connection status */}
       {!channel && (
-        <div style={{
-          padding: '0.75rem 1rem', marginBottom: '1rem',
-          background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)',
-          borderRadius: 'var(--sf-radius-sm)', fontSize: '0.82rem', color: '#fbbf24', textAlign: 'center',
-        }}>
+        <div className={styles.statusWarning}>
           {t('chat.emptyChannel')}
         </div>
       )}
       {channel && !connected && (
-        <div style={{
-          padding: '0.75rem 1rem', marginBottom: '1rem',
-          background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
-          borderRadius: 'var(--sf-radius-sm)', fontSize: '0.82rem', color: '#f87171',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
-        }}>
+        <div className={styles.statusError}>
           <span>{t('chat.disconnected')}</span>
           <button onClick={reconnect} className="sf-btn sf-btn-primary" style={{ fontSize: '0.78rem', padding: '0.3rem 0.75rem' }}>
             {t('chat.reconectar')}
@@ -437,20 +397,9 @@ export function ChatPanel({ channel }: Props) {
       )}
 
       {/* Messages */}
-      <div
-        className="glass-card"
-        style={{
-          height: 420, overflowY: 'auto', padding: '0.5rem',
-          display: 'flex', flexDirection: 'column', gap: '1px',
-          marginBottom: '0.625rem',
-        }}
-        ref={listRef}
-      >
+      <div className={`glass-card ${styles.msgContainer}`} ref={listRef}>
         {messages.length === 0 ? (
-          <div style={{
-            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'var(--sf-text-3)', fontSize: '0.85rem', textAlign: 'center',
-          }}>
+          <div className={styles.msgEmpty}>
             {channel && connected
               ? t('chat.waitingMessages')
               : t('chat.messagesHere')}
@@ -462,66 +411,30 @@ export function ChatPanel({ channel }: Props) {
                 key={msg.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                style={{
-                  padding: '0.35rem 0.5rem',
-                  borderRadius: 4,
-                  background: 'rgba(255,255,255,0.02)',
-                  lineHeight: 1.45,
-                  position: 'relative',
-                }}
+                className={styles.msgBubble}
                 onMouseEnter={() => setMenuMsg(msg.id)}
                 onMouseLeave={() => setMenuMsg(null)}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-                  {/* Badges */}
+                <div className="flex-row flex-wrap" style={{ gap: '0.35rem' }}>
                   {msg.user.badges?.map((b) => (
-                    <span key={b} style={{ fontSize: '0.6rem', opacity: 0.6 }}>{badgeIcon(b)}</span>
+                    <span key={b} className={styles.badgeIcon}>{badgeIcon(b)}</span>
                   ))}
-                  {/* Name */}
-                  <span style={{
-                    color: msg.user.color || '#a78bfa', fontWeight: 600, fontSize: '0.78rem',
-                    cursor: 'pointer',
-                  }}
+                  <span
+                    className={styles.userName}
+                    style={{ color: msg.user.color || '#a78bfa' }}
                     onClick={() => setReplyTo({ id: msg.id, user: msg.user.displayName })}
                   >
                     {msg.user.displayName}
                   </span>
-                  {/* Timestamp */}
-                  <span style={{ fontSize: '0.6rem', color: 'var(--sf-text-3)', marginLeft: 'auto', opacity: 0.5 }}>
-                    {formatTimestamp(msg.timestamp)}
-                  </span>
+                  <span className={styles.timestamp}>{formatTimestamp(msg.timestamp)}</span>
                 </div>
-                <div style={{ color: 'var(--sf-text-2)', fontSize: '0.82rem', wordBreak: 'break-word', paddingLeft: 0 }}>
-                  {msg.text}
-                </div>
+                <div className={styles.msgText}>{msg.text}</div>
 
-                {/* Action buttons (on hover) */}
                 {menuMsg === msg.id && (
-                  <div
-                    ref={menuRef}
-                    style={{
-                      position: 'absolute', right: 4, top: 4,
-                      display: 'flex', gap: '0.2rem',
-                      background: 'var(--sf-bg-2)', border: '1px solid var(--sf-border)',
-                      borderRadius: 6, padding: '0.2rem',
-                      zIndex: 10,
-                    }}
-                  >
-                    <button
-                      onClick={() => handleReply(msg)}
-                      title={t('chat.responder')}
-                      style={btnMenuStyle}
-                    >↩</button>
-                    <button
-                      onClick={() => handleModAction('timeout', msg.user.displayName)}
-                      title={t('chat.timeout5m')}
-                      style={btnMenuStyle}
-                    >⏳</button>
-                    <button
-                      onClick={() => handleModAction('ban', msg.user.displayName)}
-                      title={t('chat.banear')}
-                      style={btnMenuStyle}
-                    >🚫</button>
+                  <div ref={menuRef} className={styles.msgMenu}>
+                    <button onClick={() => handleReply(msg)} title={t('chat.responder')} className={styles.menuBtn}>↩</button>
+                    <button onClick={() => handleModAction('timeout', msg.user.displayName)} title={t('chat.timeout5m')} className={styles.menuBtn}>⏳</button>
+                    <button onClick={() => handleModAction('ban', msg.user.displayName)} title={t('chat.banear')} className={styles.menuBtn}>🚫</button>
                   </div>
                 )}
               </motion.div>
@@ -532,13 +445,7 @@ export function ChatPanel({ channel }: Props) {
 
       {/* Reply indicator */}
       {replyTo && (
-        <div style={{
-          padding: '0.3rem 0.75rem', marginBottom: '0.375rem',
-          background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.2)',
-          borderRadius: 'var(--sf-radius-sm)', fontSize: '0.78rem',
-          color: 'var(--sf-text-2)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        }}>
+        <div className={styles.replyBar}>
           <span>{t('chat.replyingTo', { user: replyTo.user })}</span>
           <button
             onClick={() => setReplyTo(null)}
@@ -548,36 +455,24 @@ export function ChatPanel({ channel }: Props) {
       )}
 
       {/* Sound selector + volume */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-        <span style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>{t('chat.sonido')}</span>
-        <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+      <div className={styles.soundRow}>
+        <span className="text-dim" style={{ fontSize: '0.7rem', fontWeight: 500 }}>{t('chat.sonido')}</span>
+        <div className="flex-row--gap-sm flex-wrap">
           <button
             onClick={() => setSelectedSound('')}
-            style={{
-              padding: '0.2rem 0.5rem', borderRadius: 4, border: '1px solid',
-              borderColor: selectedSound === '' ? 'var(--sf-primary)' : 'var(--sf-border)',
-              background: selectedSound === '' ? 'rgba(124,58,237,0.2)' : 'transparent',
-              color: selectedSound === '' ? '#a78bfa' : 'var(--sf-text-3)',
-              fontSize: '0.65rem', cursor: 'pointer', fontFamily: 'inherit',
-            }}
+            className={pillClasses(selectedSound === '', styles['pillBtn--xs'])}
           >{t('chat.sinSonido')}</button>
           {(['pop', 'ding', 'chime', 'notification'] as SoundKey[]).map((s) => (
             <button
               key={s}
               onClick={() => setSelectedSound(s)}
-              style={{
-                padding: '0.2rem 0.5rem', borderRadius: 4, border: '1px solid',
-                borderColor: selectedSound === s ? 'var(--sf-primary)' : 'var(--sf-border)',
-                background: selectedSound === s ? 'rgba(124,58,237,0.2)' : 'transparent',
-                color: selectedSound === s ? '#a78bfa' : 'var(--sf-text-3)',
-                fontSize: '0.65rem', cursor: 'pointer', fontFamily: 'inherit',
-              }}
+              className={pillClasses(selectedSound === s, styles['pillBtn--xs'])}
               onMouseEnter={() => { setMasterVolume(soundVolume); SOUNDS[s](); }}
             >{s === 'pop' ? t('chat.sonidoPop') : s === 'ding' ? t('chat.sonidoDing') : s === 'chime' ? t('chat.sonidoChime') : t('chat.sonidoNotif')}</button>
           ))}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginLeft: 'auto' }}>
-          <span style={{ fontSize: '0.6rem', color: 'var(--sf-text-3)', minWidth: 16 }}>🔈</span>
+        <div className={styles.volRange}>
+          <span className="text-dim" style={{ fontSize: '0.6rem', minWidth: 16 }}>🔈</span>
           <input
             type="range"
             min={0}
@@ -588,51 +483,33 @@ export function ChatPanel({ channel }: Props) {
             style={{ width: 56, accentColor: '#7c3aed', cursor: 'pointer' }}
             title={t('chat.volumenSonidos')}
           />
-          <span style={{ fontSize: '0.6rem', color: 'var(--sf-text-3)', minWidth: 16 }}>🔊</span>
+          <span className="text-dim" style={{ fontSize: '0.6rem', minWidth: 16 }}>🔊</span>
         </div>
       </div>
 
       {/* TTS Controls */}
-      <div style={{
-        marginBottom: '0.5rem', padding: '0.6rem 0.75rem',
-        background: tts.enabled ? 'rgba(124,58,237,0.06)' : 'transparent',
-        border: `1px solid ${tts.enabled ? 'rgba(124,58,237,0.15)' : 'var(--sf-border)'}`,
-        borderRadius: 'var(--sf-radius-sm)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>{t('chat.tts')}</span>
+      <div className={`${styles.ttsBox} ${tts.enabled ? styles.ttsBoxEnabled : styles.ttsBoxDisabled}`}>
+        <div className="flex-between mb-1">
+          <div className="flex-row--gap-sm">
+            <span className="text-dim" style={{ fontSize: '0.7rem', fontWeight: 500 }}>{t('chat.tts')}</span>
             <button
               onClick={() => { tts.setEnabled(!tts.enabled); if (tts.enabled) window.speechSynthesis?.cancel(); }}
-              style={{
-                width: 36, height: 18, borderRadius: 99,
-                background: tts.enabled ? 'var(--sf-primary)' : 'var(--sf-border)',
-                border: 'none', cursor: 'pointer', position: 'relative',
-                transition: 'background 0.2s',
-              }}
+              className={`${styles.toggleTrack} ${tts.enabled ? styles.toggleTrackOn : styles.toggleTrackOff}`}
             >
-              <span style={{
-                position: 'absolute', top: 2, left: tts.enabled ? 18 : 2,
-                width: 14, height: 14, borderRadius: '50%',
-                background: '#fff', transition: 'left 0.2s',
-              }} />
+              <span className={styles.toggleThumb} style={{ left: tts.enabled ? 18 : 2 }} />
             </button>
           </div>
           {tts.enabled && window.speechSynthesis && (
             <button
               onClick={() => window.speechSynthesis.cancel()}
-              style={{
-                background: 'none', border: 'none', color: 'var(--sf-text-3)',
-                cursor: 'pointer', fontSize: '0.65rem', fontFamily: 'inherit',
-                padding: '0.1rem 0.4rem', borderRadius: 4,
-              }}
+              className={styles.collapseArrow}
             >{t('chat.detener')}</button>
           )}
         </div>
         {tts.enabled && window.speechSynthesis && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>{t('chat.voz')}</span>
+          <div className="flex-col--gap-sm">
+            <div className="flex-row--gap-sm">
+              <span className="text-dim" style={{ fontSize: '0.65rem', minWidth: 34 }}>{t('chat.voz')}</span>
               <select
                 value={tts.voiceURI ?? ''}
                 onChange={(e) => tts.setVoiceURI(e.target.value || null)}
@@ -652,8 +529,8 @@ export function ChatPanel({ channel }: Props) {
                 ))}
               </select>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>{t('chat.velocidad')}</span>
+            <div className="flex-row--gap-sm">
+              <span className="text-dim" style={{ fontSize: '0.65rem', minWidth: 34 }}>{t('chat.velocidad')}</span>
               <input
                 type="range"
                 min={0.5}
@@ -663,10 +540,10 @@ export function ChatPanel({ channel }: Props) {
                 onChange={(e) => tts.setRate(parseFloat(e.target.value))}
                 style={{ flex: 1, accentColor: '#7c3aed', cursor: 'pointer' }}
               />
-              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 24 }}>{tts.rate.toFixed(1)}x</span>
+              <span className="text-dim" style={{ fontSize: '0.65rem', minWidth: 24 }}>{tts.rate.toFixed(1)}x</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 34 }}>{t('chat.volumen')}</span>
+            <div className="flex-row--gap-sm">
+              <span className="text-dim" style={{ fontSize: '0.65rem', minWidth: 34 }}>{t('chat.volumen')}</span>
               <input
                 type="range"
                 min={0}
@@ -676,48 +553,42 @@ export function ChatPanel({ channel }: Props) {
                 onChange={(e) => tts.setVolume(parseFloat(e.target.value))}
                 style={{ flex: 1, accentColor: '#7c3aed', cursor: 'pointer' }}
               />
-              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 24 }}>{Math.round(tts.volume * 100)}%</span>
+              <span className="text-dim" style={{ fontSize: '0.65rem', minWidth: 24 }}>{Math.round(tts.volume * 100)}%</span>
             </div>
-            <div style={{ borderTop: '1px solid var(--sf-border)', paddingTop: '0.35rem', marginTop: '0.15rem' }}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem 1rem', marginBottom: '0.35rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: 'var(--sf-text-2)', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={tts.filters.excludeOwn} onChange={(e) => tts.setFilters({ ...tts.filters, excludeOwn: e.target.checked })} style={{ accentColor: '#7c3aed', cursor: 'pointer' }} />
-                  {t('chat.ttsFilterOwn')}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: 'var(--sf-text-2)', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={tts.filters.excludeLinks} onChange={(e) => tts.setFilters({ ...tts.filters, excludeLinks: e.target.checked })} style={{ accentColor: '#7c3aed', cursor: 'pointer' }} />
-                  {t('chat.ttsFilterLinks')}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: 'var(--sf-text-2)', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={tts.filters.excludeBots} onChange={(e) => tts.setFilters({ ...tts.filters, excludeBots: e.target.checked })} style={{ accentColor: '#7c3aed', cursor: 'pointer' }} />
-                  {t('chat.ttsFilterBots')}
-                </label>
-              </div>
-              {tts.filters.excludeBots && (
-                <input
-                  type="text"
-                  value={tts.filters.botNames}
-                  onChange={(e) => tts.setFilters({ ...tts.filters, botNames: e.target.value })}
-                  placeholder={t('chat.ttsBotPlaceholder')}
-                  className="sf-input"
-                  style={{ width: '100%', fontSize: '0.65rem', padding: '0.2rem 0.4rem' }}
-                />
-              )}
+            <div className="sf-divider" style={{ margin: '0.35rem 0' }} />
+            <div className={styles.filterRow}>
+              <label className={styles.filterLabel}>
+                <input type="checkbox" checked={tts.filters.excludeOwn} onChange={(e) => tts.setFilters({ ...tts.filters, excludeOwn: e.target.checked })} style={{ accentColor: '#7c3aed', cursor: 'pointer' }} />
+                {t('chat.ttsFilterOwn')}
+              </label>
+              <label className={styles.filterLabel}>
+                <input type="checkbox" checked={tts.filters.excludeLinks} onChange={(e) => tts.setFilters({ ...tts.filters, excludeLinks: e.target.checked })} style={{ accentColor: '#7c3aed', cursor: 'pointer' }} />
+                {t('chat.ttsFilterLinks')}
+              </label>
+              <label className={styles.filterLabel}>
+                <input type="checkbox" checked={tts.filters.excludeBots} onChange={(e) => tts.setFilters({ ...tts.filters, excludeBots: e.target.checked })} style={{ accentColor: '#7c3aed', cursor: 'pointer' }} />
+                {t('chat.ttsFilterBots')}
+              </label>
             </div>
+            {tts.filters.excludeBots && (
+              <input
+                type="text"
+                value={tts.filters.botNames}
+                onChange={(e) => tts.setFilters({ ...tts.filters, botNames: e.target.value })}
+                placeholder={t('chat.ttsBotPlaceholder')}
+                className="sf-input"
+                style={{ fontSize: '0.65rem', padding: '0.2rem 0.4rem' }}
+              />
+            )}
           </div>
         )}
       </div>
 
       {/* Greeting config */}
-      <div style={{
-        marginBottom: '0.5rem', padding: '0.6rem 0.75rem',
-        background: greetingEnabled ? 'rgba(16,185,129,0.06)' : 'transparent',
-        border: `1px solid ${greetingEnabled ? 'rgba(16,185,129,0.15)' : 'var(--sf-border)'}`,
-        borderRadius: 'var(--sf-radius-sm)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>
+      <div className={`${styles.greetingBox} ${greetingEnabled ? styles.greetingBoxEnabled : styles.greetingBoxDisabled}`}>
+        <div className="flex-between mb-1">
+          <div className="flex-row--gap-sm">
+            <span className="text-dim" style={{ fontSize: '0.7rem', fontWeight: 500 }}>
               {t('chat.greeting')}
             </span>
             <button
@@ -726,35 +597,21 @@ export function ChatPanel({ channel }: Props) {
                 setGreetingEnabled(next);
                 await apiPut('/chat/greeting-config', { channel, enabled: next });
               }}
-              style={{
-                width: 36, height: 18, borderRadius: 99,
-                background: greetingEnabled ? 'var(--sf-primary)' : 'var(--sf-border)',
-                border: 'none', cursor: 'pointer', position: 'relative',
-                transition: 'background 0.2s',
-              }}
+              className={`${styles.toggleTrack} ${greetingEnabled ? styles.toggleTrackOn : styles.toggleTrackOff}`}
             >
-              <span style={{
-                position: 'absolute', top: 2, left: greetingEnabled ? 18 : 2,
-                width: 14, height: 14, borderRadius: '50%',
-                background: '#fff', transition: 'left 0.2s',
-              }} />
+              <span className={styles.toggleThumb} style={{ left: greetingEnabled ? 18 : 2 }} />
             </button>
           </div>
           <button
             onClick={() => setGreetingOpen(!greetingOpen)}
-            style={{
-              background: 'none', border: 'none', color: 'var(--sf-text-3)',
-              cursor: 'pointer', fontSize: '0.65rem', fontFamily: 'inherit',
-              padding: '0.1rem 0.4rem', borderRadius: 4,
-              transition: 'transform 0.2s',
-              transform: greetingOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-            }}
+            className={styles.collapseArrow}
+            style={{ transform: greetingOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
           >▼</button>
         </div>
         {greetingOpen && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', minWidth: 44 }}>
+          <div className="flex-col--gap-sm">
+            <div className="flex-row--gap-sm">
+              <span className="text-dim" style={{ fontSize: '0.65rem', minWidth: 44 }}>
                 {t('chat.greetingMsg')}
               </span>
               <input
@@ -768,25 +625,19 @@ export function ChatPanel({ channel }: Props) {
               />
             </div>
             {greetingMessage.includes('{user}') && (
-              <div style={{
-                fontSize: '0.68rem', color: 'var(--sf-text-3)',
-                background: 'rgba(124,58,237,0.06)',
-                padding: '0.3rem 0.5rem', borderRadius: 4,
-              }}>
+              <div className={styles.greetingPreview}>
                 {t('chat.greetingPreview')}: <span style={{ color: '#a78bfa' }}>
                   {greetingMessage.replace(/\{user\}/g, '@' + (channel || 'usuario'))}
                 </span>
               </div>
             )}
-            <div style={{ fontSize: '0.62rem', color: 'var(--sf-text-3)', opacity: 0.6 }}>
-              {t('chat.greetingDelay')}
-            </div>
+            <div className={styles.greetingHint}>{t('chat.greetingDelay')}</div>
           </div>
         )}
       </div>
 
       {/* Input */}
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
+      <div className="flex-row--gap-sm">
         <input
           ref={inputRef}
           type="text"
@@ -809,22 +660,13 @@ export function ChatPanel({ channel }: Props) {
       </div>
 
       {/* Info bar */}
-      <div style={{
-        marginTop: '0.5rem', fontSize: '0.72rem', color: 'var(--sf-text-3)',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      }}>
+      <div className={styles.infoBar}>
         <span>{t('chat.conectadoA')} <strong style={{ color: 'var(--sf-text-2)' }}>#{channel || '—'}</strong></span>
         <span>{messages.length} {t('chat.mensajes')} · {connected ? '🟢' : '🔴'}</span>
       </div>
     </div>
   );
 }
-
-const btnMenuStyle: React.CSSProperties = {
-  background: 'none', border: 'none', color: 'var(--sf-text-3)',
-  cursor: 'pointer', padding: '0.15rem 0.35rem', borderRadius: 4,
-  fontSize: '0.72rem', lineHeight: 1,
-};
 
 function badgeIcon(badge: string): string {
   const map: Record<string, string> = {

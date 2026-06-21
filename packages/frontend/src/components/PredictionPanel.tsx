@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '../i18n/context';
 import { apiPost } from '../utils/api';
+import styles from './PredictionPanel.module.css';
 
 interface Props {
   channel: string;
@@ -56,24 +57,24 @@ export function PredictionPanel({ channel }: Props) {
   const canCreate = title.trim() && validOptions.length >= 2 && !!channel;
 
   return (
-    <div style={{ maxWidth: 600 }}>
+    <div className={styles.container}>
       {/* Header */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div className={styles.header}>
+        <h2 className={styles.heading}>
           {t('predictions.title')}
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
+        <p className={styles.subtitle}>
           {t('predictions.subtitle')}
         </p>
       </div>
 
-      <div className="glass-card" style={{ padding: '1.5rem' }}>
+      <div className={`glass-card ${styles.card}`}>
         <p className="sf-section-title">{t('predictions.nuevaPrediccion')}</p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.125rem' }}>
+        <div className={styles.formFields}>
           {/* Title */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
+            <label className={styles.fieldLabel}>
               {t('predictions.pregunta')}
             </label>
             <input
@@ -89,27 +90,21 @@ export function PredictionPanel({ channel }: Props) {
 
           {/* Options */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.5rem', fontWeight: 500 }}>
+            <label className={styles.fieldLabel}>
               {t('predictions.opciones')}
-              <span style={{ color: 'var(--sf-text-3)', fontWeight: 400, marginLeft: '0.4rem' }}>
+              <span className={styles.fieldHint}>
                 {t('predictions.opcionesHint')}
               </span>
             </label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div className={styles.optionsList}>
               {options.map((opt, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
-                  style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}
+                  className={styles.optionRow}
                 >
-                  <div style={{
-                    width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-                    background: 'rgba(124,58,237,0.15)',
-                    border: '1px solid rgba(124,58,237,0.3)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '0.72rem', fontWeight: 700, color: '#a78bfa',
-                  }}>
+                  <div className={styles.optionBadge}>
                     {String.fromCharCode(65 + i)}
                   </div>
                   <input
@@ -119,21 +114,13 @@ export function PredictionPanel({ channel }: Props) {
                     value={opt}
                     onChange={(e) => updateOption(i, e.target.value)}
                     disabled={!channel}
-                    className="sf-input"
-                    style={{ flex: 1 }}
+                    className={`sf-input ${styles.optionInput}`}
                   />
                   {options.length > 2 && (
                     <button
                       onClick={() => removeOption(i)}
                       disabled={!channel}
-                      style={{
-                        width: 28, height: 28, borderRadius: 6, border: '1px solid var(--sf-border)',
-                        background: 'transparent', color: 'var(--sf-text-3)', cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '0.875rem', flexShrink: 0, transition: 'all 0.15s',
-                      }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sf-danger)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--sf-danger)'; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--sf-text-3)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--sf-border)'; }}
+                      className={styles.removeBtn}
                     >
                       ✕
                     </button>
@@ -146,18 +133,7 @@ export function PredictionPanel({ channel }: Props) {
               <button
                 onClick={addOption}
                 disabled={!channel}
-                style={{
-                  marginTop: '0.625rem',
-                  fontSize: '0.8rem',
-                  color: 'var(--sf-primary-light)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  padding: '0.25rem 0',
-                  opacity: !channel ? 0.4 : 1,
-                  transition: 'opacity 0.15s',
-                }}
+                className={styles.addOptionBtn}
               >
                 {t('predictions.agregarOpcion')}
               </button>
@@ -169,8 +145,7 @@ export function PredictionPanel({ channel }: Props) {
             id="create-prediction-btn"
             onClick={createPrediction}
             disabled={!canCreate || loading}
-            className="sf-btn sf-btn-primary"
-            style={{ width: '100%', marginTop: '0.25rem' }}
+            className={`sf-btn sf-btn-primary ${styles.submitBtn}`}
           >
             {loading ? t('predictions.creando') : t('predictions.crear')}
           </button>
@@ -180,24 +155,16 @@ export function PredictionPanel({ channel }: Props) {
             <motion.div
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              style={{
-                padding: '0.625rem 1rem',
-                background: 'rgba(16,185,129,0.1)',
-                border: '1px solid rgba(16,185,129,0.2)',
-                borderRadius: 8,
-                fontSize: '0.82rem',
-                color: '#34d399',
-                textAlign: 'center',
-              }}
+              className={styles.successMsg}
             >
               {t('predictions.creada')}
             </motion.div>
           )}
           {message && message !== 'success' && (
-            <p style={{ fontSize: '0.8rem', color: 'var(--sf-warning)', textAlign: 'center' }}>{message}</p>
+            <p className={styles.warningMsg}>{message}</p>
           )}
           {!channel && (
-            <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', textAlign: 'center' }}>
+            <p className={styles.emptyChannel}>
               {t('predictions.emptyChannel')}
             </p>
           )}

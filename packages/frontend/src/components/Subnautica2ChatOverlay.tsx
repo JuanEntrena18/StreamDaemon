@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import type { ChatMessage } from '@streamforger/shared';
+import styles from './Subnautica2ChatOverlay.module.css';
 
 const MAX_MESSAGES = 30;
 
@@ -44,26 +45,16 @@ export function Subnautica2ChatOverlay({ channel }: Props) {
   }, []);
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        pointerEvents: 'none',
-        overflow: 'hidden',
-        fontFamily: "'Courier New', 'Courier', monospace",
-      }}
-    >
-      {/* ── Ambient particles ── */}
+    <div className={styles.container}>
       {particles.map((p) => (
         <motion.div
           key={p.id}
+          className={styles.particle}
           style={{
-            position: 'absolute',
             left: `${p.x}%`,
             bottom: '-10px',
             width: p.size,
             height: p.size,
-            borderRadius: '50%',
             background: `rgba(0, 212, 255, ${p.opacity})`,
             boxShadow: `0 0 ${p.size * 2}px rgba(0, 212, 255, 0.8)`,
           }}
@@ -77,27 +68,11 @@ export function Subnautica2ChatOverlay({ channel }: Props) {
         />
       ))}
 
-      {/* ── Depth sonar ring (bottom-left corner decoration) ── */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 20,
-          left: 20,
-          width: 80,
-          height: 80,
-          opacity: 0.15,
-          pointerEvents: 'none',
-        }}
-      >
+      <div className={styles.sonarRing}>
         {[1, 2, 3].map((i) => (
           <motion.div
             key={i}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: '50%',
-              border: '1px solid #00d4ff',
-            }}
+            className={styles.sonarCircle}
             animate={{ scale: [1, 2.5], opacity: [0.6, 0] }}
             transition={{
               duration: 3,
@@ -107,32 +82,13 @@ export function Subnautica2ChatOverlay({ channel }: Props) {
             }}
           />
         ))}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            borderRadius: '50%',
-            border: '1px solid #00d4ff',
-          }}
-        />
+        <div className={styles.sonarCircle} />
       </div>
 
-      {/* ── Corner scanner brackets ── */}
       <ScannerBracket position="bottom-left" />
       <ScannerBracket position="bottom-right" />
 
-      {/* ── Chat messages ── */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 60,
-          left: 40,
-          width: 520,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-        }}
-      >
+      <div className={styles.chatArea}>
         <AnimatePresence initial={false}>
           {messages.map((msg) => (
             <motion.div
@@ -141,91 +97,51 @@ export function Subnautica2ChatOverlay({ channel }: Props) {
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
+              className={styles.msgBubble}
               style={{
                 background: `rgba(0, 10, 20, var(--bg-alpha,0.82))`,
-                backdropFilter: 'blur(8px)',
                 border: '1px solid rgba(0, 212, 255, 0.35)',
                 borderLeft: '3px solid #00d4ff',
-                borderRadius: '0 8px 8px 0',
-                padding: '8px 14px',
                 boxShadow: '0 0 20px rgba(0, 212, 255, 0.1), inset 0 0 20px rgba(0, 50, 80, 0.3)',
-                position: 'relative',
-                overflow: 'hidden',
               }}
             >
-              {/* Scanline shimmer */}
               <motion.div
+                className={styles.scanline}
                 style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background:
-                    'linear-gradient(transparent 40%, rgba(0,212,255,0.04) 50%, transparent 60%)',
-                  backgroundSize: '100% 4px',
+                  background: 'linear-gradient(transparent 40%, rgba(0,212,255,0.04) 50%, transparent 60%)',
                 }}
                 animate={{ backgroundPositionY: ['0px', '200px'] }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
               />
 
-              {/* Username label */}
               <div
+                className={styles.msgUsername}
                 style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
                   color: msg.user.color ?? '#00d4ff',
                   textShadow: `0 0 8px ${msg.user.color ?? '#00d4ff'}`,
-                  marginBottom: 3,
                 }}
               >
                 ▶ {msg.user.displayName}
               </div>
 
-              {/* Message text */}
-              <div
-                style={{
-                  fontSize: '0.85rem',
-                  color: 'rgba(200, 240, 255, 0.92)',
-                  lineHeight: 1.45,
-                  wordBreak: 'break-word',
-                }}
-              >
+              <div className={styles.msgText}>
                 {msg.text}
               </div>
 
-              {/* Bottom data bar */}
-              <div
-                style={{
-                  marginTop: 4,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  opacity: 0.4,
-                }}
-              >
-                <div
-                  style={{
-                    height: 1,
-                    flex: 1,
-                    background: 'linear-gradient(to right, #00d4ff, transparent)',
-                  }}
-                />
-                <span style={{ fontSize: '0.6rem', color: '#00ff88', letterSpacing: '0.1em' }}>
-                  SYS:OK
-                </span>
+              <div className={styles.dataBar}>
+                <div className={styles.dataLine} />
+                <span className={styles.dataLabel}>SYS:OK</span>
               </div>
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
 
-      {/* ── HUD header ── */}
       <HudHeader />
     </div>
   );
 }
 
-/** Corner scanner bracket decoration */
 function ScannerBracket({ position }: { position: 'bottom-left' | 'bottom-right' }) {
   const isRight = position === 'bottom-right';
   const size = 18;
@@ -234,16 +150,9 @@ function ScannerBracket({ position }: { position: 'bottom-left' | 'bottom-right'
 
   return (
     <div
-      style={{
-        position: 'absolute',
-        bottom: 35,
-        ...(isRight ? { right: 35 } : { left: 35 }),
-        width: size * 3,
-        height: size * 3,
-        pointerEvents: 'none',
-      }}
+      className={styles.scannerBracket}
+      style={{ ...(isRight ? { right: 35 } : { left: 35 }) }}
     >
-      {/* Corner L shape */}
       <div style={{ position: 'absolute', bottom: 0, ...(isRight ? { right: 0 } : { left: 0 }) }}>
         <div
           style={{
@@ -279,76 +188,29 @@ function HudHeader() {
   }, []);
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: 20,
-        left: 40,
-        right: 40,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        pointerEvents: 'none',
-      }}
-    >
-      {/* Left cluster */}
+    <div className={styles.headerBar}>
       <div
+        className={styles.leftCluster}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
           background: `rgba(0,10,20,var(--bg-alpha,0.7))`,
           border: '1px solid rgba(0,212,255,0.25)',
-          borderRadius: 4,
-          padding: '5px 12px',
-          backdropFilter: 'blur(6px)',
         }}
       >
         <motion.div
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: '50%',
-            background: '#00ff88',
-            boxShadow: '0 0 8px #00ff88',
-          }}
+          className={styles.liveDot}
           animate={{ opacity: [1, 0.3, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
-        <span
-          style={{
-            fontSize: '0.65rem',
-            fontWeight: 700,
-            letterSpacing: '0.12em',
-            color: '#00d4ff',
-            textTransform: 'uppercase',
-          }}
-        >
-          SUBNAUTICA II · STREAM LIVE
-        </span>
+        <span className={styles.liveText}>SUBNAUTICA II · STREAM LIVE</span>
       </div>
 
-      {/* Spacer */}
-      <div
-        style={{
-          flex: 1,
-          height: 1,
-          background: 'linear-gradient(to right, rgba(0,212,255,0.3), transparent)',
-        }}
-      />
+      <div className={styles.spacer} />
 
-      {/* Clock */}
       <div
+        className={styles.clockBox}
         style={{
           background: `rgba(0,10,20,var(--bg-alpha,0.7))`,
           border: '1px solid rgba(0,212,255,0.25)',
-          borderRadius: 4,
-          padding: '5px 12px',
-          backdropFilter: 'blur(6px)',
-          fontSize: '0.65rem',
-          color: '#00ff88',
-          letterSpacing: '0.12em',
-          fontWeight: 700,
         }}
       >
         {time}

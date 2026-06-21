@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiGet, apiPut } from '../utils/api';
 import { useTranslation } from '../i18n/context';
+import styles from './ObsPanel.module.css';
 
 interface Props {
   channel: string;
@@ -984,66 +985,48 @@ export function ObsPanel({ channel, backendUrl }: Props) {
 
     return (
       <div key={item.id}>
-        <div
-          className="glass-card"
-          style={{ padding: '1.25rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}
-        >
-          <div style={{
-            width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+        <div className={`glass-card ${styles.overlayCard}`}>
+          <div className={styles.iconBox} style={{
             background: `${item.color}22`,
             border: `1px solid ${item.color}44`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.25rem',
           }}>
             {item.icon}
           </div>
 
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-              <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--sf-text)' }}>{t(item.labelKey)}</span>
+          <div className={styles.cardContent}>
+            <div className="flex-row flex-row--gap-sm mb-2">
+              <span className={styles.cardTitle}>{t(item.labelKey)}</span>
               {item.supportsTheme && selectedTheme && (
-                <span className="sf-badge sf-badge-violet" style={{ fontSize: '0.6rem' }}>
+                <span className="sf-badge sf-badge-violet text-xs">
                   {t(THEMES.find((th) => th.id === selectedTheme)?.labelKey ?? '')}
                 </span>
               )}
             </div>
-            <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '0.625rem' }}>
+            <p className={styles.cardDesc}>
               {t(item.descKey)}
             </p>
             {item.id === 'custom' && (
-              <div style={{ marginBottom: '0.5rem' }}>
+              <div className="mb-2">
                 <input
                   id="custom-game-input"
                   type="text"
                   value={customGame}
                   onChange={(e) => setCustomGame(e.target.value)}
                   placeholder="Nombre del juego (opcional)"
-                  className="sf-input"
-                  style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem', maxWidth: 280 }}
+                  className={`sf-input ${styles.customInput}`}
                 />
               </div>
             )}
-            <code style={{
-              fontSize: '0.72rem',
-              color: 'var(--sf-text-2)',
-              background: 'rgba(0,0,0,0.3)',
-              padding: '0.3rem 0.6rem',
-              borderRadius: 6,
-              display: 'block',
-              overflowX: 'auto',
-              whiteSpace: 'nowrap',
-              border: '1px solid var(--sf-border)',
-            }}>
+            <code className={styles.codeBlock}>
               {url}
             </code>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flexShrink: 0 }}>
+          <div className={styles.cardActions}>
             <button
               id={`copy-${item.id}`}
               onClick={() => copyToClipboard(item.id, url)}
-              className={`sf-btn ${isCopied ? 'sf-btn-ghost' : 'sf-btn-primary'}`}
-              style={{ minWidth: 90, fontSize: '0.78rem', padding: '0.45rem 0.875rem' }}
+              className={`sf-btn ${isCopied ? 'sf-btn-ghost' : 'sf-btn-primary'} ${styles.copyBtn}`}
             >
               {isCopied ? t('obs.copiado') : t('obs.copiar')}
             </button>
@@ -1052,22 +1035,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
               <button
                 id="social-configure-btn"
                 onClick={() => setSocialExpanded((v) => !v)}
-                style={{
-                  padding: '0.45rem 0.875rem',
-                  borderRadius: 'var(--sf-radius-sm)',
-                  border: `1px solid ${socialExpanded ? item.color + '88' : 'var(--sf-border)'}`,
-                  background: socialExpanded ? `${item.color}18` : 'transparent',
-                  color: socialExpanded ? '#22d3ee' : 'var(--sf-text-3)',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  transition: 'all 0.15s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  justifyContent: 'center',
-                }}
+                className={socialExpanded ? styles.configureBtnSocial : styles.configureBtnInactive}
               >
                 {socialExpanded ? '▲' : '▼'} {t('obs.configurar')}
               </button>
@@ -1077,22 +1045,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
               <button
                 id={`endsocial-configure-btn-${item.id}`}
                 onClick={() => setEndSocialExpanded(endSocialExpanded === item.id ? null : item.id)}
-                style={{
-                  padding: '0.45rem 0.875rem',
-                  borderRadius: 'var(--sf-radius-sm)',
-                  border: `1px solid ${endSocialExpanded === item.id ? '#10b98188' : 'var(--sf-border)'}`,
-                  background: endSocialExpanded === item.id ? 'rgba(16,185,129,0.1)' : 'transparent',
-                  color: endSocialExpanded === item.id ? '#34d399' : 'var(--sf-text-3)',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  transition: 'all 0.15s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  justifyContent: 'center',
-                }}
+                className={endSocialExpanded === item.id ? styles.configureBtnEnd : styles.configureBtnInactive}
               >
                 {endSocialExpanded === item.id ? '▲' : '▼'} {t('obs.configurar')}
               </button>
@@ -1108,62 +1061,46 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.22, ease: 'easeOut' }}
-                style={{ overflow: 'hidden' }}
+                className={styles.expandSection}
               >
-                <div
-                  style={{
-                    marginTop: 4,
-                    padding: '1.25rem',
-                    background: 'rgba(16,185,129,0.04)',
-                    border: '1px solid rgba(16,185,129,0.15)',
-                    borderTop: 'none',
-                    borderRadius: '0 0 var(--sf-radius) var(--sf-radius)',
-                  }}
-                >
-                  <p className="sf-section-title" style={{ marginBottom: '1rem', color: '#34d399' }}>
+                <div className={styles.expandContentEnd}>
+                  <p className={styles.sectionTitleEnd}>
                     Redes Sociales · Pantalla de Despedida
                   </p>
-                  <p style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '1rem', lineHeight: 1.5 }}>
+                  <p className={styles.socialHelp}>
                     Ingresa tu nombre de usuario en cada red y desactiva las que no quieras mostrar.
                   </p>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                  <div className="flex-col flex-col--gap-sm">
                     {endScreenSocials.map((social, idx) => (
-                      <div key={social.platform} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div key={social.platform} className={styles.endSocialRow}>
                         <button
                           onClick={() => {
                             const next = [...endScreenSocials];
                             next[idx] = { ...next[idx], visible: !next[idx].visible };
                             setEndScreenSocials(next);
                           }}
-                          style={{
-                            width: 22, height: 22, borderRadius: 4, flexShrink: 0, cursor: 'pointer',
-                            background: social.visible ? `${social.color}44` : 'transparent',
-                            border: `2px solid ${social.visible ? social.color : 'var(--sf-border)'}`,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '0.65rem', color: social.visible ? '#fff' : 'transparent',
-                            transition: 'all 0.15s ease', fontFamily: 'inherit',
+                          className={social.visible ? styles.checkboxBtnChecked : styles.checkboxBtnUnchecked}
+                          style={social.visible ? {
+                            background: `${social.color}44`,
+                            border: `2px solid ${social.color}`,
+                            color: '#fff',
+                          } : {
+                            border: `2px solid var(--sf-border)`,
                           }}
                           title={social.visible ? 'Ocultar' : 'Mostrar'}
                         >
                           {social.visible ? '✓' : ''}
                         </button>
 
-                        <div style={{
-                          width: 32, height: 32, borderRadius: 8,
+                        <div className={styles.endSocialIconBox} style={{
                           background: `${social.color}22`,
                           border: `1px solid ${social.color}44`,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: '1rem', flexShrink: 0,
                         }}>
                           {social.icon}
                         </div>
 
-                        <span style={{
-                          fontSize: '0.78rem', fontWeight: 600,
-                          color: social.visible ? 'var(--sf-text-2)' : 'var(--sf-text-3)',
-                          width: 100, flexShrink: 0,
-                        }}>
+                        <span className={social.visible ? styles.endSocialLabelVisible : styles.endSocialLabelHidden}>
                           {social.label}
                         </span>
 
@@ -1176,8 +1113,8 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                             setEndScreenSocials(next);
                           }}
                           placeholder="@tu_usuario"
-                          className="sf-input"
-                          style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem', opacity: social.visible ? 1 : 0.4 }}
+                          className={`sf-input ${styles.endSocialInput}`}
+                          style={{ opacity: social.visible ? 1 : 0.4 }}
                         />
                       </div>
                     ))}
@@ -1196,39 +1133,24 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.22, ease: 'easeOut' }}
-                style={{ overflow: 'hidden' }}
+                className={styles.expandSection}
               >
-                <div
-                  style={{
-                    marginTop: 4,
-                    padding: '1.25rem',
-                    background: 'rgba(6,182,212,0.04)',
-                    border: '1px solid rgba(6,182,212,0.15)',
-                    borderTop: 'none',
-                    borderRadius: '0 0 var(--sf-radius) var(--sf-radius)',
-                  }}
-                >
-                  <p className="sf-section-title" style={{ marginBottom: '1rem', color: '#22d3ee' }}>
+                <div className={styles.expandContentSocial}>
+                  <p className={styles.sectionTitleSocial}>
                     {t('obs.socialUrls')}
                   </p>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                  <div className="flex-col flex-col--gap-sm">
                     {socialLinks.map((link) => (
-                      <div key={link.platform} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div style={{
-                          width: 32, height: 32, borderRadius: 8,
+                      <div key={link.platform} className={styles.socialRow}>
+                        <div className={styles.socialIconBox} style={{
                           background: `${link.color}22`,
                           border: `1px solid ${link.color}44`,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: '1rem', flexShrink: 0,
                         }}>
                           {link.icon}
                         </div>
 
-                        <span style={{
-                          fontSize: '0.78rem', fontWeight: 600,
-                          color: 'var(--sf-text-2)', width: 90, flexShrink: 0,
-                        }}>
+                        <span className={styles.socialLabel}>
                           {t(link.labelKey)}
                         </span>
 
@@ -1238,21 +1160,15 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                           value={link.url}
                           onChange={(e) => updateSocialLink(link.platform, e.target.value)}
                           placeholder={t(link.placeholderKey)}
-                          className="sf-input"
-                          style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem' }}
+                          className={`sf-input ${styles.socialInput}`}
                         />
 
-                        <div style={{
-                          width: 8, height: 8, borderRadius: '50%',
-                          background: link.url.trim() ? '#10b981' : 'var(--sf-border)',
-                          boxShadow: link.url.trim() ? '0 0 6px #10b981' : 'none',
-                          flexShrink: 0, transition: 'all 0.2s ease',
-                        }} />
+                        <div className={link.url.trim() ? styles.statusDotActive : styles.statusDotInactive} />
                       </div>
                     ))}
                   </div>
 
-                  <p style={{ marginTop: '1rem', fontSize: '0.72rem', color: 'var(--sf-text-3)', lineHeight: 1.5 }}>
+                  <p className={styles.socialHelp}>
                     {t('obs.socialHelp')}<span style={{ color: '#10b981' }}>●</span>) se incluirán en la URL del overlay.
                   </p>
                 </div>
@@ -1265,41 +1181,29 @@ export function ObsPanel({ channel, backendUrl }: Props) {
   }
 
   return (
-    <div style={{ maxWidth: 720 }}>
+    <div className={styles.container}>
       {/* Header */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
+      <div className="mb-5">
+        <h2 className="sf-heading">
           {t('obs.obsTitle')}
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+        <p className="text-sm text-muted" style={{ lineHeight: 1.6 }}>
           {t('obs.obsInstructions')} <strong style={{ color: 'var(--sf-text)' }}>{t('obs.browserSource')}</strong>.
-          {' '}          {t('obs.resolucionRecomendada')} <code style={{ background: 'rgba(124,58,237,0.15)', padding: '0.1rem 0.4rem', borderRadius: 4, color: '#a78bfa' }}>1920×1080</code> / <code style={{ background: 'rgba(6,182,212,0.15)', padding: '0.1rem 0.4rem', borderRadius: 4, color: '#22d3ee' }}>1080×1920</code>
+          {' '}{t('obs.resolucionRecomendada')} <code style={{ background: 'rgba(124,58,237,0.15)', padding: '0.1rem 0.4rem', borderRadius: 4, color: '#a78bfa' }}>1920×1080</code> / <code style={{ background: 'rgba(6,182,212,0.15)', padding: '0.1rem 0.4rem', borderRadius: 4, color: '#22d3ee' }}>1080×1920</code>
         </p>
       </div>
 
       {/* Theme selector */}
-      <div className="glass-card" style={{ padding: '1rem 1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--sf-text-2)', whiteSpace: 'nowrap' }}>
+      <div className="glass-card flex-row flex-row--gap-lg mb-5" style={{ padding: '1rem 1.25rem' }}>
+        <span className="text-sm" style={{ fontWeight: 600, color: 'var(--sf-text-2)', whiteSpace: 'nowrap' }}>
           {t('obs.temaVisual')}
         </span>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div className="flex-wrap">
           {THEMES.map((theme) => (
             <button
               key={theme.id}
               onClick={() => setSelectedTheme(theme.id)}
-              style={{
-                padding: '0.3rem 0.75rem',
-                borderRadius: 99,
-                border: '1px solid',
-                borderColor: selectedTheme === theme.id ? 'var(--sf-primary)' : 'var(--sf-border)',
-                background: selectedTheme === theme.id ? 'rgba(124,58,237,0.2)' : 'transparent',
-                color: selectedTheme === theme.id ? '#a78bfa' : 'var(--sf-text-3)',
-                fontSize: '0.78rem',
-                fontWeight: selectedTheme === theme.id ? 600 : 400,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-                transition: 'all 0.15s ease',
-              }}
+              className={`sf-pill-selector__pill ${selectedTheme === theme.id ? 'sf-pill-selector__pill--active' : ''}`}
             >
               {t(theme.labelKey)}
             </button>
@@ -1308,11 +1212,11 @@ export function ObsPanel({ channel, backendUrl }: Props) {
       </div>
 
       {/* Orientation selector */}
-      <div className="glass-card" style={{ padding: '0.75rem 1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--sf-text-2)', whiteSpace: 'nowrap' }}>
+      <div className="glass-card flex-row flex-row--gap-lg mb-5" style={{ padding: '0.75rem 1.25rem' }}>
+        <span className="text-sm" style={{ fontWeight: 600, color: 'var(--sf-text-2)', whiteSpace: 'nowrap' }}>
           {t('obs.orientacion')}
         </span>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="flex-row flex-row--gap-sm">
           {[
             { id: 'all', labelKey: 'obs.orientationAll' },
             { id: 'horizontal', labelKey: 'obs.orientationHorizontal' },
@@ -1321,19 +1225,12 @@ export function ObsPanel({ channel, backendUrl }: Props) {
             <button
               key={o.id}
               onClick={() => setOrientation(o.id as any)}
-              style={{
-                padding: '0.3rem 0.75rem',
-                borderRadius: 99,
-                border: '1px solid',
-                borderColor: orientation === o.id ? '#22d3ee' : 'var(--sf-border)',
-                background: orientation === o.id ? 'rgba(6,182,212,0.15)' : 'transparent',
-                color: orientation === o.id ? '#22d3ee' : 'var(--sf-text-3)',
-                fontSize: '0.78rem',
-                fontWeight: orientation === o.id ? 600 : 400,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-                transition: 'all 0.15s ease',
-              }}
+              className={`sf-pill-selector__pill ${orientation === o.id ? 'sf-pill-selector__pill--active' : ''}`}
+              style={orientation === o.id ? {
+                borderColor: '#22d3ee',
+                background: 'rgba(6,182,212,0.15)',
+                color: '#22d3ee',
+              } : {}}
             >
               {t(o.labelKey)}
             </button>
@@ -1342,7 +1239,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
       </div>
 
       {/* URL Cards */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+      <div className="flex-col flex-col--gap-md">
         {(() => {
           const filtered = OBS_URLS.filter((item) => {
             if (selectedTheme === 'fortnite') return item.id === 'fortnite' || item.id === 'fortnite-alerts' || item.id === 'fortnite-vertical' || item.id === 'fortnite-alerts-vertical';
@@ -1354,9 +1251,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
             if (selectedTheme === 'win95') return item.id.startsWith('win95-');
             if (selectedTheme === 'retrowave') return item.id.startsWith('retrowave-');
             if (selectedTheme === 'tactical') return item.id.startsWith('tactical-');
-            // Always show vertical items regardless of theme selection
             if (item.id.endsWith('-vertical')) return true;
-            // When no theme is selected, hide theme-specific overlays
             if (item.id.startsWith('dj-')) return false;
             if (item.id.startsWith('wow-alliance-')) return false;
             if (item.id.startsWith('wow-horde-')) return false;
@@ -1378,18 +1273,18 @@ export function ObsPanel({ channel, backendUrl }: Props) {
             <>
               {hItems.length > 0 && (
                 <>
-                  <div className="glass-card" style={{ padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(124,58,237,0.06)', borderColor: 'rgba(124,58,237,0.15)' }}>
-                    <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--sf-text)' }}>{t('obs.orientationHorizontal')}</span>
-                    <code style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', borderRadius: 4, background: 'rgba(124,58,237,0.1)', color: '#a78bfa' }}>1920×1080</code>
+                  <div className={`glass-card ${styles.sectionDividerHorizontal}`}>
+                    <span className={styles.sectionDividerLabel}>{t('obs.orientationHorizontal')}</span>
+                    <code className={styles.sectionDividerCodeHorizontal}>1920×1080</code>
                   </div>
                   {hItems.map((item) => renderOverlayCard(item))}
                 </>
               )}
               {vItems.length > 0 && (
                 <>
-                  <div className="glass-card" style={{ padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(6,182,212,0.06)', borderColor: 'rgba(6,182,212,0.15)' }}>
-                    <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--sf-text)' }}>{t('obs.orientationVertical')}</span>
-                    <code style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', borderRadius: 4, background: 'rgba(6,182,212,0.1)', color: '#22d3ee' }}>1080×1920</code>
+                  <div className={`glass-card ${styles.sectionDividerVertical}`}>
+                    <span className={styles.sectionDividerLabel}>{t('obs.orientationVertical')}</span>
+                    <code className={styles.sectionDividerCodeVertical}>1080×1920</code>
                   </div>
                   {vItems.map((item) => renderOverlayCard(item))}
                 </>
@@ -1399,36 +1294,28 @@ export function ObsPanel({ channel, backendUrl }: Props) {
         })()}
       </div>
 
-
-
       {/* Fortnite config */}
       {selectedTheme === 'fortnite' && (
-        <div className="glass-card" style={{ marginTop: '1.5rem', padding: '1.25rem' }}>
-          <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="glass-card sf-card--tight" style={{ marginTop: '1.5rem' }}>
+          <h4 className="flex-row flex-row--gap-sm mb-3" style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--sf-text)' }}>
             {t('obs.fortniteTitle')}
           </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div className="flex-col flex-col--gap-md">
             {/* API Key */}
             <div>
-              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <label className={styles.fnConfigLabel}>
                 {t('obs.apiKeyLabel')}
-                <span style={{
-                  fontSize: '0.6rem', fontWeight: 600, padding: '1px 6px', borderRadius: 4,
-                  color: fnHasKey ? '#34d399' : '#ef4444',
-                  background: fnHasKey ? 'rgba(52,211,153,0.12)' : 'rgba(239,68,68,0.12)',
-                  border: `1px solid ${fnHasKey ? 'rgba(52,211,153,0.3)' : 'rgba(239,68,68,0.3)'}`,
-                }}>
+                <span className={fnHasKey ? styles.fnBadgeReady : styles.fnBadgeMissing}>
                   {fnHasKey ? t('obs.configurada') : t('obs.sinKey')}
                 </span>
               </label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div className="flex-row flex-row--gap-sm">
                 <input
                   type={showFnApiKey ? 'text' : 'password'}
                   value={fnEditingKey ? fnApiKey : (fnHasKey ? '••••••••' : '')}
                   onChange={(e) => { setFnEditingKey(true); setFnApiKey(e.target.value); }}
                   placeholder={fnHasKey ? t('obs.cambiarKey') : t('obs.ingresarKey')}
-                  className="sf-input"
-                  style={{ flex: 1, fontSize: '0.78rem' }}
+                  className="sf-input flex-1 text-xs"
                 />
                 <button
                   onClick={() => setShowFnApiKey(!showFnApiKey)}
@@ -1443,7 +1330,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
             </div>
             {/* Epic Username */}
             <div>
-              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
+              <label className={styles.fnConfigBlockLabel}>
                 {t('obs.usuarioEpic')}
               </label>
               <input
@@ -1451,38 +1338,31 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                 value={fnEpicUsername}
                 onChange={(e) => setFnEpicUsername(e.target.value)}
                 placeholder={t('obs.epicPlaceholder')}
-                className="sf-input"
-                style={{ width: '100%', fontSize: '0.78rem' }}
+                className="sf-input w-full text-xs"
               />
             </div>
             {/* Mode selector */}
             <div>
-              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
+              <label className={styles.fnConfigBlockLabel}>
                 {t('obs.modoEstadisticas')}
               </label>
-              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+              <div className="flex-wrap" style={{ gap: '0.35rem' }}>
                 {['overall', 'solo', 'duo', 'trio', 'squad'].map((m) => (
                   <button
                     key={m}
                     onClick={() => setFnStatsMode(m)}
-                    style={{
-                      padding: '0.25rem 0.75rem', borderRadius: 99, border: '1px solid',
-                      borderColor: fnStatsMode === m ? 'var(--sf-primary)' : 'var(--sf-border)',
-                      background: fnStatsMode === m ? 'rgba(124,58,237,0.2)' : 'transparent',
-                      color: fnStatsMode === m ? '#a78bfa' : 'var(--sf-text-3)',
-                      fontSize: '0.75rem', fontWeight: fnStatsMode === m ? 600 : 400,
-                      cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase',
-                    }}
+                    className={`sf-pill-selector__pill ${fnStatsMode === m ? 'sf-pill-selector__pill--active' : ''}`}
+                    style={{ textTransform: 'uppercase', fontSize: '0.75rem' }}
                   >{m}</button>
                 ))}
               </div>
             </div>
             {/* Layout selector */}
             <div>
-              <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
+              <label className={styles.fnConfigBlockLabel}>
                 {t('obs.disenoOverlay')}
               </label>
-              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+              <div className="flex-wrap" style={{ gap: '0.35rem' }}>
                 {[
                   { value: 'stats', labelKey: 'obs.layoutSoloStats' },
                   { value: 'chat-left', labelKey: 'obs.layoutChatIzquierda' },
@@ -1491,40 +1371,24 @@ export function ObsPanel({ channel, backendUrl }: Props) {
                   <button
                     key={o.value}
                     onClick={() => setFnLayout(o.value)}
-                    style={{
-                      padding: '0.25rem 0.75rem', borderRadius: 99, border: '1px solid',
-                      borderColor: fnLayout === o.value ? 'var(--sf-primary)' : 'var(--sf-border)',
-                      background: fnLayout === o.value ? 'rgba(124,58,237,0.2)' : 'transparent',
-                      color: fnLayout === o.value ? '#a78bfa' : 'var(--sf-text-3)',
-                      fontSize: '0.75rem', fontWeight: fnLayout === o.value ? 600 : 400,
-                      cursor: 'pointer', fontFamily: 'inherit',
-                    }}
+                    className={`sf-pill-selector__pill ${fnLayout === o.value ? 'sf-pill-selector__pill--active' : ''}`}
                   >{t(o.labelKey)}</button>
                 ))}
               </div>
             </div>
             {/* Save */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <button onClick={saveFnConfig} className="sf-btn sf-btn-primary" style={{ fontSize: '0.78rem', padding: '0.4rem 1rem' }}>
+            <div className="flex-row flex-row--gap-md">
+              <button onClick={saveFnConfig} className={`sf-btn sf-btn-primary ${styles.fnSaveBtn}`}>
                 {t('obs.guardarConfig')}
               </button>
-              {fnSaved && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>{t('obs.guardadoConfig')}</span>}
+              {fnSaved && <span className={styles.fnSavedText}>{t('obs.guardadoConfig')}</span>}
             </div>
           </div>
         </div>
       )}
 
       {/* Help note */}
-      <div style={{
-        marginTop: '1.5rem',
-        padding: '1rem 1.25rem',
-        background: 'rgba(6,182,212,0.06)',
-        border: '1px solid rgba(6,182,212,0.15)',
-        borderRadius: 'var(--sf-radius)',
-        fontSize: '0.8rem',
-        color: 'var(--sf-text-2)',
-        lineHeight: 1.6,
-      }}>
+      <div className={styles.helpNote}>
         <strong style={{ color: '#22d3ee' }}>{t('obs.tip')}</strong> {t('obs.obsTip')}
       </div>
     </div>

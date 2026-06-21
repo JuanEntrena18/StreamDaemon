@@ -3,6 +3,7 @@ import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import type { TimerState } from '@streamforger/shared';
+import styles from './TimerPanel.module.css';
 
 interface Props {
   channel: string;
@@ -77,46 +78,38 @@ export function TimerPanel({ channel, backendUrl }: Props) {
   const progress = timer.duration > 0 ? remaining / timer.duration : 0;
 
   return (
-    <div style={{ maxWidth: 600 }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={styles.heading}>
           {t('timer.title')}
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
+        <p className={styles.subtitle}>
           {t('timer.subtitle')}
         </p>
       </div>
 
       {/* Timer display */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem', textAlign: 'center' }}>
-        <div style={{
-          fontSize: '3.5rem', fontWeight: 800, color: 'var(--sf-text)',
-          fontVariantNumeric: 'tabular-nums', lineHeight: 1.1,
-          marginBottom: '0.5rem',
-        }}>
+      <div className={`glass-card ${styles.timerDisplay}`}>
+        <div className={styles.timeText}>
           {isFinished ? '00:00' : formatTime(remaining)}
         </div>
 
         {timer.label && (
-          <div style={{ fontSize: '0.85rem', color: 'var(--sf-text-2)', marginBottom: '0.75rem' }}>
+          <div className={styles.timerLabel}>
             {timer.label}
           </div>
         )}
 
         {isActive && (
-          <div style={{
-            width: '100%', height: 4, borderRadius: 99, overflow: 'hidden',
-            background: 'rgba(255,255,255,0.08)', marginBottom: '0.75rem',
-          }}>
-            <div style={{
-              width: `${progress * 100}%`, height: '100%',
-              background: remaining <= 30 ? '#ef4444' : '#a78bfa',
-              borderRadius: 99, transition: 'width 1s linear',
-            }} />
+          <div className={styles.progressTrack}>
+            <div
+              className={`${styles.progressFill} ${remaining <= 30 ? styles['progressFill--urgent'] : styles['progressFill--normal']}`}
+              style={{ width: `${progress * 100}%` }}
+            />
           </div>
         )}
 
-        <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '1rem' }}>
+        <div className={styles.timerStatus}>
           {isRunning && t('timer.corriendo')}
           {isPaused && t('timer.pausado')}
           {isFinished && t('timer.tiempoCumplido')}
@@ -124,18 +117,14 @@ export function TimerPanel({ channel, backendUrl }: Props) {
         </div>
 
         {/* Controls */}
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div className={styles.controls}>
           {!isActive && !isFinished && (
             <button onClick={start} className="sf-btn sf-btn-primary" style={{ fontSize: '0.85rem' }}>
               {t('timer.iniciar')}
             </button>
           )}
           {isRunning && (
-            <button onClick={pause} className="sf-btn" style={{
-              fontSize: '0.85rem',
-              background: 'rgba(245,158,11,0.15)', color: '#fbbf24',
-              border: '1px solid rgba(245,158,11,0.3)',
-            }}>
+            <button onClick={pause} className={`sf-btn ${styles.pauseBtn}`}>
               {t('timer.pausar')}
             </button>
           )}
@@ -154,49 +143,40 @@ export function TimerPanel({ channel, backendUrl }: Props) {
 
       {/* New timer config */}
       {!isActive && (
-        <div className="glass-card" style={{ padding: '1.5rem' }}>
+        <div className={`glass-card ${styles.configCard}`}>
           <p className="sf-section-title">{t('timer.nuevoTimer')}</p>
 
           {/* Duration presets */}
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.4rem', display: 'block' }}>
+          <div className="mb-4">
+            <label className={styles.durationLabel}>
               {t('timer.duracion')}
             </label>
-            <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
+            <div className={styles.durationPresets}>
               {DURATION_PRESETS.map((p) => (
                 <button
                   key={p.value}
                   onClick={() => { setDuration(p.value); setCustomMinutes(''); }}
-                  className="sf-btn"
-                  style={{
-                    fontSize: '0.75rem', padding: '0.35rem 0.7rem',
-                    background: duration === p.value && !customMinutes
-                      ? 'var(--sf-primary)' : 'var(--sf-surface-hover)',
-                    color: duration === p.value && !customMinutes ? '#fff' : 'var(--sf-text-2)',
-                    border: duration === p.value && !customMinutes
-                      ? '1px solid var(--sf-primary)' : '1px solid var(--sf-border)',
-                  }}
+                  className={`sf-btn ${styles.presetBtn} ${duration === p.value && !customMinutes ? styles['presetBtn--active'] : styles['presetBtn--inactive']}`}
                 >
                   {p.label}
                 </button>
               ))}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div className="flex-row" style={{ gap: 4 }}>
                   <input
                     type="number" min="1"
                     placeholder={t('timer.min')}
                     value={customMinutes}
                     onChange={(e) => { setCustomMinutes(e.target.value); }}
-                    className="sf-input"
-                    style={{ width: 60, fontSize: '0.75rem', padding: '0.35rem 0.5rem' }}
+                    className={`sf-input ${styles.customInput}`}
                   />
-                  <span style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)' }}>{t('timer.min')}</span>
+                  <span className={styles.customSuffix}>{t('timer.min')}</span>
               </div>
             </div>
           </div>
 
           {/* Label */}
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.4rem', display: 'block' }}>
+          <div className="mb-4">
+            <label className={styles.durationLabel}>
               {t('timer.etiqueta')}
             </label>
             <input
@@ -204,8 +184,7 @@ export function TimerPanel({ channel, backendUrl }: Props) {
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder={t('timer.etiquetaPlaceholder')}
-              className="sf-input"
-              style={{ maxWidth: 300 }}
+              className={`sf-input ${styles.labelInput}`}
             />
           </div>
 
@@ -216,14 +195,12 @@ export function TimerPanel({ channel, backendUrl }: Props) {
       )}
 
       {/* Overlay URL */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginTop: '1.25rem' }}>
+      <div className={`glass-card ${styles.overlayCard}`}>
         <p className="sf-section-title">{t('timer.overlayUrl')}</p>
-        <div style={{
-          padding: '0.75rem 1rem', borderRadius: 6,
-          background: 'rgba(0,0,0,0.3)', border: '1px solid var(--sf-border)',
-          fontSize: '0.78rem', fontFamily: 'monospace', color: '#a78bfa',
-          wordBreak: 'break-all',
-        }}>
+        <p className="text-sm text-muted mb-2">
+          Agregá esta URL como Browser Source en OBS:
+        </p>
+        <div className={styles.urlBox}>
           {OVERLAY_BASE_URL}/overlay.html?mode=timer&amp;channel={channel}
         </div>
       </div>

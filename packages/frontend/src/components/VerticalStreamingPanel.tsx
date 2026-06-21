@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import styles from './VerticalStreamingPanel.module.css';
 
 interface Props {
   channel: string;
@@ -17,34 +18,24 @@ export function VerticalStreamingPanel({ }: Props) {
     { id: 'obs', label: 'Configuración OBS', icon: '🎬' },
   ];
 
-  const tabStyle = (active: boolean): React.CSSProperties => ({
-    padding: '0.5rem 1rem',
-    borderRadius: 8,
-    border: active ? '1px solid var(--sf-primary)' : '1px solid var(--sf-border)',
-    background: active ? 'rgba(124,58,237,0.15)' : 'transparent',
-    color: active ? 'var(--sf-primary)' : 'var(--sf-text-2)',
-    fontSize: '0.8rem',
-    fontWeight: active ? 600 : 400,
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-    transition: 'all 0.15s ease',
-    whiteSpace: 'nowrap',
-  });
-
   return (
-    <div style={{ maxWidth: 800 }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
+    <div className={styles.container}>
+      <div className="mb-5">
+        <h2 className={styles.heading}>
           📱 Streaming Vertical (Dual Format)
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+        <p className={styles.subtitle}>
           Twitch ha integrado el nuevo sistema de streaming vertical (Dual Format).
           Transmite en horizontal y vertical simultáneamente para llegar a todos tus espectadores,
           estén en escritorio o móvil.
         </p>
-        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div className={styles.tabsWrap}>
           {sections.map(s => (
-            <button key={s.id} onClick={() => setActiveSection(s.id)} style={tabStyle(activeSection === s.id)}>
+            <button
+              key={s.id}
+              onClick={() => setActiveSection(s.id)}
+              className={`${styles.tab} ${activeSection === s.id ? styles['tab--active'] : styles['tab--inactive']}`}
+            >
               {s.icon} {s.label}
             </button>
           ))}
@@ -57,21 +48,21 @@ export function VerticalStreamingPanel({ }: Props) {
       {activeSection === 'obs' && <ObsConfigSection />}
 
       {/* External links */}
-      <div className="glass-card" style={{ marginTop: '1.5rem', padding: '1.25rem' }}>
-        <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.5rem' }}>
+      <div className={`glass-card ${styles.linksCard}`}>
+        <p className={styles.linksTitle}>
           🌐 Enlaces oficiales
         </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.8rem' }}>
-          <a href="https://help.twitch.tv/s/article/dual-format-vertical-video" target="_blank" rel="noreferrer" style={{ color: 'var(--sf-primary)' }}>
+        <div className={styles.linksList}>
+          <a href="https://help.twitch.tv/s/article/dual-format-vertical-video" target="_blank" rel="noreferrer" className={styles.link}>
             Ayuda oficial de Twitch — Dual Format ↗
           </a>
-          <a href="https://blog.twitch.tv/en/2026/06/17/introducing-dual-format-and-2k-streaming-on-twitch/" target="_blank" rel="noreferrer" style={{ color: 'var(--sf-primary)' }}>
+          <a href="https://blog.twitch.tv/en/2026/06/17/introducing-dual-format-and-2k-streaming-on-twitch/" target="_blank" rel="noreferrer" className={styles.link}>
             Anuncio oficial de Twitch (17 Jun 2026) ↗
           </a>
-          <a href="https://streamelements.com/selive" target="_blank" rel="noreferrer" style={{ color: 'var(--sf-primary)' }}>
+          <a href="https://streamelements.com/selive" target="_blank" rel="noreferrer" className={styles.link}>
             SE.Live (StreamElements) ↗
           </a>
-          <a href="https://aitum.tv/vertical" target="_blank" rel="noreferrer" style={{ color: 'var(--sf-primary)' }}>
+          <a href="https://aitum.tv/vertical" target="_blank" rel="noreferrer" className={styles.link}>
             Aitum Vertical Plugin ↗
           </a>
         </div>
@@ -82,11 +73,11 @@ export function VerticalStreamingPanel({ }: Props) {
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
-      <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '0.75rem' }}>
+    <div className={`glass-card ${styles.sectionCard}`}>
+      <h3 className={styles.sectionTitle}>
         {title}
       </h3>
-      <div style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', lineHeight: 1.7 }}>
+      <div className={styles.sectionBody}>
         {children}
       </div>
     </div>
@@ -95,11 +86,11 @@ function SectionCard({ title, children }: { title: string; children: React.React
 
 function StepList({ steps }: { steps: { title: string; desc: string }[] }) {
   return (
-    <ol style={{ paddingLeft: '1.25rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <ol className={styles.stepList}>
       {steps.map((s, i) => (
         <li key={i}>
-          <strong style={{ color: 'var(--sf-text)' }}>{s.title}</strong>
-          <p style={{ margin: '0.25rem 0 0 0' }}>{s.desc}</p>
+          <strong className={styles.stepTitle}>{s.title}</strong>
+          <p className={styles.stepDesc}>{s.desc}</p>
         </li>
       ))}
     </ol>
@@ -113,11 +104,11 @@ function GuideSection() {
         <p>
           <strong>Dual Format</strong> te permite enviar dos versiones de tu stream al mismo tiempo:
         </p>
-        <ul style={{ marginTop: '0.5rem', paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+        <ul className={`mt-2 ${styles.bulletList}`}>
           <li><strong>Horizontal (16:9)</strong> — para espectadores en escritorio y TV</li>
           <li><strong>Vertical (9:16)</strong> — para espectadores en móvil con el teléfono en vertical</li>
         </ul>
-        <p style={{ marginTop: '0.5rem' }}>
+        <p className="mt-2">
           Twitch recibe ambas versiones simultáneamente con una sola clave de stream.
           Los espectadores ven automáticamente la mejor vista para su dispositivo.
         </p>
@@ -153,7 +144,7 @@ function GuideSection() {
       </SectionCard>
 
       <SectionCard title="Consejos para el layout vertical">
-        <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <ul className={styles.bulletList}>
           <li><strong>La cámara arriba o abajo</strong> — el gameplay ocupa la mayor parte de la pantalla, la cámara va en la parte inferior o superior</li>
           <li><strong>Gameplay recortado al centro</strong> — para juegos FPS o competitivos, recorta la parte central de la imagen horizontal</li>
           <li><strong>Overlays reducidos</strong> — las alertas y notificaciones deben ser más compactas para no robar espacio</li>
@@ -169,44 +160,44 @@ function RequirementsSection() {
   return (
     <>
       <SectionCard title="Requisitos mínimos del sistema">
-        <p style={{ marginBottom: '0.75rem' }}>
+        <p className="mb-3">
           El streaming Dual Format procesa dos vídeos simultáneamente, lo que aumenta la carga en la GPU y el ancho de banda.
           Twitch recomienda:
         </p>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+        <div className={styles.overflowAuto}>
+          <table className={styles.table}>
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--sf-border)' }}>
-                <th style={{ textAlign: 'left', padding: '0.5rem', color: 'var(--sf-text)', fontWeight: 600 }}>Requisito</th>
-                <th style={{ textAlign: 'left', padding: '0.5rem', color: 'var(--sf-text)', fontWeight: 600 }}>1080p</th>
-                <th style={{ textAlign: 'left', padding: '0.5rem', color: 'var(--sf-text)', fontWeight: 600 }}>1440p (2K)</th>
+              <tr className={styles.tableRow}>
+                <th className={styles.tableHeader}>Requisito</th>
+                <th className={styles.tableHeader}>1080p</th>
+                <th className={styles.tableHeader}>1440p (2K)</th>
               </tr>
             </thead>
             <tbody>
-              <tr style={{ borderBottom: '1px solid var(--sf-border)' }}>
-                <td style={{ padding: '0.5rem', color: 'var(--sf-text)' }}>GPU NVIDIA</td>
-                <td style={{ padding: '0.5rem' }}>RTX 3070 o superior</td>
-                <td style={{ padding: '0.5rem' }}>RTX 3080/3090/4070 o superior</td>
+              <tr className={styles.tableRow}>
+                <td className={styles.tableCellStrong}>GPU NVIDIA</td>
+                <td className={styles.tableCell}>RTX 3070 o superior</td>
+                <td className={styles.tableCell}>RTX 3080/3090/4070 o superior</td>
               </tr>
-              <tr style={{ borderBottom: '1px solid var(--sf-border)' }}>
-                <td style={{ padding: '0.5rem', color: 'var(--sf-text)' }}>GPU AMD</td>
-                <td style={{ padding: '0.5rem' }}>Radeon 6700 o superior</td>
-                <td style={{ padding: '0.5rem' }}>Radeon 6800 o superior</td>
+              <tr className={styles.tableRow}>
+                <td className={styles.tableCellStrong}>GPU AMD</td>
+                <td className={styles.tableCell}>Radeon 6700 o superior</td>
+                <td className={styles.tableCell}>Radeon 6800 o superior</td>
               </tr>
-              <tr style={{ borderBottom: '1px solid var(--sf-border)' }}>
-                <td style={{ padding: '0.5rem', color: 'var(--sf-text)' }}>SO</td>
-                <td style={{ padding: '0.5rem' }}>Windows 10/11</td>
-                <td style={{ padding: '0.5rem' }}>Windows 10/11</td>
+              <tr className={styles.tableRow}>
+                <td className={styles.tableCellStrong}>SO</td>
+                <td className={styles.tableCell}>Windows 10/11</td>
+                <td className={styles.tableCell}>Windows 10/11</td>
               </tr>
-              <tr style={{ borderBottom: '1px solid var(--sf-border)' }}>
-                <td style={{ padding: '0.5rem', color: 'var(--sf-text)' }}>Ancho de banda (subida)</td>
-                <td style={{ padding: '0.5rem' }}>13.5 Mbps</td>
-                <td style={{ padding: '0.5rem' }}>22.5 Mbps o superior</td>
+              <tr className={styles.tableRow}>
+                <td className={styles.tableCellStrong}>Ancho de banda (subida)</td>
+                <td className={styles.tableCell}>13.5 Mbps</td>
+                <td className={styles.tableCell}>22.5 Mbps o superior</td>
               </tr>
               <tr>
-                <td style={{ padding: '0.5rem', color: 'var(--sf-text)' }}>Máx. pistas de vídeo</td>
-                <td style={{ padding: '0.5rem' }}>4 o menos</td>
-                <td style={{ padding: '0.5rem' }}>5 o menos</td>
+                <td className={styles.tableCellStrong}>Máx. pistas de vídeo</td>
+                <td className={styles.tableCell}>4 o menos</td>
+                <td className={styles.tableCell}>5 o menos</td>
               </tr>
             </tbody>
           </table>
@@ -214,7 +205,7 @@ function RequirementsSection() {
       </SectionCard>
 
       <SectionCard title="Software compatible">
-        <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <ul className={styles.bulletList}>
           <li><strong>OBS Studio</strong> v31.1.2 o superior (v32+ recomendado) + plugin vertical</li>
           <li><strong>Streamlabs</strong> — soporte integrado de Dual Format</li>
           <li><strong>Streamrun</strong> — procesamiento en la nube, sin plugins necesarios</li>
@@ -229,7 +220,7 @@ function PluginsSection() {
   return (
     <>
       <SectionCard title="Aitum Vertical">
-        <p style={{ marginBottom: '0.5rem' }}>
+        <p className="mb-2">
           Plugin oficial de OBS que añade un segundo lienzo vertical. Es la solución recomendada por Twitch.
         </p>
         <StepList steps={[
@@ -253,7 +244,7 @@ function PluginsSection() {
       </SectionCard>
 
       <SectionCard title="SE.Live (StreamElements)">
-        <p style={{ marginBottom: '0.5rem' }}>
+        <p className="mb-2">
           Alternativa a Aitum Vertical con soporte integrado de Dual Format en su versión beta pública.
         </p>
         <StepList steps={[
@@ -316,7 +307,7 @@ function ObsConfigSection() {
       </SectionCard>
 
       <SectionCard title="Checklist para móvil (antes de salir en vivo)">
-        <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <ul className={styles.bulletList}>
           <li>✅ Cámara no recortada ni mal encuadrada</li>
           <li>✅ Gameplay sigue siendo legible en pantalla pequeña</li>
           <li>✅ Alertas y notificaciones no tapan información importante</li>
@@ -328,7 +319,7 @@ function ObsConfigSection() {
       </SectionCard>
 
       <SectionCard title="Notas importantes">
-        <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <ul className={styles.bulletList}>
           <li>Dual Format funciona con <strong>Enhanced Broadcasting</strong>, que codifica múltiples variantes del vídeo en tu PC antes de subirlas</li>
           <li>Twitch ha añadido <strong>transcodificado del lado del servidor</strong> para Partners y muchos Afiliados, reduciendo la carga en tu sistema</li>
           <li>El streaming en <strong>1440p (2K)</strong> ya está disponible para Partners y Afiliados, también potenciado por Enhanced Broadcasting</li>

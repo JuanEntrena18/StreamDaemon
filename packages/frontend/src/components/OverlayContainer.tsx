@@ -14,6 +14,7 @@ import { WowChatOverlay } from './WowChatOverlay';
 import { AllianceChatOverlay } from './AllianceChatOverlay';
 import { CyanChatOverlay } from './CyanChatOverlay';
 import { ChannelNotifications } from './ChannelNotifications';
+import styles from './OverlayContainer.module.css';
 
 const LS_KEY = 'streamforger-overlay-settings';
 
@@ -104,7 +105,7 @@ export function OverlayContainer() {
   }, [updateSetting]);
 
   return (
-    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative' }}>
+    <div className={styles.root}>
       <OverlayContent
         mode={mode}
         theme={theme}

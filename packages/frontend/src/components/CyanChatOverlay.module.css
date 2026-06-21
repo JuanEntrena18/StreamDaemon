@@ -1,0 +1,21 @@
+.loading {
+  width: 100vw;
+  height: calc(100vh - 36px);
+  margin-top: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.85rem;
+  font-family: sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+.iframe {
+  width: 100vw;
+  height: calc(100vh - 36px);
+  margin-top: 36px;
+  border: none;
+  background: transparent;
+}

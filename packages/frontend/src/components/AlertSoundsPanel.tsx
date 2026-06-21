@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { apiGet, apiPut, apiPost } from '../utils/api';
+import styles from './AlertSoundsPanel.module.css';
 
 interface Props {
   channel: string;
@@ -123,93 +124,77 @@ export function AlertSoundsPanel({ channel }: Props) {
     textAlign: 'center',
   });
 
-  const inputBtnStyle: React.CSSProperties = {
-    ...btnStyle('#7c3aed', false),
-    minWidth: 140,
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '0.4rem',
-  };
-
-  const smallBtnStyle: React.CSSProperties = {
-    padding: '0.35rem 0.65rem',
-    borderRadius: 6,
-    border: '1px solid var(--sf-border)',
-    background: 'transparent',
-    color: 'var(--sf-text-3)',
-    cursor: 'pointer',
-    fontSize: '0.72rem',
-    fontFamily: 'inherit',
-    transition: 'all 0.15s ease',
-  };
-
   if (loading) {
     return (
-      <div style={{ maxWidth: 600 }}>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.85rem' }}>Cargando configuración de sonidos...</p>
+      <div className={styles.container}>
+        <p className={styles.loadingText}>Cargando configuración de sonidos...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 600 }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={styles.heading}>
           🔊 Sonidos de Alertas
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+        <p className={styles.subtitle}>
           Seleccioná un archivo MP3 desde tu computadora para cada tipo de alerta.
           Se guardarán automáticamente y se reproducirán en los overlays temáticos.
         </p>
       </div>
 
-      <div className="glass-card" style={{ padding: '1.5rem' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      <div className={`glass-card ${styles.configCard}`}>
+        <div className={styles.soundsList}>
           {ALERT_TYPES.map(({ key, label, icon }) => (
-            <div key={key}>
-              <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.4rem', display: 'block' }}>
+            <div key={key} className={styles.soundRow}>
+              <label className={styles.soundLabel}>
                 {icon} {label}
               </label>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div className={styles.soundActions}>
                 <input
                   ref={(el) => { fileInputs.current[key] = el; }}
                   type="file"
                   accept=".mp3,.wav,.ogg"
                   onChange={() => handleFileSelect(key)}
-                  style={{ display: 'none' }}
+                  className={styles.fileInput}
                 />
                 <button
                   onClick={() => fileInputs.current[key]?.click()}
                   disabled={uploading === key}
-                  style={inputBtnStyle}
+                  className={`sf-btn ${styles.uploadBtn}`}
+                  style={{
+                    border: `1px solid #7c3aed66`,
+                    background: `${'#7c3aed'}18`,
+                    color: '#7c3aed',
+                  }}
                 >
                   {uploading === key ? 'Subiendo...' : sounds[key] ? '🔄 Cambiar' : '📂 Seleccionar MP3'}
                 </button>
 
                 {sounds[key] ? (
                   <>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', fontFamily: 'monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span className={styles.fileName}>
                       {sounds[key]}
                     </span>
                     <button
                       onClick={() => playSound(key)}
                       disabled={testingSound === key}
-                      style={{ ...smallBtnStyle, color: testingSound === key ? '#34d399' : '#22d3ee', borderColor: testingSound === key ? 'rgba(52,211,153,0.3)' : 'var(--sf-border)' }}
+                      className={`${styles.smallBtn} ${styles.playBtn} ${testingSound === key ? styles['playBtn--playing'] : ''}`}
                       title="Reproducir sonido"
                     >
-                      {testingSound === key ? '▶️' : '▶️'}
+                      ▶️
                     </button>
                     <button
                       onClick={() => removeSound(key)}
-                      style={{ ...smallBtnStyle, color: '#f87171' }}
+                      className={`${styles.smallBtn} ${styles.removeBtn}`}
                       title="Eliminar sonido"
                     >
                       ✕
                     </button>
                   </>
                 ) : (
-                  <span style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', fontStyle: 'italic' }}>
+                  <span className={styles.noSound}>
                     Sin sonido — no se reproducirá nada para este tipo
                   </span>
                 )}
@@ -220,20 +205,21 @@ export function AlertSoundsPanel({ channel }: Props) {
       </div>
 
       {/* ── Test Alerts ── */}
-      <div className="glass-card" style={{ marginTop: '1.5rem', padding: '1.5rem' }}>
-        <p className="sf-section-title" style={{ marginBottom: '0.75rem' }}>
+      <div className={`glass-card ${styles.testCard}`}>
+        <p className={`sf-section-title ${styles.testTitle}`}>
           🧪 Probar Alertas
         </p>
-        <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', marginBottom: '1rem', lineHeight: 1.5 }}>
-          Enviá una alerta de prueba al canal <strong style={{ color: 'var(--sf-text)' }}>#{channel}</strong>.
+        <p className={styles.testDesc}>
+          Enviá una alerta de prueba al canal <strong>#{channel}</strong>.
           Si tenés un overlay de alertas abierto en OBS, deberías verlo aparecer al instante.
         </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div className={styles.testButtons}>
           {TEST_TYPES.map(({ type, label, color }) => (
             <button
               key={type}
               onClick={() => testAlert(type)}
               disabled={testing !== null || !channel}
+              className={styles.testBtn}
               style={btnStyle(color, testing === type)}
             >
               {testing === type ? '✅ Enviado' : label}
@@ -241,7 +227,7 @@ export function AlertSoundsPanel({ channel }: Props) {
           ))}
         </div>
         {!channel && (
-          <p style={{ fontSize: '0.75rem', color: '#f87171', marginTop: '0.75rem' }}>
+          <p className={styles.testNote}>
             Ingresá un canal en la barra superior para poder probar las alertas.
           </p>
         )}

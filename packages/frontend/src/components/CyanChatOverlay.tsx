@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import styles from './CyanChatOverlay.module.css';
 
 interface Props {
   channel: string;
@@ -24,12 +25,7 @@ export function CyanChatOverlay({ channel }: Props) {
 
   if (!url) {
     return (
-      <div style={{
-        width: '100vw', height: 'calc(100vh - 36px)', marginTop: 36,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem',
-        fontFamily: 'sans-serif', textAlign: 'center', padding: 20,
-      }}>
+      <div className={styles.loading}>
         No hay URL de Cyan Chat configurada.<br />
         Configurala desde el panel principal.
       </div>
@@ -39,13 +35,7 @@ export function CyanChatOverlay({ channel }: Props) {
   return (
     <iframe
       src={url}
-      style={{
-        width: '100vw',
-        height: 'calc(100vh - 36px)',
-        marginTop: 36,
-        border: 'none',
-        background: 'transparent',
-      }}
+      className={styles.iframe}
       title="Cyan Chat"
     />
   );

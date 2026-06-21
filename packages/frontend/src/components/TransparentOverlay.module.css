@@ -1,0 +1,230 @@
+.container {
+  max-width: 600px;
+}
+
+.header {
+  margin-bottom: 1.75rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: var(--sf-text);
+}
+
+.subtitle {
+  color: var(--sf-text-2);
+  font-size: 0.875rem;
+}
+
+.kbd {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--sf-border);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  color: var(--sf-text-2);
+}
+
+.authSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+.statusDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+}
+
+.loginBtn {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+}
+
+.card {
+  padding: 1.5rem;
+}
+
+.modeSelector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.modeBtn {
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  border: 1px solid;
+  font-size: 0.825rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.modeBtn--active {
+  border-color: var(--sf-primary);
+  background: rgba(124, 58, 237, 0.2);
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+.modeBtn--inactive {
+  border-color: var(--sf-border);
+  background: transparent;
+  color: var(--sf-text-2);
+  font-weight: 400;
+}
+
+.cyanHint {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 217, 255, 0.06);
+  border: 1px solid rgba(0, 217, 255, 0.15);
+  border-radius: 8px;
+}
+
+.cyanHintText {
+  font-size: 0.8rem;
+  color: var(--sf-text-2);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cyanLink {
+  color: #22d3ee;
+}
+
+.urlInputWrap {
+  margin-bottom: 1rem;
+}
+
+.urlLabel {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--sf-text-2);
+  margin-bottom: 0.375rem;
+  font-weight: 500;
+}
+
+.gameInputWrap {
+  margin-bottom: 1rem;
+}
+
+.gameLabel {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--sf-text-2);
+  margin-bottom: 0.375rem;
+  font-weight: 500;
+}
+
+.themeSection {
+  margin-bottom: 1rem;
+}
+
+.themeLabel {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--sf-text-2);
+  margin-bottom: 0.625rem;
+  font-weight: 500;
+}
+
+.themeList {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.themeBtn {
+  padding: 0.4rem 0.875rem;
+  border-radius: 8px;
+  border: 1px solid;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.toggleWrap {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.clickThroughCard {
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 1px solid var(--sf-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.clickThroughTitle {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--sf-text);
+  margin-bottom: 0.1rem;
+}
+
+.clickThroughDesc {
+  font-size: 0.72rem;
+  color: var(--sf-text-3);
+}
+
+.toggleTrack {
+  width: 44px;
+  height: 24px;
+  border-radius: 99px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.toggleTrack--on {
+  background: var(--sf-primary);
+}
+
+.toggleTrack--off {
+  background: var(--sf-border);
+}
+
+.toggleThumb {
+  position: absolute;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  transition: left 0.2s;
+}
+
+.toggleThumb--on {
+  left: calc(100% - 21px);
+}
+
+.toggleThumb--off {
+  left: 3px;
+}
+
+.emptyMsg {
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  color: var(--sf-text-3);
+  text-align: center;
+}

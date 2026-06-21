@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n/context';
+import styles from './AchievementsPanel.module.css';
 
 interface AchievementsData {
   userId: string;
@@ -42,22 +43,22 @@ export function AchievementsPanel({ channel, backendUrl }: Props) {
   }, [channel, backendUrl]);
 
   if (loading) {
-    return <div style={{ maxWidth: 700 }}><h2>{t('achievements.title')}</h2><p>{t('common.loading')}</p></div>;
+    return <div className={styles.loadingContainer}><h2>{t('achievements.title')}</h2><p>{t('common.loading')}</p></div>;
   }
 
   if (error) {
     return (
-      <div style={{ maxWidth: 700 }}>
+      <div className={styles.errorContainer}>
         <h2>{t('achievements.title')}</h2>
-        <p style={{ color: 'var(--sf-danger)' }}>{error}</p>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.85rem' }}>{t('achievements.authHint')}</p>
+        <p className={styles.errorMsg}>{error}</p>
+        <p className={styles.errorHint}>{t('achievements.authHint')}</p>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div style={{ maxWidth: 700 }}>
+      <div className={styles.emptyContainer}>
         <h2>{t('achievements.title')}</h2>
         <p>{t('achievements.noData')}</p>
       </div>
@@ -65,40 +66,33 @@ export function AchievementsPanel({ channel, backendUrl }: Props) {
   }
 
   return (
-    <div style={{ maxWidth: 700 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+    <div className={styles.container}>
+      <div className={styles.titleRow}>
         <h2 style={{ margin: 0 }}>{t('achievements.title')}</h2>
         {data.avatarUrl && (
-          <img src={data.avatarUrl} alt="" style={{ width: 28, height: 28, borderRadius: '50%' }} />
+          <img src={data.avatarUrl} alt="" className={styles.avatar} />
         )}
-        <span style={{ fontSize: '0.9rem', color: 'var(--sf-text-2)' }}>{data.displayName}</span>
+        <span className={styles.displayName}>{data.displayName}</span>
       </div>
-      <p style={{ marginBottom: '1.5rem', color: 'var(--sf-text-2)' }}>{t('achievements.subtitle')}</p>
+      <p className={styles.subtitle}>{t('achievements.subtitle')}</p>
 
-      <div className="sf-card" style={{ marginBottom: '1.5rem', padding: '1.5rem' }}>
-        <h3 style={{ margin: '0 0 1rem', fontSize: '1rem' }}>{t('achievements.pathToAffiliate')}</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div className={`sf-card ${styles.sectionCard}`}>
+        <h3 className={styles.sectionTitle}>{t('achievements.pathToAffiliate')}</h3>
+        <div className={styles.metricsList}>
           <MetricRow label={t('achievements.followers')} current={data.followers ?? 0} goal={50} />
           <MetricRow label={t('achievements.viewCount')} current={data.viewCount ?? 0} goal={50000} />
         </div>
       </div>
 
-      <div className="sf-card" style={{ padding: '1.5rem', background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)' }}>
-        <p style={{ fontSize: '0.85rem', color: 'var(--sf-text-2)', lineHeight: 1.6, marginBottom: '0.75rem' }}>
+      <div className={styles.twitchCard}>
+        <p className={styles.twitchCardText}>
           {t('achievements.apiNote')}
         </p>
         <a
           href={data.twitchAchievementsUrl}
           target="_blank"
           rel="noreferrer"
-          className="sf-btn"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-            background: 'linear-gradient(135deg, #9147ff 0%, #6441a5 100%)',
-            color: '#fff', padding: '0.6rem 1.25rem', textDecoration: 'none',
-            fontSize: '0.85rem', fontWeight: 600,
-            boxShadow: '0 2px 12px rgba(145,71,255,0.35)',
-          }}
+          className={`sf-btn ${styles.twitchBtn}`}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
@@ -115,18 +109,15 @@ function MetricRow({ label, current, goal }: { label: string; current: number; g
   const done = current >= goal && goal > 0;
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.25rem' }}>
-        <span style={{ color: 'var(--sf-text-2)' }}>{label}</span>
-        <span style={{ color: 'var(--sf-text)', fontWeight: 600 }}>{current.toLocaleString()} / {goal.toLocaleString()}</span>
+      <div className={styles.metricRow}>
+        <span className={styles.metricLabel}>{label}</span>
+        <span className={styles.metricValue}>{current.toLocaleString()} / {goal.toLocaleString()}</span>
       </div>
-      <div style={{ height: 8, background: 'var(--sf-border)', borderRadius: 99, overflow: 'hidden' }}>
-        <div style={{
-          width: `${pct}%`, height: '100%',
-          background: done
-            ? 'linear-gradient(90deg, #22c55e, #16a34a)'
-            : 'linear-gradient(90deg, var(--sf-primary), #6366f1)',
-          borderRadius: 99, transition: 'width 0.5s ease',
-        }} />
+      <div className={styles.progressTrack}>
+        <div
+          className={`${styles.progressFill} ${done ? styles['progressFill--done'] : styles['progressFill--progress']}`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   );

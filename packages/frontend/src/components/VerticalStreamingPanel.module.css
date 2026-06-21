@@ -1,0 +1,141 @@
+.container {
+  max-width: 800px;
+}
+
+.heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: var(--sf-text);
+}
+
+.subtitle {
+  color: var(--sf-text-2);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.tabsWrap {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tab {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tab--active {
+  border: 1px solid var(--sf-primary);
+  background: rgba(124, 58, 237, 0.15);
+  color: var(--sf-primary);
+  font-weight: 600;
+}
+
+.tab--inactive {
+  border: 1px solid var(--sf-border);
+  background: transparent;
+  color: var(--sf-text-2);
+  font-weight: 400;
+}
+
+.linksCard {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+}
+
+.linksTitle {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--sf-text);
+  margin-bottom: 0.5rem;
+}
+
+.linksList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.link {
+  color: var(--sf-primary);
+}
+
+.sectionCard {
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--sf-text);
+  margin-bottom: 0.75rem;
+}
+
+.sectionBody {
+  font-size: 0.82rem;
+  color: var(--sf-text-2);
+  line-height: 1.7;
+}
+
+.stepList {
+  padding-left: 1.25rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stepTitle {
+  color: var(--sf-text);
+}
+
+.stepDesc {
+  margin: 0.25rem 0 0 0;
+}
+
+.bulletList {
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.tableHeader th {
+  text-align: left;
+  padding: 0.5rem;
+  color: var(--sf-text);
+  font-weight: 600;
+}
+
+.tableRow {
+  border-bottom: 1px solid var(--sf-border);
+}
+
+.tableCell {
+  padding: 0.5rem;
+}
+
+.tableCellStrong {
+  padding: 0.5rem;
+  color: var(--sf-text);
+}
+
+.overflowAuto {
+  overflow-x: auto;
+}

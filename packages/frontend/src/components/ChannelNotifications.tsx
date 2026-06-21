@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
+import styles from './ChannelNotifications.module.css';
 import type {
   ChannelFollowEvent,
   ChannelSubscribeEvent,
@@ -80,26 +81,15 @@ function NotificationCard({ notif, onDone }: { notif: Notification; onDone: () =
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, x: 80, scale: 0.9 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      style={{
-        background: 'rgba(0,0,0,0.75)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderLeft: '4px solid #a78bfa',
-        borderRadius: '0 10px 10px 0',
-        padding: '10px 16px',
-        minWidth: 260,
-        maxWidth: 380,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-        pointerEvents: 'none',
-      }}
+      className={styles.notificationCard}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span style={{ fontSize: '1.3rem' }}>{icon}</span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#a78bfa', marginBottom: 2 }}>
+      <div className={styles.inner}>
+        <span className={styles.icon}>{icon}</span>
+        <div className={styles.textArea}>
+          <div className={styles.typeLabel}>
             {title}
           </div>
-          <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#f8fafc', lineHeight: 1.3, wordBreak: 'break-word' }}>
+          <div className={styles.descText}>
             {desc}
           </div>
         </div>
@@ -146,18 +136,7 @@ export function ChannelNotifications() {
   }, []);
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 80,
-        right: 24,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-        zIndex: 100,
-        pointerEvents: 'none',
-      }}
-    >
+    <div className={styles.container}>
       <AnimatePresence>
         {queue.map((n, i) => (
           <NotificationCard key={`${n.type}-${i}`} notif={n} onDone={() => removeNotif(i)} />

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
+import styles from './GiveawayPanel.module.css';
 
 interface Props {
   channel: string;
@@ -256,36 +257,28 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
   };
 
   return (
-    <div style={{ maxWidth: 700 }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+    <div className={styles.container}>
+      <div className="mb-5">
+        <h2 className="sf-heading flex-row flex-row--gap-md">
           {t('giveaway.title')}
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
+        <p className="text-sm text-muted">
           {t('giveaway.subtitle')}
         </p>
-        <div style={{
-          marginTop: '0.75rem', padding: '0.75rem 1rem', borderRadius: 8,
-          background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)',
-          fontSize: '0.78rem', color: 'var(--sf-text-2)', lineHeight: 1.5,
-        }}>
-          <strong style={{ color: '#22d3ee' }}>{t('giveaway.configTitle')}</strong>
+        <div className={styles.infoBannerCyan}>
+          <strong className={styles.infoBannerTitle}>{t('giveaway.configTitle')}</strong>
           {' '}{t('giveaway.configText1')}{' '}
           <strong>"{t('giveaway.configText2')}"</strong> con un costo de{' '}
           <strong>{t('giveaway.configText3')}</strong>. {t('giveaway.configText4')}
         </div>
-        <div style={{
-          marginTop: '0.5rem', padding: '0.75rem 1rem', borderRadius: 8,
-          background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
-          fontSize: '0.78rem', color: 'var(--sf-text-2)', lineHeight: 1.5,
-        }}>
-          <strong style={{ color: '#fbbf24' }}>{t('giveaway.subMultiplier')}</strong>
+        <div className={styles.infoBannerAmber}>
+          <strong className={styles.infoBannerAmberTitle}>{t('giveaway.subMultiplier')}</strong>
           {' '}{t('giveaway.subMultiplierDesc')}{' '}
           <strong>!sorteo</strong>{t('giveaway.subMultiplierDetail')}
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+      <div className="grid-2" style={{ gap: '1.5rem' }}>
         {/* ── Existing giveaway system ── */}
         <div>
           <AnimatePresence mode="wait">
@@ -297,10 +290,10 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                 exit={{ opacity: 0, scale: 0.97 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="glass-card glass-card--accent animate-glow" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <div className="glass-card glass-card--accent animate-glow sf-card">
+                  <div className="flex-between mb-4">
                     <div>
-                      <span className="sf-badge sf-badge-success" style={{ marginBottom: '0.625rem' }}>
+                      <span className="sf-badge sf-badge-success mb-3">
                         <span className="animate-pulse-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--sf-success)', display: 'inline-block' }} />
                         {t('giveaway.activo')}
                       </span>
@@ -309,45 +302,36 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                       </h3>
                     </div>
                   </div>
-                  <div style={{
-                    background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)',
-                    borderRadius: 10, padding: '0.875rem 1rem',
-                    marginBottom: '1.25rem',
-                  }}>
-                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div className={styles.activeStatsBox}>
+                    <div className="flex-wrap" style={{ gap: '1.5rem' }}>
                       <div>
-                        <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#34d399' }}>
+                        <span className={styles.statValueGreen}>
                           {active.entries}
                         </span>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#34d399' }}>{t('giveaway.participantes')}</div>
+                        <div className={styles.statLabelGreen}>{t('giveaway.participantes')}</div>
                       </div>
                       <div>
-                        <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#a78bfa' }}>
+                        <span className={styles.statValuePurple}>
                           {active.totalTickets}
                         </span>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#a78bfa' }}>{t('giveaway.boletosTotales')}</div>
+                        <div className={styles.statLabelPurple}>{t('giveaway.boletosTotales')}</div>
                       </div>
                       {active.ticketCost > 0 && (
-                        <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)' }}>
+                        <div className={styles.ticketCost}>
                           {active.ticketCost} pts/boleto · {active.ticketRewardTitle}
                         </div>
                       )}
                     </div>
                     {active.tickets && active.tickets.length > 0 && (
-                      <details style={{ marginTop: '0.75rem' }}>
-                        <summary style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', cursor: 'pointer' }}>
+                      <details className="mt-3">
+                        <summary className={styles.summaryText}>
                           {t('giveaway.verBoletos')}
                         </summary>
-                        <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <div className="flex-col flex-col--gap-sm mt-2">
                           {active.tickets.map((entry) => {
                             const prob = active.totalTickets > 0 ? ((entry.tickets / active.totalTickets) * 100).toFixed(1) : '0';
                             return (
-                              <div key={entry.user} style={{
-                                display: 'flex', justifyContent: 'space-between',
-                                fontSize: '0.78rem', color: 'var(--sf-text-2)',
-                                padding: '0.2rem 0.4rem', borderRadius: 4,
-                                background: 'rgba(255,255,255,0.03)',
-                              }}>
+                              <div key={entry.user} className={styles.ticketRow}>
                                 <span>@{entry.user}</span>
                                 <span>{entry.tickets} {t('giveaway.boletos')} ({prob}%)</span>
                               </div>
@@ -357,7 +341,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                       </details>
                     )}
                   </div>
-                  <button onClick={endGiveaway} className="sf-btn sf-btn-danger" style={{ width: '100%' }}>
+                  <button onClick={endGiveaway} className="sf-btn sf-btn-danger w-full">
                     {t('giveaway.finalizar')}
                   </button>
                 </div>
@@ -372,9 +356,9 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
               >
                 <div className="glass-card" style={{ padding: '1.5rem' }}>
                   <p className="sf-section-title">{t('giveaway.nuevoSorteo')}</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                  <div className={styles.formGroup}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
+                      <label className="sf-label" style={{ marginBottom: '0.375rem', fontWeight: 500 }}>
                         {t('giveaway.premio')}
                       </label>
                       <input
@@ -387,24 +371,16 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
+                      <label className="sf-label" style={{ marginBottom: '0.375rem', fontWeight: 500 }}>
                         {t('giveaway.duracion')}
                       </label>
-                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <div className="flex-wrap">
                         {DURATION_OPTIONS.map((opt) => (
                           <button
                             key={opt.value}
                             onClick={() => setDuration(opt.value)}
                             disabled={!channel}
-                            style={{
-                              padding: '0.35rem 0.875rem', borderRadius: 99, border: '1px solid',
-                              borderColor: duration === opt.value ? 'var(--sf-primary)' : 'var(--sf-border)',
-                              background: duration === opt.value ? 'rgba(124,58,237,0.2)' : 'transparent',
-                              color: duration === opt.value ? '#a78bfa' : 'var(--sf-text-3)',
-                              fontSize: '0.8rem', fontWeight: duration === opt.value ? 600 : 400,
-                              cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s ease',
-                              opacity: !channel ? 0.4 : 1,
-                            }}
+                            className={`sf-pill-selector__pill ${duration === opt.value ? 'sf-pill-selector__pill--active' : ''}`}
                           >
                             {opt.label}
                           </button>
@@ -412,18 +388,17 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                       </div>
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
+                      <label className="sf-label" style={{ marginBottom: '0.375rem', fontWeight: 500 }}>
                         {t('giveaway.puntosCanal')}
                       </label>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <div className="flex-row flex-row--gap-sm">
                         <input
                           type="number"
                           placeholder={t('giveaway.puntosPorBoleto')}
                           value={ticketCost || ''}
                           onChange={(e) => setTicketCost(parseInt(e.target.value) || 0)}
                           disabled={!channel}
-                          className="sf-input"
-                          style={{ flex: 1 }}
+                          className="sf-input flex-1"
                         />
                         <input
                           type="text"
@@ -431,11 +406,10 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                           value={ticketRewardTitle}
                           onChange={(e) => setTicketRewardTitle(e.target.value)}
                           disabled={!channel || !ticketCost}
-                          className="sf-input"
-                          style={{ flex: 1 }}
+                          className="sf-input flex-1"
                         />
                       </div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', marginTop: '0.25rem' }}>
+                      <div className="text-dim" style={{ fontSize: '0.7rem', marginTop: '0.25rem' }}>
                         {ticketCost > 0
                           ? t('giveaway.puntosDesc', { reward: ticketRewardTitle || '...', cost: ticketCost })
                           : t('giveaway.puntosDesactivado')}
@@ -444,14 +418,13 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                     <button
                       onClick={startGiveaway}
                       disabled={!prize.trim() || !channel}
-                      className="sf-btn sf-btn-primary"
-                      style={{ width: '100%', marginTop: '0.25rem' }}
+                      className="sf-btn sf-btn-primary w-full mt-2"
                     >
                       {t('giveaway.iniciar')}
                     </button>
-                    {message && <p style={{ fontSize: '0.8rem', color: 'var(--sf-warning)', textAlign: 'center' }}>{message}</p>}
+                    {message && <p className="sf-error-text text-center">{message}</p>}
                     {!channel && (
-                      <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', textAlign: 'center' }}>
+                      <p className="text-xs text-dim text-center">
                         {t('giveaway.emptyChannel')}
                       </p>
                     )}
@@ -465,23 +438,22 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
         {/* ── Spin wheel ── */}
         <div>
           <div className="glass-card" style={{ padding: '1.5rem' }}>
-            <p className="sf-section-title" style={{ marginBottom: '0.75rem' }}>{t('giveaway.ruleta')}</p>
-            <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginBottom: '1rem', lineHeight: 1.4 }}>
+            <p className="sf-section-title mb-3">{t('giveaway.ruleta')}</p>
+            <p className={styles.description}>
               {t('giveaway.ruletaDesc')}
             </p>
 
-            <details style={{ marginBottom: '0.75rem' }}>
-              <summary style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', cursor: 'pointer', userSelect: 'none' }}>
+            <details className="mb-3">
+              <summary className={styles.summaryText} style={{ userSelect: 'none' }}>
                 {t('giveaway.importar')}
               </summary>
               <textarea
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
                 placeholder={t('giveaway.importarPlaceholder')}
-                className="sf-input"
-                style={{ marginTop: '0.5rem', minHeight: 80, fontSize: '0.78rem', lineHeight: 1.5, resize: 'vertical' }}
+                className={`sf-input ${styles.importTextarea}`}
               />
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <div className="flex-row flex-row--gap-sm mt-2">
                 <button
                   onClick={() => {
                     const names = importText.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
@@ -500,21 +472,21 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                 >
                   {t('giveaway.añadirARuleta')}
                 </button>
-                <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', alignSelf: 'center' }}>
+                <span className={styles.hintText}>
                   {t('giveaway.nombresHint')}
                 </span>
               </div>
             </details>
 
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+            <div className="flex-row flex-row--gap-sm mb-3">
               <input
                 type="text"
                 value={wheelInput}
                 onChange={(e) => setWheelInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') addWheelName(); }}
                 placeholder={t('giveaway.participantePlaceholder')}
-                className="sf-input"
-                style={{ flex: 1, fontSize: '0.82rem' }}
+                className="sf-input flex-1"
+                style={{ fontSize: '0.82rem' }}
               />
               <button
                 onClick={addWheelName}
@@ -527,61 +499,44 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
             </div>
 
             {wheelNames.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginBottom: '1rem' }}>
+              <div className="flex-wrap mb-4">
                 {wheelNames.map((name, i) => (
                   <span
                     key={i}
+                    className={styles.wheelChip}
                     style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
-                      padding: '0.2rem 0.6rem', borderRadius: 99,
                       background: `${WHEEL_COLORS[i % WHEEL_COLORS.length]}33`,
                       border: `1px solid ${WHEEL_COLORS[i % WHEEL_COLORS.length]}66`,
-                      fontSize: '0.78rem', color: 'var(--sf-text-2)',
                     }}
                   >
                     {name}
                     <button
                       onClick={() => removeWheelName(i)}
-                      style={{
-                        background: 'none', border: 'none', color: 'var(--sf-text-3)',
-                        cursor: 'pointer', padding: 0, fontSize: '0.85rem', lineHeight: 1,
-                      }}
+                      className={styles.wheelRemoveBtn}
                     >×</button>
                   </span>
                 ))}
               </div>
             )}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-              <span style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', fontWeight: 500 }}>
+            <div className="flex-row flex-row--gap-sm mb-3">
+              <span className="text-dim" style={{ fontSize: '0.72rem', fontWeight: 500 }}>
                 {t('giveaway.giroDuracion')}
               </span>
               {[10, 15, 20].map((s) => (
                 <button
                   key={s}
                   onClick={() => setSpinDuration(s)}
-                  style={{
-                    padding: '0.25rem 0.625rem', borderRadius: 99, border: '1px solid',
-                    borderColor: spinDuration === s ? 'var(--sf-primary)' : 'var(--sf-border)',
-                    background: spinDuration === s ? 'rgba(124,58,237,0.2)' : 'transparent',
-                    color: spinDuration === s ? '#a78bfa' : 'var(--sf-text-3)',
-                    fontSize: '0.72rem', fontWeight: spinDuration === s ? 600 : 400,
-                    cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s ease',
-                  }}
+                  className={`sf-pill-selector__pill sf-pill-selector__pill--sm ${spinDuration === s ? 'sf-pill-selector__pill--active' : ''}`}
                 >
                   {s} {t('giveaway.seg')}
                 </button>
               ))}
             </div>
 
-            <div style={{ position: 'relative', width: '100%', aspectRatio: '1', marginBottom: '1rem' }}>
+            <div className={styles.wheelContainer}>
               {wheelNames.length < 2 ? (
-                <div style={{
-                  width: '100%', height: '100%', borderRadius: '50%',
-                  border: '2px dashed var(--sf-border)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'var(--sf-text-3)', fontSize: '0.82rem',
-                }}>
+                <div className={styles.wheelPlaceholder}>
                   {t('giveaway.minimoNombres')}
                 </div>
               ) : (
@@ -592,15 +547,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                     height={280}
                     style={{ width: '100%', height: '100%', borderRadius: '50%' }}
                   />
-                  <div style={{
-                    position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%)',
-                    width: 0, height: 0,
-                    borderLeft: '10px solid transparent',
-                    borderRight: '10px solid transparent',
-                    borderTop: '14px solid var(--sf-text)',
-                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
-                    zIndex: 2,
-                  }} />
+                  <div className={styles.wheelPointer} />
                 </>
               )}
             </div>
@@ -608,8 +555,8 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
             <button
               onClick={spinWheel}
               disabled={wheelNames.length < 2 || spinning}
-              className={`sf-btn ${spinning ? 'sf-btn-ghost' : 'sf-btn-primary'}`}
-              style={{ width: '100%', marginBottom: winner ? '0.75rem' : 0 }}
+              className={`sf-btn w-full ${spinning ? 'sf-btn-ghost' : 'sf-btn-primary'}`}
+              style={{ marginBottom: winner ? '0.75rem' : 0 }}
             >
               {spinning ? t('giveaway.girando') : t('giveaway.girar')}
             </button>
@@ -618,16 +565,12 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                style={{
-                  padding: '0.75rem 1rem', borderRadius: 'var(--sf-radius-sm)',
-                  background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)',
-                  textAlign: 'center',
-                }}
+                className={styles.winnerBox}
               >
-                <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 600, marginBottom: '0.15rem' }}>
+                <div className={styles.winnerLabel}>
                   {t('giveaway.ganador')}
                 </div>
-                <div style={{ fontSize: '1.125rem', fontWeight: 700, color: '#6ee7b7' }}>
+                <div className={styles.winnerName}>
                   {winner}
                 </div>
               </motion.div>

@@ -1,0 +1,91 @@
+.container {
+  max-width: 700px;
+}
+
+.header {
+  margin-bottom: 1.75rem;
+}
+
+.heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: var(--sf-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subtitle {
+  color: var(--sf-text-2);
+  font-size: 0.875rem;
+}
+
+.filterBar {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  font-size: 0.72rem;
+  padding: 0.3rem 0.6rem;
+}
+
+.filterBtn--active {
+  background: var(--sf-primary);
+  color: #fff;
+}
+
+.filterBtn--inactive {
+  background: var(--sf-surface-hover);
+  color: var(--sf-text-2);
+}
+
+.eventsCard {
+  padding: 1rem;
+}
+
+.emptyState {
+  font-size: 0.85rem;
+  color: var(--sf-text-3);
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.eventsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.eventItem {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+
+.eventIcon {
+  font-size: 1.1rem;
+}
+
+.eventUser {
+  color: var(--sf-text);
+  min-width: 100px;
+}
+
+.eventMsg {
+  color: var(--sf-text-2);
+  flex: 1;
+}
+
+.eventTime {
+  font-size: 0.68rem;
+  color: var(--sf-text-3);
+}

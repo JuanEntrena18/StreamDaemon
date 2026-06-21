@@ -1,0 +1,61 @@
+.loading {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.bar {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  border-radius: 10px;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.offline {
+  font-size: 0.7rem;
+  color: #f87171;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.itemIcon {
+  font-size: 0.7rem;
+}
+
+.itemValue {
+  font-weight: 600;
+}
+
+.metaItem {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  padding-left: 10px;
+}
+
+.metaTruncate {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

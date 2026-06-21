@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiGet, apiPost, apiPut } from '../utils/api';
 import { useTranslation } from '../i18n/context';
+import styles from './SecurityPanel.module.css';
 
 interface Props {
   channel: string;
@@ -141,58 +142,58 @@ export function SecurityPanel({ channel }: Props) {
 
   if (loading) {
     return (
-      <div style={{ color: 'var(--sf-text-2)', fontSize: '0.9rem' }}>
+      <div className="text-muted" style={{ fontSize: '0.9rem' }}>
         {t('security.loading')}
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 700 }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={`sf-heading flex-row flex-row--gap-sm ${styles.heading}`}>
           {t('security.title')}
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
+        <p className="text-muted text-sm">
           {t('security.subtitle')}
         </p>
       </div>
 
       {/* Help card */}
-      <div className="glass-card" style={{ padding: '1rem 1.25rem', marginBottom: '1rem', background: 'rgba(59,130,246,0.06)', borderLeft: '3px solid #60a5fa' }}>
-        <div style={{ fontSize: '0.78rem', lineHeight: 1.6, color: 'var(--sf-text-2)' }}>
+      <div className={styles.helpCard}>
+        <div className="text-xs" style={{ lineHeight: 1.6, color: 'var(--sf-text-2)' }}>
           {t('security.helpText')}
         </div>
       </div>
 
       {/* Stats */}
-      <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
-        <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--sf-text)' }}>
+      <div className="glass-card sf-card--tight">
+        <h3 className={`${styles.sectionTitle} mb-3`}>
           {t('security.stats')}
         </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem' }}>
-          <div style={{ background: 'var(--sf-surface)', borderRadius: 8, padding: '0.75rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f87171' }}>{stats?.stats.totalBanned ?? 0}</div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginTop: '0.2rem' }}>{t('security.baneadosTotales')}</div>
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <div className={styles.statValue} style={{ color: '#f87171' }}>{stats?.stats.totalBanned ?? 0}</div>
+            <div className={styles.statLabel}>{t('security.baneadosTotales')}</div>
           </div>
-          <div style={{ background: 'var(--sf-surface)', borderRadius: 8, padding: '0.75rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#fbbf24' }}>{stats?.stats.todayBanned ?? 0}</div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginTop: '0.2rem' }}>{t('security.baneadosHoy')}</div>
+          <div className={styles.statCard}>
+            <div className={styles.statValue} style={{ color: '#fbbf24' }}>{stats?.stats.todayBanned ?? 0}</div>
+            <div className={styles.statLabel}>{t('security.baneadosHoy')}</div>
           </div>
-          <div style={{ background: 'var(--sf-surface)', borderRadius: 8, padding: '0.75rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#fb923c' }}>{stats?.stats.totalFlagged ?? 0}</div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginTop: '0.2rem' }}>{t('security.marcados')}</div>
+          <div className={styles.statCard}>
+            <div className={styles.statValue} style={{ color: '#fb923c' }}>{stats?.stats.totalFlagged ?? 0}</div>
+            <div className={styles.statLabel}>{t('security.marcados')}</div>
           </div>
-          <div style={{ background: 'var(--sf-surface)', borderRadius: 8, padding: '0.75rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--sf-primary)' }}>{stats?.knownBotCount ?? 0}</div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginTop: '0.2rem' }}>{t('security.botsConocidos')}</div>
+          <div className={styles.statCard}>
+            <div className={styles.statValue} style={{ color: 'var(--sf-primary)' }}>{stats?.knownBotCount ?? 0}</div>
+            <div className={styles.statLabel}>{t('security.botsConocidos')}</div>
           </div>
         </div>
       </div>
 
       {/* Toggles */}
-      <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
-        <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--sf-text)' }}>
+      <div className="glass-card sf-card--tight">
+        <h3 className={`${styles.sectionTitle} mb-3`}>
           {t('security.protecciones')}
         </h3>
 
@@ -217,24 +218,18 @@ export function SecurityPanel({ channel }: Props) {
       </div>
 
       {/* Manual scan */}
-      <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
-        <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--sf-text)' }}>
+      <div className="glass-card sf-card--tight">
+        <h3 className={`${styles.sectionTitle} mb-2`}>
           {t('security.scanTitle')}
         </h3>
-        <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.75rem' }}>
+        <p className="text-xs text-muted mb-3">
           {t('security.scanDesc')}
         </p>
-        <button onClick={runScan} disabled={scanning} className="sf-btn" style={{
-          fontSize: '0.82rem', padding: '0.45rem 1rem',
-          background: 'rgba(239,68,68,0.1)', color: '#f87171',
-          border: '1px solid rgba(239,68,68,0.25)',
-        }}>
+        <button onClick={runScan} disabled={scanning} className={`sf-btn ${styles.scanButton}`}>
           {scanning ? t('security.escanenado') : t('security.escanear')}
         </button>
         {scanResult && (
-          <div style={{
-            marginTop: '0.75rem', padding: '0.5rem 0.75rem', borderRadius: 6,
-            fontSize: '0.82rem',
+          <div className={styles.scanResultBox} style={{
             background: scanResult.found > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
             color: scanResult.found > 0 ? '#f87171' : '#34d399',
           }}>
@@ -246,49 +241,40 @@ export function SecurityPanel({ channel }: Props) {
       </div>
 
       {/* Whitelist */}
-      <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
-        <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--sf-text)' }}>
+      <div className="glass-card sf-card--tight">
+        <h3 className={`${styles.sectionTitle} mb-2`}>
           {t('security.whitelist')}
         </h3>
-        <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.75rem' }}>
+        <p className="text-xs text-muted mb-3">
           {t('security.whitelistDesc')}
         </p>
 
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+        <div className="flex-row flex-row--gap-sm mb-3">
           <input
             type="text"
             value={newWhitelistUser}
             onChange={(e) => setNewWhitelistUser(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') addWhitelist(); }}
             placeholder={t('security.whitelistPlaceholder')}
-            className="sf-input"
-            style={{ flex: 1 }}
+            className="sf-input flex-1"
           />
-          <button onClick={addWhitelist} disabled={!newWhitelistUser.trim()} className="sf-btn" style={{
-            fontSize: '0.82rem', padding: '0.45rem 1rem',
-            background: 'var(--sf-primary)', color: '#fff', border: 'none',
-          }}>
+          <button onClick={addWhitelist} disabled={!newWhitelistUser.trim()} className={`sf-btn ${styles.addButton}`}>
             {t('security.agregar')}
           </button>
         </div>
 
         {config.whitelist.length === 0 ? (
-          <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)' }}>
+          <div className={styles.emptyText}>
             {t('security.whitelistEmpty')}
           </div>
         ) : (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+          <div className={styles.whitelistWrap}>
             {config.whitelist.map((user) => (
-              <span key={user} style={{
-                display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                padding: '0.25rem 0.5rem', borderRadius: 6,
-                background: 'rgba(16,185,129,0.1)', color: '#34d399',
-                fontSize: '0.8rem', border: '1px solid rgba(16,185,129,0.2)',
-              }}>
+              <span key={user} className={styles.whitelistChip}>
                 {user}
                 <button
                   onClick={() => removeFromWhitelist(user)}
-                  style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: 0, fontSize: '0.85rem', lineHeight: 1 }}
+                  className={styles.chipRemove}
                 >
                   ×
                 </button>
@@ -299,16 +285,16 @@ export function SecurityPanel({ channel }: Props) {
       </div>
 
       {/* Recent detections */}
-      <div className="glass-card" style={{ padding: '1.25rem' }}>
-        <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--sf-text)' }}>
+      <div className="glass-card sf-card">
+        <h3 className={`${styles.sectionTitle} mb-3`}>
           {t('security.detections')}
         </h3>
         {(!stats?.recentDetections || stats.recentDetections.length === 0) ? (
-          <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)' }}>
+          <div className={styles.emptyText}>
             {t('security.detectionsEmpty')}
           </div>
         ) : (
-          <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+          <div className={styles.detectionList}>
             {stats.recentDetections.map((d) => {
               const isWhitelisted = config.whitelist.some((w) => w.toLowerCase() === d.user.toLowerCase());
               const loadingKey = actionLoading;
@@ -317,44 +303,34 @@ export function SecurityPanel({ channel }: Props) {
               const isWlLoading = loadingKey === `wl:${d.user}`;
 
               return (
-              <div key={d.id} style={{
-                padding: '0.5rem 0.75rem', borderRadius: 6, marginBottom: '0.35rem',
-                background: 'var(--sf-surface)',
+              <div key={d.id} className={styles.detectionItem} style={{
                 borderLeft: `3px solid ${DETECTION_TYPE_COLORS[d.type] || 'var(--sf-border)'}`,
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.15rem' }}>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)' }}>
+                <div className={styles.detectionHeader}>
+                  <div className={styles.detectionUser}>
                     {d.user}
-                    <span style={{
-                      fontSize: '0.65rem', fontWeight: 400, marginLeft: '0.4rem',
+                    <span className={styles.detectionType} style={{
                       color: DETECTION_TYPE_COLORS[d.type] || 'var(--sf-text-2)',
                     }}>
                       {t(DETECTION_TYPE_LABELS[d.type] || d.type)}
                     </span>
                   </div>
-                  <div style={{
-                    fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: 4,
+                  <div className={styles.actionBadge} style={{
                     background: d.action === 'banned' ? 'rgba(239,68,68,0.15)' : 'rgba(251,191,36,0.15)',
                     color: d.action === 'banned' ? '#f87171' : '#fbbf24',
-                    textTransform: 'uppercase', fontWeight: 600,
                   }}>
                     {d.action === 'banned' ? t('security.baneado') : t('security.marcado')}
                   </div>
                 </div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-2)', marginBottom: '0.4rem' }}>
+                <div className={styles.detectionMeta}>
                   {d.reason} — {new Date(d.timestamp).toLocaleString('es-ES')}
                 </div>
-                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                <div className={styles.detectionActions}>
                   {d.action === 'flagged' && (
                     <button
                       onClick={() => handleBan(d.user)}
                       disabled={isBanLoading}
-                      className="sf-btn"
-                      style={{
-                        fontSize: '0.7rem', padding: '0.2rem 0.5rem',
-                        background: 'rgba(239,68,68,0.1)', color: '#f87171',
-                        border: '1px solid rgba(239,68,68,0.25)',
-                      }}
+                      className={`sf-btn ${styles.actionBtn} ${styles.actionBtnDanger}`}
                     >
                       {isBanLoading ? t('security.banning') : t('security.ban')}
                     </button>
@@ -363,12 +339,7 @@ export function SecurityPanel({ channel }: Props) {
                     <button
                       onClick={() => handleUnban(d.user)}
                       disabled={isUnbanLoading}
-                      className="sf-btn"
-                      style={{
-                        fontSize: '0.7rem', padding: '0.2rem 0.5rem',
-                        background: 'rgba(16,185,129,0.1)', color: '#34d399',
-                        border: '1px solid rgba(16,185,129,0.25)',
-                      }}
+                      className={`sf-btn ${styles.actionBtn} ${styles.actionBtnSuccess}`}
                     >
                       {isUnbanLoading ? t('security.unbanning') : t('security.unban')}
                     </button>
@@ -376,12 +347,7 @@ export function SecurityPanel({ channel }: Props) {
                   {isWhitelisted ? (
                     <button
                       onClick={() => removeFromWhitelist(d.user)}
-                      className="sf-btn"
-                      style={{
-                        fontSize: '0.7rem', padding: '0.2rem 0.5rem',
-                        background: 'rgba(251,191,36,0.1)', color: '#fbbf24',
-                        border: '1px solid rgba(251,191,36,0.25)',
-                      }}
+                      className={`sf-btn ${styles.actionBtn} ${styles.actionBtnWarning}`}
                     >
                       {t('security.removeWhitelist')}
                     </button>
@@ -397,12 +363,7 @@ export function SecurityPanel({ channel }: Props) {
                         }
                       }}
                       disabled={isWlLoading}
-                      className="sf-btn"
-                      style={{
-                        fontSize: '0.7rem', padding: '0.2rem 0.5rem',
-                        background: 'rgba(59,130,246,0.1)', color: '#60a5fa',
-                        border: '1px solid rgba(59,130,246,0.25)',
-                      }}
+                      className={`sf-btn ${styles.actionBtn} ${styles.actionBtnInfo}`}
                     >
                       {isWlLoading ? '...' : t('security.addWhitelist')}
                     </button>
@@ -425,10 +386,7 @@ function ToggleRow({ label, desc, checked, onChange }: {
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div style={{
-      display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
-      padding: '0.75rem 0', borderBottom: '1px solid var(--sf-border)',
-    }}>
+    <div className={styles.toggleRow}>
       <button
         onClick={() => onChange(!checked)}
         style={{
@@ -446,11 +404,11 @@ function ToggleRow({ label, desc, checked, onChange }: {
           boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
         }} />
       </button>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.15rem' }}>
+      <div className="flex-1">
+        <div className={styles.toggleLabel}>
           {label}
         </div>
-        <div style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)' }}>
+        <div className={styles.toggleDesc}>
           {desc}
         </div>
       </div>

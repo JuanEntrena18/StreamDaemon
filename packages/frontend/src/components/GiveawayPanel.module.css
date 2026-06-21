@@ -1,0 +1,184 @@
+.container {
+  max-width: 700px;
+}
+
+.infoBanner {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: var(--sf-text-2);
+  line-height: 1.5;
+}
+
+.infoBannerCyan {
+  composes: infoBanner;
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.infoBannerAmber {
+  composes: infoBanner;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.infoBannerTitle {
+  color: #22d3ee;
+}
+
+.infoBannerAmberTitle {
+  color: #fbbf24;
+}
+
+.activeStatsBox {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.statValueGreen {
+  composes: statValue;
+  color: #34d399;
+}
+
+.statValuePurple {
+  composes: statValue;
+  color: #a78bfa;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.statLabelGreen {
+  composes: statLabel;
+  color: #34d399;
+}
+
+.statLabelPurple {
+  composes: statLabel;
+  color: #a78bfa;
+}
+
+.ticketCost {
+  font-size: 0.72rem;
+  color: var(--sf-text-3);
+}
+
+.ticketRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--sf-text-2);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.summaryText {
+  font-size: 0.72rem;
+  color: var(--sf-text-3);
+  cursor: pointer;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.wheelChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  color: var(--sf-text-2);
+}
+
+.wheelRemoveBtn {
+  background: none;
+  border: none;
+  color: var(--sf-text-3);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.wheelContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  margin-bottom: 1rem;
+}
+
+.wheelPlaceholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px dashed var(--sf-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sf-text-3);
+  font-size: 0.82rem;
+}
+
+.wheelPointer {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 14px solid var(--sf-text);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  z-index: 2;
+}
+
+.winnerBox {
+  padding: 0.75rem 1rem;
+  border-radius: var(--sf-radius-sm);
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  text-align: center;
+}
+
+.winnerLabel {
+  font-size: 0.72rem;
+  color: #34d399;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.winnerName {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #6ee7b7;
+}
+
+.hintText {
+  font-size: 0.68rem;
+  color: var(--sf-text-3);
+  align-self: center;
+}
+
+.description {
+  font-size: 0.78rem;
+  color: var(--sf-text-3);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}

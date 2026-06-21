@@ -1,0 +1,168 @@
+.container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+.bgOrb1 {
+  position: absolute;
+  top: -30%;
+  right: -10%;
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.bgOrb2 {
+  position: absolute;
+  bottom: -20%;
+  left: -10%;
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.topBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 24px 36px 40px;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.liveDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 12px #ef4444;
+}
+
+.liveLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #ef4444;
+}
+
+.channelName {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #f8fafc;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.gameName {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(148, 163, 184, 0.8);
+  letter-spacing: 0.02em;
+}
+
+.chatArea {
+  position: absolute;
+  bottom: 50px;
+  left: 36px;
+  width: 500px;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column-reverse;
+  overflow: hidden;
+}
+
+.chatInner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.msgBubble {
+  border-radius: 0 10px 10px 0;
+  padding: 8px 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.msgHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.msgAvatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.msgUser {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.msgTime {
+  font-size: 0.6rem;
+  color: rgba(148, 163, 184, 0.4);
+  margin-left: auto;
+}
+
+.msgBody {
+  font-size: 0.8rem;
+  color: rgba(248, 250, 252, 0.85);
+  line-height: 1.45;
+  word-break: break-word;
+  padding-left: 30px;
+}
+
+.activityArea {
+  position: absolute;
+  bottom: 50px;
+  right: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  max-width: 280px;
+}
+
+.activityChip {
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.72rem;
+  color: rgba(248, 250, 252, 0.7);
+  white-space: nowrap;
+}
+
+.activityUser {
+  font-weight: 600;
+  color: #a78bfa;
+}
+
+.brandBar {
+  position: absolute;
+  bottom: 16px;
+  left: 36px;
+  font-size: 0.6rem;
+  color: rgba(148, 163, 184, 0.25);
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}

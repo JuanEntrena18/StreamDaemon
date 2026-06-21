@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import styles from './PredictionOverlay.module.css';
 
 interface Option {
   id: string;
@@ -47,13 +48,7 @@ export function PredictionOverlay({ channel }: Props) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="fixed bottom-6 left-6 right-6 max-w-lg p-4 rounded-lg"
-          style={{
-            background: 'rgba(0,0,0,0.8)',
-            border: 'var(--theme-border)',
-            boxShadow: 'var(--theme-glow)',
-            backdropFilter: 'blur(4px)',
-          }}
+          className={`fixed bottom-6 left-6 right-6 max-w-lg p-4 rounded-lg ${styles.card}`}
         >
           <h3 className="text-lg font-bold mb-3">{prediction.title}</h3>
           <div className="flex flex-col gap-2">
@@ -61,16 +56,16 @@ export function PredictionOverlay({ channel }: Props) {
               const pct = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
               const isWinner = prediction.outcome === option.id;
               return (
-                <div key={option.id} className="relative">
+                <div key={option.id} className={styles.optionRow}>
                   <div
-                    className="absolute inset-0 rounded transition-all duration-500"
+                    className={styles.optionBar}
                     style={{
                       width: `${pct}%`,
                       background: isWinner ? 'var(--theme-accent)' : 'var(--theme-secondary)',
                       opacity: 0.3,
                     }}
                   />
-                  <div className="relative flex justify-between px-3 py-2 text-sm">
+                  <div className={styles.optionContent}>
                     <span>{option.title}{isWinner ? ' 👑' : ''}</span>
                     <span>{pct.toFixed(0)}%</span>
                   </div>
@@ -78,7 +73,7 @@ export function PredictionOverlay({ channel }: Props) {
               );
             })}
           </div>
-          <p className="text-xs mt-2 opacity-50">
+          <p className={styles.footer}>
             {prediction.status === 'active'
               ? 'Predicción activa — usa !predict en el chat'
               : prediction.status === 'resolved'

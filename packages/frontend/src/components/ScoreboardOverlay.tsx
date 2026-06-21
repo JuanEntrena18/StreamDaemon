@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import type { FighterState } from '@streamforger/shared';
+import styles from './ScoreboardOverlay.module.css';
 
 interface Props {
   channel: string;
@@ -133,54 +134,26 @@ export function ScoreboardOverlay({ channel }: Props) {
   const timerLow = fighter.timerRemaining <= 10 && fighter.timerRunning;
 
   return (
-    <div style={{
-      position: 'absolute',
-      top: 0, left: 0, right: 0,
-      padding: '12px 24px 4px',
-      fontFamily: "'Inter', 'Segoe UI', sans-serif",
-      pointerEvents: 'none',
-      userSelect: 'none',
-    }}>
-      {/* Timer & Round Indicators layer */}
-      <div style={{ display: 'flex', alignItems: 'stretch', gap: 8, height: 90 }}>
-        {/* ── P1 side ── */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          flex: 1, justifyContent: 'flex-start',
-        }}>
+    <div className={styles.bar}>
+      <div className={styles.mainRow}>
+        <div className={styles.playerSide} style={{ justifyContent: 'flex-start' }}>
           <Portrait url={fighter.p1.portrait} name={fighter.p1.charName || fighter.p1.name} side="p1" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, flex: 1 }}>
-            <div style={{
-              fontSize: '0.75rem', fontWeight: 700, color: p1Theme.accent,
-              textTransform: 'uppercase', letterSpacing: '0.08em',
-              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-            }}>
+          <div className={styles.playerInfo}>
+            <div className={styles.playerName} style={{ color: p1Theme.accent }}>
               {fighter.p1.name}
             </div>
-            <div style={{
-              height: 22, borderRadius: 4, overflow: 'hidden',
-              background: healthBgColor('p1'),
-              position: 'relative',
-              border: `1px solid ${p1Theme.primary}33`,
-            }}>
+            <div className={styles.healthBar} style={{ background: healthBgColor('p1'), border: `1px solid ${p1Theme.primary}33` }}>
               <motion.div
                 layout
                 animate={{ width: `${p1Pct * 100}%` }}
                 transition={{ type: 'spring', stiffness: 120, damping: 14 }}
+                className={styles.healthFill}
                 style={{
-                  height: '100%',
                   background: `linear-gradient(90deg, ${healthColor(fighter.p1.health, fighter.maxHealth)}, ${p1Theme.primary})`,
-                  borderRadius: 3,
                   boxShadow: `inset 0 0 8px ${p1Theme.glow}`,
                 }}
               />
-              <div style={{
-                position: 'absolute', inset: 0,
-                display: 'flex', alignItems: 'center', padding: '0 8px',
-                fontSize: '0.72rem', fontWeight: 800, color: '#fff',
-                fontVariantNumeric: 'tabular-nums',
-                textShadow: '0 1px 3px rgba(0,0,0,0.6)',
-              }}>
+              <div className={styles.healthText}>
                 {fighter.p1.health}
               </div>
             </div>
@@ -188,73 +161,40 @@ export function ScoreboardOverlay({ channel }: Props) {
           </div>
         </div>
 
-        {/* ── Center Timer ── */}
-        <div style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          justifyContent: 'center', width: 72, flexShrink: 0, gap: 2,
-        }}>
+        <div className={styles.centerTimer}>
           <motion.div
             animate={timerLow ? { scale: [1, 1.15, 1] } : {}}
             transition={{ repeat: timerLow ? Infinity : 0, duration: 0.5 }}
+            className={styles.timerText}
             style={{
               fontSize: '1.5rem', fontWeight: 900,
-              fontFamily: "'Inter', 'Segoe UI', monospace",
-              fontVariantNumeric: 'tabular-nums',
               color: timerLow ? '#fbbf24' : 'rgba(255,255,255,0.85)',
               textShadow: timerLow ? '0 0 12px rgba(251,191,36,0.6)' : '0 1px 4px rgba(0,0,0,0.5)',
-              lineHeight: 1,
-              letterSpacing: '0.02em',
-              transition: 'color 0.3s',
             }}
           >
             {formatTime(fighter.timerRemaining)}
           </motion.div>
-          <div style={{
-            fontSize: '0.55rem', fontWeight: 600,
-            color: 'rgba(255,255,255,0.4)',
-            textTransform: 'uppercase', letterSpacing: '0.12em',
-          }}>
-            TIME
-          </div>
+          <div className={styles.timerLabel}>TIME</div>
         </div>
 
-        {/* ── P2 side ── */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          flex: 1, justifyContent: 'flex-end',
-        }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, flex: 1, textAlign: 'right' }}>
-            <div style={{
-              fontSize: '0.75rem', fontWeight: 700, color: p2Theme.accent,
-              textTransform: 'uppercase', letterSpacing: '0.08em',
-              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-            }}>
+        <div className={styles.playerSide} style={{ justifyContent: 'flex-end' }}>
+          <div className={styles.playerInfo} style={{ textAlign: 'right' }}>
+            <div className={styles.playerName} style={{ color: p2Theme.accent }}>
               {fighter.p2.name}
             </div>
-            <div style={{
-              height: 22, borderRadius: 4, overflow: 'hidden',
-              background: healthBgColor('p2'),
-              position: 'relative',
-              border: `1px solid ${p2Theme.primary}33`,
-            }}>
+            <div className={styles.healthBar} style={{ background: healthBgColor('p2'), border: `1px solid ${p2Theme.primary}33` }}>
               <motion.div
                 layout
                 animate={{ width: `${p2Pct * 100}%` }}
                 transition={{ type: 'spring', stiffness: 120, damping: 14 }}
+                className={styles.healthFill}
                 style={{
-                  height: '100%', marginLeft: 'auto',
+                  marginLeft: 'auto',
                   background: `linear-gradient(270deg, ${healthColor(fighter.p2.health, fighter.maxHealth)}, ${p2Theme.primary})`,
-                  borderRadius: 3,
                   boxShadow: `inset 0 0 8px ${p2Theme.glow}`,
                 }}
               />
-              <div style={{
-                position: 'absolute', inset: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 8px',
-                fontSize: '0.72rem', fontWeight: 800, color: '#fff',
-                fontVariantNumeric: 'tabular-nums',
-                textShadow: '0 1px 3px rgba(0,0,0,0.6)',
-              }}>
+              <div className={`${styles.healthText} ${styles['healthText--right']}`}>
                 {fighter.p2.health}
               </div>
             </div>
@@ -264,20 +204,11 @@ export function ScoreboardOverlay({ channel }: Props) {
         </div>
       </div>
 
-      {/* ── Status Bar ── */}
       {fighter.status === 'finished' && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{
-            textAlign: 'center',
-            fontSize: '0.85rem', fontWeight: 800,
-            color: '#fbbf24',
-            textShadow: '0 0 20px rgba(251,191,36,0.5)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.15em',
-            marginTop: 6,
-          }}
+          className={styles.statusBar}
         >
           {fighter.p1.rounds > fighter.p2.rounds
             ? `${fighter.p1.name} WINS!`

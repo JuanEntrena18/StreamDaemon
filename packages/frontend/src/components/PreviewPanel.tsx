@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '../i18n/context';
+import styles from './PreviewPanel.module.css';
 
 interface Props {
   channel: string;
@@ -11,39 +12,36 @@ export function PreviewPanel({ channel }: Props) {
   const [loading, setLoading] = useState(true);
 
   return (
-    <div style={{ maxWidth: 900 }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={styles.heading}>
           {t('preview.title')}
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
+        <p className={styles.subtitle}>
           {t('preview.subtitle')}
         </p>
       </div>
 
       {!channel ? (
-        <div className="glass-card" style={{ padding: '3rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📺</div>
-          <p style={{ color: 'var(--sf-text-3)', fontSize: '0.9rem' }}>
+        <div className={`glass-card ${styles.emptyCard}`}>
+          <div className={styles.emptyIcon}>📺</div>
+          <p className={styles.emptyText}>
             {t('preview.emptyState')}
           </p>
         </div>
       ) : (
         <>
-          <div style={{
-            marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
-          }}>
+          <div className={styles.topBar}>
             <a
               href={`https://twitch.tv/${channel}`}
               target="_blank"
               rel="noreferrer"
-              className="sf-btn sf-btn-primary"
-              style={{ fontSize: '0.8rem', padding: '0.4rem 0.875rem', textDecoration: 'none' }}
+              className={`sf-btn sf-btn-primary ${styles.twitchBtn}`}
             >
               {t('preview.abrirEnTwitch')}
             </a>
             {loading && (
-              <span style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)' }}>
+              <span className={styles.loadingHint}>
                 {t('preview.cargando')}
               </span>
             )}
@@ -52,25 +50,17 @@ export function PreviewPanel({ channel }: Props) {
           <motion.div
             initial={{ y: 10 }}
             animate={{ y: 0 }}
-            className="glass-card"
-            style={{ padding: '0.25rem', overflow: 'hidden' }}
+            className={`glass-card ${styles.playerCard}`}
           >
-            <div style={{
-              position: 'relative',
-              width: '100%',
-              paddingBottom: '56.25%',
-              borderRadius: 'var(--sf-radius-sm)',
-              overflow: 'hidden',
-              background: '#0a0a1a',
-            }}>
+            <div className={styles.playerWrapper}>
               <iframe
                 key={channel}
                 src={`https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&parent=localhost&parent=127.0.0.1&muted=true`}
                 onLoad={() => setLoading(false)}
+                className={styles.iframe}
                 style={{
                   position: 'absolute', top: 0, left: 0,
                   width: '100%', height: '100%',
-                  border: 'none',
                 }}
                 allow="autoplay; fullscreen"
                 allowFullScreen
@@ -78,15 +68,7 @@ export function PreviewPanel({ channel }: Props) {
             </div>
           </motion.div>
 
-          <div style={{
-            marginTop: '0.75rem', padding: '0.75rem 1rem',
-            background: 'rgba(6,182,212,0.06)',
-            border: '1px solid rgba(6,182,212,0.15)',
-            borderRadius: 'var(--sf-radius-sm)',
-            fontSize: '0.75rem',
-            color: 'var(--sf-text-3)',
-            lineHeight: 1.5,
-          }}>
+          <div className={styles.tipBox}>
             {t('preview.tip', { hostname: window.location.hostname })}
           </div>
         </>

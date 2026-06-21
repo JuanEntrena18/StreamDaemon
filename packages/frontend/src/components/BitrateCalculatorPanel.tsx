@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from '../i18n/context';
+import styles from './BitrateCalculatorPanel.module.css';
 
 interface Props {
   channel: string;
@@ -43,14 +44,12 @@ function getRecommendation(uploadMbps: number) {
   return { ...last, videoBitrate: vb, totalBitrate: tb, maxBitrate: Math.round(maxBitrate) };
 }
 
-function btnStyle(active: boolean, color: string, disabled?: boolean): React.CSSProperties {
+function btnStyle(active: boolean, color: string): React.CSSProperties {
   return {
-    padding: '0.35rem 0.75rem', borderRadius: 6, border: '1px solid',
-    fontSize: '0.82rem', cursor: disabled ? 'not-allowed' : 'pointer',
-    fontWeight: active ? 700 : 400, opacity: disabled ? 0.5 : 1,
+    borderColor: active ? color : 'var(--sf-border)',
     background: active ? `${color}22` : 'transparent',
     color: active ? color : 'var(--sf-text-2)',
-    borderColor: active ? color : 'var(--sf-border)',
+    fontWeight: active ? 700 : 400,
   };
 }
 
@@ -110,25 +109,25 @@ export function BitrateCalculatorPanel(_props: Props) {
   const speedVal = speedEntered && uploadSpeed ? parseFloat(uploadSpeed) : 0;
 
   return (
-    <div style={{ maxWidth: 720 }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={`sf-heading ${styles.heading}`}>
           {fmtLabel('title')}
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
+        <p className="text-muted text-sm">
           {fmtLabel('subtitle')}
         </p>
       </div>
 
       {/* Internet speed */}
-      <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
-        <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.3rem', color: 'var(--sf-text)' }}>
+      <div className="glass-card sf-card--tight">
+        <h3 className={styles.sectionTitle}>
           {fmtLabel('speedSection')}
         </h3>
-        <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.75rem' }}>
+        <p className={`text-xs text-muted mb-3`}>
           {fmtLabel('speedDesc')}
         </p>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className={styles.speedRow}>
           <input type="number" step="0.1" min={0.5} max={1000}
             value={uploadSpeed}
             onChange={(e) => { setUploadSpeed(e.target.value); setSpeedEntered(false); }}
@@ -136,26 +135,19 @@ export function BitrateCalculatorPanel(_props: Props) {
             placeholder={fmtLabel('speedPlaceholder')}
             className="sf-input"
             style={{ width: 120 }} />
-          <span style={{ fontSize: '0.82rem', color: 'var(--sf-text-3)' }}>Mbps</span>
+          <span className={styles.speedUnit}>Mbps</span>
           <button onClick={handleCalculate}
             disabled={!uploadSpeed || isNaN(parseFloat(uploadSpeed))}
-            className="sf-btn sf-btn-primary"
-            style={{ fontSize: '0.82rem', padding: '0.4rem 1rem' }}>
+            className={`sf-btn sf-btn-primary ${styles.calcBtn}`}>
             {fmtLabel('calculate')}
           </button>
           <a href="https://fast.com" target="_blank" rel="noopener noreferrer"
-            style={{
-              fontSize: '0.78rem', color: '#60a5fa', textDecoration: 'none',
-              padding: '0.35rem 0.75rem', borderRadius: 6,
-              border: '1px solid rgba(96,165,250,0.3)',
-            }}>
+            className={styles.fastLink}>
             {fmtLabel('openFast')} ↗
           </a>
         </div>
         {rec && (
-          <div style={{
-            marginTop: '0.75rem', padding: '0.5rem 0.75rem', borderRadius: 6,
-            fontSize: '0.78rem',
+          <div className={styles.resultBanner} style={{
             background: 'rgba(16,185,129,0.08)', color: '#34d399',
             borderLeft: '3px solid #34d399',
           }}>
@@ -166,35 +158,24 @@ export function BitrateCalculatorPanel(_props: Props) {
 
       {/* Recommendation */}
       {rec && (
-        <div className="glass-card" style={{
-          padding: '1.25rem', marginBottom: '1rem',
-          border: '1px solid rgba(16,185,129,0.2)',
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div className={`glass-card sf-card--tight ${styles.recBorder}`}>
+          <div className={styles.recHeader}>
             <div>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.2rem', color: '#34d399' }}>
+              <h3 className={styles.recTitle}>
                 {fmtLabel('recommendationTitle')}
               </h3>
-              <p style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)', marginBottom: '0' }}>
+              <p className={styles.recDesc}>
                 {fmtLabel('recommendationDesc')}
               </p>
             </div>
             {!isRecommended && (
               <button onClick={handleCalculate}
-                className="sf-btn"
-                style={{
-                  fontSize: '0.78rem', padding: '0.35rem 0.75rem',
-                  background: 'rgba(16,185,129,0.1)', color: '#34d399',
-                  border: '1px solid rgba(16,185,129,0.25)',
-                }}>
+                className={`sf-btn ${styles.recApplyBtn}`}>
                 {fmtLabel('applySettings')}
               </button>
             )}
           </div>
-          <div style={{
-            marginTop: '0.75rem', display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.5rem',
-          }}>
+          <div className={styles.recGrid}>
             <MiniBox label={fmtLabel('resolution')} value={rec.label} color="#60a5fa" />
             <MiniBox label={fmtLabel('fps')} value={`${rec.fps} fps`} color="#34d399" />
             <MiniBox label={fmtLabel('videoBitrate')} value={`${rec.videoBitrate} kbps`} color="#a78bfa" />
@@ -205,18 +186,13 @@ export function BitrateCalculatorPanel(_props: Props) {
       )}
 
       {/* Calculator form */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          marginBottom: '1rem',
-        }}>
-          <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--sf-text)', margin: 0 }}>
+      <div className="glass-card sf-card">
+        <div className={styles.formHeader}>
+          <h3 className={styles.formTitle}>
             {fmtLabel('manualMode')}
           </h3>
           {rec && (
-            <span style={{
-              fontSize: '0.68rem', padding: '0.15rem 0.5rem', borderRadius: 4,
-              textTransform: 'uppercase', fontWeight: 700,
+            <span className={styles.modeBadge} style={{
               background: isRecommended ? 'rgba(16,185,129,0.15)' : 'rgba(251,191,36,0.15)',
               color: isRecommended ? '#34d399' : '#fbbf24',
             }}>
@@ -226,48 +202,51 @@ export function BitrateCalculatorPanel(_props: Props) {
         </div>
 
         {/* Resolution */}
-        <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.5rem' }}>
+        <div className={styles.fieldGroup}>
+          <div className={styles.fieldLabel}>
             {fmtLabel('resolution')}
           </div>
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+          <div className={styles.pillGroup}>
             {Object.keys(PRESETS).map((r) => (
               <button key={r} onClick={() => { setResolution(r); markManual(); }}
+                className={styles.pillBtn}
                 style={btnStyle(resolution === r, '#60a5fa')}>
                 {r}
               </button>
             ))}
             <button onClick={() => { setResolution('custom'); markManual(); }}
+              className={styles.pillBtn}
               style={btnStyle(isCustom, '#a78bfa')}>
               {fmtLabel('custom')}
             </button>
           </div>
           {isCustom && (
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div className={styles.customInputRow}>
               <input type="number" value={customW} min={320} max={3840} step={2}
                 onChange={(e) => { setCustomW(Number(e.target.value)); markManual(); }}
                 className="sf-input" style={{ width: 100 }}
                 placeholder={fmtLabel('width')} />
-              <span style={{ color: 'var(--sf-text-3)', alignSelf: 'center' }}>×</span>
+              <span className={styles.speedUnit} style={{ alignSelf: 'center' }}>×</span>
               <input type="number" value={customH} min={240} max={2160} step={2}
                 onChange={(e) => { setCustomH(Number(e.target.value)); markManual(); }}
                 className="sf-input" style={{ width: 100 }}
                 placeholder={fmtLabel('height')} />
             </div>
           )}
-          <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginTop: '0.3rem' }}>
+          <div className={styles.resolutionHint}>
             {w} × {h}
           </div>
         </div>
 
         {/* FPS */}
-        <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.5rem' }}>
+        <div className={styles.fieldGroup}>
+          <div className={styles.fieldLabel}>
             {fmtLabel('fps')}
           </div>
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+          <div className={styles.pillGroup}>
             {FPS_OPTIONS.map((f) => (
               <button key={f} onClick={() => { setFps(f); markManual(); }}
+                className={styles.pillBtn}
                 style={btnStyle(fps === f, '#34d399')}>
                 {f} fps
               </button>
@@ -276,31 +255,32 @@ export function BitrateCalculatorPanel(_props: Props) {
         </div>
 
         {/* BPP */}
-        <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)' }}>
+        <div className={styles.fieldGroup}>
+          <div className={styles.sliderHeader}>
+            <span className={styles.sliderLabel}>
               {fmtLabel('bpp')}
             </span>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#60a5fa' }}>
+            <span className={styles.sliderValue} style={{ color: '#60a5fa' }}>
               {bpp.toFixed(2)}
             </span>
           </div>
           <input type="range" min={0.01} max={0.15} step={0.01} value={bpp}
             onChange={(e) => { setBpp(Number(e.target.value)); markManual(); }}
-            style={{ width: '100%', accentColor: '#7c3aed' }} />
-          <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)' }}>
+            className={styles.slider} style={{ accentColor: '#7c3aed' }} />
+          <div className={styles.sliderHint}>
             {fmtLabel('bppDesc')}
           </div>
         </div>
 
         {/* Audio bitrate */}
-        <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.5rem' }}>
+        <div className={styles.fieldGroup}>
+          <div className={styles.fieldLabel}>
             {fmtLabel('audio')}
           </div>
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+          <div className={styles.pillGroup}>
             {AUDIO_OPTIONS.map((a) => (
               <button key={a} onClick={() => { setAudioBitrate(a); markManual(); }}
+                className={styles.pillBtn}
                 style={btnStyle(audioBitrate === a, '#fbbf24')}>
                 {a} kbps
               </button>
@@ -310,52 +290,44 @@ export function BitrateCalculatorPanel(_props: Props) {
 
         {/* Usage % */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)' }}>
+          <div className={styles.sliderHeader}>
+            <span className={styles.sliderLabel}>
               {fmtLabel('usage')}
             </span>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#34d399' }}>
+            <span className={styles.sliderValue} style={{ color: '#34d399' }}>
               {usagePct}%
             </span>
           </div>
           <input type="range" min={50} max={100} step={1} value={usagePct}
             onChange={(e) => setUsagePct(Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#7c3aed' }} />
-          <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)' }}>
+            className={styles.slider} style={{ accentColor: '#7c3aed' }} />
+          <div className={styles.sliderHint}>
             {fmtLabel('usageDesc')}
           </div>
         </div>
       </div>
 
       {/* Results */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+      <div className="glass-card sf-card">
+        <div className={styles.resultsGrid}>
           <ResultBox label={fmtLabel('videoBitrate')} value={`${videoBitrate.toLocaleString()}`} unit="kbps" color="#60a5fa" />
           <ResultBox label={fmtLabel('totalBitrate')} value={`${totalBitrate.toLocaleString()}`} unit="kbps" color="#a78bfa" />
           <ResultBox label={fmtLabel('needed')} value={`${neededUpload.toFixed(1)}`} unit="mbps" color="#fbbf24" />
         </div>
 
         {exceedsTwitch && (
-          <div style={{
-            marginTop: '0.75rem', padding: '0.5rem 0.75rem', borderRadius: 6,
-            fontSize: '0.78rem', background: 'rgba(239,68,68,0.1)', color: '#f87171',
-          }}>
+          <div className={styles.warningBox} style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171' }}>
             {fmtLabel('warning')}
           </div>
         )}
         {!exceedsTwitch && videoBitrate > 0 && (
-          <div style={{
-            marginTop: '0.75rem', padding: '0.5rem 0.75rem', borderRadius: 6,
-            fontSize: '0.78rem', background: 'rgba(16,185,129,0.1)', color: '#34d399',
-          }}>
+          <div className={styles.warningBox} style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399' }}>
             {fmtLabel('recommendation')}
           </div>
         )}
 
         {speedEntered && speedVal > 0 && (
-          <div style={{
-            marginTop: '0.5rem', padding: '0.5rem 0.75rem', borderRadius: 6,
-            fontSize: '0.78rem',
+          <div className={styles.connectionBox} style={{
             background: neededUpload <= speedVal ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
             color: neededUpload <= speedVal ? '#34d399' : '#f87171',
             borderLeft: `3px solid ${neededUpload <= speedVal ? '#34d399' : '#f87171'}`,
@@ -368,48 +340,36 @@ export function BitrateCalculatorPanel(_props: Props) {
       </div>
 
       {/* Info */}
-      <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
-        <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--sf-text)' }}>
+      <div className="glass-card sf-card--tight">
+        <div className={styles.aboutTitle}>
           {fmtLabel('aboutTitle')}
         </div>
-        <div style={{ fontSize: '0.78rem', lineHeight: 1.6, color: 'var(--sf-text-2)' }}>
+        <div className={styles.aboutText}>
           {fmtLabel('aboutText')}
         </div>
       </div>
 
       {/* OBS Guide */}
-      <div className="glass-card" style={{ padding: '1.25rem' }}>
+      <div className="glass-card sf-card--tight">
         <button onClick={() => setShowObsGuide(!showObsGuide)}
-          style={{
-            width: '100%', background: 'none', border: 'none', cursor: 'pointer',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            color: 'var(--sf-text)', fontSize: '0.82rem', fontWeight: 600, padding: 0,
-          }}>
+          className={styles.obsToggleBtn}>
           <span>{fmtLabel('obsGuide')}</span>
-          <span style={{ fontSize: '0.9rem', transition: 'transform 0.2s', transform: showObsGuide ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+          <span className={styles.obsToggleArrow} style={{ transform: showObsGuide ? 'rotate(180deg)' : 'rotate(0deg)' }}>
             ▼
           </span>
         </button>
 
         {showObsGuide && (
-          <div style={{ marginTop: '1rem', fontSize: '0.78rem', lineHeight: 1.6, color: 'var(--sf-text-2)' }}>
+          <div className={styles.obsContent}>
             {rec && (
-              <div style={{
-                padding: '0.5rem 0.75rem', borderRadius: 6, marginBottom: '0.75rem',
-                background: 'rgba(16,185,129,0.08)', color: '#34d399',
-                borderLeft: '3px solid #34d399', fontSize: '0.75rem',
-              }}>
+              <div className={styles.obsRecBanner}>
                 {label('obsGuideForSpeed').replace('{speed}', speedVal.toFixed(1)).replace('{label}', rec.label)}
               </div>
             )}
-            <p style={{ marginBottom: '0.75rem' }}>{fmtLabel('obsGuideDesc')}</p>
+            <p className="mb-3">{fmtLabel('obsGuideDesc')}</p>
 
-            <div style={{
-              padding: '0.75rem', borderRadius: 6, marginBottom: '1rem',
-              background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)',
-              fontFamily: 'monospace', fontSize: '0.82rem',
-            }}>
-              <div style={{ fontWeight: 700, color: '#a78bfa', marginBottom: '0.4rem', fontFamily: 'Inter, sans-serif' }}>
+            <div className={styles.obsSummaryBox}>
+              <div className={styles.obsSummaryTitle}>
                 {fmtLabel('obsGuideSummary')}
               </div>
               <SummaryRow label={fmtLabel('videoBitrate')} value={`${videoBitrate} kbps`} />
@@ -421,33 +381,33 @@ export function BitrateCalculatorPanel(_props: Props) {
             </div>
 
             <SectionTitle text={fmtLabel('obsGuideVideo')} />
-            <p>{fmtLabel('obsGuideOutputStep')}</p>
+            <p className="mb-3">{fmtLabel('obsGuideOutputStep')}</p>
             <ul style={{ paddingLeft: '1.25rem', marginBottom: '0.75rem' }}>
-              <li style={{ marginBottom: '0.25rem' }}><strong>{fmtLabel('obsGuideVideoBitrate')}</strong> <code style={codeStyle}>{videoBitrate}</code> kbps</li>
-              <li style={{ marginBottom: '0.25rem' }}><strong>{fmtLabel('obsGuideAudioBitrate')}</strong> <code style={codeStyle}>{audioBitrate}</code> kbps</li>
-              <li><strong>{fmtLabel('obsGuideEncoderItem')}</strong> <code style={codeStyle}>x264</code> / <code style={codeStyle}>NVENC H.264</code> / <code style={codeStyle}>AMF</code></li>
+              <li className="mb-2"><strong>{fmtLabel('obsGuideVideoBitrate')}</strong> <code className={styles.code}>{videoBitrate}</code> kbps</li>
+              <li className="mb-2"><strong>{fmtLabel('obsGuideAudioBitrate')}</strong> <code className={styles.code}>{audioBitrate}</code> kbps</li>
+              <li><strong>{fmtLabel('obsGuideEncoderItem')}</strong> <code className={styles.code}>x264</code> / <code className={styles.code}>NVENC H.264</code> / <code className={styles.code}>AMF</code></li>
             </ul>
 
             <SectionTitle text={fmtLabel('obsGuideAdvanced')} />
             <ul style={{ paddingLeft: '1.25rem', marginBottom: '0.75rem' }}>
-              <li style={{ marginBottom: '0.25rem' }}><strong>{fmtLabel('obsGuideKeyframeItem')}</strong> <code style={codeStyle}>2</code> {fmtLabel('obsGuideKeyframeDesc')}</li>
-              <li style={{ marginBottom: '0.25rem' }}><strong>{fmtLabel('obsGuidePreset')}</strong> <code style={codeStyle}>veryfast</code> (x264) o <code style={codeStyle}>P6: Slower</code> (NVENC) {fmtLabel('obsGuidePresetDesc')}</li>
-              <li><strong>{fmtLabel('obsGuideProfile')}</strong> <code style={codeStyle}>high</code></li>
+              <li className="mb-2"><strong>{fmtLabel('obsGuideKeyframeItem')}</strong> <code className={styles.code}>2</code> {fmtLabel('obsGuideKeyframeDesc')}</li>
+              <li className="mb-2"><strong>{fmtLabel('obsGuidePreset')}</strong> <code className={styles.code}>veryfast</code> (x264) o <code className={styles.code}>P6: Slower</code> (NVENC) {fmtLabel('obsGuidePresetDesc')}</li>
+              <li><strong>{fmtLabel('obsGuideProfile')}</strong> <code className={styles.code}>high</code></li>
             </ul>
 
             <SectionTitle text={fmtLabel('obsGuideAudio')} />
-            <p>{fmtLabel('obsGuideAudioDesc')}</p>
+            <p className="mb-3">{fmtLabel('obsGuideAudioDesc')}</p>
             <ul style={{ paddingLeft: '1.25rem', marginBottom: '0.75rem' }}>
-              <li style={{ marginBottom: '0.25rem' }}><strong>{fmtLabel('obsGuideSampleRate')}</strong> <code style={codeStyle}>48 kHz</code></li>
-              <li style={{ marginBottom: '0.25rem' }}><strong>{fmtLabel('obsGuideAudioBitrateItem')}</strong> <code style={codeStyle}>{audioBitrate}</code> kbps</li>
+              <li className="mb-2"><strong>{fmtLabel('obsGuideSampleRate')}</strong> <code className={styles.code}>48 kHz</code></li>
+              <li className="mb-2"><strong>{fmtLabel('obsGuideAudioBitrateItem')}</strong> <code className={styles.code}>{audioBitrate}</code> kbps</li>
             </ul>
 
             <SectionTitle text={fmtLabel('obsGuideVideoTab')} />
             <ul style={{ paddingLeft: '1.25rem', marginBottom: '0.5rem' }}>
-              <li style={{ marginBottom: '0.25rem' }}><strong>{fmtLabel('obsGuideBaseRes')}</strong> {fmtLabel('obsGuideBaseResDesc')}</li>
-              <li style={{ marginBottom: '0.25rem' }}><strong>{fmtLabel('obsGuideOutputRes')}</strong> <code style={codeStyle}>{w} × {h}</code></li>
-              <li style={{ marginBottom: '0.25rem' }}><strong>{fmtLabel('obsGuideFpsItem')}</strong> <code style={codeStyle}>{fps}</code></li>
-              <li><strong>{fmtLabel('obsGuideFilter')}</strong> <code style={codeStyle}>Lanczos</code></li>
+              <li className="mb-2"><strong>{fmtLabel('obsGuideBaseRes')}</strong> {fmtLabel('obsGuideBaseResDesc')}</li>
+              <li className="mb-2"><strong>{fmtLabel('obsGuideOutputRes')}</strong> <code className={styles.code}>{w} × {h}</code></li>
+              <li className="mb-2"><strong>{fmtLabel('obsGuideFpsItem')}</strong> <code className={styles.code}>{fps}</code></li>
+              <li><strong>{fmtLabel('obsGuideFilter')}</strong> <code className={styles.code}>Lanczos</code></li>
             </ul>
           </div>
         )}
@@ -456,43 +416,36 @@ export function BitrateCalculatorPanel(_props: Props) {
   );
 }
 
-const codeStyle: React.CSSProperties = {
-  background: 'rgba(124,58,237,0.12)', padding: '0.1rem 0.35rem', borderRadius: 4,
-  color: '#a78bfa', fontSize: '0.78rem',
-};
-
 function ResultBox({ label, value, unit, color }: { label: string; value: string; unit: string; color: string }) {
   return (
-    <div style={{ background: 'var(--sf-surface)', borderRadius: 8, padding: '0.75rem 1rem', textAlign: 'center' }}>
-      <div style={{ fontSize: '1.1rem', fontWeight: 700, color }}>{value}</div>
-      <div style={{ fontSize: '0.6rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{unit}</div>
-      <div style={{ fontSize: '0.7rem', color: 'var(--sf-text-2)', marginTop: '0.15rem' }}>{label}</div>
+    <div className={styles.resultBox}>
+      <div className={styles.resultValue} style={{ color }}>{value}</div>
+      <div className={styles.resultUnit}>{unit}</div>
+      <div className={styles.resultLabel}>{label}</div>
     </div>
   );
 }
 
 function MiniBox({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div style={{ background: 'var(--sf-surface)', borderRadius: 6, padding: '0.5rem', textAlign: 'center' }}>
-      <div style={{ fontSize: '0.82rem', fontWeight: 700, color }}>{value}</div>
-      <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)' }}>{label}</div>
+    <div className={styles.miniBox}>
+      <div className={styles.miniValue} style={{ color }}>{value}</div>
+      <div className={styles.miniLabel}>{label}</div>
     </div>
   );
 }
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0', borderBottom: '1px solid rgba(124,58,237,0.1)' }}>
+    <div className={styles.summaryRow}>
       <span>{label}</span>
-      <span style={{ color: '#c084fc', fontWeight: 600 }}>{value}</span>
+      <span className={styles.summaryValue}>{value}</span>
     </div>
   );
 }
 
 function SectionTitle({ text }: { text: string }) {
   return (
-    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.4rem', marginTop: '0.25rem' }}>
-      {text}
-    </div>
+    <div className={styles.sectionTitleSub}>{text}</div>
   );
 }

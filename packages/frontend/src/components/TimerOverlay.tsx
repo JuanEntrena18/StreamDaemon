@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import type { TimerState } from '@streamforger/shared';
+import styles from './TimerOverlay.module.css';
 
 interface Props {
   channel: string;
@@ -59,62 +60,30 @@ export function TimerOverlay({ channel }: Props) {
       : '#a78bfa';
 
   return (
-    <div style={{
-      position: 'absolute',
-      top: '50%', left: '50%',
-      transform: 'translate(-50%, -50%)',
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', gap: 8,
-      fontFamily: "'Inter', sans-serif",
-    }}>
-      {/* Label */}
+    <div className={styles.center}>
       {timer.label && (
-        <div style={{
-          fontSize: '1rem', fontWeight: 600,
-          color: 'rgba(255,255,255,0.7)',
-          textTransform: 'uppercase', letterSpacing: '0.15em',
-        }}>
+        <div className={styles.label}>
           {timer.label}
         </div>
       )}
 
-      {/* Timer display */}
-      <div style={{
-        fontSize: isUrgent ? '5rem' : '4rem',
-        fontWeight: 800,
-        fontVariantNumeric: 'tabular-nums',
-        color: timerColor,
-        textShadow: `0 0 30px ${timerColor}44, 0 0 60px ${timerColor}22`,
-        lineHeight: 1,
-        transition: 'font-size 0.3s, color 0.3s',
-      }}>
+      <div
+        className={`${styles.timer} ${isUrgent ? styles['timer--urgent'] : styles['timer--normal']}`}
+        style={{
+          color: timerColor,
+          textShadow: `0 0 30px ${timerColor}44, 0 0 60px ${timerColor}22`,
+        }}
+      >
         {isFinished ? '00:00' : formatTime(remaining)}
       </div>
 
-      {/* Status badge */}
-      <div style={{
-        fontSize: '0.7rem', fontWeight: 600,
-        textTransform: 'uppercase', letterSpacing: '0.12em',
-        color: timerColor + '88',
-        marginTop: 4,
-      }}>
+      <div className={styles.statusBadge} style={{ color: timerColor + '88' }}>
         {isFinished ? t('timer.tiempoCumplido') : timer.status === 'paused' ? t('timer.pausado') : t('timer.corriendo')}
       </div>
 
-      {/* Progress bar */}
       {!isFinished && (
-        <div style={{
-          width: 200, height: 3,
-          background: 'rgba(255,255,255,0.08)',
-          borderRadius: 99, overflow: 'hidden',
-          marginTop: 4,
-        }}>
-          <div style={{
-            width: `${progress * 100}%`, height: '100%',
-            background: timerColor,
-            borderRadius: 99,
-            transition: 'width 1s linear',
-          }} />
+        <div className={styles.progressTrack}>
+          <div className={styles.progressFill} style={{ width: `${progress * 100}%`, background: timerColor }} />
         </div>
       )}
     </div>

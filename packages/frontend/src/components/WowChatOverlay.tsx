@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import type { ChatMessage } from '@streamforger/shared';
+import styles from './WowChatOverlay.module.css';
 
 const MAX_MESSAGES = 18;
 
@@ -56,14 +57,7 @@ export function WowChatOverlay({ channel }: Props) {
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed', inset: 0,
-        pointerEvents: 'none', overflow: 'hidden',
-        fontFamily: "'Cinzel', 'Palatino Linotype', 'Times New Roman', serif",
-      }}
-    >
-      {/* ── Google Font: Cinzel ── */}
+    <div className={styles.container}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap');
 
@@ -97,43 +91,16 @@ export function WowChatOverlay({ channel }: Props) {
         .horda-flicker { animation: hordaFlicker 8s ease-in-out infinite; }
       `}</style>
 
-      {/* ════════════════════════════════
-          FONDO: Niebla de guerra oscura
-      ════════════════════════════════ */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: 'transparent',
-        pointerEvents: 'none',
-      }} />
-
-      {/* Vignette lateral suave */}
-      <div style={{
-        position: 'absolute', inset: 0,
+      <div className={styles.vignette} style={{
         background: `
           radial-gradient(ellipse 20% 100% at 0% 50%, ${H.red}08 0%, transparent 100%),
           radial-gradient(ellipse 20% 100% at 100% 50%, ${H.red}08 0%, transparent 100%)
         `,
-        pointerEvents: 'none',
       }} />
 
-      {/* ════════════════════════════════
-          SECCIÓN WEBCAM — arriba derecha
-          Marco: Piedra orco grabada con runas
-      ════════════════════════════════ */}
-      <div style={{
-        position: 'absolute',
-        top: 24, right: 24,
-        width: 320, height: 240,
-        pointerEvents: 'none',
-      }}>
-        {/* Zona de video (transparente para la webcam de OBS) */}
-        <div style={{
-          position: 'absolute', inset: 16,
-          background: 'transparent',
-          border: `2px solid ${H.red}66`,
-        }} />
+      <div className={styles.webcamFrame}>
+        <div className={styles.webcamArea} style={{ border: `2px solid ${H.red}66` }} />
 
-        {/* Marco exterior de piedra orco - SVG */}
         <svg
           width="320" height="240"
           viewBox="0 0 320 240"
@@ -166,20 +133,14 @@ export function WowChatOverlay({ channel }: Props) {
             </filter>
           </defs>
 
-          {/* Relleno fondo del marco */}
           <rect x="0" y="0" width="320" height="240" fill="url(#hordaStone)" rx="4" />
           <rect x="0" y="0" width="320" height="240" fill="transparent" />
 
-          {/* Borde superior */}
           <rect x="0" y="0" width="320" height="16" fill="url(#hordaStone)" />
-          {/* Borde inferior */}
           <rect x="0" y="224" width="320" height="16" fill="url(#hordaStone)" />
-          {/* Borde izquierdo */}
           <rect x="0" y="0" width="16" height="240" fill="url(#hordaStone)" />
-          {/* Borde derecho */}
           <rect x="304" y="0" width="16" height="240" fill="url(#hordaStone)" />
 
-          {/* Líneas de borde dorado */}
           <rect x="0" y="0" width="320" height="16" fill="url(#hordaGoldH)" opacity="0.4" />
           <rect x="0" y="224" width="320" height="16" fill="url(#hordaGoldH)" opacity="0.4" />
           <line x1="0" y1="15.5" x2="320" y2="15.5" stroke={H.goldLight} strokeWidth="0.5" opacity="0.6" />
@@ -187,92 +148,51 @@ export function WowChatOverlay({ channel }: Props) {
           <line x1="15.5" y1="0" x2="15.5" y2="240" stroke={H.goldLight} strokeWidth="0.5" opacity="0.6" />
           <line x1="304.5" y1="0" x2="304.5" y2="240" stroke={H.goldLight} strokeWidth="0.5" opacity="0.6" />
 
-          {/* ── Esquinas: cráneos orcos estilizados ── */}
-          {/* Esquina superior izquierda */}
           <g transform="translate(0,0)">
             <polygon points="0,0 32,0 0,32" fill={H.stone} opacity="0.95" />
             <text x="8" y="22" fontSize="16" fill={H.red} opacity="0.9" fontFamily="serif">☠</text>
             <line x1="0" y1="32" x2="32" y2="0" stroke={H.goldLight} strokeWidth="0.5" opacity="0.5" />
           </g>
-          {/* Esquina superior derecha */}
           <g transform="translate(320,0) scale(-1,1)">
             <polygon points="0,0 32,0 0,32" fill={H.stone} opacity="0.95" />
             <text x="8" y="22" fontSize="16" fill={H.red} opacity="0.9" fontFamily="serif">☠</text>
             <line x1="0" y1="32" x2="32" y2="0" stroke={H.goldLight} strokeWidth="0.5" opacity="0.5" />
           </g>
-          {/* Esquina inferior izquierda */}
           <g transform="translate(0,240) scale(1,-1)">
             <polygon points="0,0 32,0 0,32" fill={H.stone} opacity="0.95" />
             <text x="8" y="22" fontSize="16" fill={H.red} opacity="0.9" fontFamily="serif">☠</text>
             <line x1="0" y1="32" x2="32" y2="0" stroke={H.goldLight} strokeWidth="0.5" opacity="0.5" />
           </g>
-          {/* Esquina inferior derecha */}
           <g transform="translate(320,240) scale(-1,-1)">
             <polygon points="0,0 32,0 0,32" fill={H.stone} opacity="0.95" />
             <text x="8" y="22" fontSize="16" fill={H.red} opacity="0.9" fontFamily="serif">☠</text>
             <line x1="0" y1="32" x2="32" y2="0" stroke={H.goldLight} strokeWidth="0.5" opacity="0.5" />
           </g>
 
-          {/* ── Banner central superior: emblema Horda ── */}
           <g transform="translate(80,0)">
-            {/* Pergamino central */}
             <rect x="0" y="0" width="160" height="16" fill={H.stone} />
-            {/* Símbolo de la Horda (H estilizada con colgantes) */}
-            <text
-              x="80" y="13"
-              fontSize="10" fontFamily="'Cinzel', serif" fontWeight="700"
-              fill={H.goldLight} textAnchor="middle" letterSpacing="3"
-              opacity="0.9"
-            >
-              ⚔ FOR THE HORDE ⚔
-            </text>
+            <text x="80" y="13" fontSize="10" fontFamily="'Cinzel', serif" fontWeight="700" fill={H.goldLight} textAnchor="middle" letterSpacing="3" opacity="0.9">⚔ FOR THE HORDE ⚔</text>
           </g>
 
-          {/* ── Runas laterales izquierdas ── */}
           {['᚛', '᚜', 'ᚈ'].map((rune, i) => (
-            <text
-              key={i}
-              x="7" y={80 + i * 28}
-              fontSize="12" fontFamily="serif"
-              fill={H.red} opacity="0.6" textAnchor="middle"
-            >
-              {rune}
-            </text>
+            <text key={i} x="7" y={80 + i * 28} fontSize="12" fontFamily="serif" fill={H.red} opacity="0.6" textAnchor="middle">{rune}</text>
           ))}
-          {/* ── Runas laterales derechas ── */}
           {['᚛', '᚜', 'ᚈ'].map((rune, i) => (
-            <text
-              key={i}
-              x="313" y={80 + i * 28}
-              fontSize="12" fontFamily="serif"
-              fill={H.red} opacity="0.6" textAnchor="middle"
-            >
-              {rune}
-            </text>
+            <text key={i} x="313" y={80 + i * 28} fontSize="12" fontFamily="serif" fill={H.red} opacity="0.6" textAnchor="middle">{rune}</text>
           ))}
 
-          {/* ── Banner inferior: nombre del canal ── */}
           <g transform="translate(40,224)">
             <rect x="0" y="0" width="240" height="16" fill="#1a0803" opacity="0.95" />
             <rect x="0" y="0" width="240" height="16" fill="url(#hordaGoldH)" opacity="0.25" />
-            <text
-              x="120" y="12"
-              fontSize="9" fontFamily="'Cinzel', serif" fontWeight="600"
-              fill={H.goldLight} textAnchor="middle" letterSpacing="2"
-              opacity="0.85"
-            >
-              {channel.toUpperCase()}
-            </text>
+            <text x="120" y="12" fontSize="9" fontFamily="'Cinzel', serif" fontWeight="600" fill={H.goldLight} textAnchor="middle" letterSpacing="2" opacity="0.85">{channel.toUpperCase()}</text>
           </g>
 
-          {/* Destellos de brasa en esquinas (círculos pequeños) */}
           <circle cx="32" cy="32" r="2" fill={H.ember} opacity="0.4" />
           <circle cx="288" cy="32" r="2" fill={H.ember} opacity="0.4" />
           <circle cx="32" cy="208" r="2" fill={H.ember} opacity="0.4" />
           <circle cx="288" cy="208" r="2" fill={H.ember} opacity="0.4" />
         </svg>
 
-        {/* Destello de brasa animado */}
         <div className="horda-ember" style={{
           position: 'absolute', top: 28, right: 28,
           width: 4, height: 4, borderRadius: '50%',
@@ -288,22 +208,8 @@ export function WowChatOverlay({ channel }: Props) {
         }} />
       </div>
 
-      {/* ════════════════════════════════
-          SECCIÓN CHAT — pergamino Horda
-          Posición: abajo izquierda
-      ════════════════════════════════ */}
-      <div style={{
-        position: 'absolute',
-        bottom: 20, left: 20,
-        width: 420,
-        pointerEvents: 'none',
-      }}>
-
-        {/* ── Cabecera del pergamino ── */}
-        <div style={{
-          position: 'relative',
-          marginBottom: 0,
-        }}>
+      <div className={styles.chatSection}>
+        <div className={styles.chatHeader}>
           <svg width="420" height="52" viewBox="0 0 420 52" style={{ display: 'block' }}>
             <defs>
               <linearGradient id="hordaHeaderBg" x1="0" y1="0" x2="0" y2="1">
@@ -319,90 +225,29 @@ export function WowChatOverlay({ channel }: Props) {
                 <stop offset="100%" stopColor={H.red} stopOpacity="0" />
               </linearGradient>
             </defs>
-
-            {/* Forma del pergamino: enrrollado arriba */}
-            <path
-              d="M0,16 Q0,0 16,0 L404,0 Q420,0 420,16 L420,52 L0,52 Z"
-              fill="url(#hordaHeaderBg)"
-            />
-            {/* Línea de brillo superior roja */}
-            <path
-              d="M0,16 Q0,0 16,0 L404,0 Q420,0 420,16"
-              fill="none" stroke="url(#hordaHeaderTop)" strokeWidth="1.5"
-            />
-
-            {/* Símbolo central Horda */}
+            <path d="M0,16 Q0,0 16,0 L404,0 Q420,0 420,16 L420,52 L0,52 Z" fill="url(#hordaHeaderBg)" />
+            <path d="M0,16 Q0,0 16,0 L404,0 Q420,0 420,16" fill="none" stroke="url(#hordaHeaderTop)" strokeWidth="1.5" />
             <text x="24" y="34" fontSize="20" fill={H.red} opacity="0.8" fontFamily="serif">⚔</text>
-
-            {/* Título */}
-            <text
-              x="210" y="22"
-              fontSize="9" fontFamily="'Cinzel', serif" fontWeight="700"
-              fill={H.goldLight} textAnchor="middle" letterSpacing="4"
-              opacity="0.7"
-            >
-              {t('overlayChat.susurrosGuerra')}
-            </text>
-            <text
-              x="210" y="40"
-              fontSize="14" fontFamily="'Cinzel Decorative', serif" fontWeight="700"
-              fill={H.goldGlow} textAnchor="middle" letterSpacing="1"
-              style={{ filter: `drop-shadow(0 0 6px ${H.red}88)` }}
-            >
-              {t('overlayChat.chatHorda')}
-            </text>
-
+            <text x="210" y="22" fontSize="9" fontFamily="'Cinzel', serif" fontWeight="700" fill={H.goldLight} textAnchor="middle" letterSpacing="4" opacity="0.7">{t('overlayChat.susurrosGuerra')}</text>
+            <text x="210" y="40" fontSize="14" fontFamily="'Cinzel Decorative', serif" fontWeight="700" fill={H.goldGlow} textAnchor="middle" letterSpacing="1" style={{ filter: `drop-shadow(0 0 6px ${H.red}88)` }}>{t('overlayChat.chatHorda')}</text>
             <text x="396" y="34" fontSize="20" fill={H.red} opacity="0.8" fontFamily="serif" textAnchor="end">⚔</text>
-
-            {/* Separador inferior dorado */}
             <line x1="0" y1="51.5" x2="420" y2="51.5" stroke={H.goldLight} strokeWidth="0.5" opacity="0.5" />
           </svg>
         </div>
 
-        {/* ── Cuerpo del pergamino: mensajes ── */}
-        <div style={{
-          position: 'relative',
+        <div className={styles.chatBody} style={{
           background: `linear-gradient(180deg, #1a0500 0%, #150400 40%, #1a0800 100%)`,
           borderLeft: `1px solid ${H.gold}44`,
           borderRight: `1px solid ${H.gold}44`,
         }}>
-          {/* Textura de pergamino viejo */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: `
-              repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 22px,
-                ${H.red}06 22px,
-                ${H.red}06 23px
-              )
-            `,
-            pointerEvents: 'none',
+          <div className={styles.chatLines} style={{
+            backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 22px, ${H.red}06 22px, ${H.red}06 23px)`,
+          }} />
+          <div className={styles.chatStains} style={{
+            background: `radial-gradient(ellipse 60% 30% at 20% 70%, ${H.red}06 0%, transparent 100%), radial-gradient(ellipse 40% 20% at 80% 30%, ${H.red}04 0%, transparent 100%)`,
           }} />
 
-          {/* Manchas de tinta / desgaste */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: `
-              radial-gradient(ellipse 60% 30% at 20% 70%, ${H.red}06 0%, transparent 100%),
-              radial-gradient(ellipse 40% 20% at 80% 30%, ${H.red}04 0%, transparent 100%)
-            `,
-            pointerEvents: 'none',
-          }} />
-
-          {/* Contenedor de mensajes */}
-          <div
-            ref={chatRef}
-            style={{
-              maxHeight: 340,
-              overflow: 'hidden',
-              padding: '8px 0 4px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 0,
-            }}
-          >
+          <div ref={chatRef} className={styles.chatMessages}>
             <AnimatePresence initial={false}>
               {messages.map((msg, i) => {
                 const isLast = i === messages.length - 1;
@@ -413,58 +258,22 @@ export function WowChatOverlay({ channel }: Props) {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                     transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className={styles.msgRow}
                     style={{
-                      padding: '5px 14px 5px 12px',
-                      borderLeft: isLast
-                        ? `3px solid ${H.redBright}`
-                        : `3px solid ${msg.user.color || H.red}99`,
-                      background: isLast
-                        ? `linear-gradient(90deg, ${H.red}18 0%, transparent 80%)`
-                        : 'transparent',
-                      position: 'relative',
+                      borderLeft: isLast ? `3px solid ${H.redBright}` : `3px solid ${msg.user.color || H.red}99`,
+                      background: isLast ? `linear-gradient(90deg, ${H.red}18 0%, transparent 80%)` : 'transparent',
                     }}
                   >
-                    {/* Punto de sangre a la izquierda (sólo último) */}
                     {isLast && (
-                      <div style={{
-                        position: 'absolute', left: -5, top: '50%',
-                        transform: 'translateY(-50%)',
-                        width: 6, height: 6, borderRadius: '50%',
-                        background: H.redBright,
-                        boxShadow: `0 0 8px ${H.redGlow}`,
-                      }} />
+                      <div className={styles.bloodDot} style={{ background: H.redBright, boxShadow: `0 0 8px ${H.redGlow}` }} />
                     )}
 
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-                      {/* Nombre del usuario */}
-                      <span style={{
-                        fontFamily: "'Cinzel', serif",
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        color: msg.user.color || H.goldLight,
-                        letterSpacing: '0.05em',
-                        textShadow: `0 0 8px ${msg.user.color || H.gold}66`,
-                        whiteSpace: 'nowrap',
-                      }}>
+                    <div className={styles.msgContent}>
+                      <span className={styles.username} style={{ color: msg.user.color || H.goldLight, textShadow: `0 0 8px ${msg.user.color || H.gold}66` }}>
                         {msg.user.displayName}
                       </span>
-
-                      {/* Separador */}
-                      <span style={{
-                        fontSize: '0.65rem',
-                        color: `${H.red}99`,
-                        fontFamily: 'serif',
-                      }}>⸬</span>
-
-                      {/* Texto del mensaje */}
-                      <span style={{
-                        fontFamily: "'IM Fell English', 'Palatino Linotype', serif",
-                        fontSize: '0.78rem',
-                        color: `${H.bone}cc`,
-                        lineHeight: 1.5,
-                        wordBreak: 'break-word',
-                        fontStyle: isLast ? 'normal' : 'normal',
-                      }}>
+                      <span className={styles.separator} style={{ color: `${H.red}99` }}>⸬</span>
+                      <span className={styles.messageText} style={{ color: `${H.bone}cc` }}>
                         {msg.text}
                       </span>
                     </div>
@@ -473,18 +282,9 @@ export function WowChatOverlay({ channel }: Props) {
               })}
             </AnimatePresence>
 
-            {/* Placeholder si no hay mensajes */}
             {messages.length === 0 && (
-              <div style={{
-                padding: '20px 16px',
-                textAlign: 'center',
-              }}>
-                <div style={{
-                  fontFamily: "'Cinzel', serif",
-                  fontSize: '0.7rem',
-                  color: `${H.red}66`,
-                  letterSpacing: '0.15em',
-                }}>
+              <div className={styles.emptyPlaceholder}>
+                <div className={styles.emptyText} style={{ color: `${H.red}66` }}>
                   {t('overlayChat.guerrerosAguardan')}
                 </div>
               </div>
@@ -492,7 +292,6 @@ export function WowChatOverlay({ channel }: Props) {
           </div>
         </div>
 
-        {/* ── Pie del pergamino: enrollado abajo ── */}
         <svg width="420" height="32" viewBox="0 0 420 32" style={{ display: 'block' }}>
           <defs>
             <linearGradient id="hordaFooterBg" x1="0" y1="0" x2="0" y2="1">
@@ -500,77 +299,35 @@ export function WowChatOverlay({ channel }: Props) {
               <stop offset="100%" stopColor="#3d1500" />
             </linearGradient>
           </defs>
-          <path
-            d="M0,0 L420,0 L420,16 Q420,32 404,32 L16,32 Q0,32 0,16 Z"
-            fill="url(#hordaFooterBg)"
-          />
-          {/* Línea de separación dorada */}
+          <path d="M0,0 L420,0 L420,16 Q420,32 404,32 L16,32 Q0,32 0,16 Z" fill="url(#hordaFooterBg)" />
           <line x1="0" y1="0.5" x2="420" y2="0.5" stroke={H.goldLight} strokeWidth="0.5" opacity="0.4" />
-          {/* Decoración central */}
-          <text
-            x="210" y="22"
-            fontSize="9" fontFamily="'Cinzel', serif"
-            fill={H.red} textAnchor="middle" letterSpacing="3" opacity="0.6"
-          >
-            ✦ LOK'TAR OGAR ✦
-          </text>
-          {/* Puntos de brasa */}
+          <text x="210" y="22" fontSize="9" fontFamily="'Cinzel', serif" fill={H.red} textAnchor="middle" letterSpacing="3" opacity="0.6">✦ LOK'TAR OGAR ✦</text>
           <circle cx="20" cy="16" r="2" fill={H.ember} opacity="0.5" />
           <circle cx="400" cy="16" r="2" fill={H.ember} opacity="0.5" />
         </svg>
-
       </div>
 
-      {/* ════════════════════════════════
-          EMBLEMA HORDA — watermark sutil
-          (centro-derecha, debajo webcam)
-      ════════════════════════════════ */}
-      <div style={{
-        position: 'absolute',
-        top: 280, right: 60,
-        pointerEvents: 'none',
-        opacity: 0.04,
-      }}>
+      <div className={styles.watermark}>
         <svg width="200" height="200" viewBox="0 0 200 200">
-          {/* Círculo exterior */}
           <circle cx="100" cy="100" r="90" fill="none" stroke={H.red} strokeWidth="2" />
           <circle cx="100" cy="100" r="75" fill="none" stroke={H.red} strokeWidth="0.5" />
-          {/* H estilizada de la Horda */}
-          <text x="100" y="130" fontSize="100" fontFamily="serif" fontWeight="900"
-            fill={H.red} textAnchor="middle">H</text>
-          {/* Colmillos */}
+          <text x="100" y="130" fontSize="100" fontFamily="serif" fontWeight="900" fill={H.red} textAnchor="middle">H</text>
           <polygon points="60,160 70,200 80,155" fill={H.red} />
           <polygon points="120,160 130,200 140,155" fill={H.red} />
         </svg>
       </div>
 
-      {/* ════════════════════════════════
-          INDICADOR DE CONEXIÓN
-      ════════════════════════════════ */}
-      <div style={{
-        position: 'absolute',
-        top: 276, right: 28,
-        display: 'flex', alignItems: 'center', gap: 5,
-        pointerEvents: 'none',
-      }}>
-        <div style={{
-          width: 6, height: 6, borderRadius: '50%',
+      <div className={styles.connectionIndicator}>
+        <div className={styles.connectionDot} style={{
           background: connected ? H.ember : H.red,
-          boxShadow: connected
-            ? `0 0 6px ${H.ember}, 0 0 12px ${H.ember}88`
-            : `0 0 6px ${H.red}`,
+          boxShadow: connected ? `0 0 6px ${H.ember}, 0 0 12px ${H.ember}88` : `0 0 6px ${H.red}`,
         }} />
-        <span style={{
-          fontFamily: "'Cinzel', serif",
-          fontSize: '0.55rem',
+        <span className={styles.connectionLabel} style={{
           color: connected ? `${H.ember}cc` : `${H.red}88`,
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
         }}>
           {connected ? t('overlayChat.enVivo') : t('overlayChat.desconectado')}
         </span>
       </div>
-
     </div>
   );
 }

@@ -1,0 +1,150 @@
+.container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  font-family: 'Cinzel', 'Palatino Linotype', 'Times New Roman', serif;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.webcamFrame {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 320px;
+  height: 240px;
+  pointer-events: none;
+}
+
+.webcamArea {
+  position: absolute;
+  inset: 16px;
+  background: transparent;
+}
+
+.chatSection {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 420px;
+  pointer-events: none;
+}
+
+.chatHeader {
+  position: relative;
+  margin-bottom: 0;
+}
+
+.chatBody {
+  position: relative;
+}
+
+.chatLines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.chatStains {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.chatMessages {
+  max-height: 340px;
+  overflow: hidden;
+  padding: 8px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.msgRow {
+  padding: 5px 14px 5px 12px;
+  position: relative;
+}
+
+.bloodDot {
+  position: absolute;
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.msgContent {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.username {
+  font-family: 'Cinzel', serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.separator {
+  font-size: 0.65rem;
+  font-family: serif;
+}
+
+.messageText {
+  font-family: 'IM Fell English', 'Palatino Linotype', serif;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.emptyPlaceholder {
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.emptyText {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+}
+
+.connectionIndicator {
+  position: absolute;
+  top: 276px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.connectionDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.connectionLabel {
+  font-family: 'Cinzel', serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.watermark {
+  position: absolute;
+  top: 280px;
+  right: 60px;
+  pointer-events: none;
+  opacity: 0.04;
+}

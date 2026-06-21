@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n/context';
 import { motion } from 'framer-motion';
+import styles from './TrackerPanel.module.css';
 
 interface Props {
   channel: string;
@@ -265,38 +266,32 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
     chartMetric === 'followersGained' ? t('tracker.metricFollowers') : t('tracker.metricDuration');
 
   return (
-    <div style={{ maxWidth: 860 }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={`sf-heading flex-row flex-row--gap-sm ${styles.heading}`}>
           {t('tracker.title')}
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
+        <p className="text-muted text-sm">
           {t('tracker.subtitle')}
         </p>
       </div>
 
       {/* Period selector */}
-      <div className="glass-card" style={{ padding: '1rem 1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--sf-text-2)', whiteSpace: 'nowrap' }}>
+      <div className={`glass-card ${styles.periodBar}`}>
+        <span className={styles.periodLabel}>
           {t('tracker.periodo')}
         </span>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div className="flex-wrap flex-wrap--sm">
           {PERIODS.map((p) => (
             <button
               key={p.id}
               onClick={() => setPeriod(p.id)}
+              className={styles.periodBtnBase}
               style={{
-                padding: '0.3rem 0.75rem',
-                borderRadius: 99,
-                border: '1px solid',
                 borderColor: period === p.id ? 'var(--sf-primary)' : 'var(--sf-border)',
                 background: period === p.id ? 'rgba(124,58,237,0.2)' : 'transparent',
                 color: period === p.id ? '#a78bfa' : 'var(--sf-text-3)',
-                fontSize: '0.78rem',
                 fontWeight: period === p.id ? 600 : 400,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-                transition: 'all 0.15s ease',
               }}
             >
               {p.label}
@@ -306,18 +301,14 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
       </div>
 
       {loading && (
-        <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--sf-text-3)', fontSize: '0.9rem' }}>
-          <div style={{ marginBottom: '0.75rem' }}>⏳</div>
+        <div className={styles.loadingState}>
+          <div className={styles.loadingIcon}>⏳</div>
           {t('tracker.cargando')}
         </div>
       )}
 
       {error && (
-        <div style={{
-          padding: '1rem 1.25rem', marginBottom: '1.25rem',
-          background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-          borderRadius: 'var(--sf-radius-sm)', fontSize: '0.82rem', color: '#f87171',
-        }}>
+        <div className={styles.errorBox}>
           {error === 'Error al obtener estadísticas'
             ? t('tracker.error')
             : error}
@@ -325,54 +316,49 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
       )}
 
       {noData && !loading && (
-        <div style={{
-          padding: '2rem', textAlign: 'center',
-          background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)',
-          borderRadius: 'var(--sf-radius)', fontSize: '0.85rem', color: 'var(--sf-text-2)',
-          marginBottom: '1.5rem',
-        }}>
-          <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>📭</div>
+        <div className={styles.noDataBox}>
+          <div className={styles.noDataIcon}>📭</div>
           {t('tracker.empty')}
         </div>
       )}
 
       {/* Stats cards */}
       {stats && !loading && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+        <div className={styles.statsGrid}>
           <div className="glass-card" style={{ padding: '1.25rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏱️</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '0.2rem' }}>
+            <div className={styles.statIcon}>⏱️</div>
+            <div className={styles.statNumber}>
               {formatHours(stats.totalHoursStreamed)}
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div className="sf-caption">
               {t('tracker.horasStreameadas')}
             </div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-4)', marginTop: '0.3rem' }}>
+            <div className={styles.statSubtext}>
               {stats.videoCount} {stats.videoCount === 1 ? t('tracker.directo') : t('tracker.directos')}
             </div>
           </div>
 
           <div className="glass-card" style={{ padding: '1.25rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👥</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '0.2rem' }}>
+            <div className={styles.statIcon}>👥</div>
+            <div className={styles.statNumber}>
               {stats.peakViewers.toLocaleString()}
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div className="sf-caption">
               {t('tracker.picoEspectadores')}
             </div>
             {stats.peakDate && (
-              <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-4)', marginTop: '0.3rem' }}>
+              <div className={styles.statSubtext}>
                 {formatDate(stats.peakDate)}
               </div>
             )}
           </div>
 
           <div className="glass-card" style={{ padding: '1.25rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>❤️</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '0.2rem' }}>
+            <div className={styles.statIcon}>❤️</div>
+            <div className={styles.statNumber}>
               {stats.totalFollowers.toLocaleString()}
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div className="sf-caption">
               {t('tracker.seguidoresTotales')}
             </div>
           </div>
@@ -384,66 +370,57 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ marginBottom: '2rem' }}
+          className={styles.lastStreamSection}
         >
-          <div style={{ marginBottom: '1rem' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className={styles.lastStreamHeader}>
+            <h3 className={styles.lastStreamTitle}>
               {t('tracker.ultimoStream')}
             </h3>
-            <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)' }}>
+            <p className={styles.lastStreamMeta}>
               {lastStream.title} · {formatDate(lastStream.creationDate)} · {formatDuration(lastStream.durationInSeconds)}
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '0.75rem' }}>
-            <div className="glass-card" style={{ padding: '0.875rem 1rem', textAlign: 'center', background: 'linear-gradient(135deg, rgba(124,58,237,0.15), rgba(99,102,241,0.08))', border: '1px solid rgba(124,58,237,0.15)' }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--sf-text)' }}>
+          <div className={styles.miniStatGrid}>
+            <div className={`glass-card ${styles.highlightedCard}`} style={{ padding: '0.875rem 1rem', textAlign: 'center' }}>
+              <div className={styles.miniStatValue}>
                 {formatNumber(lastStream.totalViews)}
               </div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.2rem' }}>
+              <div className="sf-caption mt-2">
                 {t('tracker.visualizaciones')}
               </div>
             </div>
             <div className="glass-card" style={{ padding: '0.875rem 1rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--sf-text)' }}>
+              <div className={styles.miniStatValue}>
                 +{lastStream.followersGained}
               </div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.2rem' }}>
+              <div className="sf-caption mt-2">
                 {t('tracker.seguidores')}
               </div>
             </div>
             <div className="glass-card" style={{ padding: '0.875rem 1rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--sf-text)' }}>
+              <div className={styles.miniStatValue}>
                 {lastStream.subsGained > 0 ? '+' : ''}{lastStream.subsGained}
               </div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.2rem' }}>
+              <div className="sf-caption mt-2">
                 {t('tracker.suscripciones')}
               </div>
             </div>
             <div className="glass-card" style={{ padding: '0.875rem 1rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--sf-text)' }}>
+              <div className={styles.miniStatValue}>
                 {lastStream.bitsDonated > 0 ? '+' : ''}{lastStream.bitsDonated}
               </div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.2rem' }}>
+              <div className="sf-caption mt-2">
                 {t('tracker.bits')}
               </div>
             </div>
           </div>
 
-          <div style={{
-            padding: '0.75rem 1rem',
-            background: 'rgba(52,211,153,0.06)',
-            border: '1px solid rgba(52,211,153,0.15)',
-            borderRadius: 'var(--sf-radius-sm)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontSize: '0.82rem',
-          }}>
-            <span style={{ color: 'var(--sf-text-2)' }}>
+          <div className={styles.revenueBox}>
+            <span className={styles.revenueLabel}>
               {t('tracker.ingresosEstimados')}
             </span>
-            <span style={{ fontWeight: 700, color: '#34d399' }}>
+            <span className={styles.revenueValue}>
               {estimateRevenue(lastStream.subsGained, lastStream.bitsDonated)}
             </span>
           </div>
@@ -456,17 +433,16 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.04 }}
-          className="glass-card"
-          style={{ padding: '1.25rem', marginBottom: '2rem', overflow: 'hidden' }}
+          className={`glass-card ${styles.chartCard}`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className={styles.chartHeader}>
+            <h3 className={styles.chartTitle}>
               {t('tracker.evolucion')}
-              <span style={{ fontSize: '0.72rem', fontWeight: 400, color: 'var(--sf-text-3)' }}>
+              <span className={styles.chartTitleHint}>
                 — {chartLabel}
               </span>
             </h3>
-            <div style={{ display: 'flex', gap: '0.35rem' }}>
+            <div className={styles.chartBtnGroup}>
               {(['totalViews', 'followersGained', 'durationInSeconds'] as const).map((key) => {
                 const lbl = key === 'totalViews' ? t('tracker.metricViews') : key === 'followersGained' ? t('tracker.metricFollowers') : t('tracker.metricDuration');
                 const c = CHART_COLORS[key === 'totalViews' ? 'views' : key === 'followersGained' ? 'followers' : 'duration'];
@@ -474,16 +450,11 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                   <button
                     key={key}
                     onClick={() => setChartMetric(key)}
+                    className={styles.chartBtnBase}
                     style={{
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: 6,
-                      border: '1px solid',
                       borderColor: chartMetric === key ? c : 'var(--sf-border)',
                       background: chartMetric === key ? `${c}20` : 'transparent',
                       color: chartMetric === key ? c : 'var(--sf-text-3)',
-                      fontSize: '0.7rem',
-                      cursor: 'pointer',
-                      fontFamily: 'inherit',
                       fontWeight: chartMetric === key ? 600 : 400,
                     }}
                   >
@@ -493,7 +464,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
               })}
             </div>
           </div>
-          <div style={{ overflowX: 'auto', paddingBottom: '0.25rem' }}>
+          <div className={styles.chartScroll}>
             <SvgBarChart data={streams} dataKey={chartMetric} color={chartColor} />
           </div>
         </motion.div>
@@ -505,49 +476,36 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.06 }}
-          style={{ marginBottom: '2rem' }}
+          className={styles.adviceSection}
         >
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 className={styles.adviceTitle}>
             {t('tracker.consejos')}
             {advice.ollamaAvailable && (
-              <span style={{
-                fontSize: '0.6rem', padding: '0.15rem 0.4rem',
-                background: 'rgba(52,211,153,0.12)', color: '#34d399',
-                borderRadius: 4, fontWeight: 600, letterSpacing: '0.03em',
-              }}>
+              <span className={styles.iaBadge}>
                 {t('tracker.ia')}
               </span>
             )}
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className={styles.adviceList}>
             {advice.advice.map((item, idx) => {
-              const style = ADVICE_TYPE_STYLES[item.type] ?? ADVICE_TYPE_STYLES.info;
+              const s = ADVICE_TYPE_STYLES[item.type] ?? ADVICE_TYPE_STYLES.info;
               return (
                 <div
                   key={idx}
+                  className={styles.adviceCard}
                   style={{
-                    padding: '0.875rem 1rem',
-                    background: style.bg,
-                    border: `1px solid ${style.border}`,
-                    borderRadius: 'var(--sf-radius-sm)',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '0.75rem',
+                    background: s.bg,
+                    border: `1px solid ${s.border}`,
                   }}
                 >
-                  <div style={{
-                    width: 32, height: 32, borderRadius: 8,
-                    background: style.iconBg,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '1rem', flexShrink: 0,
-                  }}>
+                  <div className={styles.adviceIconBox} style={{ background: s.iconBg }}>
                     {item.icon}
                   </div>
                   <div>
-                    <p style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.15rem' }}>
+                    <p className={styles.adviceTextTitle}>
                       {item.title}
                     </p>
-                    <p style={{ fontSize: '0.78rem', color: 'var(--sf-text-2)', lineHeight: 1.5 }}>
+                    <p className={styles.adviceTextDesc}>
                       {item.description}
                     </p>
                   </div>
@@ -565,23 +523,22 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08 }}
         >
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 className={styles.streamsTitle}>
             {t('tracker.streamsRecientes')}
-            <span style={{ fontSize: '0.72rem', fontWeight: 400, color: 'var(--sf-text-3)' }}>
+            <span className={styles.streamCount}>
               ({streams.length} {streams.length === 1 ? t('tracker.stream') : t('tracker.streams')})
             </span>
           </h3>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className={styles.streamList}>
             {streams.map((s, idx) => {
               const isExpanded = expandedStream === s.videoId;
               return (
                 <div key={s.videoId}>
                   <div
                     onClick={() => setExpandedStream(isExpanded ? null : s.videoId)}
+                    className={styles.streamItem}
                     style={{
-                      display: 'flex', alignItems: 'center', gap: '0.75rem',
-                      padding: '0.75rem 1rem',
                       background: isExpanded
                         ? 'rgba(124,58,237,0.08)'
                         : idx === 0
@@ -594,27 +551,20 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                       borderColor: isExpanded
                         ? 'var(--sf-primary)'
                         : 'var(--sf-border)',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
                     }}
                   >
-                    <div style={{
-                      width: 32, height: 32, borderRadius: 6,
-                      background: 'rgba(124,58,237,0.12)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '1rem', flexShrink: 0,
-                    }}>
+                    <div className={styles.streamIconBox}>
                       {idx === 0 ? '⭐' : '🎬'}
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div className={styles.streamInfo}>
+                      <div className={styles.streamTitle}>
                         {s.title}
                       </div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--sf-text-3)', marginTop: '0.15rem' }}>
+                      <div className={styles.streamMeta}>
                         {formatDateTime(s.creationDate)} · {formatDuration(s.durationInSeconds)} · {formatNumber(s.totalViews)} {t('tracker.visualizaciones')}
                       </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.75rem', flexShrink: 0 }}>
+                    <div className={styles.streamGains}>
                       {s.followersGained > 0 && (
                         <span style={{ fontSize: '0.72rem', color: '#f87171' }}>+{s.followersGained} ❤️</span>
                       )}
@@ -625,70 +575,61 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                         <span style={{ fontSize: '0.72rem', color: '#fbbf24' }}>+{s.bitsDonated} 💎</span>
                       )}
                     </div>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)', transition: 'transform 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'none' }}>
+                    <span className={styles.streamArrow} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }}>
                       ▼
                     </span>
                   </div>
 
                   {isExpanded && (
-                    <div style={{
-                      padding: '1rem 1.25rem',
-                      background: 'rgba(124,58,237,0.02)',
-                      border: '1px solid var(--sf-primary)',
-                      borderTop: 'none',
-                      borderRadius: '0 0 var(--sf-radius-sm) var(--sf-radius-sm)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.75rem',
-                    }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+                    <div className={styles.expandedDetails}>
+                      <div className={styles.detailGrid}>
                         <div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
+                          <div className={styles.detailLabel}>
                             {t('tracker.seguidores')}
                           </div>
-                          <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--sf-text)' }}>
+                          <div className={styles.detailValue}>
                             {s.followersGained > 0 ? `+${s.followersGained}` : '—'}
                           </div>
                         </div>
                         <div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
+                          <div className={styles.detailLabel}>
                             {t('tracker.suscripciones')}
                           </div>
-                          <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--sf-text)' }}>
+                          <div className={styles.detailValue}>
                             {s.subsGained > 0 ? `+${s.subsGained}` : '—'}
                           </div>
                         </div>
                         <div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
+                          <div className={styles.detailLabel}>
                             {t('tracker.bits')}
                           </div>
-                          <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--sf-text)' }}>
+                          <div className={styles.detailValue}>
                             {s.bitsDonated > 0 ? `+${s.bitsDonated}` : '—'}
                           </div>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', gap: '0.75rem' }}>
+                      <div className={styles.detailRow}>
                         <div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
+                          <div className={styles.detailLabel}>
                             {t('tracker.duracion')}
                           </div>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--sf-text)' }}>
+                          <div className={styles.detailSmallValue}>
                             {formatDuration(s.durationInSeconds)}
                           </div>
                         </div>
                         <div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
+                          <div className={styles.detailLabel}>
                             {t('tracker.views')}
                           </div>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--sf-text)' }}>
+                          <div className={styles.detailSmallValue}>
                             {s.totalViews.toLocaleString()}
                           </div>
                         </div>
                         <div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
+                          <div className={styles.detailLabel}>
                             {t('tracker.ingresosEst')}
                           </div>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#34d399' }}>
+                          <div className={styles.detailRevenueValue}>
                             {estimateRevenue(s.subsGained, s.bitsDonated)}
                           </div>
                         </div>
@@ -697,10 +638,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
                         href={s.url}
                         target="_blank"
                         rel="noreferrer"
-                        style={{
-                          fontSize: '0.75rem', color: 'var(--sf-primary-light)',
-                          textDecoration: 'none', marginTop: '0.25rem',
-                        }}
+                        className={styles.vodLink}
                       >
                         {t('tracker.verVod')}
                       </a>

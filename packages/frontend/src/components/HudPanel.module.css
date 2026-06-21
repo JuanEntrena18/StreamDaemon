@@ -1,0 +1,115 @@
+.container {
+  max-width: 600px;
+}
+
+.header {
+  margin-bottom: 1.75rem;
+}
+
+.heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: var(--sf-text);
+}
+
+.subtitle {
+  color: var(--sf-text-2);
+  font-size: 0.875rem;
+}
+
+.card {
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.statsGrid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.statCard {
+  flex: 1;
+  min-width: 100px;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--sf-border);
+  text-align: center;
+}
+
+.statIcon {
+  font-size: 1.25rem;
+  margin-bottom: 4px;
+}
+
+.statValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sf-text);
+}
+
+.statLabel {
+  font-size: 0.68rem;
+  color: var(--sf-text-3);
+  margin-top: 2px;
+}
+
+.infoLines {
+  font-size: 0.82rem;
+  color: var(--sf-text-2);
+  line-height: 1.6;
+}
+
+.infoLineLabel {
+  color: var(--sf-text);
+}
+
+.liveStatus {
+  color: #34d399;
+}
+
+.offlineStatus {
+  color: #f87171;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pollBtn {
+  font-size: 0.82rem;
+  padding: 0.5rem 1rem;
+}
+
+.ghostBtn {
+  font-size: 0.82rem;
+  padding: 0.5rem 1rem;
+}
+
+.pollStatus {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.pollStatus--active {
+  color: #34d399;
+}
+
+.pollStatus--inactive {
+  color: var(--sf-text-3);
+}
+
+.urlBox {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--sf-border);
+  font-size: 0.78rem;
+  font-family: monospace;
+  color: #a78bfa;
+  word-break: break-all;
+}

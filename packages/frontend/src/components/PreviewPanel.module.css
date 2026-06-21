@@ -1,0 +1,84 @@
+.container {
+  max-width: 900px;
+}
+
+.header {
+  margin-bottom: 1.75rem;
+}
+
+.heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: var(--sf-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subtitle {
+  color: var(--sf-text-2);
+  font-size: 0.875rem;
+}
+
+.emptyCard {
+  padding: 3rem;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+emptyText {
+  color: var(--sf-text-3);
+  font-size: 0.9rem;
+}
+
+.topBar {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.twitchBtn {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.875rem;
+  text-decoration: none;
+}
+
+.loadingHint {
+  font-size: 0.75rem;
+  color: var(--sf-text-3);
+}
+
+.playerCard {
+  padding: 0.25rem;
+  overflow: hidden;
+}
+
+.playerWrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  border-radius: var(--sf-radius-sm);
+  overflow: hidden;
+  background: #0a0a1a;
+}
+
+.iframe {
+  border: none;
+}
+
+.tipBox {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(6, 182, 212, 0.06);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  border-radius: var(--sf-radius-sm);
+  font-size: 0.75rem;
+  color: var(--sf-text-3);
+  line-height: 1.5;
+}

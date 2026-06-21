@@ -1,0 +1,155 @@
+.container {
+  max-width: 720px;
+}
+
+.healthTrack {
+  height: 20px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.healthTrackP1 {
+  composes: healthTrack;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.healthTrackP2 {
+  composes: healthTrack;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.healthFill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.healthFillP1 {
+  composes: healthFill;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+.healthFillP2 {
+  composes: healthFill;
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.healthInfo {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--sf-text-2);
+}
+
+.actionBtn {
+  font-size: 0.72rem;
+  padding: 0.3rem 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.damageBtn {
+  composes: actionBtn;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.healBtn {
+  composes: actionBtn;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.roundBtn {
+  composes: actionBtn;
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.presetBtn {
+  font-size: 0.78rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.presetBtnKo {
+  composes: presetBtn;
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.presetBtnDefault {
+  composes: presetBtn;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--sf-text);
+}
+
+.playerLabel {
+  font-weight: 600;
+  font-size: 0.78rem;
+  margin-bottom: 0.5rem;
+}
+
+.playerLabelP1 {
+  composes: playerLabel;
+  color: #3b82f6;
+}
+
+.playerLabelP2 {
+  composes: playerLabel;
+  color: #ef4444;
+}
+
+.timerValue {
+  font-size: 2rem;
+  font-weight: 900;
+  font-family: monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--sf-text);
+}
+
+.timerStatus {
+  font-size: 0.72rem;
+  color: var(--sf-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.configInput {
+  font-size: 0.8rem;
+  width: 100%;
+}
+
+.configInputMargin {
+  composes: configInput;
+  margin-bottom: 0.375rem;
+}
+
+.urlBox {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--sf-border);
+  font-size: 0.78rem;
+  font-family: monospace;
+  color: #a78bfa;
+  word-break: break-all;
+}
+
+.configGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.configLabel {
+  font-size: 0.72rem;
+  color: var(--sf-text-2);
+  display: block;
+  margin-bottom: 0.25rem;
+}

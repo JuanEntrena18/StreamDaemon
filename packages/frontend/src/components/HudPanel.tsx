@@ -3,6 +3,7 @@ import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import { useTranslation } from '../i18n/context';
 import type { HudData } from '@streamforger/shared';
+import styles from './HudPanel.module.css';
 
 interface Props {
   channel: string;
@@ -60,55 +61,47 @@ export function HudPanel({ channel, backendUrl }: Props) {
   };
 
   const stat = (label: string, value: string, icon: string) => (
-    <div key={label} style={{
-      flex: 1, minWidth: 100,
-      padding: '0.75rem', borderRadius: 8,
-      background: 'rgba(255,255,255,0.04)',
-      border: '1px solid var(--sf-border)',
-      textAlign: 'center',
-    }}>
-      <div style={{ fontSize: '1.25rem', marginBottom: 4 }}>{icon}</div>
-      <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--sf-text)' }}>{value}</div>
-      <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', marginTop: 2 }}>{label}</div>
+    <div key={label} className={styles.statCard}>
+      <div className={styles.statIcon}>{icon}</div>
+      <div className={styles.statValue}>{value}</div>
+      <div className={styles.statLabel}>{label}</div>
     </div>
   );
 
   return (
-    <div style={{ maxWidth: 600 }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)' }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={styles.heading}>
           {t('hud.title')}
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
+        <p className={styles.subtitle}>
           {t('hud.subtitle')}
         </p>
       </div>
 
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
+      <div className={`glass-card ${styles.card}`}>
         <p className="sf-section-title">{t('hud.statsTitle')}</p>
 
         {!hud && (
-          <p style={{ fontSize: '0.85rem', color: 'var(--sf-text-3)' }}>
+          <p className="text-sm text-dim">
             {channel ? t('hud.cargando') : t('hud.empty')}
           </p>
         )}
 
         {hud && (
           <>
-            <div style={{
-              display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: '1rem',
-            }}>
+            <div className={styles.statsGrid}>
               {stat(t('hud.viewers'), hud.viewers.toString(), '👁️')}
               {stat(t('hud.followers'), hud.followers.toLocaleString(), '❤️')}
               {stat(t('hud.subs'), hud.subscribers.toLocaleString(), '⭐')}
               {stat(t('hud.tiempo'), formatUptime(hud.uptimeSeconds), '⏱️')}
             </div>
 
-            <div style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', lineHeight: 1.6 }}>
-              <div><strong style={{ color: 'var(--sf-text)' }}>{t('hud.titulo')}</strong> {hud.streamTitle}</div>
-              {hud.gameName && <div><strong style={{ color: 'var(--sf-text)' }}>{t('hud.juego')}</strong> {hud.gameName}</div>}
-              <div><strong style={{ color: 'var(--sf-text)' }}>{t('hud.estado')}</strong>{' '}
-                <span style={{ color: hud.isLive ? '#34d399' : '#f87171' }}>
+            <div className={styles.infoLines}>
+              <div><strong className={styles.infoLineLabel}>{t('hud.titulo')}</strong> {hud.streamTitle}</div>
+              {hud.gameName && <div><strong className={styles.infoLineLabel}>{t('hud.juego')}</strong> {hud.gameName}</div>}
+              <div><strong className={styles.infoLineLabel}>{t('hud.estado')}</strong>{' '}
+                <span className={hud.isLive ? styles.liveStatus : styles.offlineStatus}>
                   {hud.isLive ? t('hud.enVivo') : t('hud.offline')}
                 </span>
               </div>
@@ -117,36 +110,30 @@ export function HudPanel({ channel, backendUrl }: Props) {
         )}
       </div>
 
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
+      <div className={`glass-card ${styles.card}`}>
         <p className="sf-section-title">{t('hud.autoTitle')}</p>
-        <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', marginBottom: '1rem' }}>
+        <p className="text-sm text-muted mb-4">
           {t('hud.autoDesc')}
         </p>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button onClick={togglePolling} className={`sf-btn ${polling ? 'sf-btn-danger' : 'sf-btn-primary'}`}
-            style={{ fontSize: '0.82rem', padding: '0.5rem 1rem' }}>
+        <div className={styles.actions}>
+          <button onClick={togglePolling} className={`sf-btn ${polling ? 'sf-btn-danger' : 'sf-btn-primary'} ${styles.pollBtn}`}>
             {polling ? t('hud.detenerActualizacion') : t('hud.iniciarActualizacion')}
           </button>
-          <button onClick={refresh} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.82rem', padding: '0.5rem 1rem' }}>
+          <button onClick={refresh} className={`sf-btn sf-btn-ghost ${styles.ghostBtn}`}>
             {t('hud.actualizarAhora')}
           </button>
         </div>
-        <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: polling ? '#34d399' : 'var(--sf-text-3)' }}>
+        <div className={`${styles.pollStatus} ${polling ? styles['pollStatus--active'] : styles['pollStatus--inactive']}`}>
           {polling ? t('hud.actualizando') : t('hud.manual')}
         </div>
       </div>
 
       <div className="glass-card" style={{ padding: '1.5rem' }}>
         <p className="sf-section-title">{t('hud.overlayUrl')}</p>
-        <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', marginBottom: '0.5rem' }}>
+        <p className="text-sm text-muted mb-2">
           Agregá esta URL como Browser Source en OBS:
         </p>
-        <div style={{
-          padding: '0.75rem 1rem', borderRadius: 6,
-          background: 'rgba(0,0,0,0.3)', border: '1px solid var(--sf-border)',
-          fontSize: '0.78rem', fontFamily: 'monospace', color: '#a78bfa',
-          wordBreak: 'break-all',
-        }}>
+        <div className={styles.urlBox}>
           {OVERLAY_BASE_URL}/overlay.html?mode=hud&amp;channel={channel}
         </div>
       </div>

@@ -1,0 +1,290 @@
+.container {
+  max-width: 700px;
+}
+
+.cyanChatBox {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(0,217,255,0.06);
+  border: 1px solid rgba(0,217,255,0.15);
+  border-radius: var(--sf-radius);
+}
+
+.overlayControlBox {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(124,58,237,0.06);
+  border: 1px solid rgba(124,58,237,0.15);
+  border-radius: var(--sf-radius);
+  overflow: hidden;
+}
+
+.statusWarning {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: var(--sf-radius-sm);
+  font-size: 0.82rem;
+  color: #fbbf24;
+  text-align: center;
+}
+
+.statusError {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--sf-radius-sm);
+  font-size: 0.82rem;
+  color: #f87171;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.msgContainer {
+  height: 420px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 0.625rem;
+}
+
+.msgEmpty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sf-text-3);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.msgBubble {
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.02);
+  line-height: 1.45;
+  position: relative;
+}
+
+.badgeIcon {
+  font-size: 0.6rem;
+  opacity: 0.6;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.timestamp {
+  font-size: 0.6rem;
+  color: var(--sf-text-3);
+  margin-left: auto;
+  opacity: 0.5;
+}
+
+.msgText {
+  color: var(--sf-text-2);
+  font-size: 0.82rem;
+  word-break: break-word;
+  padding-left: 0;
+}
+
+.msgMenu {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  display: flex;
+  gap: 0.2rem;
+  background: var(--sf-bg-2);
+  border: 1px solid var(--sf-border);
+  border-radius: 6px;
+  padding: 0.2rem;
+  z-index: 10;
+}
+
+.replyBar {
+  padding: 0.3rem 0.75rem;
+  margin-bottom: 0.375rem;
+  background: rgba(124,58,237,0.1);
+  border: 1px solid rgba(124,58,237,0.2);
+  border-radius: var(--sf-radius-sm);
+  font-size: 0.78rem;
+  color: var(--sf-text-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.soundRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.volRange {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: auto;
+}
+
+.ttsBox {
+  margin-bottom: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--sf-radius-sm);
+}
+.ttsBoxEnabled {
+  background: rgba(124,58,237,0.06);
+  border: 1px solid rgba(124,58,237,0.15);
+}
+.ttsBoxDisabled {
+  background: transparent;
+  border: 1px solid var(--sf-border);
+}
+
+.greetingBox {
+  margin-bottom: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--sf-radius-sm);
+}
+.greetingBoxEnabled {
+  background: rgba(16,185,129,0.06);
+  border: 1px solid rgba(16,185,129,0.15);
+}
+.greetingBoxDisabled {
+  background: transparent;
+  border: 1px solid var(--sf-border);
+}
+
+.infoBar {
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--sf-text-3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Pill button — shared pattern for mode/size/sound selectors */
+.pillBtn {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--sf-border);
+  background: transparent;
+  color: var(--sf-text-3);
+  font-size: 0.72rem;
+  font-weight: 400;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.pillBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pillBtn--active {
+  background: rgba(124,58,237,0.2);
+  color: #a78bfa;
+  border-color: var(--sf-primary);
+  font-weight: 600;
+}
+.pillBtn--xs {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+.pillBtn--sm {
+  font-size: 0.68rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+}
+
+/* Toggle switch */
+.toggleTrack {
+  width: 36px;
+  height: 18px;
+  border-radius: 99px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+}
+.toggleTrackOff {
+  background: var(--sf-border);
+}
+.toggleTrackOn {
+  background: var(--sf-primary);
+}
+.toggleThumb {
+  position: absolute;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.2s;
+}
+
+/* Collapse arrow */
+.collapseArrow {
+  background: none;
+  border: none;
+  color: var(--sf-text-3);
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-family: inherit;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  transition: transform 0.2s;
+}
+
+/* Filter checkboxes row */
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.filterLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.65rem;
+  color: var(--sf-text-2);
+  cursor: pointer;
+}
+
+.greetingPreview {
+  font-size: 0.68rem;
+  color: var(--sf-text-3);
+  background: rgba(124,58,237,0.06);
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+}
+
+.greetingHint {
+  font-size: 0.62rem;
+  color: var(--sf-text-3);
+  opacity: 0.6;
+}
+
+.menuBtn {
+  background: none;
+  border: none;
+  color: var(--sf-text-3);
+  cursor: pointer;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  line-height: 1;
+}

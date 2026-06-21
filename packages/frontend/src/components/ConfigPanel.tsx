@@ -2,6 +2,7 @@ import { useTranslation } from '../i18n/context';
 import { useSocket } from '../hooks/useSocket';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import { Logo } from './Logo';
+import styles from './ConfigPanel.module.css';
 
 interface Props {
   channel: string;
@@ -15,70 +16,52 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
   const { authenticated, user, loading: authLoading, login, loginBrowser, logout, deviceState, cancelDeviceLogin } = useAuthStatus();
 
   return (
-    <div style={{ maxWidth: 600 }}>
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+    <div className={styles.container}>
+      <div className="mb-5">
+        <h2 className="sf-heading flex-row--gap-sm">
           {t('config.title')}
         </h2>
-        <p style={{ color: 'var(--sf-text-2)', fontSize: '0.875rem' }}>
-          {t('config.subtitle')}
-        </p>
+        <p className="text-sm text-muted">{t('config.subtitle')}</p>
       </div>
 
       {/* ── Buy Me a Coffee ── */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
+      <div className="glass-card sf-card">
         <p className="sf-section-title">{t('config.apoyoTitle')}</p>
-        <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', marginBottom: '1rem', lineHeight: 1.5 }}>
+        <p className="text-sm text-muted" style={{ marginBottom: '1rem', lineHeight: 1.5 }}>
           {t('config.apoyoDesc')}
         </p>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+        <div className="flex-row flex-wrap" style={{ gap: '1.25rem' }}>
           <img
             src="/qr-code.png"
             alt="Buy Me a Coffee QR"
-            style={{
-              width: 120, height: 120, borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--sf-border)', flexShrink: 0,
-            }}
+            className={styles.qrImg}
           />
           <div style={{ flex: 1, minWidth: 200 }}>
             <a
               href="https://buymeacoffee.com/jentrena"
               target="_blank"
               rel="noreferrer"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.6rem 1.25rem',
-                borderRadius: 'var(--radius-sm)',
-                background: 'linear-gradient(135deg, #FFDD00, #FFB800)',
-                color: '#1a1a2e',
-                textDecoration: 'none',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                transition: 'all 0.15s',
-                boxShadow: '0 2px 12px rgba(255,221,0,0.3)',
-              }}
+              className={styles.bmcBtn}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M21 4H3c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h8l1 3h-2c-.55 0-1 .45-1 1s.45 1 1 1h6c.55 0 1-.45 1-1s-.45-1-1-1h-2l1-3h8c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1zm-1 10H4V6h16v8z"/>
               </svg>
               {t('config.invitameCafe')}
             </a>
-            <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--sf-text-3)' }}>
-              buymeacoffee.com/jentrena
-            </div>
+            <div className={styles.bmcLink}>buymeacoffee.com/jentrena</div>
           </div>
         </div>
       </div>
 
       {/* ── Twitch Auth ── */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
+      <div className="glass-card sf-card">
         <p className="sf-section-title">{t('config.twitchTitle')}</p>
-        <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', marginBottom: '1rem', lineHeight: 1.5 }}>
+        <p className="text-sm text-muted" style={{ marginBottom: '1rem', lineHeight: 1.5 }}>
           {t('config.twitchDesc')}
         </p>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="flex-row" style={{ gap: '1rem' }}>
           <div style={{
             width: 48, height: 48, borderRadius: 12, flexShrink: 0,
             background: authenticated ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.12)',
@@ -87,18 +70,18 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
           }}>
             {authenticated ? '✅' : '🔌'}
           </div>
-            <div style={{ flex: 1 }}>
+          <div style={{ flex: 1 }}>
             <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--sf-text)' }}>
               {authenticated && user ? user.displayName : t('config.noConectado')}
             </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)' }}>
+            <div className="text-xs text-dim">
               {authenticated
                 ? t('config.sesionActiva')
                 : t('config.conectaTwitch')}
             </div>
           </div>
           {!authLoading && !authenticated && (
-            <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+            <div className="flex-row--gap-sm" style={{ flexShrink: 0 }}>
               <button
                 onClick={login}
                 className="sf-btn"
@@ -136,42 +119,26 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
 
         {/* ── Device Code Dialog ── */}
         {deviceState.status !== 'idle' && (
-          <div style={{
-            marginTop: '1.25rem', padding: '1.25rem',
-            background: 'rgba(124,58,237,0.08)',
-            border: '1px solid rgba(124,58,237,0.25)',
-            borderRadius: 'var(--sf-radius-sm)',
-          }}>
+          <div className={styles.authBox}>
             {deviceState.status === 'loading' && (
-              <div style={{ fontSize: '0.85rem', color: 'var(--sf-text-2)', textAlign: 'center' }}>
-                {t('config.conectando')}
-              </div>
+              <div className="text-sm text-muted text-center">{t('config.conectando')}</div>
             )}
 
             {deviceState.status === 'polling' && (
               <>
-                <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.75rem' }}>
+                <p className="text-sm" style={{ fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.75rem' }}>
                   {t('config.authTitle')}
                 </p>
                 <ol style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', lineHeight: 1.8, paddingLeft: '1.25rem', marginBottom: '1rem' }}>
                   <li>{t('config.authAbre')} <strong style={{ color: '#a78bfa' }}>{deviceState.verificationUri}</strong> {t('config.authEnNavegador')}</li>
-                  <li>{t('config.authCodigo')} <strong style={{
-                    fontSize: '1.4rem', fontFamily: 'monospace',
-                    color: '#c4b5fd', letterSpacing: '0.15em',
-                    background: 'rgba(0,0,0,0.25)', padding: '0.15rem 0.6rem',
-                    borderRadius: 6, marginLeft: '0.25rem',
-                  }}>{deviceState.userCode}</strong></li>
+                  <li>{t('config.authCodigo')} <strong className={styles.authCode}>{deviceState.userCode}</strong></li>
                   <li>{t('config.authInstrucciones')}</li>
                 </ol>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div className="flex-row--gap-sm">
                   <button
                     onClick={() => {
                       if (deviceState.verificationUri) {
-                        if (window.streamforger?.isDesktop) {
-                          window.open(deviceState.verificationUri, '_blank');
-                        } else {
-                          window.open(deviceState.verificationUri, '_blank');
-                        }
+                        window.open(deviceState.verificationUri, '_blank');
                       }
                     }}
                     className="sf-btn"
@@ -199,19 +166,17 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
             )}
 
             {deviceState.error && (
-              <p style={{ fontSize: '0.8rem', color: '#f87171', marginTop: '0.5rem' }}>
-                {deviceState.error}
-              </p>
+              <p className="sf-error-text">{deviceState.error}</p>
             )}
           </div>
         )}
 
         {/* Channel connector */}
-        <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--sf-border)' }}>
-          <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--sf-text-2)', marginBottom: '0.375rem', fontWeight: 500 }}>
+        <div className={styles.channelSection}>
+          <label className="sf-label mb-2" style={{ fontWeight: 500 }}>
             {t('config.canalActivo')}
           </label>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <div className="flex-row--gap-sm">
             <span style={{ fontSize: '1rem', color: 'var(--sf-text-3)' }}>#</span>
             <input
               type="text"
@@ -222,14 +187,10 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
               readOnly
             />
             <div
-              className={connected ? 'sf-badge sf-badge-success' : 'sf-badge sf-badge-danger'}
+              className={`sf-badge ${connected ? 'sf-badge-success' : 'sf-badge-danger'}`}
               style={{ flexShrink: 0 }}
             >
-              <span style={{
-                width: 5, height: 5, borderRadius: '50%',
-                background: connected ? 'var(--sf-success)' : 'var(--sf-danger)',
-                display: 'inline-block',
-              }} />
+              <span className={styles.statusDot} style={{ background: connected ? 'var(--sf-success)' : 'var(--sf-danger)' }} />
               {connected ? t('config.conectadoBadge') : t('config.desconectadoBadge')}
             </div>
           </div>
@@ -238,111 +199,73 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
 
       {/* ── Re-auth note ── */}
       {authenticated && (
-        <div style={{
-          padding: '0.75rem 1rem',
-          background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
-          borderRadius: 'var(--sf-radius-sm)', fontSize: '0.78rem', color: '#fbbf24',
-          lineHeight: 1.5,
-        }}>
+        <div className={styles.reauthNote}>
           {t('config.infoEventsub')}
         </div>
       )}
 
       {/* ── Always on top ── */}
       {window.streamforger && (
-        <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
+        <div className="glass-card sf-card">
           <p className="sf-section-title">{t('config.ventanaTitle')}</p>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="flex-between">
             <div>
               <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--sf-text)', marginBottom: '0.1rem' }}>
                 {t('config.siempreEncima')}
               </div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)' }}>
-                {t('config.siempreEncimaDesc')}
-              </div>
+              <div className="text-xs text-dim">{t('config.siempreEncimaDesc')}</div>
             </div>
             <button
               onClick={toggleAlwaysOnTop}
-              style={{
-                width: 44, height: 24, borderRadius: 99,
-                background: alwaysOnTop ? 'var(--sf-primary)' : 'var(--sf-border)',
-                border: 'none', cursor: 'pointer', position: 'relative',
-                transition: 'background 0.2s', flexShrink: 0,
-              }}
+              className={`${styles.toggle} ${alwaysOnTop ? styles.toggleOn : ''}`}
             >
-              <span style={{
-                position: 'absolute', top: 3,
-                left: alwaysOnTop ? 'calc(100% - 21px)' : 3,
-                width: 18, height: 18, borderRadius: '50%',
-                background: 'white', transition: 'left 0.2s',
-              }} />
+              <span className={styles.toggleThumb} style={{ left: alwaysOnTop ? 'calc(100% - 21px)' : 3 }} />
             </button>
           </div>
         </div>
       )}
 
       {/* ── About ── */}
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '1.25rem' }}>
+      <div className="glass-card sf-card">
         <p className="sf-section-title">{t('config.acercaDe')}</p>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+        <div className="flex-row" style={{ gap: '1rem', marginBottom: '1.25rem' }}>
           <div className="animate-float"><Logo size={48} /></div>
           <div>
             <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--sf-text)' }}>
               {t('config.appName')}
             </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--sf-text-3)', marginTop: '2px' }}>
+            <div className="text-xs text-dim" style={{ marginTop: '2px' }}>
               {t('config.appVersion')}
             </div>
           </div>
         </div>
 
-        <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', lineHeight: 1.7, marginBottom: '1.25rem' }}>
+        <p className="text-sm text-muted" style={{ lineHeight: 1.7, marginBottom: '1.25rem' }}>
           {t('config.appDesc')}
         </p>
 
-        <div style={{
-          padding: '0.875rem 1rem',
-          background: 'rgba(124,58,237,0.08)',
-          border: '1px solid rgba(124,58,237,0.2)',
-          borderRadius: 'var(--sf-radius-sm)',
-          display: 'flex', alignItems: 'center', gap: '0.75rem',
-        }}>
+        <div className={styles.githubBox}>
           <span style={{ fontSize: '1.25rem' }}>🐙</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--sf-text)' }}>
               {t('config.githubTitle')}
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)' }}>
-              {t('config.githubDesc')}
-            </div>
+            <div className="text-xs text-dim">{t('config.githubDesc')}</div>
           </div>
           <a
             href="https://github.com/JuanEntrena18/StreamForge"
             target="_blank"
             rel="noreferrer"
-            style={{
-              padding: '0.4rem 0.875rem',
-              borderRadius: 'var(--sf-radius-sm)',
-              background: 'rgba(124,58,237,0.2)',
-              color: '#a78bfa',
-              textDecoration: 'none',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              transition: 'all 0.15s',
-              flexShrink: 0,
-            }}
+            className={styles.githubBtn}
           >
             {t('config.irRepo')}
           </a>
         </div>
 
-        <div style={{ marginTop: '1rem', fontSize: '0.72rem', color: 'var(--sf-text-3)', textAlign: 'center' }}>
-          {t('config.licencia')}
-        </div>
+        <div className={styles.licenseLine}>{t('config.licencia')}</div>
       </div>
-
     </div>
   );
 }

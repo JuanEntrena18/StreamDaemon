@@ -1,0 +1,366 @@
+.container {
+  max-width: 720px;
+}
+
+.iconBox {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.overlayCard {
+  padding: 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.cardContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.cardTitle {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--sf-text);
+}
+
+.cardDesc {
+  font-size: 0.78rem;
+  color: var(--sf-text-3);
+  margin-bottom: 0.625rem;
+}
+
+.codeBlock {
+  font-size: 0.72rem;
+  color: var(--sf-text-2);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+  border: 1px solid var(--sf-border);
+}
+
+.cardActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.copyBtn {
+  min-width: 90px;
+  font-size: 0.78rem;
+  padding: 0.45rem 0.875rem;
+}
+
+.configureBtn {
+  padding: 0.45rem 0.875rem;
+  border-radius: var(--sf-radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  justify-content: center;
+}
+
+.configureBtnInactive {
+  composes: configureBtn;
+  border: 1px solid var(--sf-border);
+  background: transparent;
+  color: var(--sf-text-3);
+}
+
+.configureBtnSocial {
+  composes: configureBtn;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.55);
+  color: #22d3ee;
+}
+
+.configureBtnEnd {
+  composes: configureBtn;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.55);
+  color: #34d399;
+}
+
+.expandSection {
+  overflow: hidden;
+}
+
+.expandContent {
+  margin-top: 4px;
+  padding: 1.25rem;
+  border: 1px solid;
+  border-top: none;
+  border-radius: 0 0 var(--sf-radius) var(--sf-radius);
+}
+
+.expandContentSocial {
+  composes: expandContent;
+  background: rgba(6, 182, 212, 0.04);
+  border-color: rgba(6, 182, 212, 0.15);
+}
+
+.expandContentEnd {
+  composes: expandContent;
+  background: rgba(16, 185, 129, 0.04);
+  border-color: rgba(16, 185, 129, 0.15);
+}
+
+.sectionTitle {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--sf-text);
+}
+
+.sectionTitleEnd {
+  composes: sectionTitle;
+  color: #34d399;
+  margin-bottom: 1rem;
+}
+
+.sectionTitleSocial {
+  composes: sectionTitle;
+  color: #22d3ee;
+  margin-bottom: 1rem;
+}
+
+.socialHelp {
+  margin-top: 1rem;
+  font-size: 0.72rem;
+  color: var(--sf-text-3);
+  line-height: 1.5;
+}
+
+.socialRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.socialIconBox {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.socialLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--sf-text-2);
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.socialInput {
+  font-size: 0.78rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.statusDotActive {
+  composes: statusDot;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.statusDotInactive {
+  composes: statusDot;
+  background: var(--sf-border);
+  box-shadow: none;
+}
+
+.endSocialRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.checkboxBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.checkboxBtnChecked {
+  composes: checkboxBtn;
+}
+
+.checkboxBtnUnchecked {
+  composes: checkboxBtn;
+  background: transparent;
+  border: 2px solid var(--sf-border);
+  color: transparent;
+}
+
+.endSocialIconBox {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.endSocialLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.endSocialLabelVisible {
+  composes: endSocialLabel;
+  color: var(--sf-text-2);
+}
+
+.endSocialLabelHidden {
+  composes: endSocialLabel;
+  color: var(--sf-text-3);
+}
+
+.endSocialInput {
+  font-size: 0.78rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.fnConfigLabel {
+  font-size: 0.72rem;
+  color: var(--sf-text-3);
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.fnConfigBlockLabel {
+  composes: fnConfigLabel;
+  display: block;
+}
+
+.fnBadge {
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.fnBadgeReady {
+  composes: fnBadge;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.fnBadgeMissing {
+  composes: fnBadge;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.fnSaveBtn {
+  font-size: 0.78rem;
+  padding: 0.4rem 1rem;
+}
+
+.fnSavedText {
+  font-size: 0.72rem;
+  color: #34d399;
+}
+
+.helpNote {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: rgba(6, 182, 212, 0.06);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  border-radius: var(--sf-radius);
+  font-size: 0.8rem;
+  color: var(--sf-text-2);
+  line-height: 1.6;
+}
+
+.customInput {
+  font-size: 0.78rem;
+  padding: 0.4rem 0.75rem;
+  max-width: 280px;
+}
+
+.sectionDivider {
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sectionDividerHorizontal {
+  composes: sectionDivider;
+  background: rgba(124, 58, 237, 0.06);
+  border-color: rgba(124, 58, 237, 0.15);
+}
+
+.sectionDividerVertical {
+  composes: sectionDivider;
+  background: rgba(6, 182, 212, 0.06);
+  border-color: rgba(6, 182, 212, 0.15);
+}
+
+.sectionDividerLabel {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--sf-text);
+}
+
+.sectionDividerCode {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+.sectionDividerCodeHorizontal {
+  composes: sectionDividerCode;
+  background: rgba(124, 58, 237, 0.1);
+  color: #a78bfa;
+}
+
+.sectionDividerCodeVertical {
+  composes: sectionDividerCode;
+  background: rgba(6, 182, 212, 0.1);
+  color: #22d3ee;
+}

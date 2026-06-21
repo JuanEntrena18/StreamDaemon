@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from 'react';
 import { TranslationContext } from '../i18n/context';
+import styles from './OverlayErrorBoundary.module.css';
 
 interface Props { children: ReactNode; }
 interface State { error: Error | null; }
@@ -20,15 +21,10 @@ export class OverlayErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.error) {
       return (
-        <div style={{
-          padding: 24, background: '#0a0a1a', color: '#ef4444',
-          fontFamily: 'monospace', fontSize: 14, height: '100vh',
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-          textAlign: 'center',
-        }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>⚠</div>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>{this.context.t('overlay.errorOverlay')}</div>
-          <div style={{ color: '#94a3b8', maxWidth: 400, wordBreak: 'break-word' }}>
+        <div className={styles.errorContainer}>
+          <div className={styles.errorIcon}>⚠</div>
+          <div className={styles.errorTitle}>{this.context.t('overlay.errorOverlay')}</div>
+          <div className={styles.errorDetail}>
             {this.state.error.message}
           </div>
         </div>

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { apiPut, apiGet } from '../utils/api';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
+import styles from './StreamDashboard.module.css';
 
 interface Props {
   channel: string;
@@ -69,7 +70,6 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
   const [stats, setStats] = useState<HudStats | null>(null);
   const { socket: sock } = useSocket();
 
-  // Stream info editor state
   const [title, setTitle] = useState('');
   const [game, setGame] = useState('');
   const [saving, setSaving] = useState(false);
@@ -77,22 +77,18 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
   const [saveError, setSaveError] = useState('');
   const [missingScope, setMissingScope] = useState(false);
 
-  // Game search
   const [gameResults, setGameResults] = useState<GameResult[]>([]);
   const [showGameResults, setShowGameResults] = useState(false);
   const [searchingGame, setSearchingGame] = useState(false);
   const gameSearchRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Tags
   const [allTags, setAllTags] = useState<TagInfo[]>([]);
   const [activeTagIds, setActiveTagIds] = useState<string[]>([]);
   const [tagSearch, setTagSearch] = useState('');
 
-  // Activity feed state
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [filter, setFilter] = useState('all');
 
-  // Fetch HUD stats
   useEffect(() => {
     if (!channel) return;
     const fetchStats = async () => {
@@ -111,13 +107,11 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
     return () => clearInterval(interval);
   }, [channel, backendUrl]);
 
-  // Join socket room for real-time events
   useEffect(() => {
     if (!channel) return;
     sock.emit('join:channel', channel);
   }, [sock, channel]);
 
-  // Fetch historical activity events on mount
   useEffect(() => {
     if (!channel) return;
     fetch(`${backendUrl}/activity/${channel}`)
@@ -126,7 +120,6 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
       .catch(() => {});
   }, [channel, backendUrl]);
 
-  // Game search with debounce
   const handleGameInput = (value: string) => {
     setGame(value);
     setShowGameResults(true);
@@ -149,7 +142,6 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
     setShowGameResults(false);
   };
 
-  // Fetch tags on mount
   useEffect(() => {
     if (!channel) return;
     apiGet(`/hud/tags/${channel}`).then(async (r) => {
@@ -200,7 +192,6 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
     addEvent({ id: `${Date.now()}-cheer`, type: 'cheer', user: data.userDisplayName, message: t('dashboard.eventBits', { bits: data.bits }), timestamp: Date.now(), amount: data.bits });
   });
 
-  // Save stream info
   const saveInfo = async () => {
     setSaving(true);
     setSaveError('');
@@ -229,13 +220,11 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
 
   if (!channel) {
     return (
-      <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-        <div className="glass-card" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+      <div className={styles.emptyState}>
+        <div className={`glass-card ${styles.emptyCard}`}>
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎮</div>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--sf-text)', marginBottom: '0.5rem' }}>
-            {t('dashboard.title')}
-          </h2>
-          <p style={{ color: 'var(--sf-text-3)', fontSize: '0.9rem', maxWidth: 400, margin: '0 auto' }}>
+          <h2 className="sf-heading mb-2">{t('dashboard.title')}</h2>
+          <p className="text-dim" style={{ fontSize: '0.9rem', maxWidth: 400, margin: '0 auto' }}>
             {t('dashboard.emptyState')}
           </p>
         </div>
@@ -244,57 +233,44 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
   }
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-      {/* ── Activity Feed (top, full-width) ── */}
+    <div className={styles.container}>
+      {/* ── Activity Feed (top) ── */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card"
-        style={{ padding: '1.25rem', marginBottom: '1.25rem' }}
+        className={`glass-card ${styles.activityCard}`}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--sf-text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className={styles.activityHeader}>
+          <h3 className="flex-row--gap-sm" style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--sf-text)' }}>
             {t('dashboard.actividadReciente')}
           </h3>
-
-          {/* Filters */}
-          <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-            <button onClick={() => setFilter('all')} className="sf-btn" style={{
-              fontSize: '0.68rem', padding: '0.25rem 0.5rem',
-              background: filter === 'all' ? 'var(--sf-primary)' : 'var(--sf-surface-hover)',
-              color: filter === 'all' ? '#fff' : 'var(--sf-text-2)',
-              border: 'none', borderRadius: 6, cursor: 'pointer',
-            }}>{t('dashboard.todos')}</button>
+          <div className="flex-row--gap-sm flex-wrap">
+            <button
+              onClick={() => setFilter('all')}
+              className={`${styles.filterBtn} ${filter === 'all' ? styles.filterBtnActive : styles.filterBtnInactive}`}
+            >{t('dashboard.todos')}</button>
             {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
-              <button key={key} onClick={() => setFilter(key)} className="sf-btn" style={{
-                fontSize: '0.68rem', padding: '0.25rem 0.5rem',
-                background: filter === key ? 'var(--sf-primary)' : 'var(--sf-surface-hover)',
-                color: filter === key ? '#fff' : 'var(--sf-text-2)',
-                border: 'none', borderRadius: 6, cursor: 'pointer',
-              }}>{cfg.icon} {cfg.label}</button>
+              <button
+                key={key}
+                onClick={() => setFilter(key)}
+                className={`${styles.filterBtn} ${filter === key ? styles.filterBtnActive : styles.filterBtnInactive}`}
+              >{cfg.icon} {cfg.label}</button>
             ))}
           </div>
         </div>
 
         {filteredEvents.length === 0 ? (
-          <p style={{ fontSize: '0.82rem', color: 'var(--sf-text-3)', textAlign: 'center', padding: '1.5rem 0' }}>
+          <p className="text-dim text-center" style={{ fontSize: '0.82rem', padding: '1.5rem 0' }}>
             {channel ? t('dashboard.esperandoActividad') : t('dashboard.conectarParaActividad')}
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div className="flex-col--gap-sm" style={{ gap: 4 }}>
             {filteredEvents.slice(0, 20).map((event) => (
-              <div key={event.id} style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.4rem 0.625rem',
-                background: 'rgba(255,255,255,0.02)', borderRadius: 6,
-                fontSize: '0.8rem',
-              }}>
-                <span style={{ fontSize: '1rem' }}>{TYPE_CONFIG[event.type]?.icon ?? '📌'}</span>
-                <strong style={{ color: 'var(--sf-text)', minWidth: 80, fontSize: '0.78rem' }}>{event.user}</strong>
-                <span style={{ color: 'var(--sf-text-2)', flex: 1, fontSize: '0.78rem' }}>{event.message}</span>
-                <span style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', whiteSpace: 'nowrap' }}>
-                  {new Date(event.timestamp).toLocaleTimeString()}
-                </span>
+              <div key={event.id} className={styles.eventItem}>
+                <span className={styles.eventIcon}>{TYPE_CONFIG[event.type]?.icon ?? '📌'}</span>
+                <strong className={styles.eventUser}>{event.user}</strong>
+                <span className={styles.eventMsg}>{event.message}</span>
+                <span className={styles.eventTime}>{new Date(event.timestamp).toLocaleTimeString()}</span>
               </div>
             ))}
           </div>
@@ -302,37 +278,24 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
       </motion.div>
 
       {/* ── Bottom section: Preview + Info ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1.6fr 1fr',
-        gap: '1.25rem',
-      }}>
+      <div className={styles.bottomGrid}>
         {/* Preview */}
         <motion.div
           initial={{ y: 10 }}
           animate={{ y: 0 }}
-          className="glass-card"
-          style={{ padding: '0.25rem', overflow: 'hidden' }}
+          className={`glass-card ${styles.previewCard}`}
         >
-          <div style={{
-            position: 'relative', width: '100%', paddingBottom: '56.25%',
-            borderRadius: 'var(--sf-radius-sm)', overflow: 'hidden', background: '#0a0a1a',
-          }}>
+          <div className={styles.previewWrap}>
             <iframe
               key={channel}
               src={`https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&parent=localhost&parent=127.0.0.1&muted=true`}
               onLoad={() => setPreviewLoading(false)}
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+              className={styles.previewIframe}
               allow="autoplay; fullscreen"
               allowFullScreen
             />
             {previewLoading && (
-              <div style={{
-                position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '0.85rem', color: 'var(--sf-text-3)', pointerEvents: 'none',
-              }}>
-                {t('dashboard.cargandoStream')}
-              </div>
+              <div className={styles.previewLoading}>{t('dashboard.cargandoStream')}</div>
             )}
           </div>
         </motion.div>
@@ -342,25 +305,27 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.05 }}
-          className="glass-card"
-          style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}
+          className={`glass-card ${styles.infoCard}`}
         >
           {/* Live indicator */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="flex-between">
+            <div className="flex-row--gap-sm">
               <span style={{
                 width: 8, height: 8, borderRadius: '50%',
                 background: stats?.isLive ? '#34d399' : '#6b7280',
                 boxShadow: stats?.isLive ? '0 0 8px rgba(52,211,153,0.5)' : 'none',
               }} />
-              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: stats?.isLive ? '#34d399' : 'var(--sf-text-3)' }}>
+              <span style={{
+                fontSize: '0.82rem', fontWeight: 600,
+                color: stats?.isLive ? '#34d399' : 'var(--sf-text-3)',
+              }}>
                 {stats?.isLive ? t('dashboard.enVivo') : t('dashboard.offline')}
               </span>
             </div>
             <a
               href={`https://twitch.tv/${channel}`}
               target="_blank" rel="noreferrer"
-              style={{ fontSize: '0.75rem', color: 'var(--sf-primary-light)', textDecoration: 'none' }}
+              className="text-xs text-muted" style={{ color: 'var(--sf-primary-light)', textDecoration: 'none' }}
             >
               {t('dashboard.twitchLink')}
             </a>
@@ -368,22 +333,18 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
 
           {/* Stream info editor */}
           <div>
-            <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
-              {t('dashboard.tituloStream')}
-            </label>
+            <label className="sf-label mb-2">{t('dashboard.tituloStream')}</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t('dashboard.tituloPlaceholder')}
               className="sf-input"
-              style={{ width: '100%', fontSize: '0.82rem' }}
+              style={{ fontSize: '0.82rem' }}
             />
           </div>
           <div style={{ position: 'relative' }}>
-            <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.25rem', display: 'block' }}>
-              {t('dashboard.juegoCategoria')}
-            </label>
+            <label className="sf-label mb-2">{t('dashboard.juegoCategoria')}</label>
             <input
               type="text"
               value={game}
@@ -392,24 +353,13 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
               onBlur={() => setTimeout(() => setShowGameResults(false), 200)}
               placeholder={t('dashboard.juegoPlaceholder')}
               className="sf-input"
-              style={{ width: '100%', fontSize: '0.82rem' }}
+              style={{ fontSize: '0.82rem' }}
             />
-            {searchingGame && <span style={{ position: 'absolute', right: 8, top: 28, fontSize: '0.65rem', color: 'var(--sf-text-3)' }}>{t('dashboard.buscando')}</span>}
+            {searchingGame && <span className="text-dim" style={{ position: 'absolute', right: 8, top: 28, fontSize: '0.65rem' }}>{t('dashboard.buscando')}</span>}
             {showGameResults && gameResults.length > 0 && (
-              <div style={{
-                position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10,
-                background: '#13132e', border: '1px solid var(--sf-border)',
-                borderRadius: 8, maxHeight: 180, overflowY: 'auto', marginTop: 4,
-              }}>
+              <div className={styles.gameSearchResults}>
                 {gameResults.map((g) => (
-                  <div key={g.id} onClick={() => selectGame(g)} style={{
-                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                    padding: '0.4rem 0.625rem', cursor: 'pointer', fontSize: '0.8rem',
-                    borderBottom: '1px solid var(--sf-border)', color: 'var(--sf-text)',
-                  }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--sf-surface-hover)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                  >
+                  <div key={g.id} onClick={() => selectGame(g)} className={styles.gameSearchItem}>
                     {g.boxArtUrl && <img src={g.boxArtUrl} alt="" style={{ width: 28, height: 38, borderRadius: 4, objectFit: 'cover' }} />}
                     <span>{g.name}</span>
                   </div>
@@ -420,31 +370,25 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
 
           {/* Tags */}
           <div>
-            <label style={{ fontSize: '0.72rem', color: 'var(--sf-text-3)', marginBottom: '0.35rem', display: 'block' }}>
-              {t('dashboard.tagsStream')} {activeTagIds.length > 0 && <span style={{ color: 'var(--sf-text-3)', fontSize: '0.65rem' }}>({activeTagIds.length}/10)</span>}
+            <label className="sf-label mb-2">
+              {t('dashboard.tagsStream')} {activeTagIds.length > 0 && <span className="text-dim" style={{ fontSize: '0.65rem' }}>({activeTagIds.length}/10)</span>}
             </label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              {/* Active tag chips */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', minHeight: 24 }}>
+            <div className="flex-col--gap-sm">
+              <div className="flex-row flex-wrap" style={{ gap: '0.3rem', minHeight: 24 }}>
                 {activeTagIds.map((tagId) => {
                   const tagInfo = allTags.find((t) => t.id === tagId);
                   return (
-                    <span key={tagId} style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
-                      fontSize: '0.68rem', padding: '0.15rem 0.5rem', borderRadius: 12,
-                      background: 'var(--sf-primary)', color: '#fff',
-                    }}>
+                    <span key={tagId} className={styles.tagChip}>
                       {tagInfo?.name ?? tagId}
-                      <span onClick={() => toggleTag(tagId)} style={{ cursor: 'pointer', marginLeft: 2, opacity: 0.7 }}>×</span>
+                      <span onClick={() => toggleTag(tagId)} className={styles.tagRemove}>×</span>
                     </span>
                   );
                 })}
                 {activeTagIds.length === 0 && (
-                  <span style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)' }}>{t('dashboard.sinTags')}</span>
+                  <span className="text-dim" style={{ fontSize: '0.68rem' }}>{t('dashboard.sinTags')}</span>
                 )}
               </div>
-              {/* Custom tag input */}
-              <div style={{ display: 'flex', gap: '0.3rem' }}>
+              <div className="flex-row" style={{ gap: '0.3rem' }}>
                 <input
                   type="text"
                   value={customTagInput}
@@ -459,18 +403,16 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
                   {t('dashboard.agregarTag')}
                 </button>
               </div>
-              {/* Filter/search available tags */}
               <input
                 type="text"
                 value={tagSearch}
                 onChange={(e) => setTagSearch(e.target.value)}
                 placeholder={allTags.length > 0 ? t('dashboard.buscarTags') : ''}
                 className="sf-input"
-                style={{ width: '100%', fontSize: '0.75rem', display: allTags.length > 0 ? '' : 'none' }}
+                style={{ fontSize: '0.75rem', display: allTags.length > 0 ? '' : 'none' }}
               />
-              {/* Available tags list */}
               {tagSearch && allTags.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', maxHeight: 80, overflowY: 'auto' }}>
+                <div className="flex-row flex-wrap" style={{ gap: '0.3rem', maxHeight: 80, overflowY: 'auto' }}>
                   {allTags
                     .filter((tag) => tag.name.toLowerCase().includes(tagSearch.toLowerCase()) && !activeTagIds.includes(tag.id))
                     .slice(0, 15)
@@ -478,12 +420,8 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
                       <button
                         key={tag.id}
                         onClick={() => toggleTag(tag.id)}
-                        style={{
-                          fontSize: '0.68rem', padding: '0.2rem 0.5rem', borderRadius: 12, border: 'none',
-                          cursor: 'pointer', whiteSpace: 'nowrap',
-                          background: 'var(--sf-surface-hover)', color: 'var(--sf-text-2)',
-                          opacity: tag.isAuto ? 0.5 : 1,
-                        }}
+                        className={styles.tagBtn}
+                        style={{ opacity: tag.isAuto ? 0.5 : 1 }}
                       >{tag.name}{tag.isAuto ? ` (${t('dashboard.auto')})` : ''}</button>
                     ))}
                 </div>
@@ -491,7 +429,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingTop: '0.25rem' }}>
+          <div className="flex-row" style={{ gap: '0.75rem', paddingTop: '0.25rem' }}>
             <button onClick={saveInfo} disabled={saving} className="sf-btn sf-btn-primary" style={{ fontSize: '0.78rem', padding: '0.4rem 1rem' }}>
               {saving ? t('dashboard.guardando') : t('dashboard.guardarCambios')}
             </button>
@@ -515,10 +453,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
           </div>
 
           {/* Stats */}
-          <div style={{
-            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem',
-            paddingTop: '0.75rem', borderTop: '1px solid var(--sf-border)',
-          }}>
+          <div className={styles.statsGrid}>
             <StatCard label={t('dashboard.statsViewers')} value={stats ? formatNumber(stats.viewers) : '—'} />
             <StatCard label={t('dashboard.statsFollowers')} value={stats ? formatNumber(stats.followers) : '—'} />
             <StatCard label={t('dashboard.statsSubs')} value={stats ? formatNumber(stats.subscribers) : '—'} />
@@ -539,7 +474,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
       textAlign: 'center',
     }}>
       <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--sf-text)' }}>{value}</div>
-      <div style={{ fontSize: '0.65rem', color: 'var(--sf-text-3)', marginTop: '1px' }}>{label}</div>
+      <div className="text-dim" style={{ fontSize: '0.65rem', marginTop: '1px' }}>{label}</div>
     </div>
   );
 }
