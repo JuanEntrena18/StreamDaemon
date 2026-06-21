@@ -6,6 +6,7 @@ export interface AuthUser {
   id: string;
   login: string;
   displayName: string;
+  profileImageUrl?: string;
 }
 
 export interface AuthStatus {

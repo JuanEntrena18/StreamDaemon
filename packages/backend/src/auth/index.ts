@@ -32,7 +32,7 @@ const SCOPES = [
 ];
 
 export let authProvider: RefreshingAuthProvider | null = null;
-export let currentUser: { id: string; login: string; displayName: string } | null = null;
+export let currentUser: { id: string; login: string; displayName: string; profileImageUrl?: string } | null = null;
 
 const authCallbacks: Array<() => void> = [];
 
@@ -312,6 +312,7 @@ async function finishAuth(
     id: twitchUser.id,
     login: twitchUser.login,
     displayName: twitchUser.display_name,
+    profileImageUrl: twitchUser.profile_image_url,
   };
 
   const encKey = config.TWITCH_CLIENT_SECRET;
@@ -373,6 +374,7 @@ async function restoreSession() {
     id: user.twitchId,
     login: user.login,
     displayName: user.displayName,
+    profileImageUrl: user.avatarUrl ?? undefined,
   };
 
   await authProvider?.addUserForToken(

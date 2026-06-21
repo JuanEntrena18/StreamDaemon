@@ -25,6 +25,7 @@ interface SidebarProps {
   onLocaleChange: (locale: Locale) => void;
   version: string;
   t: (key: string) => string;
+  badges?: Record<string, number>;
 }
 
 const SIDEBAR_WIDTH_EXPANDED = 220;
@@ -34,7 +35,7 @@ export function Sidebar({
   collapsed, onToggleCollapse, mobileOpen, onMobileClose,
   navSections, activeTab, onTabChange,
   isDesktop, alwaysOnTop, onToggleAlwaysOnTop,
-  locale, onLocaleChange, version, t,
+  locale, onLocaleChange, version, t, badges,
 }: SidebarProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -91,6 +92,19 @@ export function Sidebar({
                         </motion.span>
                       )}
                     </AnimatePresence>
+                    {badges?.[item.id] ? (
+                      <span className={collapsed ? styles.navBadgeCollapsed : styles.navBadgeExpanded}>
+                        {badges[item.id] > 99 ? '99+' : badges[item.id]}
+                      </span>
+                    ) : null}
+                    {active && (
+                      <motion.div
+                        layoutId="sidebar-active-indicator"
+                        className={styles.activeIndicator}
+                        initial={false}
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      />
+                    )}
                   </button>
                 );
               })}

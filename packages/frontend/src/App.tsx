@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSocket } from './hooks/useSocket';
+import { useSocket, useSocketEvent } from './hooks/useSocket';
 import { useAuthStatus } from './hooks/useAuthStatus';
 import { useTranslation } from './i18n/context';
 import { Sidebar } from './components/Sidebar';
@@ -56,6 +56,7 @@ export function App() {
   const { authenticated, user, loading: authLoading, refresh } = useAuthStatus();
   const [channel, setChannel] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('chat');
+  const [tabDirection, setTabDirection] = useState(1);
   const [setupComplete, setSetupComplete] = useState(isSetupComplete);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem('streamforger-sidebar-collapsed') === 'true'; } catch { return false; }
@@ -107,6 +108,43 @@ export function App() {
     };
   }, [channel, socket]);
 
+  // Global badges tracking
+  const [unreadChat, setUnreadChat] = useState(0);
+  const [giveawayParticipants, setGiveawayParticipants] = useState(0);
+
+  useEffect(() => {
+    if (activeTab === 'chat') setUnreadChat(0);
+  }, [activeTab]);
+
+  useSocketEvent('chat:message', useCallback(() => {
+    if (activeTab !== 'chat') setUnreadChat((c) => c + 1);
+  }, [activeTab]));
+
+  useEffect(() => {
+    if (!channel) return;
+    fetch(`${BACKEND_URL}/giveaways/${channel}/active`)
+      .then((r) => r.json())
+      .then((data) => { if (data && data.id) setGiveawayParticipants(data.entries || 0); })
+      .catch(() => {});
+  }, [channel]);
+
+  useSocketEvent('giveaway:start', useCallback((data: any) => {
+    setGiveawayParticipants(data.entries || 0);
+  }, []));
+
+  useSocketEvent('giveaway:entry', useCallback((data: { count: number }) => {
+    setGiveawayParticipants(data.count);
+  }, []));
+
+  useSocketEvent('giveaway:end', useCallback(() => {
+    setGiveawayParticipants(0);
+  }, []));
+
+  const badges = {
+    chat: unreadChat,
+    giveaway: giveawayParticipants,
+  };
+
   if (!backendReady) return <SplashScreen onReady={onReady} />;
   if (!setupComplete) return <SetupWizard onComplete={() => setSetupComplete(true)} />;
 
@@ -120,6 +158,14 @@ export function App() {
     const next = !sidebarCollapsed;
     setSidebarCollapsed(next);
     try { localStorage.setItem('streamforger-sidebar-collapsed', next ? 'true' : 'false'); } catch {}
+  }
+
+  function handleTabChange(newTab: Tab) {
+    const navOrder = buildNav().flatMap(s => s.items.map(i => i.id));
+    const currentIndex = navOrder.indexOf(activeTab);
+    const newIndex = navOrder.indexOf(newTab);
+    setTabDirection(newIndex > currentIndex ? 1 : -1);
+    setActiveTab(newTab);
   }
 
   function buildNav() {
@@ -208,7 +254,7 @@ export function App() {
             onMobileClose={() => setMobileOpen(false)}
             navSections={buildNav()}
             activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={handleTabChange}
             isDesktop={isDesktop}
             alwaysOnTop={alwaysOnTop}
             onToggleAlwaysOnTop={toggleAlwaysOnTop}
@@ -216,6 +262,7 @@ export function App() {
             onLocaleChange={setLocale}
             version={t('app.version')}
             t={t}
+            badges={badges}
           />
 
           {/* ── Main ── */}
@@ -253,7 +300,11 @@ export function App() {
                 {!authLoading && authenticated && user ? (
                   <div className={styles.userBadge}>
                     <div className={styles.userAvatar}>
-                      {user.displayName.charAt(0).toUpperCase()}
+                      {user.profileImageUrl ? (
+                        <img src={user.profileImageUrl} alt="Avatar" className={styles.avatarImg} />
+                      ) : (
+                        user.displayName.charAt(0).toUpperCase()
+                      )}
                     </div>
                     <span className={styles.userName}>{user.displayName}</span>
                     <span className={styles.userDot} />
@@ -290,13 +341,14 @@ export function App() {
 
             {/* Content */}
             <div className={styles.content}>
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait" custom={tabDirection}>
                 <motion.div
                   key={activeTab}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  custom={tabDirection}
+                  initial={(dir: number) => ({ opacity: 0, x: dir * 20, y: 0 })}
+                  animate={{ opacity: 1, x: 0, y: 0 }}
+                  exit={{ opacity: 0, y: -6, x: 0 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
                 >
                   {activeTab === 'dashboard' && <StreamDashboard channel={channel} backendUrl={BACKEND_URL} />}
                   {activeTab === 'tracker'   && <TrackerPanel channel={channel} backendUrl={BACKEND_URL} />}
