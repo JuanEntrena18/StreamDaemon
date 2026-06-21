@@ -43,7 +43,7 @@
     "siempreEncima": "🎮 Immer im Vordergrund",
     "desactivarSiempreEncima": "Immer im Vordergrund deaktivieren",
     "activarSiempreEncima": "Immer im Vordergrund aktivieren",
-    "version": "v0.2.4 · Open Source",
+    "version": "v0.3.0 · Open Source",
     "panelControl": "Dashboard · StreamForger",
     "hash": "#",
     "placeholderCanal": "Twitch-Kanal...",
@@ -51,7 +51,9 @@
     "authSuccessTitle": "Anmeldung erfolgreich",
     "authSuccessMsg": "Sie können diesen Tab jetzt schließen.",
     "conectado": "Verbunden",
-    "desconectado": "Getrennt"
+    "desconectado": "Getrennt",
+    "colapsarSidebar": "Sidebar einklappen",
+    "expandirSidebar": "Sidebar ausklappen"
   },
   "chat": {
     "title": "💬 Live-Chat",

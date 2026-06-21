@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket } from './hooks/useSocket';
 import { useAuthStatus } from './hooks/useAuthStatus';
 import { useTranslation } from './i18n/context';
-import type { Locale } from './i18n/types';
+import { Sidebar } from './components/Sidebar';
+import type { Tab, NavSection } from './components/Sidebar';
 import { GiveawayPanel } from './components/GiveawayPanel';
 import { PredictionPanel } from './components/PredictionPanel';
 import { ObsPanel } from './components/ObsPanel';
-import { Logo } from './components/Logo';
 import { ChatPanel } from './components/ChatPanel';
 import { ConfigPanel } from './components/ConfigPanel';
 import { TrackerPanel } from './components/TrackerPanel';
@@ -31,9 +31,7 @@ import { TtsManager } from './components/TtsManager';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config' | 'bitrate' | 'vertical' | 'alertsounds' | 'achievements';
-
-const APP_VERSION = '0.2.4';
+const APP_VERSION = '0.3.0';
 
 // Clear stale localStorage keys when version changes
 try {
@@ -57,6 +55,20 @@ export function App() {
   const [channel, setChannel] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('chat');
   const [setupComplete, setSetupComplete] = useState(isSetupComplete);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem('streamforger-sidebar-collapsed') === 'true'; } catch { return false; }
+  });
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+      if (!e.matches) setMobileOpen(false);
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   // Handle ?auth=success from browser login redirect
   const [showAuthSuccess, setShowAuthSuccess] = useState(false);
@@ -102,9 +114,13 @@ export function App() {
     window.streamforger?.window.setAlwaysOnTop(next);
   }
 
+  function toggleSidebarCollapse() {
+    const next = !sidebarCollapsed;
+    setSidebarCollapsed(next);
+    try { localStorage.setItem('streamforger-sidebar-collapsed', next ? 'true' : 'false'); } catch {}
+  }
+
   function buildNav() {
-    type NavItem = { id: Tab; icon: string; label: string };
-    type NavSection = { id: string; label: string; items: NavItem[] };
     const s = (k: string) => t(`nav.${k}`);
     return [
       { id: 'gestor', label: s('gestorDelStream'), items: [{ id: 'dashboard' as Tab, icon: '📡', label: s('gestorTab') }] },
@@ -214,138 +230,22 @@ export function App() {
       {/* ── Body row ── */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
-        <aside style={{
-          width: 220,
-          background: 'rgba(13,13,30,0.95)',
-          borderRight: '1px solid var(--sf-border)',
-          display: 'flex',
-          flexDirection: 'column',
-          flexShrink: 0,
-          overflow: 'hidden',
-        }}>
-          {/* Brand */}
-          <div style={{ padding: '1.25rem 1.25rem 1rem', borderBottom: '1px solid var(--sf-border)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
-              <div className="animate-float"><Logo size={38} /></div>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.02em', color: 'var(--sf-text)' }}>
-                  StreamForger
-                </div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', marginTop: '1px' }}>
-                  by Cyber Haute Couture
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <nav style={{ flex: 1, padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', overflowY: 'auto' }}>
-            {buildNav().map((section) => (
-              <div key={section.id}>
-                <p className="sf-section-title" style={{ paddingLeft: '0.5rem', marginBottom: '0.5rem' }}>
-                  {section.label}
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-                  {section.items.map((item) => {
-                    const isActive = activeTab === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveTab(item.id)}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '0.625rem',
-                          padding: '0.625rem 0.75rem', borderRadius: '10px', border: 'none',
-                          cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.875rem',
-                          fontWeight: isActive ? 600 : 400, textAlign: 'left',
-                          transition: 'all 0.15s ease',
-                          background: isActive
-                            ? 'linear-gradient(135deg, rgba(124,58,237,0.25), rgba(99,102,241,0.15))'
-                            : 'transparent',
-                          color: isActive ? 'var(--sf-text)' : 'var(--sf-text-2)',
-                          borderLeft: isActive ? '2px solid var(--sf-primary)' : '2px solid transparent',
-                          outline: 'none',
-                          width: '100%',
-                        }}
-                      >
-                        <span style={{ fontSize: '1rem', minWidth: '1.25rem' }}>{item.icon}</span>
-                        {item.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </nav>
-
-          {/* Overlay controls (desktop only) */}
-          {isDesktop && (
-            <div style={{
-              padding: '1rem 1.25rem',
-              borderTop: '1px solid var(--sf-border)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.625rem',
-            }}>
-              <p className="sf-section-title">{t('app.modoOverlay')}</p>
-
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--sf-text-2)' }}>
-                  {t('app.siempreEncima')}
-                </span>
-                <button
-                  onClick={toggleAlwaysOnTop}
-                  title={alwaysOnTop ? t('app.desactivarSiempreEncima') : t('app.activarSiempreEncima')}
-                  style={{
-                    width: 38, height: 20, borderRadius: 99,
-                    background: alwaysOnTop ? 'var(--sf-primary)' : 'var(--sf-border)',
-                    border: 'none', cursor: 'pointer', position: 'relative',
-                    transition: 'background 0.2s', flexShrink: 0,
-                  }}
-                >
-                  <span style={{
-                    position: 'absolute', top: 2,
-                    left: alwaysOnTop ? 'calc(100% - 18px)' : 2,
-                    width: 16, height: 16, borderRadius: '50%',
-                    background: 'white', transition: 'left 0.2s',
-                  }} />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Footer */}
-          <div style={{
-            padding: '0.875rem 1.25rem',
-            borderTop: '1px solid var(--sf-border)',
-            fontSize: '0.7rem', color: 'var(--sf-text-3)', lineHeight: 1.6,
-          }}>
-            <div>{t('app.version')}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
-              <select
-                value={locale}
-                onChange={(e) => setLocale(e.target.value as Locale)}
-                style={{
-                  padding: '1px 4px', borderRadius: 4, border: '1px solid var(--sf-border)',
-                  background: 'transparent', color: 'var(--sf-text-2)', fontSize: '0.65rem',
-                  fontFamily: 'inherit', outline: 'none', cursor: 'pointer',
-                }}
-              >
-                <option value="es">ES</option>
-                <option value="en">EN</option>
-                <option value="fr">FR</option>
-                <option value="de">DE</option>
-                <option value="it">IT</option>
-              </select>
-            </div>
-            <a
-              href="https://github.com/JuanEntrena18/StreamForge"
-              target="_blank" rel="noreferrer"
-              style={{ color: 'var(--sf-primary-light)', textDecoration: 'none' }}
-            >
-              GitHub ↗
-            </a>
-          </div>
-        </aside>
+        <Sidebar
+          collapsed={sidebarCollapsed && !isMobile}
+          onToggleCollapse={toggleSidebarCollapse}
+          mobileOpen={mobileOpen}
+          onMobileClose={() => setMobileOpen(false)}
+          navSections={buildNav()}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          isDesktop={isDesktop}
+          alwaysOnTop={alwaysOnTop}
+          onToggleAlwaysOnTop={toggleAlwaysOnTop}
+          locale={locale}
+          onLocaleChange={setLocale}
+          version={t('app.version')}
+          t={t}
+        />
 
         {/* ── Main ── */}
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
@@ -360,13 +260,29 @@ export function App() {
             flexShrink: 0,
             zIndex: 5,
           }}>
-            <div>
-              <h1 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--sf-text)', letterSpacing: '-0.01em' }}>
-                {t(`nav.${activeTab}Tab`)}
-              </h1>
-              <p style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)', marginTop: '1px' }}>
-                {t('app.panelControl')}
-              </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {isMobile && (
+                <button
+                  onClick={() => setMobileOpen(true)}
+                  style={{
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    color: 'var(--sf-text-2)', fontSize: '1.25rem',
+                    padding: '0.25rem', borderRadius: '6px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  ☰
+                </button>
+              )}
+              <div>
+                <h1 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--sf-text)', letterSpacing: '-0.01em' }}>
+                  {t(`nav.${activeTab}Tab`)}
+                </h1>
+                <p style={{ fontSize: '0.75rem', color: 'var(--sf-text-3)', marginTop: '1px' }}>
+                  {t('app.panelControl')}
+                </p>
+              </div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>

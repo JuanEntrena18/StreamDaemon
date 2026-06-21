@@ -43,7 +43,7 @@
     "siempreEncima": "🎮 Sempre in primo piano",
     "desactivarSiempreEncima": "Disattiva sempre in primo piano",
     "activarSiempreEncima": "Attiva sempre in primo piano",
-    "version": "v0.2.4 · Open Source",
+    "version": "v0.3.0 · Open Source",
     "panelControl": "Pannello di controllo · StreamForger",
     "hash": "#",
     "placeholderCanal": "canale twitch...",
@@ -51,7 +51,9 @@
     "authSuccessTitle": "Accesso riuscito",
     "authSuccessMsg": "Puoi chiudere questa scheda.",
     "conectado": "Connesso",
-    "desconectado": "Disconnesso"
+    "desconectado": "Disconnesso",
+    "colapsarSidebar": "Comprimi sidebar",
+    "expandirSidebar": "Espandi sidebar"
   },
   "chat": {
     "title": "💬 Chat dal vivo",

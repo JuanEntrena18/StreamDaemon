@@ -76,7 +76,7 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 
 | Componente | Descripción |
 |---|---|
-| `App.tsx` | Layout principal con sidebar (8 secciones: GESTOR, ESTADÍSTICAS, SEGURIDAD, Chat, MOD, COMANDOS, Herramientas, Config) + header + tab transitions |
+| `App.tsx` | Layout principal con sidebar state management, header + tab transitions, ?auth=success handler y version migration |
 | `StreamDashboard.tsx` | Gestor unificado: preview embed, editor título/juego, stats en vivo, feed actividad con filtros |
 | `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación, selector sonido con volumen, **TTS (voz, velocidad, volumen)**, overlay controls (tamaño, opacidad, tipografía, fondo negro/transparente) |
 | `SecurityPanel.tsx` | Anti-Bots: estadísticas, toggles de protección, escaneo manual, lista blanca, log de detecciones con acciones ban/unban/whitelist por fila, tarjeta de ayuda del sistema |
@@ -92,6 +92,7 @@ El dashboard usa un sistema de tokens CSS definidos en `index.css`:
 | `CommandsPanel.tsx` | Comandos personalizados: crear, editar, toggle, cooldown |
 | `ObsPanel.tsx` | URLs OBS con copiar al portapapeles y selector de overlays standalone |
 | `ConfigPanel.tsx` | Config: conexión Twitch OAuth, logout, acerca de |
+| `Sidebar.tsx` | Barra lateral colapsable con 8 secciones (GESTOR, ESTADÍSTICAS, SEGURIDAD, Chat, MOD, COMANDOS, Herramientas, Config). Se colapsa a 56px mostrando solo iconos con animación Framer Motion. En < 768px se convierte en drawer overlay con botón hamburguesa. Estado persistido en localStorage |
 
 ---
 
@@ -322,3 +323,4 @@ twitch_overlay/
 | **42** | **🛸 Tactical Sci-Fi theme** — 4 overlays BSG con radar DRADIS, chat táctico y telemetría | ✅ |
 | **43** | **Socket.IO en overlays temáticos** — Todos los overlays con chat (gameplay y just chatting) conectados al backend via Socket.IO para mensajes, follows, subs, cheers y redemptions | ✅ |
 | **44** | **Socket.IO standalone fix** — Corrección de conexión Socket.IO en 39 overlays standalone: WebSocket-only transport para evitar interceptación de Fastify v5, cliente Socket.IO local (`/overlays/js/socket.io.js`), orden correcto de `script.onload` para evitar race condition, y handler `connect_error` en todos los overlays | ✅ |
+| **45** | **🗂️ Sidebar colapsable/responsive** — Sidebar extraída a componente propio con colapso a 56px (solo iconos), animación Framer Motion, modo drawer en < 768px con overlay + backdrop blur y botón hamburguesa. Estado persistido en localStorage | ✅ |
