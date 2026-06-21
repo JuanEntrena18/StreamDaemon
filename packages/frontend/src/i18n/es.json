@@ -847,7 +847,9 @@
   },
   "splash": {
     "apoya": "☕ Apoya el desarrollo de StreamForger aquí",
-    "cargando": "Cargando…"
+    "cargando": "Conectando con el backend…",
+    "conectado": "¡Conectado!",
+    "timeout": "Continuando…"
   },
   "bitrate": {
     "title": "🧮 Calculadora de Bitrate",

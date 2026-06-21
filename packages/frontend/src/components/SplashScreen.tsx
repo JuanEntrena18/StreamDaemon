@@ -1,7 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTranslation } from '../i18n/context';
 import { Logo } from './Logo';
 import styles from './SplashScreen.module.css';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
+const POLL_INTERVAL = 500;
+const MAX_WAIT = 5000;
 
 interface Props {
   onReady: () => void;
@@ -9,9 +13,52 @@ interface Props {
 
 export function SplashScreen({ onReady }: Props) {
   const { t } = useTranslation();
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState<'connecting' | 'connected' | 'timeout'>('connecting');
+  const calledRef = useRef(false);
+
   useEffect(() => {
-    const t = setTimeout(onReady, 5000);
-    return () => clearTimeout(t);
+    const startTime = Date.now();
+
+    const poll = async () => {
+      if (calledRef.current) return;
+      try {
+        const r = await fetch(`${BACKEND_URL}/auth/status`, { signal: AbortSignal.timeout(3000) });
+        if (r.ok && !calledRef.current) {
+          calledRef.current = true;
+          setProgress(100);
+          setStatus('connected');
+          setTimeout(onReady, 400);
+        }
+      } catch {}
+    };
+
+    // Progress animation (simulated until backend responds)
+    const progressInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min((elapsed / MAX_WAIT) * 100, 95);
+      setProgress(pct);
+    }, 100);
+
+    // Poll backend
+    const pollInterval = setInterval(poll, POLL_INTERVAL);
+    poll();
+
+    // Max fallback
+    const fallback = setTimeout(() => {
+      if (!calledRef.current) {
+        calledRef.current = true;
+        setProgress(100);
+        setStatus('timeout');
+        setTimeout(onReady, 400);
+      }
+    }, MAX_WAIT);
+
+    return () => {
+      clearInterval(progressInterval);
+      clearInterval(pollInterval);
+      clearTimeout(fallback);
+    };
   }, []);
 
   return (
@@ -29,12 +76,8 @@ export function SplashScreen({ onReady }: Props) {
         </div>
 
         <div className={styles.titleWrap}>
-          <h1 className={styles.title}>
-            StreamForger
-          </h1>
-          <p className={styles.tagline}>
-            Open-source stream tools, forged for creators.
-          </p>
+          <h1 className={styles.title}>StreamForger</h1>
+          <p className={styles.tagline}>Open-source stream tools, forged for creators.</p>
         </div>
 
         <div className={styles.divider} />
@@ -62,9 +105,14 @@ export function SplashScreen({ onReady }: Props) {
         </a>
 
         <div className={styles.loadingRow}>
-          <span className={styles.loadingDot} />
-          <span className={styles.loadingLabel}>
-            {t('splash.cargando')}
+          <div className={styles.progressTrack}>
+            <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+          </div>
+          <span className={`${styles.loadingLabel} ${status === 'connected' ? styles.loadingLabelSuccess : ''}`}>
+            <span className={`${styles.loadingDot} ${status === 'connected' ? styles.loadingDotSuccess : ''}`} />
+            {status === 'connecting' && (t('splash.cargando') || 'Conectando con el backend...')}
+            {status === 'connected' && (t('splash.conectado') || '¡Conectado!')}
+            {status === 'timeout' && (t('splash.timeout') || 'Continuando...')}
           </span>
         </div>
       </div>

@@ -90,21 +90,49 @@
 .loadingRow {
   margin-top: 0.75rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.625rem;
+  gap: 0.5rem;
+  width: 240px;
 }
 
-.loadingDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #7c3aed;
-  animation: pulse-spinner 1s ease-in-out infinite;
+.progressTrack {
+  width: 100%;
+  height: 3px;
+  background: var(--sf-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--sf-primary), var(--sf-accent));
+  transition: width 0.4s ease;
 }
 
 .loadingLabel {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   color: var(--sf-text-3);
+  transition: color 0.3s ease;
+}
+
+.loadingLabelSuccess {
+  color: #34d399;
+}
+
+.loadingDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sf-text-3);
+  display: inline-block;
+  margin-right: 0.4rem;
+  animation: pulse-spinner 1s ease-in-out infinite;
+}
+
+.loadingDotSuccess {
+  background: #34d399;
 }
 
 @keyframes pulse-spinner {

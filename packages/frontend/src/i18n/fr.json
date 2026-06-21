@@ -818,7 +818,9 @@
   },
   "splash": {
     "apoya": "☕ Soutenez le développement de StreamForger ici",
-    "cargando": "Chargement…"
+    "cargando": "Connexion au backend…",
+    "conectado": "Connecté !",
+    "timeout": "On continue…"
   },
   "bitrate": {
     "title": "🧮 Calculateur de Débit",
