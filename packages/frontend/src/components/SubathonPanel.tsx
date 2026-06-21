@@ -3,6 +3,7 @@ import { useTranslation } from '../i18n/context';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import { ConfirmModal } from './ConfirmModal';
+import { Toggle } from './Toggle';
 import type { SubathonState, SubathonAction } from '@streamforger/shared';
 import styles from './SubathonPanel.module.css';
 
@@ -259,10 +260,12 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
             <label className={styles.alertsToggle}>
               {t('subathon.alertsEnabled')}
             </label>
-            <button onClick={() => setAlertsEnabled(!alertsEnabled)}
-              className={alertsEnabled ? styles.alertsBtnOn : styles.alertsBtnOff}>
-              {alertsEnabled ? t('subathon.on') : t('subathon.off')}
-            </button>
+            <Toggle
+              checked={alertsEnabled}
+              onChange={setAlertsEnabled}
+              label={alertsEnabled ? t('subathon.on') : t('subathon.off')}
+              size="md"
+            />
           </div>
 
           <div className={styles.configField}>

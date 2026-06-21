@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from './Logo';
+import { Toggle } from './Toggle';
 import type { Locale } from '../i18n/types';
 import styles from './Sidebar.module.css';
 
@@ -117,13 +118,11 @@ export function Sidebar({
           <p className="sf-section-title">{t('app.modoOverlay')}</p>
           <div className={styles.overlayRow}>
             <span className={styles.overlayLabel}>{t('app.siempreEncima')}</span>
-            <button
-              onClick={onToggleAlwaysOnTop}
-              title={alwaysOnTop ? t('app.desactivarSiempreEncima') : t('app.activarSiempreEncima')}
-              className={`${styles.toggle} ${alwaysOnTop ? styles.toggleOn : ''}`}
-            >
-              <span className={styles.toggleThumb} style={{ left: alwaysOnTop ? 'calc(100% - 18px)' : 2 }} />
-            </button>
+            <Toggle
+              checked={alwaysOnTop}
+              onChange={onToggleAlwaysOnTop}
+              size="md"
+            />
           </div>
         </div>
       )}

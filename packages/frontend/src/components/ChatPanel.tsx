@@ -7,6 +7,7 @@ import { apiGet, apiPut } from '../utils/api';
 import { useTts } from '../contexts/TtsContext';
 import { getVoices } from '../utils/tts';
 import { ConfirmModal } from './ConfirmModal';
+import { Toggle } from './Toggle';
 import styles from './ChatPanel.module.css';
 
 const OVERLAY_LS_KEY = 'streamforger-chat-overlay-settings';
@@ -494,12 +495,11 @@ export function ChatPanel({ channel }: Props) {
         <div className="flex-between mb-1">
           <div className="flex-row--gap-sm">
             <span className="text-dim" style={{ fontSize: '0.7rem', fontWeight: 500 }}>{t('chat.tts')}</span>
-            <button
-              onClick={() => { tts.setEnabled(!tts.enabled); if (tts.enabled) window.speechSynthesis?.cancel(); }}
-              className={`${styles.toggleTrack} ${tts.enabled ? styles.toggleTrackOn : styles.toggleTrackOff}`}
-            >
-              <span className={styles.toggleThumb} style={{ left: tts.enabled ? 18 : 2 }} />
-            </button>
+            <Toggle
+              checked={tts.enabled}
+              onChange={(c) => { tts.setEnabled(c); if (c) window.speechSynthesis?.cancel(); }}
+              size="sm"
+            />
           </div>
           {tts.enabled && window.speechSynthesis && (
             <button
@@ -593,16 +593,14 @@ export function ChatPanel({ channel }: Props) {
             <span className="text-dim" style={{ fontSize: '0.7rem', fontWeight: 500 }}>
               {t('chat.greeting')}
             </span>
-            <button
-              onClick={async () => {
-                const next = !greetingEnabled;
-                setGreetingEnabled(next);
-                await apiPut('/chat/greeting-config', { channel, enabled: next });
+            <Toggle
+              checked={greetingEnabled}
+              onChange={async (c) => {
+                setGreetingEnabled(c);
+                await apiPut('/chat/greeting-config', { channel, enabled: c });
               }}
-              className={`${styles.toggleTrack} ${greetingEnabled ? styles.toggleTrackOn : styles.toggleTrackOff}`}
-            >
-              <span className={styles.toggleThumb} style={{ left: greetingEnabled ? 18 : 2 }} />
-            </button>
+              size="sm"
+            />
           </div>
           <button
             onClick={() => setGreetingOpen(!greetingOpen)}

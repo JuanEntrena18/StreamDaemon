@@ -199,30 +199,6 @@
   font-size: 0.75rem;
   color: var(--sf-text-2);
 }
-.toggle {
-  width: 38px;
-  height: 20px;
-  border-radius: 99px;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  transition: background 0.2s;
-  flex-shrink: 0;
-  background: var(--sf-border);
-}
-.toggleOn {
-  background: var(--sf-primary);
-}
-.toggleThumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: white;
-  transition: left 0.2s;
-}
 
 /* ── Footer ── */
 .footer {

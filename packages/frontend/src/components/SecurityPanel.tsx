@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { apiGet, apiPost, apiPut } from '../utils/api';
 import { useTranslation } from '../i18n/context';
 import { ConfirmModal } from './ConfirmModal';
+import { Toggle } from './Toggle';
 import styles from './SecurityPanel.module.css';
 
 interface Props {
@@ -398,24 +399,8 @@ function ToggleRow({ label, desc, checked, onChange }: {
 }) {
   return (
     <div className={styles.toggleRow}>
-      <button
-        onClick={() => onChange(!checked)}
-        style={{
-          flexShrink: 0, width: 44, height: 24, borderRadius: 12,
-          border: 'none', cursor: 'pointer', position: 'relative',
-          transition: 'background 0.2s',
-          background: checked ? 'var(--sf-primary)' : 'var(--sf-border)',
-          marginTop: 2,
-        }}
-      >
-        <div style={{
-          position: 'absolute', top: 2, left: checked ? 22 : 2,
-          width: 20, height: 20, borderRadius: '50%',
-          background: '#fff', transition: 'left 0.2s',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-        }} />
-      </button>
-      <div className="flex-1">
+      <Toggle checked={checked} onChange={onChange} />
+      <div className="flex-1" style={{ marginLeft: 6 }}>
         <div className={styles.toggleLabel}>
           {label}
         </div>

@@ -400,3 +400,32 @@
   background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(99, 102, 241, 0.08));
   border: 1px solid rgba(124, 58, 237, 0.15);
 }
+
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .miniStatGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+  .periodBar {
+    flex-wrap: wrap;
+  }
+  .streamGains {
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+  .miniStatGrid {
+    grid-template-columns: 1fr;
+  }
+}

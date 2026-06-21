@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '../i18n/context';
+import { Toggle } from './Toggle';
 import styles from './TransparentOverlay.module.css';
 
 interface Props {
@@ -237,13 +238,10 @@ export function TransparentOverlay({ channel }: Props) {
                   {t('overlay.arrastra')}
                 </div>
               </div>
-              <button
-                id="overlay-clickthrough-toggle"
-                onClick={toggleClickThrough}
-                className={`${styles.toggleTrack} ${clickThrough ? styles['toggleTrack--on'] : styles['toggleTrack--off']}`}
-              >
-                <span className={`${styles.toggleThumb} ${clickThrough ? styles['toggleThumb--on'] : styles['toggleThumb--off']}`} />
-              </button>
+              <Toggle
+                checked={clickThrough}
+                onChange={toggleClickThrough}
+              />
             </div>
           </motion.div>
         )}

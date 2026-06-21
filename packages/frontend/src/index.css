@@ -489,3 +489,29 @@ body {
 .mb-5  { margin-bottom: 1.25rem; }
 .mt-2  { margin-top: 0.5rem; }
 .mt-3  { margin-top: 0.75rem; }
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE MEDIA QUERIES
+   ═══════════════════════════════════════════════ */
+
+/* Laptops (< 1280px) */
+@media (max-width: 1280px) {
+  /* Future updates */
+}
+
+/* Tablets/Small Laptops (< 1024px) */
+@media (max-width: 1024px) {
+  /* Future updates */
+}
+
+/* Tablets Portrait (< 900px) */
+@media (max-width: 900px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* Mobile (< 768px) */
+@media (max-width: 768px) {
+  .sf-card, .sf-card--tight { padding: 1rem; }
+  .sf-card__inner { padding: 1rem; }
+  .sf-heading { font-size: 1.1rem; }
+}

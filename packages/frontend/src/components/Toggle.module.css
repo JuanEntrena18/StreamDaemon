@@ -1,0 +1,65 @@
+.toggleTrack {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease-in-out;
+  flex-shrink: 0;
+}
+
+.toggleTrack--on {
+  background-color: var(--sf-primary);
+}
+
+.toggleTrack--off {
+  background-color: var(--sf-border);
+}
+
+.toggleThumb {
+  background-color: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* Size md (44x24) */
+.toggleTrack--md {
+  width: 44px;
+  height: 24px;
+}
+.toggleThumb--md {
+  width: 20px;
+  height: 20px;
+}
+.toggleThumb--md.toggleThumb--on {
+  transform: translateX(20px);
+}
+
+/* Size sm (36x20) */
+.toggleTrack--sm {
+  width: 36px;
+  height: 20px;
+}
+.toggleThumb--sm {
+  width: 16px;
+  height: 16px;
+}
+.toggleThumb--sm.toggleThumb--on {
+  transform: translateX(16px);
+}
+
+.container {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: var(--sf-text);
+  cursor: pointer;
+}

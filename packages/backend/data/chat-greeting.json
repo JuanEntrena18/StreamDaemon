@@ -1,0 +1,6 @@
+{
+  "jentrena": {
+    "enabled": false,
+    "message": "¡Bienvenido @{user} al canal!"
+  }
+}

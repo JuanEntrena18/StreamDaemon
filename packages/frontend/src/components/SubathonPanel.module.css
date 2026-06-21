@@ -107,25 +107,6 @@
   color: var(--sf-text);
 }
 
-.alertsBtn {
-  font-size: 0.75rem;
-  padding: 0.3rem 0.8rem;
-}
-
-.alertsBtnOn {
-  composes: alertsBtn;
-  background: rgba(167, 139, 250, 0.15);
-  border: 1px solid rgba(167, 139, 250, 0.3);
-  color: #a78bfa;
-}
-
-.alertsBtnOff {
-  composes: alertsBtn;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--sf-text-3);
-}
-
 .rangeLabels {
   display: flex;
   justify-content: space-between;

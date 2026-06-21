@@ -188,3 +188,9 @@
   padding-top: 0.75rem;
   border-top: 1px solid var(--sf-border);
 }
+
+@media (max-width: 900px) {
+  .bottomGrid {
+    grid-template-columns: 1fr;
+  }
+}

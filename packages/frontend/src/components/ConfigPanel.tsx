@@ -4,6 +4,7 @@ import { useSocket } from '../hooks/useSocket';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import { ConfirmModal } from './ConfirmModal';
 import { Logo } from './Logo';
+import { Toggle } from './Toggle';
 import styles from './ConfigPanel.module.css';
 
 interface Props {
@@ -228,12 +229,10 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
               </div>
               <div className="text-xs text-dim">{t('config.siempreEncimaDesc')}</div>
             </div>
-            <button
-              onClick={toggleAlwaysOnTop}
-              className={`${styles.toggle} ${alwaysOnTop ? styles.toggleOn : ''}`}
-            >
-              <span className={styles.toggleThumb} style={{ left: alwaysOnTop ? 'calc(100% - 21px)' : 3 }} />
-            </button>
+            <Toggle
+              checked={alwaysOnTop}
+              onChange={toggleAlwaysOnTop}
+            />
           </div>
         </div>
       )}
