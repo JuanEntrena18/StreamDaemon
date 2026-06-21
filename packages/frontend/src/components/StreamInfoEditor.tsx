@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiPut } from '../utils/api';
 import { useTranslation } from '../i18n/context';
+import { useToast } from '../contexts/ToastContext';
 import styles from './StreamInfoEditor.module.css';
 
 interface Props {
@@ -17,12 +18,12 @@ interface StreamInfo {
 
 export function StreamInfoEditor({ channel, backendUrl }: Props) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [info, setInfo] = useState<StreamInfo>({ title: '', gameName: '', isLive: false });
   const [title, setTitle] = useState('');
   const [game, setGame] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!channel) return;
@@ -40,19 +41,19 @@ export function StreamInfoEditor({ channel, backendUrl }: Props) {
 
   const save = async () => {
     setSaving(true);
-    setError('');
     setSaved(false);
     try {
       const r = await apiPut('/stream/info', { channel, title, game });
       if (!r.ok) {
         const data = await r.json();
-        setError(data.error || 'Error al guardar');
+        toast.error(data.error || t('info.errorGuardar') || 'Error al guardar');
       } else {
+        toast.success(t('info.guardado'));
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
       }
     } catch {
-      setError('Error de conexión');
+      toast.error(t('info.errorConexion') || 'Error de conexión');
     } finally {
       setSaving(false);
     }
@@ -114,7 +115,6 @@ export function StreamInfoEditor({ channel, backendUrl }: Props) {
             {saving ? t('info.guardando') : t('info.guardarCambios')}
           </button>
           {saved && <span className={styles.savedText}>{t('info.guardado')}</span>}
-          {error && <span className={styles.errorText}>{error}</span>}
         </div>
       </div>
 

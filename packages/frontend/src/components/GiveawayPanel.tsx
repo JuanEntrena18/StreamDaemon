@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
+import { useToast } from '../contexts/ToastContext';
 import styles from './GiveawayPanel.module.css';
 
 interface Props {
@@ -31,9 +32,9 @@ const WHEEL_COLORS = [
 
 export function GiveawayPanel({ channel, backendUrl }: Props) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [prize, setPrize] = useState('');
   const [duration, setDuration] = useState(60);
-  const [message, setMessage] = useState('');
   const [active, setActive] = useState<ActiveGiveaway | null>(null);
   const [ticketCost, setTicketCost] = useState(1000);
   const [ticketRewardTitle, setTicketRewardTitle] = useState(t('giveaway.configText2'));
@@ -67,7 +68,6 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
 
   useSocketEvent('giveaway:start', useCallback((data: ActiveGiveaway) => {
     setActive(data);
-    setMessage('');
   }, []));
 
   useSocketEvent('giveaway:entry', useCallback((data: { user: string; participants: string[]; tickets: { user: string; tickets: number }[]; count: number; totalTickets: number }) => {
@@ -82,7 +82,6 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
 
   useSocketEvent('giveaway:end', useCallback(() => {
     setActive(null);
-    setMessage('');
   }, []));
 
   useEffect(() => {
@@ -237,8 +236,9 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
     });
     if (res.ok) {
       setPrize('');
+      toast.success(t('giveaway.sorteoIniciado') || 'Sorteo iniciado');
     } else {
-      setMessage('Error al iniciar sorteo');
+      toast.error(t('giveaway.errorIniciar') || 'Error al iniciar sorteo');
     }
   };
 
@@ -422,7 +422,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                     >
                       {t('giveaway.iniciar')}
                     </button>
-                    {message && <p className="sf-error-text text-center">{message}</p>}
+
                     {!channel && (
                       <p className="text-xs text-dim text-center">
                         {t('giveaway.emptyChannel')}

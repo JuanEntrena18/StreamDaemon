@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '../i18n/context';
+import { useToast } from '../contexts/ToastContext';
 import { apiPost } from '../utils/api';
 import styles from './PredictionPanel.module.css';
 
@@ -11,9 +12,9 @@ interface Props {
 
 export function PredictionPanel({ channel }: Props) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [title, setTitle] = useState('');
   const [options, setOptions] = useState(['', '']);
-  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const addOption = () => {
@@ -45,11 +46,10 @@ export function PredictionPanel({ channel }: Props) {
     if (res.ok) {
       setTitle('');
       setOptions(['', '']);
-      setMessage('success');
-      setTimeout(() => setMessage(''), 3000);
+      toast.success(t('predictions.creada'));
     } else {
       const err = await res.json().catch(() => ({}));
-      setMessage(err.error || 'error');
+      toast.error(err.error || t('predictions.errorCrear') || 'Error');
     }
   };
 
@@ -150,19 +150,7 @@ export function PredictionPanel({ channel }: Props) {
             {loading ? t('predictions.creando') : t('predictions.crear')}
           </button>
 
-          {/* Feedback */}
-          {message === 'success' && (
-            <motion.div
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={styles.successMsg}
-            >
-              {t('predictions.creada')}
-            </motion.div>
-          )}
-          {message && message !== 'success' && (
-            <p className={styles.warningMsg}>{message}</p>
-          )}
+
           {!channel && (
             <p className={styles.emptyChannel}>
               {t('predictions.emptyChannel')}

@@ -1,0 +1,134 @@
+export type OverlayCategory = 'general' | 'dj' | '8bits' | 'win95' | 'retrowave' | 'tactical' | 'wow-alliance' | 'wow-horde';
+
+export interface OverlayEntry {
+  id: string;
+  icon: string;
+  labelKey: string;
+  descKey: string;
+  mode: string;
+  supportsTheme: boolean;
+  color: string;
+  filename: string | null;
+  category: OverlayCategory;
+  orientation: 'horizontal' | 'vertical';
+  isNew?: boolean;
+}
+
+export interface CategoryInfo {
+  id: OverlayCategory;
+  labelKey: string;
+  icon: string;
+  color: string;
+  themeId: string;
+}
+
+export const CATEGORIES: CategoryInfo[] = [
+  { id: 'general',      labelKey: 'obs.catGeneral',     icon: '📦', color: '#7c3aed', themeId: '' },
+  { id: 'dj',           labelKey: 'obs.catDJ',          icon: '🎧', color: '#00f0ff', themeId: 'dj' },
+  { id: '8bits',        labelKey: 'obs.cat8bits',       icon: '🕹️', color: '#00ff41', themeId: '8bits' },
+  { id: 'win95',        labelKey: 'obs.catWin95',       icon: '💻', color: '#008080', themeId: 'win95' },
+  { id: 'retrowave',    labelKey: 'obs.catRetrowave',   icon: '🌅', color: '#ff00ff', themeId: 'retrowave' },
+  { id: 'tactical',     labelKey: 'obs.catTactical',    icon: '🛸', color: '#ffb300', themeId: 'tactical' },
+  { id: 'wow-alliance', labelKey: 'obs.catAlliance',    icon: '🔵', color: '#4a8cff', themeId: 'alliance' },
+  { id: 'wow-horde',    labelKey: 'obs.catHorde',       icon: '🔴', color: '#ff2222', themeId: 'wow' },
+];
+
+export const OVERLAY_REGISTRY: OverlayEntry[] = [
+  // ── General ──
+  { id: 'start',         icon: '🚀', labelKey: 'obs.start',           descKey: 'obs.startDesc',           mode: 'start',              supportsTheme: false, color: '#7c3aed',   filename: 'start.html',                                            category: 'general', orientation: 'horizontal' },
+  { id: 'chat',          icon: '💬', labelKey: 'obs.chatOverlay',     descKey: 'obs.chatOverlayDesc',     mode: 'chat',               supportsTheme: true,  color: '#7c3aed',   filename: null,                                                      category: 'general', orientation: 'horizontal' },
+  { id: 'custom',        icon: '🎨', labelKey: 'obs.customOverlay',   descKey: 'obs.customOverlayDesc',   mode: 'custom',             supportsTheme: false, color: '#a855f7',   filename: null,                                                      category: 'general', orientation: 'horizontal' },
+  { id: 'giveaway',      icon: '🎁', labelKey: 'obs.giveaways',       descKey: 'obs.giveawaysDesc',       mode: 'giveaway',           supportsTheme: true,  color: '#10b981',   filename: null,                                                      category: 'general', orientation: 'horizontal' },
+  { id: 'prediction',    icon: '📊', labelKey: 'obs.predictions',     descKey: 'obs.predictionsDesc',     mode: 'prediction',         supportsTheme: true,  color: '#f59e0b',   filename: null,                                                      category: 'general', orientation: 'horizontal' },
+  { id: 'social',        icon: '🌐', labelKey: 'obs.social',          descKey: 'obs.socialDesc',          mode: 'social',             supportsTheme: false, color: '#06b6d4',   filename: null,                                                      category: 'general', orientation: 'horizontal' },
+  { id: 'hud',           icon: '📊', labelKey: 'obs.hud',             descKey: 'obs.hudDesc',             mode: 'hud',                supportsTheme: false, color: '#a855f7',   filename: null,                                                      category: 'general', orientation: 'horizontal' },
+  { id: 'timer',         icon: '⏱️', labelKey: 'obs.timer',           descKey: 'obs.timerDesc',           mode: 'timer',              supportsTheme: false, color: '#f59e0b',   filename: null,                                                      category: 'general', orientation: 'horizontal' },
+  { id: 'scoreboard',    icon: '🏆', labelKey: 'obs.scoreboard',      descKey: 'obs.scoreboardDesc',      mode: 'scoreboard',         supportsTheme: false, color: '#10b981',   filename: null,                                                      category: 'general', orientation: 'horizontal' },
+  { id: 'subathon',      icon: '🔴', labelKey: 'obs.subathon',        descKey: 'obs.subathonDesc',        mode: 'subathon',           supportsTheme: false, color: '#ef4444',   filename: 'subathon.html',                                           category: 'general', orientation: 'horizontal' },
+  { id: 'subnautica2_standalone', icon: '🌊', labelKey: 'obs.subnautica', descKey: 'obs.subnauticaDesc', mode: 'subnautica2_standalone', supportsTheme: false, color: '#00d4ff', filename: 'subnautica2.html',                                    category: 'general', orientation: 'horizontal' },
+  { id: 'fortnite',      icon: '🔫', labelKey: 'obs.fortnite',        descKey: 'obs.fortniteDesc',        mode: 'fortnite',           supportsTheme: false, color: '#00D4FF',   filename: 'fortnite.html',                                           category: 'general', orientation: 'horizontal' },
+  { id: 'fortnite-alerts',  icon: '🔔', labelKey: 'obs.fortniteAlerts',   descKey: 'obs.fortniteAlertsDesc',   mode: 'fortnite-alerts',    supportsTheme: false, color: '#00D4FF',   filename: 'alerta_fortnite.html',                                    category: 'general', orientation: 'horizontal' },
+  { id: 'alerts',        icon: '🔔', labelKey: 'obs.alertas',         descKey: 'obs.alertasDesc',         mode: 'alerts',             supportsTheme: false, color: '#c84bff',   filename: 'alerts.html',                                             category: 'general', orientation: 'horizontal' },
+
+  // ── DJ ──
+  { id: 'dj-webcam',            icon: '🎥', labelKey: 'obs.djWebcam',          descKey: 'obs.djWebcamDesc',          mode: 'dj-webcam',            supportsTheme: false, color: '#00f0ff', filename: 'dj-webcam.html',                category: 'dj', orientation: 'horizontal' },
+  { id: 'dj-webcam-labels',     icon: '🏷️', labelKey: 'obs.djWebcamTags',      descKey: 'obs.djWebcamTagsDesc',      mode: 'dj-webcam-labels',     supportsTheme: false, color: '#ff00aa', filename: 'dj-webcam-labels.html',          category: 'dj', orientation: 'horizontal' },
+  { id: 'dj-chroma',            icon: '🟢', labelKey: 'obs.djChroma',           descKey: 'obs.djChromaDesc',          mode: 'dj-chroma',            supportsTheme: false, color: '#34d399', filename: 'dj-chroma.html',                category: 'dj', orientation: 'horizontal' },
+  { id: 'dj-chroma-labels',     icon: '🔰', labelKey: 'obs.djChromaTags',       descKey: 'obs.djChromaTagsDesc',      mode: 'dj-chroma-labels',     supportsTheme: false, color: '#8b5cf6', filename: 'dj-chroma-labels.html',          category: 'dj', orientation: 'horizontal' },
+  { id: 'dj-banner-webcam',     icon: '📰', labelKey: 'obs.djBannerWebcam',     descKey: 'obs.djBannerWebcamDesc',    mode: 'dj-banner-webcam',     supportsTheme: false, color: '#fbbf24', filename: 'dj-banner-webcam.html',          category: 'dj', orientation: 'horizontal' },
+  { id: 'dj-banner-chroma',     icon: '📋', labelKey: 'obs.djBannerChroma',     descKey: 'obs.djBannerChromaDesc',    mode: 'dj-banner-chroma',     supportsTheme: false, color: '#f472b6', filename: 'dj-banner-chroma.html',          category: 'dj', orientation: 'horizontal' },
+  { id: 'dj-fullscreen',        icon: '🖥️', labelKey: 'obs.djFullscreen',       descKey: 'obs.djFullscreenDesc',      mode: 'dj-fullscreen',        supportsTheme: false, color: '#a855f7', filename: 'dj-fullscreen.html',             category: 'dj', orientation: 'horizontal' },
+  { id: 'dj-alerts',            icon: '🔔', labelKey: 'obs.djAlerts',            descKey: 'obs.djAlertsDesc',          mode: 'dj-alerts',            supportsTheme: false, color: '#ff00aa', filename: 'dj-alerts.html',                category: 'dj', orientation: 'horizontal' },
+  { id: 'dj-transition',        icon: '💿', labelKey: 'obs.djTransition',        descKey: 'obs.djTransitionDesc',      mode: 'dj-transition',        supportsTheme: false, color: '#00f0ff', filename: 'dj-transition.html',             category: 'dj', orientation: 'horizontal' },
+
+  // ── 8-bits ──
+  { id: '8bits-start',          icon: '🕹️', labelKey: 'obs.b8bitsStart',       descKey: 'obs.b8bitsStartDesc',       mode: '8bits-start',          supportsTheme: false, color: '#00ff41', filename: '8bits-pantalla_comienzo.html',              category: '8bits', orientation: 'horizontal' },
+  { id: '8bits-gameplay',       icon: '📺', labelKey: 'obs.b8bitsGameplay',     descKey: 'obs.b8bitsGameplayDesc',    mode: '8bits-gameplay',       supportsTheme: false, color: '#ff00ff', filename: '8bits-overlay_gameplay_tv.html',            category: '8bits', orientation: 'horizontal' },
+  { id: '8bits-just-chatting',  icon: '💬', labelKey: 'obs.b8bitsJustChatting', descKey: 'obs.b8bitsJustChattingDesc', mode: '8bits-just-chatting',  supportsTheme: false, color: '#ffff00', filename: '8bits-overlay_just_chatting.html',          category: '8bits', orientation: 'horizontal' },
+  { id: '8bits-end',            icon: '🏁', labelKey: 'obs.b8bitsEnd',          descKey: 'obs.b8bitsEndDesc',         mode: '8bits-end',            supportsTheme: false, color: '#ff4444', filename: '8bits-pantalla_despedida.html',             category: '8bits', orientation: 'horizontal' },
+  { id: '8bits-fullscreen',     icon: '🖥️', labelKey: 'obs.b8bitsFullscreen',   descKey: 'obs.b8bitsFullscreenDesc',  mode: '8bits-fullscreen',     supportsTheme: false, color: '#00ff41', filename: 'overlay_pantalla_completa_retro_8_bits_nochat_.html', category: '8bits', orientation: 'horizontal' },
+  { id: '8bits-chat-standalone', icon: '💬', labelKey: 'obs.b8bitsChatStandalone', descKey: 'obs.b8bitsChatStandaloneDesc', mode: '8bits-chat-standalone', supportsTheme: false, color: '#ff00ff', filename: 'chat_independiente_retro_8_bits.html',        category: '8bits', orientation: 'horizontal' },
+  { id: '8bits-alerts',         icon: '🔔', labelKey: 'obs.b8bitsAlerts',       descKey: 'obs.b8bitsAlertsDesc',      mode: '8bits-alerts',         supportsTheme: false, color: '#ffff00', filename: 'alerta_retro_8_bits.html',                   category: '8bits', orientation: 'horizontal' },
+
+  // ── Win95 ──
+  { id: 'win95-start',          icon: '💻', labelKey: 'obs.bwin95Start',        descKey: 'obs.bwin95StartDesc',       mode: 'win95-start',          supportsTheme: false, color: '#008080', filename: 'pantalla_comienzo_win95.html',               category: 'win95', orientation: 'horizontal' },
+  { id: 'win95-gameplay',       icon: '🎮', labelKey: 'obs.bwin95Gameplay',     descKey: 'obs.bwin95GameplayDesc',    mode: 'win95-gameplay',       supportsTheme: false, color: '#c0c0c0', filename: 'overlay_gameplay_win95.html',                category: 'win95', orientation: 'horizontal' },
+  { id: 'win95-just-chatting',  icon: '🪟', labelKey: 'obs.bwin95JustChatting', descKey: 'obs.bwin95JustChattingDesc', mode: 'win95-just-chatting',  supportsTheme: false, color: '#000080', filename: 'overlay_just_chatting_win95.html',             category: 'win95', orientation: 'horizontal' },
+  { id: 'win95-end',            icon: '🏁', labelKey: 'obs.bwin95End',          descKey: 'obs.bwin95EndDesc',         mode: 'win95-end',            supportsTheme: false, color: '#800000', filename: 'pantalla_despedida_win95.html',              category: 'win95', orientation: 'horizontal' },
+  { id: 'win95-fullscreen',     icon: '🖥️', labelKey: 'obs.bwin95Fullscreen',   descKey: 'obs.bwin95FullscreenDesc',  mode: 'win95-fullscreen',     supportsTheme: false, color: '#008080', filename: 'overlay_pantalla_completa_retro_95_nochat_.html',  category: 'win95', orientation: 'horizontal' },
+  { id: 'win95-chat-standalone', icon: '💬', labelKey: 'obs.bwin95ChatStandalone', descKey: 'obs.bwin95ChatStandaloneDesc', mode: 'win95-chat-standalone', supportsTheme: false, color: '#c0c0c0', filename: 'chat_independiente_retro_95.html',             category: 'win95', orientation: 'horizontal' },
+  { id: 'win95-alerts',         icon: '🔔', labelKey: 'obs.bwin95Alerts',       descKey: 'obs.bwin95AlertsDesc',      mode: 'win95-alerts',         supportsTheme: false, color: '#000080', filename: 'alerta_windows_95.html',                      category: 'win95', orientation: 'horizontal' },
+
+  // ── RetroWave ──
+  { id: 'retrowave-start',          icon: '🌅', labelKey: 'obs.retrowaveStart',          descKey: 'obs.retrowaveStartDesc',          mode: 'retrowave-start',          supportsTheme: false, color: '#ff00ff', filename: 'pantalla_comienzo_retrowave.html',                        category: 'retrowave', orientation: 'horizontal' },
+  { id: 'retrowave-gameplay',       icon: '🎮', labelKey: 'obs.retrowaveGameplay',        descKey: 'obs.retrowaveGameplayDesc',        mode: 'retrowave-gameplay',       supportsTheme: false, color: '#00ffff', filename: 'overlay_gameplay_retrowave.html',                         category: 'retrowave', orientation: 'horizontal' },
+  { id: 'retrowave-just-chatting',  icon: '💬', labelKey: 'obs.retrowaveJustChatting',    descKey: 'obs.retrowaveJustChattingDesc',    mode: 'retrowave-just-chatting',  supportsTheme: false, color: '#ff00ff', filename: 'overlay_just_chatting_retrowave.html',                     category: 'retrowave', orientation: 'horizontal' },
+  { id: 'retrowave-end',            icon: '🏁', labelKey: 'obs.retrowaveEnd',             descKey: 'obs.retrowaveEndDesc',             mode: 'retrowave-end',            supportsTheme: false, color: '#ffea00', filename: 'pantalla_despedida_retrowave.html',                        category: 'retrowave', orientation: 'horizontal' },
+  { id: 'retrowave-fullscreen',      icon: '🖥️', labelKey: 'obs.retrowaveFullscreen',      descKey: 'obs.retrowaveFullscreenDesc',      mode: 'retrowave-fullscreen',     supportsTheme: false, color: '#ff00ff', filename: 'overlay_pantalla_completa_retrowave_nochat_.html',           category: 'retrowave', orientation: 'horizontal' },
+  { id: 'retrowave-chat-standalone', icon: '💬', labelKey: 'obs.retrowaveChatStandalone',  descKey: 'obs.retrowaveChatStandaloneDesc',  mode: 'retrowave-chat-standalone', supportsTheme: false, color: '#00ffff', filename: 'chat_independiente_retrowave.html',                          category: 'retrowave', orientation: 'horizontal' },
+  { id: 'retrowave-alerts',         icon: '🔔', labelKey: 'obs.retrowaveAlerts',          descKey: 'obs.retrowaveAlertsDesc',          mode: 'retrowave-alerts',         supportsTheme: false, color: '#ff00ff', filename: 'alerta_retrowave.html',                                   category: 'retrowave', orientation: 'horizontal' },
+
+  // ── Tactical Sci-Fi ──
+  { id: 'tactical-start',          icon: '🛸', labelKey: 'obs.tacticalStart',          descKey: 'obs.tacticalStartDesc',          mode: 'tactical-start',          supportsTheme: false, color: '#ffb300', filename: 'pantalla_de_inicio_t_ctica.html',               category: 'tactical', orientation: 'horizontal' },
+  { id: 'tactical-gameplay',       icon: '🎯', labelKey: 'obs.tacticalGameplay',        descKey: 'obs.tacticalGameplayDesc',        mode: 'tactical-gameplay',       supportsTheme: false, color: '#4caf50', filename: 'hud_gameplay_monitor.html',                      category: 'tactical', orientation: 'horizontal' },
+  { id: 'tactical-just-chatting',  icon: '📡', labelKey: 'obs.tacticalJustChatting',    descKey: 'obs.tacticalJustChattingDesc',    mode: 'tactical-just-chatting',  supportsTheme: false, color: '#ffb300', filename: 'hud_just_chatting.html',                         category: 'tactical', orientation: 'horizontal' },
+  { id: 'tactical-end',            icon: '🏁', labelKey: 'obs.tacticalEnd',             descKey: 'obs.tacticalEndDesc',             mode: 'tactical-end',            supportsTheme: false, color: '#f44336', filename: 'pantalla_despedida_t_ctica.html',                category: 'tactical', orientation: 'horizontal' },
+  { id: 'tactical-fullscreen',      icon: '🖥️', labelKey: 'obs.tacticalFullscreen',      descKey: 'obs.tacticalFullscreenDesc',      mode: 'tactical-fullscreen',     supportsTheme: false, color: '#4caf50', filename: 'overlay_pantalla_completa_sci_fi_nochat_.html',    category: 'tactical', orientation: 'horizontal' },
+  { id: 'tactical-chat-standalone', icon: '💬', labelKey: 'obs.tacticalChatStandalone',  descKey: 'obs.tacticalChatStandaloneDesc',  mode: 'tactical-chat-standalone', supportsTheme: false, color: '#ffb300', filename: 'chat_independiente_sci_fi.html',                   category: 'tactical', orientation: 'horizontal' },
+  { id: 'tactical-alerts',         icon: '🔔', labelKey: 'obs.tacticalAlerts',          descKey: 'obs.tacticalAlertsDesc',          mode: 'tactical-alerts',         supportsTheme: false, color: '#4caf50', filename: 'alerta_sci_fi_t_ctica_bsg.html',                 category: 'tactical', orientation: 'horizontal' },
+
+  // ── WoW Alliance ──
+  { id: 'wow-alliance-start',             icon: '🔵', labelKey: 'obs.allianceStart',             descKey: 'obs.allianceStartDesc',             mode: 'wow-alliance-start',             supportsTheme: false, color: '#4a8cff', filename: 'wow-alliance-start.html',                category: 'wow-alliance', orientation: 'horizontal' },
+  { id: 'wow-alliance-webcam',            icon: '🎥', labelKey: 'obs.allianceWebcam',            descKey: 'obs.allianceWebcamDesc',            mode: 'wow-alliance-webcam',            supportsTheme: false, color: '#2b5fc8', filename: 'wow-alliance-webcam.html',               category: 'wow-alliance', orientation: 'horizontal' },
+  { id: 'wow-alliance-webcam-labels',     icon: '🏷️', labelKey: 'obs.allianceWebcamTags',         descKey: 'obs.allianceWebcamTagsDesc',         mode: 'wow-alliance-webcam-labels',     supportsTheme: false, color: '#ffc800', filename: 'wow-alliance-webcam-labels.html',          category: 'wow-alliance', orientation: 'horizontal' },
+  { id: 'wow-alliance-chat',              icon: '💬', labelKey: 'obs.allianceChat',              descKey: 'obs.allianceChatDesc',              mode: 'wow-alliance-chat',              supportsTheme: false, color: '#8ab4ff', filename: 'wow-alliance-chat.html',                 category: 'wow-alliance', orientation: 'horizontal' },
+  { id: 'wow-alliance-chat-labels',       icon: '🔰', labelKey: 'obs.allianceTags',              descKey: 'obs.allianceTagsDesc',              mode: 'wow-alliance-chat-labels',       supportsTheme: false, color: '#6b4ce6', filename: 'wow-alliance-chat-labels.html',            category: 'wow-alliance', orientation: 'horizontal' },
+  { id: 'wow-alliance-banner-webcam',     icon: '📰', labelKey: 'obs.allianceBannerWebcam',       descKey: 'obs.allianceBannerWebcamDesc',       mode: 'wow-alliance-banner-webcam',     supportsTheme: false, color: '#ffc800', filename: 'wow-alliance-banner-webcam.html',          category: 'wow-alliance', orientation: 'horizontal' },
+  { id: 'wow-alliance-banner-transparent', icon: '📋', labelKey: 'obs.allianceBannerTransparente', descKey: 'obs.allianceBannerTransparenteDesc', mode: 'wow-alliance-banner-transparent', supportsTheme: false, color: '#2b5fc8', filename: 'wow-alliance-banner-transparent.html',     category: 'wow-alliance', orientation: 'horizontal' },
+  { id: 'wow-alliance-fullscreen',        icon: '🖥️', labelKey: 'obs.allianceFullscreen',         descKey: 'obs.allianceFullscreenDesc',         mode: 'wow-alliance-fullscreen',        supportsTheme: false, color: '#a855f7', filename: 'wow-alliance-fullscreen.html',             category: 'wow-alliance', orientation: 'horizontal' },
+  { id: 'wow-alliance-alerts',            icon: '🔔', labelKey: 'obs.allianceAlerts',            descKey: 'obs.allianceAlertsDesc',            mode: 'wow-alliance-alerts',            supportsTheme: false, color: '#ffc800', filename: 'wow-alliance-alerts.html',                category: 'wow-alliance', orientation: 'horizontal' },
+  { id: 'wow-alliance-transition',        icon: '👑', labelKey: 'obs.allianceTransition',         descKey: 'obs.allianceTransitionDesc',         mode: 'wow-alliance-transition',        supportsTheme: false, color: '#2b5fc8', filename: 'wow-alliance-transition.html',             category: 'wow-alliance', orientation: 'horizontal' },
+
+  // ── WoW Horde ──
+  { id: 'wow-horde-start',              icon: '🔴', labelKey: 'obs.hordaStart',              descKey: 'obs.hordaStartDesc',              mode: 'wow-horde-start',              supportsTheme: false, color: '#ff2222', filename: 'wow-horde-start.html',                     category: 'wow-horde', orientation: 'horizontal' },
+  { id: 'wow-horde-gameplay',           icon: '⚔️', labelKey: 'obs.hordaGameplay',           descKey: 'obs.hordaGameplayDesc',           mode: 'wow-horde-gameplay',           supportsTheme: false, color: '#cc0000', filename: 'overlay_gameplay_horda.html',                category: 'wow-horde', orientation: 'horizontal' },
+  { id: 'wow-horde-just-chatting',      icon: '💬', labelKey: 'obs.hordaJustChatting',       descKey: 'obs.hordaJustChattingDesc',       mode: 'wow-horde-just-chatting',      supportsTheme: false, color: '#8b0000', filename: 'overlay_just_chatting_horda.html',            category: 'wow-horde', orientation: 'horizontal' },
+  { id: 'wow-horde-end',                icon: '🏁', labelKey: 'obs.hordaEnd',                descKey: 'obs.hordaEndDesc',                mode: 'wow-horde-end',                supportsTheme: false, color: '#ffc800', filename: 'pantalla_despedida_horda.html',               category: 'wow-horde', orientation: 'horizontal' },
+  { id: 'wow-horde-fullscreen',         icon: '🖥️', labelKey: 'obs.hordaFullscreen',         descKey: 'obs.hordaFullscreenDesc',         mode: 'wow-horde-fullscreen',         supportsTheme: false, color: '#cc0000', filename: 'overlay_pantalla_completa_nochat_horda.html',   category: 'wow-horde', orientation: 'horizontal' },
+  { id: 'wow-horde-chat-standalone',    icon: '💬', labelKey: 'obs.hordaChatStandalone',      descKey: 'obs.hordaChatStandaloneDesc',      mode: 'wow-horde-chat-standalone',    supportsTheme: false, color: '#8b0000', filename: 'chat_independiente_horda.html',                category: 'wow-horde', orientation: 'horizontal' },
+  { id: 'wow-horde-alerts-fullscreen',  icon: '🔔', labelKey: 'obs.hordaAlertsFullscreen',    descKey: 'obs.hordaAlertsFullscreenDesc',    mode: 'wow-horde-alerts-fullscreen',  supportsTheme: false, color: '#ff2222', filename: 'alerta_horda.html',                           category: 'wow-horde', orientation: 'horizontal' },
+
+  // ── Vertical (1080×1920) ──
+  { id: 'fortnite-vertical',         icon: '📱', labelKey: 'obs.fortniteVertical',     descKey: 'obs.fortniteVerticalDesc',     mode: 'fortnite-vertical',         supportsTheme: false, color: '#00D4FF', filename: 'fortnite-vertical.html',                     category: 'general', orientation: 'vertical' },
+  { id: 'fortnite-alerts-vertical',  icon: '🔔', labelKey: 'obs.fortniteAlertsV',      descKey: 'obs.fortniteAlertsVDesc',      mode: 'fortnite-alerts-vertical',  supportsTheme: false, color: '#00D4FF', filename: 'alerta_fortnite_vertical.html',                category: 'general', orientation: 'vertical' },
+  { id: '8bits-vertical',            icon: '📱', labelKey: 'obs.b8bitsVertical',        descKey: 'obs.b8bitsVerticalDesc',       mode: '8bits-vertical',            supportsTheme: false, color: '#00ff41', filename: '8bits-vertical.html',                          category: '8bits', orientation: 'vertical' },
+  { id: '8bits-alerts-vertical',     icon: '🔔', labelKey: 'obs.b8bitsAlertsV',         descKey: 'obs.b8bitsAlertsVDesc',        mode: '8bits-alerts-vertical',     supportsTheme: false, color: '#ff00ff', filename: 'alerta_retro_8_bits_vertical.html',             category: '8bits', orientation: 'vertical' },
+  { id: 'win95-vertical',            icon: '📱', labelKey: 'obs.win95Vertical',         descKey: 'obs.win95VerticalDesc',        mode: 'win95-vertical',            supportsTheme: false, color: '#008080', filename: 'win95-vertical.html',                          category: 'win95', orientation: 'vertical' },
+  { id: 'win95-alerts-vertical',     icon: '🔔', labelKey: 'obs.win95AlertsV',          descKey: 'obs.win95AlertsVDesc',         mode: 'win95-alerts-vertical',     supportsTheme: false, color: '#000080', filename: 'alerta_windows_95_vertical.html',               category: 'win95', orientation: 'vertical' },
+  { id: 'retrowave-vertical',        icon: '📱', labelKey: 'obs.retrowaveVertical',     descKey: 'obs.retrowaveVerticalDesc',    mode: 'retrowave-vertical',        supportsTheme: false, color: '#ff00ff', filename: 'retrowave-vertical.html',                      category: 'retrowave', orientation: 'vertical' },
+  { id: 'retrowave-alerts-vertical', icon: '🔔', labelKey: 'obs.retrowaveAlertsV',      descKey: 'obs.retrowaveAlertsVDesc',     mode: 'retrowave-alerts-vertical', supportsTheme: false, color: '#ff00ff', filename: 'alerta_retrowave_vertical.html',                 category: 'retrowave', orientation: 'vertical' },
+  { id: 'tactical-vertical',         icon: '📱', labelKey: 'obs.tacticalVertical',      descKey: 'obs.tacticalVerticalDesc',     mode: 'tactical-vertical',         supportsTheme: false, color: '#ffb300', filename: 'tactical-vertical.html',                        category: 'tactical', orientation: 'vertical' },
+  { id: 'tactical-alerts-vertical',  icon: '🔔', labelKey: 'obs.tacticalAlertsV',       descKey: 'obs.tacticalAlertsVDesc',      mode: 'tactical-alerts-vertical',  supportsTheme: false, color: '#4caf50', filename: 'alerta_sci_fi_t_ctica_bsg_vertical.html',        category: 'tactical', orientation: 'vertical' },
+  { id: 'wow-horde-vertical',        icon: '📱', labelKey: 'obs.hordeVertical',         descKey: 'obs.hordeVerticalDesc',        mode: 'wow-horde-vertical',        supportsTheme: false, color: '#cc0000', filename: 'horde-vertical.html',                           category: 'wow-horde', orientation: 'vertical' },
+  { id: 'wow-horde-alerts-vertical', icon: '🔔', labelKey: 'obs.hordeAlertsV',          descKey: 'obs.hordeAlertsVDesc',         mode: 'wow-horde-alerts-vertical', supportsTheme: false, color: '#ff2222', filename: 'alerta_horda_vertical.html',                    category: 'wow-horde', orientation: 'vertical' },
+];

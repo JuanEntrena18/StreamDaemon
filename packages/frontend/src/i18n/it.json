@@ -397,7 +397,17 @@
     "tacticalAlertsV": "Tactical · Alerts Vertical",
     "tacticalAlertsVDesc": "Vertical tactical sci-fi animated alerts optimized for mobile (1080×1920)",
     "hordeAlertsV": "Horde · Alerts Vertical",
-    "hordeAlertsVDesc": "Vertical Horde animated alerts optimized for mobile (1080×1920)"
+    "hordeAlertsVDesc": "Vertical Horde animated alerts optimized for mobile (1080×1920)",
+    "catGeneral": "Generale",
+    "catDJ": "🎧 DJ",
+    "cat8bits": "🕹️ Retro 8-bit",
+    "catWin95": "🪟 Retro Win95",
+    "catRetrowave": "🌅 RetroWave",
+    "catTactical": "🛸 Tactical Sci-Fi",
+    "catAlliance": "👑 WoW - Alleanza",
+    "catHorde": "🛡️ WoW - Orda",
+    "searchPlaceholder": "Cerca overlay...",
+    "new": "NUOVO"
   },
   "security": {
     "loading": "Caricamento configurazione sicurezza...",

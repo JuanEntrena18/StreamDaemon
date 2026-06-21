@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { apiPut, apiGet } from '../utils/api';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
+import { useToast } from '../contexts/ToastContext';
 import styles from './StreamDashboard.module.css';
 
 interface Props {
@@ -74,7 +75,6 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
   const [game, setGame] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [saveError, setSaveError] = useState('');
   const [missingScope, setMissingScope] = useState(false);
 
   const [gameResults, setGameResults] = useState<GameResult[]>([]);
@@ -192,9 +192,10 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
     addEvent({ id: `${Date.now()}-cheer`, type: 'cheer', user: data.userDisplayName, message: t('dashboard.eventBits', { bits: data.bits }), timestamp: Date.now(), amount: data.bits });
   });
 
+  const toast = useToast();
+
   const saveInfo = async () => {
     setSaving(true);
-    setSaveError('');
     setSaved(false);
     setMissingScope(false);
     try {
@@ -204,13 +205,14 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
         if (data.error === 'missing_scope') {
           setMissingScope(true);
         }
-        setSaveError(data.error === 'missing_scope' ? data.message : (data.error || t('dashboard.errorGuardar')));
+        toast.error(data.error === 'missing_scope' ? data.message : (data.error || t('dashboard.errorGuardar')));
       } else {
+        toast.success(t('dashboard.guardado'));
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
       }
     } catch {
-      setSaveError(t('dashboard.errorConexion'));
+      toast.error(t('dashboard.errorConexion'));
     } finally {
       setSaving(false);
     }
@@ -434,21 +436,16 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
               {saving ? t('dashboard.guardando') : t('dashboard.guardarCambios')}
             </button>
             {saved && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>{t('dashboard.guardado')}</span>}
-            {saveError && (
-              <div style={{ fontSize: '0.74rem', color: '#f87171', lineHeight: 1.5 }}>
-                <span>{saveError}</span>
-                {missingScope && (
-                  <button onClick={() => window.location.href = '/auth/login'}
-                    className="sf-btn"
-                    style={{
-                      marginLeft: '0.5rem', fontSize: '0.72rem', padding: '0.25rem 0.6rem',
-                      background: 'rgba(239,68,68,0.1)', color: '#f87171',
-                      border: '1px solid rgba(239,68,68,0.25)',
-                    }}>
-                    Reconectar Twitch ↗
-                  </button>
-                )}
-              </div>
+            {missingScope && (
+              <button onClick={() => window.location.href = '/auth/login'}
+                className="sf-btn"
+                style={{
+                  fontSize: '0.72rem', padding: '0.25rem 0.6rem',
+                  background: 'rgba(239,68,68,0.1)', color: '#f87171',
+                  border: '1px solid rgba(239,68,68,0.25)',
+                }}>
+                Reconectar Twitch ↗
+              </button>
             )}
           </div>
 
