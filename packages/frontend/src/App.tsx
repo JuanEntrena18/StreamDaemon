@@ -345,9 +345,14 @@ export function App() {
                 <motion.div
                   key={activeTab}
                   custom={tabDirection}
-                  initial={(dir: number) => ({ opacity: 0, x: dir * 20, y: 0 })}
-                  animate={{ opacity: 1, x: 0, y: 0 }}
-                  exit={{ opacity: 0, y: -6, x: 0 }}
+                  variants={{
+                    enter: (dir: number) => ({ opacity: 0, x: dir * 20, y: 0 }),
+                    center: { opacity: 1, x: 0, y: 0 },
+                    exit: { opacity: 0, y: -6, x: 0 },
+                  }}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
                   transition={{ duration: 0.25, ease: 'easeOut' }}
                 >
                   {activeTab === 'dashboard' && <StreamDashboard channel={channel} backendUrl={BACKEND_URL} />}
