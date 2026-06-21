@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n/context';
 import { apiPost } from '../utils/api';
+import { ConfirmModal } from './ConfirmModal';
 import styles from './ModPanel.module.css';
 
 interface Props {
@@ -21,6 +22,7 @@ export function ModPanel({ channel, backendUrl }: Props) {
   const [chatters, setChatters] = useState<{ userName: string; userDisplayName: string }[]>([]);
   const [chattersLoading, setChattersLoading] = useState(true);
   const [chattersError, setChattersError] = useState('');
+  const [showBanConfirm, setShowBanConfirm] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -196,13 +198,22 @@ export function ModPanel({ channel, backendUrl }: Props) {
         )}
 
         {/* Execute */}
-        <button onClick={execute} disabled={loading || !userName.trim()} className={`sf-btn ${styles.executeBtn}`} style={{
+        <button onClick={() => action === 'ban' ? setShowBanConfirm(true) : execute()} disabled={loading || !userName.trim()} className={`sf-btn ${styles.executeBtn}`} style={{
           background: action === 'timeout' ? 'rgba(245,158,11,0.15)' : action === 'ban' ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)',
           color: action === 'timeout' ? '#fbbf24' : action === 'ban' ? '#f87171' : '#34d399',
           border: `1px solid ${action === 'timeout' ? 'rgba(245,158,11,0.3)' : action === 'ban' ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'}`,
         }}>
           {loading ? t('mod.procesando') : `${t('mod.ejecutar')} ${action === 'timeout' ? t('mod.timeout') : action === 'ban' ? t('mod.ban') : t('mod.unban')}`}
         </button>
+
+        <ConfirmModal
+          open={showBanConfirm}
+          title={t('mod.confirmBanTitle')}
+          message={t('mod.confirmBanMsg', { user: userName })}
+          confirmLabel={t('mod.ban')}
+          onConfirm={() => { setShowBanConfirm(false); execute(); }}
+          onCancel={() => setShowBanConfirm(false)}
+        />
 
         {/* Result */}
         {result && (

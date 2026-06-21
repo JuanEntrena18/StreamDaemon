@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import { useToast } from '../contexts/ToastContext';
+import { ConfirmModal } from './ConfirmModal';
 import styles from './GiveawayPanel.module.css';
 
 interface Props {
@@ -48,6 +49,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
   const [winner, setWinner] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
   const [autoSpin, setAutoSpin] = useState(false);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
   const wheelRef = useRef<HTMLCanvasElement>(null);
   const { socket, connected } = useSocket();
   const DURATION_OPTIONS = [
@@ -256,6 +258,11 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
     }
   };
 
+  const handleEndConfirm = () => {
+    setShowEndConfirm(false);
+    endGiveaway();
+  };
+
   return (
     <div className={styles.container}>
       <div className="mb-5">
@@ -341,9 +348,18 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
                       </details>
                     )}
                   </div>
-                  <button onClick={endGiveaway} className="sf-btn sf-btn-danger w-full">
+                  <button onClick={() => setShowEndConfirm(true)} className="sf-btn sf-btn-danger w-full">
                     {t('giveaway.finalizar')}
                   </button>
+                  <ConfirmModal
+                    open={showEndConfirm}
+                    title={t('giveaway.confirmEndTitle')}
+                    message={t('giveaway.confirmEndMsg')}
+                    confirmLabel={t('giveaway.finalizar')}
+                    onConfirm={handleEndConfirm}
+                    onCancel={() => setShowEndConfirm(false)}
+                    showDontAskAgain
+                  />
                 </div>
               </motion.div>
             ) : (

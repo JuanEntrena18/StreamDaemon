@@ -101,6 +101,10 @@
     "responder": "Antworten",
     "timeout5m": "Timeout 5 Min",
     "banear": "Bannen",
+    "confirmBanTitle": "{{user}} bannen?",
+    "confirmBanMsg": "Bist du sicher, dass du @{{user}} aus dem Chat bannen möchtest? Der Benutzer wird vom Kanal entfernt.",
+    "confirmTimeoutTitle": "{{user}} timeout?",
+    "confirmTimeoutMsg": "Bist du sicher, dass du einen 5-minütigen Timeout für @{{user}} anwenden möchtest?",
     "ttsFilterOwn": "Eigene Nachrichten ausschließen",
     "ttsFilterLinks": "Nachrichten mit Links ausschließen",
     "ttsFilterBots": "Bot-Nachrichten ausschließen",
@@ -156,6 +160,8 @@
     "loginNavegador": "Browser-Login",
     "loginNavegadorTitle": "Login im Browser öffnen (sichere Alternative während des Streams)",
     "desconectar": "Trennen",
+    "confirmLogoutTitle": "Abmelden?",
+    "confirmLogoutMsg": "Deine Twitch-Sitzung wird geschlossen. Du musst dich erneut anmelden, um die Funktionen des Panels zu nutzen.",
     "conectando": "Verbinde mit Twitch…",
     "authTitle": "🔑 Auf Twitch autorisieren",
     "authAbre": "Öffne",
@@ -419,6 +425,8 @@
     "marcados": "Markiert",
     "botsConocidos": "Bekannte Bots",
     "protecciones": "Aktive Schutzmaßnahmen",
+    "confirmBanTitle": "Benutzer bannen?",
+    "confirmBanMsg": "Bist du sicher, dass du @{{user}} bannen möchtest? Der Benutzer wird vom Kanal entfernt.",
     "followBots": "Follow-Bot-Schutz",
     "followBotsDesc": "Erkennt und blockiert automatisch verdächtige Konten, die dem Kanal folgen",
     "spamFilter": "Chat-Spam-Filter",
@@ -503,6 +511,8 @@
     "verBoletos": "Tickets pro Teilnehmer anzeigen",
     "boletos": "Tickets",
     "finalizar": "Gewinnspiel beenden und Gewinner wählen",
+    "confirmEndTitle": "Gewinnspiel beenden?",
+    "confirmEndMsg": "Das Gewinnspiel wird geschlossen und ein zufälliger Gewinner ausgewählt. Dies kann nicht rückgängig gemacht werden.",
     "nuevoSorteo": "Neues Gewinnspiel",
     "premio": "Preis",
     "premioPlaceholder": "z.B. 3-monatiges Abo...",
@@ -573,7 +583,9 @@
     "editar": "Bearbeiten",
     "deshabilitar": "Deaktivieren",
     "habilitar": "Aktivieren",
-    "eliminar": "Löschen"
+    "eliminar": "Löschen",
+    "confirmDeleteTitle": "Befehl löschen?",
+    "confirmDeleteMsg": "Bist du sicher, dass du !{{cmd}} löschen möchtest? Dies kann nicht rückgängig gemacht werden."
   },
   "subathon": {
     "sub": "Abonnement",
@@ -594,6 +606,8 @@
     "pausar": "⏸ Pausieren",
     "reanudar": "▶ Fortsetzen",
     "detener": "⏹ Stoppen",
+    "confirmStopTitle": "Subathon stoppen?",
+    "confirmStopMsg": "Der Timer wird gestoppt und es wird keine Zeit mehr hinzugefügt. Du kannst ihn später fortsetzen.",
     "config": "⚙️ Einstellungen",
     "subTier1": "Sub Tier 1/Prime (Sekunden)",
     "subTier2": "Sub Tier 2 (Sekunden)",
@@ -702,7 +716,9 @@
     "razon": "Grund (optional)",
     "razonPlaceholder": "z.B. Spam im Chat",
     "procesando": "Verarbeite...",
-    "ejecutar": "Ausführen"
+    "ejecutar": "Ausführen",
+    "confirmBanTitle": "{{user}} bannen?",
+    "confirmBanMsg": "Bist du sicher, dass du @{{user}} bannen möchtest? Der Benutzer wird dauerhaft vom Kanal entfernt."
   },
   "predictions": {
     "title": "📊 Vorhersagen",
@@ -919,6 +935,11 @@
     "viewCount": "Gesamtaufrufe",
     "apiNote": "Twitch stellt nicht alle Erfolgsdaten über die API bereit. Klicken Sie unten, um Ihren vollständigen Fortschritt auf Twitch zu sehen.",
     "viewOnTwitch": "Auf Twitch ansehen"
+  },
+  "confirm": {
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "dontAskAgain": "Nicht erneut fragen"
   },
   "common": {
     "save": "Speichern",

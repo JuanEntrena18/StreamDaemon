@@ -6,6 +6,7 @@ import { useTranslation } from '../i18n/context';
 import { apiGet, apiPut } from '../utils/api';
 import { useTts } from '../contexts/TtsContext';
 import { getVoices } from '../utils/tts';
+import { ConfirmModal } from './ConfirmModal';
 import styles from './ChatPanel.module.css';
 
 const OVERLAY_LS_KEY = 'streamforger-chat-overlay-settings';
@@ -53,6 +54,7 @@ export function ChatPanel({ channel }: Props) {
   const [input, setInput] = useState('');
   const [replyTo, setReplyTo] = useState<{ id: string; user: string } | null>(null);
   const [menuMsg, setMenuMsg] = useState<string | null>(null);
+  const [confirmModAction, setConfirmModAction] = useState<{ action: 'timeout' | 'ban'; user: string } | null>(null);
   const [selectedSound, setSelectedSound] = useState<SoundKey | ''>('');
   const { socket, connected, reconnect } = useSocket();
   const listRef = useRef<HTMLDivElement>(null);
@@ -434,7 +436,7 @@ export function ChatPanel({ channel }: Props) {
                   <div ref={menuRef} className={styles.msgMenu}>
                     <button onClick={() => handleReply(msg)} title={t('chat.responder')} className={styles.menuBtn}>↩</button>
                     <button onClick={() => handleModAction('timeout', msg.user.displayName)} title={t('chat.timeout5m')} className={styles.menuBtn}>⏳</button>
-                    <button onClick={() => handleModAction('ban', msg.user.displayName)} title={t('chat.banear')} className={styles.menuBtn}>🚫</button>
+                    <button onClick={() => setConfirmModAction({ action: 'ban', user: msg.user.displayName })} title={t('chat.banear')} className={styles.menuBtn}>🚫</button>
                   </div>
                 )}
               </motion.div>
@@ -664,6 +666,15 @@ export function ChatPanel({ channel }: Props) {
         <span>{t('chat.conectadoA')} <strong style={{ color: 'var(--sf-text-2)' }}>#{channel || '—'}</strong></span>
         <span>{messages.length} {t('chat.mensajes')} · {connected ? '🟢' : '🔴'}</span>
       </div>
+
+      <ConfirmModal
+        open={confirmModAction !== null}
+        title={confirmModAction?.action === 'ban' ? t('chat.confirmBanTitle') : t('chat.confirmTimeoutTitle')}
+        message={confirmModAction?.action === 'ban' ? t('chat.confirmBanMsg', { user: confirmModAction?.user || '' }) : t('chat.confirmTimeoutMsg', { user: confirmModAction?.user || '' })}
+        confirmLabel={confirmModAction?.action === 'ban' ? t('chat.banear') : t('chat.timeout5m')}
+        onConfirm={() => { if (confirmModAction) handleModAction(confirmModAction.action, confirmModAction.user); setConfirmModAction(null); }}
+        onCancel={() => setConfirmModAction(null)}
+      />
     </div>
   );
 }

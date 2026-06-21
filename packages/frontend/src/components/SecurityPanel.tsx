@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiGet, apiPost, apiPut } from '../utils/api';
 import { useTranslation } from '../i18n/context';
+import { ConfirmModal } from './ConfirmModal';
 import styles from './SecurityPanel.module.css';
 
 interface Props {
@@ -63,6 +64,7 @@ export function SecurityPanel({ channel }: Props) {
   const [scanResult, setScanResult] = useState<{ found: number; banned: number } | null>(null);
   const [newWhitelistUser, setNewWhitelistUser] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [confirmBanUser, setConfirmBanUser] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -328,7 +330,7 @@ export function SecurityPanel({ channel }: Props) {
                 <div className={styles.detectionActions}>
                   {d.action === 'flagged' && (
                     <button
-                      onClick={() => handleBan(d.user)}
+                      onClick={() => setConfirmBanUser(d.user)}
                       disabled={isBanLoading}
                       className={`sf-btn ${styles.actionBtn} ${styles.actionBtnDanger}`}
                     >
@@ -375,6 +377,15 @@ export function SecurityPanel({ channel }: Props) {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={confirmBanUser !== null}
+        title={t('security.confirmBanTitle')}
+        message={t('security.confirmBanMsg', { user: confirmBanUser || '' })}
+        confirmLabel={t('security.ban')}
+        onConfirm={() => { if (confirmBanUser) handleBan(confirmBanUser); setConfirmBanUser(null); }}
+        onCancel={() => setConfirmBanUser(null)}
+      />
     </div>
   );
 }

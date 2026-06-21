@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useTranslation } from '../i18n/context';
 import { useSocket } from '../hooks/useSocket';
 import { useAuthStatus } from '../hooks/useAuthStatus';
+import { ConfirmModal } from './ConfirmModal';
 import { Logo } from './Logo';
 import styles from './ConfigPanel.module.css';
 
@@ -14,6 +16,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
   const { t } = useTranslation();
   const { connected } = useSocket();
   const { authenticated, user, loading: authLoading, login, loginBrowser, logout, deviceState, cancelDeviceLogin } = useAuthStatus();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   return (
     <div className={styles.container}>
@@ -108,13 +111,22 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
           )}
           {!authLoading && authenticated && (
             <button
-              onClick={logout}
+              onClick={() => setShowLogoutConfirm(true)}
               className="sf-btn sf-btn-ghost"
               style={{ fontSize: '0.78rem', padding: '0.4rem 0.75rem', color: 'var(--sf-text-3)', whiteSpace: 'nowrap', flexShrink: 0 }}
             >
               {t('config.desconectar')}
             </button>
           )}
+          <ConfirmModal
+            open={showLogoutConfirm}
+            title={t('config.confirmLogoutTitle')}
+            message={t('config.confirmLogoutMsg')}
+            confirmLabel={t('config.desconectar')}
+            onConfirm={() => { setShowLogoutConfirm(false); logout(); }}
+            onCancel={() => setShowLogoutConfirm(false)}
+            showDontAskAgain
+          />
         </div>
 
         {/* ── Device Code Dialog ── */}

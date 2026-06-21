@@ -101,6 +101,10 @@
     "responder": "Rispondi",
     "timeout5m": "Timeout 5 min",
     "banear": "Banna",
+    "confirmBanTitle": "Bannare {{user}}?",
+    "confirmBanMsg": "Sei sicuro di voler bannare @{{user}} dalla chat? L'utente verrà rimosso dal canale.",
+    "confirmTimeoutTitle": "Timeout {{user}}?",
+    "confirmTimeoutMsg": "Sei sicuro di applicare un timeout di 5 minuti a @{{user}}?",
     "ttsFilterOwn": "Escludere i miei messaggi",
     "ttsFilterLinks": "Escludere messaggi con link",
     "ttsFilterBots": "Escludere messaggi dei bot",
@@ -156,6 +160,8 @@
     "loginNavegador": "Login browser",
     "loginNavegadorTitle": "Apri login nel browser (alternativa sicura durante lo stream)",
     "desconectar": "Disconnetti",
+    "confirmLogoutTitle": "Disconnettersi?",
+    "confirmLogoutMsg": "La sessione Twitch verrà chiusa. Dovrai riconnetterti per usare le funzioni del pannello.",
     "conectando": "Connessione a Twitch…",
     "authTitle": "🔑 Autorizza su Twitch",
     "authAbre": "Apri",
@@ -419,6 +425,8 @@
     "marcados": "Segnalati",
     "botsConocidos": "Bot conosciuti",
     "protecciones": "Protezioni attive",
+    "confirmBanTitle": "Bannare l'utente?",
+    "confirmBanMsg": "Sei sicuro di voler bannare @{{user}}? L'utente verrà rimosso dal canale.",
     "followBots": "Protezione Follow Bot",
     "followBotsDesc": "Rileva e blocca automaticamente account sospetti quando seguono il canale",
     "spamFilter": "Filtro antispam chat",
@@ -503,6 +511,8 @@
     "verBoletos": "Vedi biglietti per partecipante",
     "boletos": "biglietti",
     "finalizar": "Termina giveaway e scegli vincitore",
+    "confirmEndTitle": "Terminare il giveaway?",
+    "confirmEndMsg": "Il giveaway verrà chiuso e verrà scelto un vincitore casuale. Questa azione non può essere annullata.",
     "nuevoSorteo": "Nuovo giveaway",
     "premio": "Premio",
     "premioPlaceholder": "es. Abbonamento 3 mesi...",
@@ -573,7 +583,9 @@
     "editar": "Modifica",
     "deshabilitar": "Disattiva",
     "habilitar": "Attiva",
-    "eliminar": "Elimina"
+    "eliminar": "Elimina",
+    "confirmDeleteTitle": "Eliminare il comando?",
+    "confirmDeleteMsg": "Sei sicuro di voler eliminare !{{cmd}}? Questa azione non può essere annullata."
   },
   "subathon": {
     "sub": "Abbonamento",
@@ -594,6 +606,8 @@
     "pausar": "⏸ Pausa",
     "reanudar": "▶ Riprendi",
     "detener": "⏹ Ferma",
+    "confirmStopTitle": "Fermare il Subathon?",
+    "confirmStopMsg": "Il timer si fermerà e non verrà aggiunto più tempo. Puoi riprenderlo in seguito.",
     "config": "⚙️ Impostazioni",
     "subTier1": "Sub Tier 1/Prime (secondi)",
     "subTier2": "Sub Tier 2 (secondi)",
@@ -702,7 +716,9 @@
     "razon": "Motivo (opzionale)",
     "razonPlaceholder": "Es: Spam nella chat",
     "procesando": "Elaborazione...",
-    "ejecutar": "Esegui"
+    "ejecutar": "Esegui",
+    "confirmBanTitle": "Bannare {{user}}?",
+    "confirmBanMsg": "Sei sicuro di voler bannare @{{user}}? L'utente verrà rimosso permanentemente dal canale."
   },
   "predictions": {
     "title": "📊 Previsioni",
@@ -919,6 +935,11 @@
     "viewCount": "Visualizzazioni totali",
     "apiNote": "Twitch non espone tutti i dati degli achievement tramite API. Clicca sotto per vedere i tuoi progressi completi su Twitch.",
     "viewOnTwitch": "Vedi su Twitch"
+  },
+  "confirm": {
+    "cancel": "Annulla",
+    "confirm": "Conferma",
+    "dontAskAgain": "Non chiedere più"
   },
   "common": {
     "save": "Salva",

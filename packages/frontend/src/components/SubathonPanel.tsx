@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '../i18n/context';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
+import { ConfirmModal } from './ConfirmModal';
 import type { SubathonState, SubathonAction } from '@streamforger/shared';
 import styles from './SubathonPanel.module.css';
 
@@ -58,6 +59,7 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
   const [manualUser, setManualUser] = useState('');
   const [manualTime, setManualTime] = useState(60);
   const [manualNote, setManualNote] = useState('');
+  const [showStopConfirm, setShowStopConfirm] = useState(false);
 
   const { socket, connected } = useSocket();
 
@@ -193,10 +195,19 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
             </button>
           )}
           {isActive && (
-            <button onClick={stop} className={styles.controlBtnDanger}>
+            <button onClick={() => setShowStopConfirm(true)} className={styles.controlBtnDanger}>
               {t('subathon.detener')}
             </button>
           )}
+          <ConfirmModal
+            open={showStopConfirm}
+            title={t('subathon.confirmStopTitle')}
+            message={t('subathon.confirmStopMsg')}
+            confirmLabel={t('subathon.detener')}
+            onConfirm={() => { setShowStopConfirm(false); stop(); }}
+            onCancel={() => setShowStopConfirm(false)}
+            showDontAskAgain
+          />
         </div>
       </div>
 

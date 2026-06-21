@@ -101,6 +101,10 @@
     "responder": "Reply",
     "timeout5m": "Timeout 5 min",
     "banear": "Ban",
+    "confirmBanTitle": "Ban {{user}}?",
+    "confirmBanMsg": "Are you sure you want to ban @{{user}} from chat? The user will be removed from the channel.",
+    "confirmTimeoutTitle": "Timeout {{user}}?",
+    "confirmTimeoutMsg": "Are you sure you want to apply a 5-minute timeout to @{{user}}?",
     "greeting": "Auto Greeting",
     "greetingMsg": "Message:",
     "greetingPreview": "Preview",
@@ -160,6 +164,8 @@
     "loginNavegador": "Browser login",
     "loginNavegadorTitle": "Open login in browser (safe alternative while streaming)",
     "desconectar": "Disconnect",
+    "confirmLogoutTitle": "Disconnect?",
+    "confirmLogoutMsg": "Your Twitch session will be closed. You'll need to reconnect to use panel features.",
     "conectando": "Connecting to Twitch…",
     "authTitle": "🔑 Authorize on Twitch",
     "authAbre": "Open",
@@ -423,6 +429,8 @@
     "marcados": "Flagged",
     "botsConocidos": "Known bots",
     "protecciones": "Active protections",
+    "confirmBanTitle": "Ban user?",
+    "confirmBanMsg": "Are you sure you want to ban @{{user}}? The user will be removed from the channel.",
     "followBots": "Follow Bot Protection",
     "followBotsDesc": "Automatically detect and block suspicious accounts when they follow the channel",
     "spamFilter": "Chat Spam Filter",
@@ -514,6 +522,8 @@
     "verBoletos": "View tickets per participant",
     "boletos": "tickets",
     "finalizar": "End giveaway and pick winner",
+    "confirmEndTitle": "End giveaway?",
+    "confirmEndMsg": "The giveaway will close and a random winner will be picked. This cannot be undone.",
     "nuevoSorteo": "New giveaway",
     "premio": "Prize",
     "premioPlaceholder": "e.g. 3-month subscription...",
@@ -584,7 +594,9 @@
     "editar": "Edit",
     "deshabilitar": "Disable",
     "habilitar": "Enable",
-    "eliminar": "Delete"
+    "eliminar": "Delete",
+    "confirmDeleteTitle": "Delete command?",
+    "confirmDeleteMsg": "Are you sure you want to delete !{{cmd}}? This cannot be undone."
   },
   "subathon": {
     "sub": "Subscription",
@@ -605,6 +617,8 @@
     "pausar": "⏸ Pause",
     "reanudar": "▶ Resume",
     "detener": "⏹ Stop",
+    "confirmStopTitle": "Stop Subathon?",
+    "confirmStopMsg": "The timer will stop and no more time will be added. You can resume it later.",
     "config": "⚙️ Settings",
     "subTier1": "Sub Tier 1/Prime (seconds)",
     "subTier2": "Sub Tier 2 (seconds)",
@@ -719,7 +733,9 @@
     "razon": "Reason (optional)",
     "razonPlaceholder": "e.g. Spam in chat",
     "procesando": "Processing...",
-    "ejecutar": "Execute"
+    "ejecutar": "Execute",
+    "confirmBanTitle": "Ban {{user}}?",
+    "confirmBanMsg": "Are you sure you want to ban @{{user}}? The user will be permanently removed from the channel."
   },
   "predictions": {
     "title": "📊 Predictions",
@@ -936,6 +952,11 @@
     "viewCount": "Total views",
     "apiNote": "Twitch does not expose all achievement data via API. Click below to see your full progress on Twitch.",
     "viewOnTwitch": "View on Twitch"
+  },
+  "confirm": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "dontAskAgain": "Don't ask again"
   },
   "common": {
     "save": "Save",

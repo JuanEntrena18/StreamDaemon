@@ -1,0 +1,78 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modal {
+  width: 90%;
+  max-width: 400px;
+  background: var(--sf-surface);
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius);
+  box-shadow: var(--sf-shadow-card), 0 8px 40px rgba(0, 0, 0, 0.4);
+  padding: 1.5rem;
+  outline: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.iconDanger {
+  font-size: 1.4rem;
+}
+
+.iconWarning {
+  font-size: 1.4rem;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sf-text);
+  margin: 0;
+}
+
+.message {
+  font-size: 0.85rem;
+  color: var(--sf-text-2);
+  line-height: 1.55;
+  margin: 0 0 1.25rem;
+}
+
+.dontAskRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox {
+  accent-color: var(--sf-primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.dontAskLabel {
+  font-size: 0.78rem;
+  color: var(--sf-text-3);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625rem;
+}

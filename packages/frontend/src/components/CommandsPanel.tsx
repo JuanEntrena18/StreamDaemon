@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from '../i18n/context';
 import { apiPost, apiPut } from '../utils/api';
 import { useSocket } from '../hooks/useSocket';
+import { ConfirmModal } from './ConfirmModal';
 import styles from './CommandsPanel.module.css';
 
 interface Props {
@@ -77,6 +78,7 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
   const [importResult, setImportResult] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showVarPicker, setShowVarPicker] = useState<'new' | 'edit' | null>(null);
+  const [confirmDeleteCmd, setConfirmDeleteCmd] = useState<Command | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -347,13 +349,22 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
                   <button onClick={() => toggleCommand(cmd)} className={`sf-btn sf-btn-ghost ${styles.pillActionBtnSm}`} title={cmd.enabled ? t('commands.deshabilitar') : t('commands.habilitar')}>
                     {cmd.enabled ? '🔕' : '🔔'}
                   </button>
-                  <button onClick={() => deleteCommand(cmd)} className={`sf-btn sf-btn-ghost ${styles.ghostBtnDanger}`} title={t('commands.eliminar')}>🗑️</button>
+                  <button onClick={() => setConfirmDeleteCmd(cmd)} className={`sf-btn sf-btn-ghost ${styles.ghostBtnDanger}`} title={t('commands.eliminar')}>🗑️</button>
                 </div>
               )
             ))}
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={confirmDeleteCmd !== null}
+        title={t('commands.confirmDeleteTitle')}
+        message={t('commands.confirmDeleteMsg', { cmd: confirmDeleteCmd?.name || '' })}
+        confirmLabel={t('commands.eliminar')}
+        onConfirm={() => { if (confirmDeleteCmd) deleteCommand(confirmDeleteCmd); setConfirmDeleteCmd(null); }}
+        onCancel={() => setConfirmDeleteCmd(null)}
+      />
     </div>
   );
 }

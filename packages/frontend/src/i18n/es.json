@@ -101,6 +101,10 @@
     "responder": "Responder",
     "timeout5m": "Timeout 5 min",
     "banear": "Banear",
+    "confirmBanTitle": "¿Banear a {{user}}?",
+    "confirmBanMsg": "¿Estás seguro de querer banear a @{{user}} desde el chat? El usuario será expulsado del canal.",
+    "confirmTimeoutTitle": "¿Timeout a {{user}}?",
+    "confirmTimeoutMsg": "¿Estás seguro de aplicar un timeout de 5 minutos a @{{user}}?",
     "greeting": "Saludo automático",
     "greetingMsg": "Mensaje:",
     "greetingPreview": "Vista previa",
@@ -160,6 +164,8 @@
     "loginNavegador": "Login en navegador",
     "loginNavegadorTitle": "Abrir login en el navegador (alternativa segura durante emisión)",
     "desconectar": "Desconectar",
+    "confirmLogoutTitle": "¿Desconectar?",
+    "confirmLogoutMsg": "Se cerrará tu sesión de Twitch. Deberás volver a conectar para usar las funciones del panel.",
     "conectando": "Conectando con Twitch…",
     "authTitle": "🔑 Autorizar en Twitch",
     "authAbre": "Abre",
@@ -435,6 +441,8 @@
     "marcados": "Marcados",
     "botsConocidos": "Bots conocidos",
     "protecciones": "Protecciones activas",
+    "confirmBanTitle": "¿Banear usuario?",
+    "confirmBanMsg": "¿Estás seguro de querer banear a @{{user}}? El usuario será expulsado del canal.",
     "followBots": "Protección contra Follow Bots",
     "followBotsDesc": "Detecta y bloquea automáticamente cuentas sospechosas al seguir el canal",
     "spamFilter": "Filtro de Spam en chat",
@@ -526,6 +534,8 @@
     "verBoletos": "Ver participaciones por participante",
     "boletos": "participaciones",
     "finalizar": "Finalizar sorteo y escoger ganador",
+    "confirmEndTitle": "¿Finalizar sorteo?",
+    "confirmEndMsg": "El sorteo se cerrará y se elegirá un ganador al azar. Esta acción no se puede deshacer.",
     "nuevoSorteo": "Nuevo sorteo",
     "premio": "Premio",
     "premioPlaceholder": "p. ej. Suscripción de 3 meses...",
@@ -596,7 +606,9 @@
     "editar": "Editar",
     "deshabilitar": "Deshabilitar",
     "habilitar": "Habilitar",
-    "eliminar": "Eliminar"
+    "eliminar": "Eliminar",
+    "confirmDeleteTitle": "¿Eliminar comando?",
+    "confirmDeleteMsg": "¿Estás seguro de eliminar el comando !{{cmd}}? Esta acción no se puede deshacer."
   },
   "subathon": {
     "sub": "Suscripción",
@@ -617,6 +629,8 @@
     "pausar": "⏸ Pausar",
     "reanudar": "▶ Reanudar",
     "detener": "⏹ Detener",
+    "confirmStopTitle": "¿Detener el Subathon?",
+    "confirmStopMsg": "El temporizador se detendrá y no se añadirá más tiempo. Puedes reanudarlo más tarde.",
     "config": "⚙️ Configuración",
     "subTier1": "Sub Tier 1/Prime (segundos)",
     "subTier2": "Sub Tier 2 (segundos)",
@@ -731,7 +745,9 @@
     "razon": "Razón (opcional)",
     "razonPlaceholder": "Ej: Spam en el chat",
     "procesando": "Procesando...",
-    "ejecutar": "Ejecutar"
+    "ejecutar": "Ejecutar",
+    "confirmBanTitle": "¿Banear a {{user}}?",
+    "confirmBanMsg": "¿Estás seguro de querer banear a @{{user}}? El usuario será expulsado del canal de forma permanente."
   },
   "predictions": {
     "title": "📊 Predicciones",
@@ -948,6 +964,11 @@
     "viewCount": "Visualizaciones totales",
     "apiNote": "Twitch no expone todos los datos de logros por API. Haz clic abajo para ver tu progreso completo en Twitch.",
     "viewOnTwitch": "Ver en Twitch"
+  },
+  "confirm": {
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "dontAskAgain": "No volver a preguntar"
   },
   "common": {
     "save": "Guardar",
