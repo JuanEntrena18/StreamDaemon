@@ -133,14 +133,15 @@ export function SetupWizard({ onComplete }: Props) {
                               <li>{t('config.authInstrucciones')}</li>
                             </ol>
                             <div className={styles.deviceActions}>
-                              <button
-                                onClick={() => {
-                                  if (deviceState.verificationUri) window.open(deviceState.verificationUri, '_blank');
-                                }}
+                              <a
+                                href={deviceState.verificationUri || '#'}
+                                target="_blank"
+                                rel="noreferrer"
                                 className={`sf-btn ${styles.openTwitchBtn}`}
+                                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                               >
                                 {t('config.abrirTwitchActivate')}
-                              </button>
+                              </a>
                               <button
                                 onClick={cancelDeviceLogin}
                                 className={`sf-btn ${styles.cancelBtn}`}

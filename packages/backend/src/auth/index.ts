@@ -222,7 +222,7 @@ export async function setupAuth(app: FastifyInstance) {
     });
   });
 
-  app.post('/auth/device/poll', { config: { rateLimit: { max: 12, timeWindow: '1 minute' } } }, async (req, reply) => {
+  app.post('/auth/device/poll', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req, reply) => {
     const { device_code } = req.body as { device_code: string };
     if (!device_code) return reply.status(400).send({ error: 'Missing device_code' });
 
@@ -247,8 +247,11 @@ export async function setupAuth(app: FastifyInstance) {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      req.log.error({ err }, 'Twitch token poll failed');
-      return reply.send({ status: 'pending', error: 'authorization_pending' });
+      const errorType = err.message || err.error || 'authorization_pending';
+      if (errorType !== 'authorization_pending') {
+        req.log.error({ err }, 'Twitch token poll failed');
+      }
+      return reply.send({ status: 'pending', error: errorType });
     }
 
     const tokenData = await res.json();

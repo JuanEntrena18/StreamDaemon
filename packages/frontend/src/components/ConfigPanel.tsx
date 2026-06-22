@@ -148,21 +148,19 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
                   <li>{t('config.authInstrucciones')}</li>
                 </ol>
                 <div className="flex-row--gap-sm">
-                  <button
-                    onClick={() => {
-                      if (deviceState.verificationUri) {
-                        window.open(deviceState.verificationUri, '_blank');
-                      }
-                    }}
+                  <a
+                    href={deviceState.verificationUri || '#'}
+                    target="_blank"
+                    rel="noreferrer"
                     className="sf-btn"
                     style={{
                       background: 'linear-gradient(135deg, #9147ff 0%, #6441a5 100%)',
                       color: '#fff', fontSize: '0.78rem', padding: '0.4rem 0.875rem',
-                      flex: 1, justifyContent: 'center',
+                      flex: 1, justifyContent: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center'
                     }}
                   >
                     {t('config.abrirTwitchActivate')}
-                  </button>
+                  </a>
                   <button
                     onClick={cancelDeviceLogin}
                     className="sf-btn"
