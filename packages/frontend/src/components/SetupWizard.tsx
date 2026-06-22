@@ -156,6 +156,12 @@ export function SetupWizard({ onComplete }: Props) {
                             )}
                           </div>
                         )}
+
+                        {deviceState.status === 'idle' && deviceState.error && (
+                          <p className={styles.errorText} style={{ marginTop: '0.75rem', color: 'var(--sf-danger)', fontSize: '0.85rem' }}>
+                            {deviceState.error}
+                          </p>
+                        )}
                       </div>
                     )}
 

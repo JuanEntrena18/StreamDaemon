@@ -63,13 +63,13 @@ async function pushDbSchema() {
     if (!schemaPath || !existsSync(cliPath)) return;
 
     console.log('🗄️  Pushing database schema...');
-    execFileSync('node', [
+    execFileSync(process.execPath, [
       cliPath, 'db', 'push',
       `--schema=${schemaPath}`,
       '--accept-data-loss',
       '--skip-generate',
     ], {
-      env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL! },
+      env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL!, ELECTRON_RUN_AS_NODE: '1' },
       cwd: path.dirname(schemaPath),
       stdio: 'pipe',
       timeout: 30_000,
@@ -359,19 +359,20 @@ async function finishAuth(
 }
 
 async function restoreSession() {
-  const user = await prisma.user.findFirst({ orderBy: { updatedAt: 'desc' } });
-  if (!user) return;
-
-  let accessToken = user.accessToken;
-  let refreshToken = user.refreshToken;
-
-  const encKey = config.TWITCH_CLIENT_SECRET;
   try {
-    accessToken = decryptToken(user.accessToken, encKey);
-    refreshToken = decryptToken(user.refreshToken, encKey);
-  } catch {
-    // Tokens may be in plaintext from a previous version — use as-is
-  }
+    const user = await prisma.user.findFirst({ orderBy: { updatedAt: 'desc' } });
+    if (!user) return;
+
+    let accessToken = user.accessToken;
+    let refreshToken = user.refreshToken;
+
+    const encKey = config.TWITCH_CLIENT_SECRET;
+    try {
+      accessToken = decryptToken(user.accessToken, encKey);
+      refreshToken = decryptToken(user.refreshToken, encKey);
+    } catch {
+      // Tokens may be in plaintext from a previous version — use as-is
+    }
 
   currentUser = {
     id: user.twitchId,
@@ -393,7 +394,10 @@ async function restoreSession() {
     ['chat'],
   );
 
-  notifyAuth();
+    notifyAuth();
 
-  console.log(`🔑 Session restored for ${user.displayName}`);
+    console.log(`🔑 Session restored for ${user.displayName}`);
+  } catch (err) {
+    console.warn('⚠️  Could not restore session (database uninitialized?):', err instanceof Error ? err.message : err);
+  }
 }

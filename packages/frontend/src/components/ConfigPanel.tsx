@@ -131,7 +131,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
         </div>
 
         {/* ── Device Code Dialog ── */}
-        {deviceState.status !== 'idle' && (
+        {(deviceState.status !== 'idle' || deviceState.error) && (
           <div className={styles.authBox}>
             {deviceState.status === 'loading' && (
               <div className="text-sm text-muted text-center">{t('config.conectando')}</div>
