@@ -2,12 +2,11 @@ import { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from './Logo';
 import { Toggle } from './Toggle';
-import type { LocaleSetting } from '../i18n/types';
 import styles from './Sidebar.module.css';
 
 export type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config' | 'bitrate' | 'vertical' | 'alertsounds' | 'achievements';
 
-export type NavItem = { id: Tab; icon: string; label: string };
+export type NavItem = { id: Tab; icon: string; label: string; shortcut?: string };
 export type NavSection = { id: string; label: string; items: NavItem[] };
 
 interface SidebarProps {
@@ -21,8 +20,6 @@ interface SidebarProps {
   isDesktop: boolean;
   alwaysOnTop: boolean;
   onToggleAlwaysOnTop: () => void;
-  locale: LocaleSetting;
-  onLocaleChange: (locale: LocaleSetting) => void;
   version: string;
   t: (key: string) => string;
   badges?: Record<string, number>;
@@ -35,7 +32,7 @@ export function Sidebar({
   collapsed, onToggleCollapse, mobileOpen, onMobileClose,
   navSections, activeTab, onTabChange,
   isDesktop, alwaysOnTop, onToggleAlwaysOnTop,
-  locale, onLocaleChange, version, t, badges,
+  version, t, badges,
 }: SidebarProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -73,7 +70,7 @@ export function Sidebar({
                       onTabChange(item.id);
                       onMobileClose();
                     }}
-                    title={collapsed ? item.label : undefined}
+                    title={collapsed ? item.label + (item.shortcut ? ` (${item.shortcut})` : '') : undefined}
                     className={`${styles.navBtn} ${collapsed ? styles.navBtnCollapsed : styles.navBtnExpanded} ${active ? styles.navBtnActive : ''}`}
                   >
                     <span className={`${styles.navIcon} ${collapsed ? styles.navIconCollapsed : styles.navIconExpanded}`}>
@@ -92,6 +89,9 @@ export function Sidebar({
                         </motion.span>
                       )}
                     </AnimatePresence>
+                    {!collapsed && item.shortcut && (
+                      <span className={styles.navShortcut}>{item.shortcut}</span>
+                    )}
                     {badges?.[item.id] ? (
                       <span className={collapsed ? styles.navBadgeCollapsed : styles.navBadgeExpanded}>
                         {badges[item.id] > 99 ? '99+' : badges[item.id]}

@@ -49,7 +49,7 @@ try {
 } catch {}
 
 export function App() {
-  const { t, locale, localeSetting, setLocale } = useTranslation();
+  const { t } = useTranslation();
   const [backendReady, setBackendReady] = useState(false);
   const onReady = useCallback(() => setBackendReady(true), []);
   const { connected } = useSocket();
@@ -145,6 +145,43 @@ export function App() {
     giveaway: giveawayParticipants,
   };
 
+  useEffect(() => {
+    const handleNav = (e: Event) => {
+      const customEvent = e as CustomEvent<Tab>;
+      setActiveTab(customEvent.detail);
+      setTabDirection(1);
+    };
+    window.addEventListener('navigateTab', handleNav);
+    return () => window.removeEventListener('navigateTab', handleNav);
+  }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const ctrl = e.ctrlKey || e.metaKey;
+      const key = e.key;
+
+      if (ctrl && !e.shiftKey && key >= '1' && key <= '9') {
+        e.preventDefault();
+        const navOrder = buildNav().flatMap(s => s.items.map(i => i.id));
+        const idx = parseInt(key, 10) - 1;
+        if (idx < navOrder.length) {
+          handleTabChange(navOrder[idx]);
+        }
+        return;
+      }
+
+      if (ctrl && e.shiftKey && key.toLowerCase() === 'c') {
+        e.preventDefault();
+        handleTabChange('chat');
+        return;
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [activeTab]);
+
   if (!backendReady) return <SplashScreen onReady={onReady} />;
   if (!setupComplete) return <SetupWizard onComplete={() => setSetupComplete(true)} />;
 
@@ -168,30 +205,21 @@ export function App() {
     setActiveTab(newTab);
   }
 
-  useEffect(() => {
-    const handleNav = (e: Event) => {
-      const customEvent = e as CustomEvent<Tab>;
-      handleTabChange(customEvent.detail);
-    };
-    window.addEventListener('navigateTab', handleNav);
-    return () => window.removeEventListener('navigateTab', handleNav);
-  }, [activeTab]);
-
   function buildNav() {
     const s = (k: string) => t(`nav.${k}`);
     return [
-      { id: 'gestor', label: s('gestorDelStream'), items: [{ id: 'dashboard' as Tab, icon: '📡', label: s('gestorTab') }] },
+      { id: 'gestor', label: s('gestorDelStream'), items: [{ id: 'dashboard' as Tab, icon: '📡', label: s('gestorTab'), shortcut: 'Ctrl+1' }] },
       { id: 'tracker-section', label: s('estadisticas'), items: [
-        { id: 'tracker' as Tab, icon: '📈', label: s('trackerTab') },
-        { id: 'achievements' as Tab, icon: '🏆', label: s('achievementsTab') },
+        { id: 'tracker' as Tab, icon: '📈', label: s('trackerTab'), shortcut: 'Ctrl+2' },
+        { id: 'achievements' as Tab, icon: '🏆', label: s('achievementsTab'), shortcut: 'Ctrl+3' },
       ]},
-      { id: 'chat-section', label: s('chat'), items: [{ id: 'chat' as Tab, icon: '💬', label: s('chatTab') }] },
-      { id: 'security-section', label: s('seguridad'), items: [{ id: 'security' as Tab, icon: '🔒', label: s('antiBotsTab') }] },
-      { id: 'mod-section', label: s('mod'), items: [{ id: 'mod' as Tab, icon: '🛡️', label: s('moderacionTab') }] },
-      { id: 'commands-section', label: s('comandos'), items: [{ id: 'commands' as Tab, icon: '🤖', label: s('comandosTab') }] },
+      { id: 'chat-section', label: s('chat'), items: [{ id: 'chat' as Tab, icon: '💬', label: s('chatTab'), shortcut: 'Ctrl+4' }] },
+      { id: 'security-section', label: s('seguridad'), items: [{ id: 'security' as Tab, icon: '🔒', label: s('antiBotsTab'), shortcut: 'Ctrl+5' }] },
+      { id: 'mod-section', label: s('mod'), items: [{ id: 'mod' as Tab, icon: '🛡️', label: s('moderacionTab'), shortcut: 'Ctrl+6' }] },
+      { id: 'commands-section', label: s('comandos'), items: [{ id: 'commands' as Tab, icon: '🤖', label: s('comandosTab'), shortcut: 'Ctrl+7' }] },
       { id: 'tools', label: s('herramientas'), items: [
-        { id: 'obs' as Tab,        icon: '🎮', label: s('gameOverlaysTab') },
-        { id: 'subathon' as Tab,   icon: '🔴', label: s('subathonTab') },
+        { id: 'obs' as Tab,        icon: '🎮', label: s('gameOverlaysTab'), shortcut: 'Ctrl+8' },
+        { id: 'subathon' as Tab,   icon: '🔴', label: s('subathonTab'), shortcut: 'Ctrl+9' },
         { id: 'giveaway' as Tab,   icon: '🎁', label: s('sorteosTab') },
         { id: 'prediction' as Tab, icon: '📊', label: s('prediccionesTab') },
         { id: 'hud' as Tab,        icon: '📊', label: s('hudTab') },
@@ -267,8 +295,6 @@ export function App() {
             isDesktop={isDesktop}
             alwaysOnTop={alwaysOnTop}
             onToggleAlwaysOnTop={toggleAlwaysOnTop}
-            locale={localeSetting}
-            onLocaleChange={setLocale}
             version={t('app.version')}
             t={t}
             badges={badges}

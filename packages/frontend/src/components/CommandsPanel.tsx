@@ -164,11 +164,7 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
       const data = JSON.parse(text);
       const cmds = data.commands ?? data;
       if (!Array.isArray(cmds)) throw new Error('Formato inválido');
-      const r = await fetch(`${backendUrl}/commands/${channel}/import`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ commands: cmds }),
-      });
+      const r = await apiPost(`/commands/${channel}/import`, { commands: cmds });
       if (r.ok) {
         const result = await r.json();
         setImportResult(`✅ ${result.imported} importados, ${result.skipped} omitidos`);
@@ -263,21 +259,23 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
             <input ref={fileRef} type="file" accept=".json" onChange={importCommands} style={{ display: 'none' }} />
           </div>
         </div>
-        <div className="flex-row flex-row--gap-sm mb-2">
-          <input
-            type="text" value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder={t('commands.comandoPlaceholder')}
-            className={`sf-input ${styles.inputSmall}`}
-          />
-          <div style={{ position: 'relative', flex: 1 }}>
+        <div className="flex-col flex-col--gap-sm">
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text" value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder={t('commands.comandoPlaceholder')}
+              className={`sf-input ${styles.inputFull}`}
+            />
+          </div>
+          <div style={{ position: 'relative' }}>
             <input
               ref={inputRef}
               type="text" value={newResponse}
               onChange={(e) => setNewResponse(e.target.value)}
               onKeyDown={(e) => handleResponseKeyDown('new', e)}
               placeholder={t('commands.respuestaPlaceholder')}
-              className={`sf-input ${styles.inputFlex}`}
+              className={`sf-input ${styles.inputFull}`}
             />
             {showVarPicker === 'new' && (
               <VarPicker onSelect={(v) => handleVarInsert('new', v)} onClose={() => setShowVarPicker(null)} />

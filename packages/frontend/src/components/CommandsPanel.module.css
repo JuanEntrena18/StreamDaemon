@@ -189,14 +189,10 @@
   color: #f87171;
 }
 
-.inputSmall {
-  width: 140px;
-  font-size: 0.82rem;
-}
-
-.inputFlex {
+.inputFull {
   width: 100%;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .cooldownInput {

@@ -152,6 +152,19 @@
   overflow: hidden;
 }
 
+.navShortcut {
+  margin-left: auto;
+  font-size: 0.62rem;
+  color: var(--sf-text-3);
+  background: rgba(255,255,255,0.05);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+  font-weight: 500;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
 .activeIndicator {
   position: absolute;
   left: 0;

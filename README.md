@@ -32,6 +32,7 @@ Available in two modes:
 - **🎮 Transparent overlay window** — Always-on-top window with sidebar toggle, background mode (black/transparent), font selector (6 typefaces), text size adjustment (10-24px), overall opacity control (10-100%), always-visible control bar with drag zone and integrated settings panel. Changes persist in localStorage. Includes `OverlayErrorBoundary` that catches React errors and shows a visible message instead of leaving the window blank.
 - **🔐 OAuth Authentication** — Twitch login. Browser: Authorization Code Grant flow with redirect. Desktop: **Device Code Grant** flow (user sees a code in the app and enters it at twitch.tv/activate). Tokens persisted with automatic refresh. Full logout.
 - **🖥️ Premium dashboard** — Interface with collapsible sidebar (expands from 56px icons to 220px full navigation), responsive drawer mode on mobile with hamburger menu, glassmorphism, Framer Motion animations, purple/indigo palette, Twitch user badge and real-time connection status. All components use **CSS Modules** (`*.module.css`) instead of inline styles for maintainability and performance.
+- **⌨️ Keyboard shortcuts** — Navigate between panels instantly with `Ctrl+1` through `Ctrl+9` for the first 9 tabs. `Ctrl+Shift+C` jumps directly to Chat. `Escape` closes any open confirmation modal. Shortcuts are displayed as badges next to each sidebar item and shown in tooltips when collapsed. All shortcuts are ignored while typing in text inputs or textareas to avoid interfering with normal data entry.
 - **📊 Fortnite Stats Overlay** — Configurable panel in the Fortnite overlay displaying kills, wins, matches, K/D and win rate from the [fortnite-api.com](https://fortnite-api.com) API. Each user registers their own API Key from the panel. 5 min cache.
 - **🧮 Bitrate Calculator** — Calculates the optimal bitrate for your stream with automatic recommendation based on your upload speed. Enter your upload (or measure it with fast.com) and the tool suggests the best resolution, FPS and bitrate. Fine manual adjustment with resolution selectors (1080p/900p/720p/480p/custom), FPS (60/30/24), BPP, audio and upload usage %. Shows "your connection vs. required" comparison and Twitch's 6000 kbps limit warning. Includes step-by-step OBS configuration guide with calculated values. No backend — 100% client-side.
 - **📋 Activity Feed** — Chronological log of follows, subs, bits and raids on the channel with filters and file persistence.
@@ -213,6 +214,27 @@ StreamForge/
 | **🎮 Stream Deck integration** | Native Elgato Stream Deck plugin to control StreamForger from physical buttons: start/stop Subathon, launch giveaway, ban user, change stream title and more |
 | **🎤 Twitch EventSub enhancements** | More EventSub subscription types: Hype Train, Channel Points Automatic Rewards, Stream Online/Offline notifications with configurable actions |
 | **🎬 TikTok clip management** | Create, edit and automatically export stream clips to TikTok with vertical format, auto-captions and scheduled publishing |
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+1` | Dashboard |
+| `Ctrl+2` | Tracker |
+| `Ctrl+3` | Achievements |
+| `Ctrl+4` | Chat |
+| `Ctrl+5` | Security |
+| `Ctrl+6` | Moderation |
+| `Ctrl+7` | Commands |
+| `Ctrl+8` | Overlays |
+| `Ctrl+9` | Subathon |
+| `Ctrl+Shift+C` | Chat (explicit shortcut, easy to remember) |
+| `Escape` | Close any open confirmation modal |
+| `F12` | Toggle DevTools (Electron only) |
+
+> Shortcuts are disabled while the focus is inside a text input or textarea to prevent interference with typing. Visual indicators appear as badges next to each item in the sidebar (expanded mode) and in the tooltip (collapsed mode).
 
 ---
 

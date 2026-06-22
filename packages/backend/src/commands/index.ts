@@ -113,9 +113,9 @@ export function setupCommands(app: FastifyInstance) {
     if (!store.has(channel)) store.set(channel, []);
 
     const cmds = store.get(channel)!;
-    const cleanName = body.name.trim().toLowerCase().replace(/^!/, '');
+    const cleanName = String(body.name).trim().toLowerCase().replace(/^!/, '');
     
-    if (cmds.find((c) => c.name.replace(/^!/, '') === cleanName)) {
+    if (cmds.find((c) => String(c.name || '').replace(/^!/, '') === cleanName)) {
       return reply.status(409).send({ error: `El comando !${cleanName} ya existe` });
     }
 
@@ -179,7 +179,7 @@ export function setupCommands(app: FastifyInstance) {
     if (!cmd) return reply.status(404).send({ error: 'Command not found' });
 
     if (body.response !== undefined) cmd.response = body.response;
-    if (body.aliases !== undefined) cmd.aliases = body.aliases.map(a => a.trim().toLowerCase().replace(/^!/, ''));
+    if (body.aliases !== undefined) cmd.aliases = body.aliases.map(a => String(a || '').trim().toLowerCase().replace(/^!/, ''));
     if (body.cooldown !== undefined) cmd.cooldown = body.cooldown;
     if (body.modOnly !== undefined) cmd.modOnly = body.modOnly;
 

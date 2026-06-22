@@ -7,9 +7,14 @@ export function generateApiToken(): string {
 
 export async function requireLocalAuth(req: FastifyRequest, reply: FastifyReply) {
   // En desarrollo (sin token configurado), permitir todas las peticiones POST
-  if (!process.env.LOCAL_API_TOKEN) return;
+  if (!process.env.LOCAL_API_TOKEN) {
+    console.log('[requireLocalAuth] LOCAL_API_TOKEN is not set, skipping auth');
+    return;
+  }
   const token = req.headers['x-local-token'];
   if (!token || token !== process.env.LOCAL_API_TOKEN) {
+    console.log('[requireLocalAuth] Unauthorized! Provided:', token, 'Expected:', process.env.LOCAL_API_TOKEN);
     return reply.status(401).send({ error: 'Unauthorized' });
   }
+  console.log('[requireLocalAuth] Token matched successfully');
 }
