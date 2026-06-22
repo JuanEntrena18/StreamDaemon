@@ -252,6 +252,7 @@ export function App() {
         onToggleAlwaysOnTop={isDesktop ? toggleAlwaysOnTop : undefined}
       />
       <div className={styles.root}>
+        <a href="#main-content" className="skip-link">Skip to main content</a>
         <div className={styles.bgGlow} style={{
           background: `
             radial-gradient(ellipse 60% 50% at 10% 0%, rgba(124,58,237,0.12) 0%, transparent 70%),
@@ -291,7 +292,7 @@ export function App() {
             badges={badges}
           />
 
-          <main className={styles.main}>
+          <main id="main-content" className={styles.main}>
             <MainContent
               activeTab={activeTab}
               tabDirection={tabDirection}

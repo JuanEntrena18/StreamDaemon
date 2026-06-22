@@ -116,7 +116,10 @@
     "emptyStateTitle": "Conecta a tu canal",
     "emptyStateDesc": "Conecta a tu canal para ver el chat en tiempo real",
     "emptyStateBtn": "Introducir canal",
-    "emptyMessagesTitle": "El chat está tranquilo"
+    "emptyMessagesTitle": "El chat está tranquilo",
+    "cyanUrl": "URL de Cyan Chat",
+    "cyanConfig": "Configurar ↗",
+    "cyanDesc": "Abre Cyan Chat, configura tus opciones y pega la URL que se genera aquí."
   },
   "dashboard": {
     "title": "Gestor del Stream",
@@ -154,7 +157,15 @@
     "eventResub": "renovó suscripción ({{tier}}, {{months}} meses)",
     "eventGift": "regaló {{amount}} suscripción(es) ({{tier}})",
     "eventRedeem": "canjeó {{reward}} ({{cost}} pts)",
-    "eventBits": "donó {{bits}} bits"
+    "eventBits": "donó {{bits}} bits",
+    "reconnectTwitch": "Reconectar Twitch ↗",
+    "typeFollow": "Follows",
+    "typeSub": "Subs",
+    "typeResub": "Re-subs",
+    "typeGift": "Gifts",
+    "typeRaid": "Raids",
+    "typeCheer": "Bits",
+    "typeRedeem": "Canjes"
   },
   "config": {
     "title": "⚙️ Configuración",
@@ -517,7 +528,8 @@
     "emptyStateTitle": "Conecta tu cuenta Twitch",
     "emptyStateDesc": "Conecta tu cuenta Twitch para ver tus estadísticas",
     "emptyStateBtn": "Ir a Configuración",
-    "emptyDataTitle": "Sin datos recientes"
+    "emptyDataTitle": "Sin datos recientes",
+    "max": "máx:"
   },
   "giveaway": {
     "dur30s": "30 seg",
@@ -569,7 +581,9 @@
     "minimoNombres": "Añade al menos 2 nombres",
     "girando": "🎡 Girando...",
     "girar": "🎡 Girar ruleta",
-    "ganador": "🏆 GANADOR"
+    "ganador": "🏆 GANADOR",
+    "errorStart": "Error al iniciar sorteo",
+    "costLabel": "con un costo de"
   },
   "commands": {
     "varUser": "Nombre del usuario que ejecutó el comando",
@@ -1008,5 +1022,11 @@
     "tiktokDesc": "Transmite en simultáneo y gestiona tu cuenta de TikTok.",
     "start": "Comenzar a usar StreamForger",
     "connectFirst": "Conecta Twitch primero"
+  },
+  "auth": {
+    "errorLogin": "Error al iniciar login",
+    "errorNetwork": "Error de red",
+    "errorExpired": "Código expirado, intenta de nuevo",
+    "errorDenied": "Acceso denegado"
   }
 }

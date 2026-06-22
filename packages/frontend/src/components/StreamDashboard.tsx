@@ -42,15 +42,15 @@ interface TagInfo {
   isAuto: boolean;
 }
 
-const TYPE_CONFIG: Record<string, { icon: string; label: string }> = {
-  follow: { icon: '❤️', label: 'Follows' },
-  sub: { icon: '⭐', label: 'Subs' },
-  resub: { icon: '🔄', label: 'Re-subs' },
-  gift: { icon: '🎁', label: 'Gifts' },
-  raid: { icon: '⚔️', label: 'Raids' },
-  cheer: { icon: '💎', label: 'Bits' },
-  redemption: { icon: '🪄', label: 'Canjes' },
-};
+const TYPE_CONFIG = (t: (key: string) => string): Record<string, { icon: string; label: string }> => ({
+  follow: { icon: '❤️', label: t('dashboard.typeFollow') },
+  sub: { icon: '⭐', label: t('dashboard.typeSub') },
+  resub: { icon: '🔄', label: t('dashboard.typeResub') },
+  gift: { icon: '🎁', label: t('dashboard.typeGift') },
+  raid: { icon: '⚔️', label: t('dashboard.typeRaid') },
+  cheer: { icon: '💎', label: t('dashboard.typeCheer') },
+  redemption: { icon: '🪄', label: t('dashboard.typeRedeem') },
+});
 
 function formatUptime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -251,7 +251,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
               onClick={() => setFilter('all')}
               className={`${styles.filterBtn} ${filter === 'all' ? styles.filterBtnActive : styles.filterBtnInactive}`}
             >{t('dashboard.todos')}</button>
-            {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
+            {Object.entries(TYPE_CONFIG(t)).map(([key, cfg]) => (
               <button
                 key={key}
                 onClick={() => setFilter(key)}
@@ -266,10 +266,10 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
             {channel ? t('dashboard.esperandoActividad') : t('dashboard.conectarParaActividad')}
           </p>
         ) : (
-          <div className="flex-col--gap-sm" style={{ gap: 4 }}>
+          <div className="flex-col--gap-sm" style={{ gap: 4 }} aria-live="polite">
             {filteredEvents.slice(0, 20).map((event) => (
               <div key={event.id} className={styles.eventItem}>
-                <span className={styles.eventIcon}>{TYPE_CONFIG[event.type]?.icon ?? '📌'}</span>
+                <span className={styles.eventIcon}>{TYPE_CONFIG(t)[event.type]?.icon ?? '📌'}</span>
                 <strong className={styles.eventUser}>{event.user}</strong>
                 <span className={styles.eventMsg}>{event.message}</span>
                 <span className={styles.eventTime}>{new Date(event.timestamp).toLocaleTimeString(dateLocale || 'es-ES')}</span>
@@ -444,7 +444,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
                   background: 'rgba(239,68,68,0.1)', color: '#f87171',
                   border: '1px solid rgba(239,68,68,0.25)',
                 }}>
-                Reconectar Twitch ↗
+                {t('dashboard.reconnectTwitch')}
               </button>
             )}
           </div>

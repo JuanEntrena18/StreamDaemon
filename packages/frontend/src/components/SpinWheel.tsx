@@ -246,6 +246,8 @@ export const SpinWheel = forwardRef<SpinWheelHandle>((_props, ref) => {
               width={280}
               height={280}
               style={{ width: '100%', height: '100%', borderRadius: '50%' }}
+              role="img"
+              aria-label={t('giveaway.ruletaDesc')}
             />
             <div className={styles.wheelPointer} />
           </>

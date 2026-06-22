@@ -177,7 +177,7 @@ export function ChatPanel({ channel }: Props) {
       {/* Cyan Chat URL config */}
       {overlayMode === 'cyanchat' && (
         <div className={styles.cyanChatBox}>
-          <label className="sf-label mb-2">{t('chat.cyanUrl') || 'URL de Cyan Chat'}</label>
+          <label className="sf-label mb-2">{t('chat.cyanUrl')}</label>
           <div className="flex-row--gap-sm">
             <input
               type="url"
@@ -194,11 +194,11 @@ export function ChatPanel({ channel }: Props) {
               className="sf-btn"
               style={{ fontSize: '0.72rem', padding: '0.4rem 0.75rem', textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
             >
-              Configurar ↗
+              {t('chat.cyanConfig')}
             </a>
           </div>
           <p style={{ fontSize: '0.68rem', color: 'var(--sf-text-3)', marginTop: '0.3rem', marginBottom: 0 }}>
-            Abre Cyan Chat, configura tus opciones y pega la URL que se genera aquí.
+            {t('chat.cyanDesc')}
           </p>
         </div>
       )}
@@ -220,7 +220,7 @@ export function ChatPanel({ channel }: Props) {
       )}
 
       {/* Messages */}
-      <div className={`glass-card ${styles.msgContainer}`} ref={listRef}>
+      <div className={`glass-card ${styles.msgContainer}`} ref={listRef} aria-live="polite">
         {!channel ? (
           <EmptyState 
             icon="💬"
@@ -263,9 +263,9 @@ export function ChatPanel({ channel }: Props) {
 
                 {menuMsg === msg.id && (
                   <div ref={menuRef} className={styles.msgMenu}>
-                    <button onClick={() => handleReply(msg)} title={t('chat.responder')} className={styles.menuBtn}>↩</button>
-                    <button onClick={() => handleModAction('timeout', msg.user.displayName)} title={t('chat.timeout5m')} className={styles.menuBtn}>⏳</button>
-                    <button onClick={() => setConfirmModAction({ action: 'ban', user: msg.user.displayName })} title={t('chat.banear')} className={styles.menuBtn}>🚫</button>
+                    <button onClick={() => handleReply(msg)} title={t('chat.responder')} aria-label={t('chat.responder')} className={styles.menuBtn}>↩</button>
+                    <button onClick={() => handleModAction('timeout', msg.user.displayName)} title={t('chat.timeout5m')} aria-label={t('chat.timeout5m')} className={styles.menuBtn}>⏳</button>
+                    <button onClick={() => setConfirmModAction({ action: 'ban', user: msg.user.displayName })} title={t('chat.banear')} aria-label={t('chat.banear')} className={styles.menuBtn}>🚫</button>
                   </div>
                 )}
               </motion.div>

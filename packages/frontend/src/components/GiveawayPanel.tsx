@@ -101,7 +101,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
       setPrize('');
       toast.success(t('giveaway.sorteoIniciado') || 'Sorteo iniciado');
     } else {
-      toast.error(t('giveaway.errorIniciar') || 'Error al iniciar sorteo');
+      toast.error(t('giveaway.errorStart'));
     }
   };
 
@@ -134,7 +134,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
         <div className={styles.infoBannerCyan}>
           <strong className={styles.infoBannerTitle}>{t('giveaway.configTitle')}</strong>
           {' '}{t('giveaway.configText1')}{' '}
-          <strong>"{t('giveaway.configText2')}"</strong> con un costo de{' '}
+          <strong>"{t('giveaway.configText2')}"</strong> {t('giveaway.costLabel')}{' '}
           <strong>{t('giveaway.configText3')}</strong>. {t('giveaway.configText4')}
         </div>
         <div className={styles.infoBannerAmber}>

@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function TrackerChart({ data, dataKey, color }: Props) {
-  const { dateLocale } = useTranslation();
+  const { t, dateLocale } = useTranslation();
   if (data.length === 0) return null;
   const values = data.map((d) => d[dataKey] as number);
   const max = Math.max(...values, 1);
@@ -82,7 +82,7 @@ export function TrackerChart({ data, dataKey, color }: Props) {
         fontSize="10"
         style={{ fontFamily: 'system-ui, sans-serif' }}
       >
-        máx: {formatVal(max)}
+        {t('tracker.max')} {formatVal(max)}
       </text>
       <line x1={0} y1={chartH - 8} x2={chartW} y2={chartH - 8} stroke="#334155" strokeWidth={1} />
     </svg>

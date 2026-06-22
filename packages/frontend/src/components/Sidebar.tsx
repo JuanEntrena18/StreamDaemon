@@ -71,6 +71,7 @@ export function Sidebar({
                       onMobileClose();
                     }}
                     title={collapsed ? item.label + (item.shortcut ? ` (${item.shortcut})` : '') : undefined}
+                    aria-label={item.label}
                     className={`${styles.navBtn} ${collapsed ? styles.navBtnCollapsed : styles.navBtnExpanded} ${active ? styles.navBtnActive : ''}`}
                   >
                     <span className={`${styles.navIcon} ${collapsed ? styles.navIconCollapsed : styles.navIconExpanded}`}>
@@ -118,6 +119,7 @@ export function Sidebar({
         <button
           onClick={onToggleCollapse}
           title={collapsed ? t('app.expandirSidebar') || 'Expandir' : t('app.colapsarSidebar') || 'Colapsar'}
+          aria-label={collapsed ? t('app.expandirSidebar') || 'Expandir' : t('app.colapsarSidebar') || 'Colapsar'}
           className={`${styles.collapseBtn} ${!collapsed ? styles.collapseBtnWide : ''}`}
           onMouseEnter={(e) => e.currentTarget.style.color = 'var(--sf-text)'}
           onMouseLeave={(e) => e.currentTarget.style.color = 'var(--sf-text-3)'}
@@ -151,6 +153,7 @@ export function Sidebar({
               if (mobileOpen) onMobileClose();
             }}
             title={t('config.languageTitle') || 'Language'}
+            aria-label={t('config.languageTitle') || 'Language'}
             className={styles.globeBtn}
             style={collapsed ? { fontSize: '1.2rem', padding: '0.4rem' } : {}}
           >
@@ -214,6 +217,7 @@ export function Sidebar({
               <button
                 onClick={onMobileClose}
                 className={styles.drawerClose}
+                aria-label="Cerrar menú"
               >
                 ✕
               </button>

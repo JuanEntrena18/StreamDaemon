@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useTranslation } from '../i18n/context';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 
@@ -24,6 +25,7 @@ export interface DeviceCodeState {
 }
 
 export function useAuthStatus() {
+  const { t } = useTranslation();
   const [status, setStatus] = useState<AuthStatus>({ authenticated: false, user: null });
   const [loading, setLoading] = useState(true);
   const [deviceState, setDeviceState] = useState<DeviceCodeState>({ status: 'idle' });
@@ -59,7 +61,7 @@ export function useAuthStatus() {
       const res = await fetch(`${BACKEND_URL}/auth/device`, { method: 'POST' });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        setDeviceState({ status: 'idle', error: err.error || 'Error al iniciar login' });
+        setDeviceState({ status: 'idle', error: err.error || t('auth.errorLogin') });
         return;
       }
       const data = await res.json();
@@ -71,7 +73,7 @@ export function useAuthStatus() {
         interval: data.interval,
       });
     } catch {
-      setDeviceState({ status: 'idle', error: 'Error de red' });
+      setDeviceState({ status: 'idle', error: t('auth.errorNetwork') });
     }
   }, []);
 
@@ -99,7 +101,7 @@ export function useAuthStatus() {
         if (data.error === 'expired_token' || data.error === 'access_denied') {
           setDeviceState({
             status: 'idle',
-            error: data.error === 'expired_token' ? 'Código expirado, intenta de nuevo' : 'Acceso denegado',
+            error: data.error === 'expired_token' ? t('auth.errorExpired') : t('auth.errorDenied'),
           });
           return;
         }

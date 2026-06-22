@@ -64,6 +64,28 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Accessibility ── */
+:focus-visible {
+  outline: 2px solid var(--sf-primary-light);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--sf-primary);
+  color: #fff;
+  padding: 8px;
+  z-index: 9999999;
+  transition: top 0.2s;
+  text-decoration: none;
+  font-weight: bold;
+}
+.skip-link:focus {
+  top: 0;
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }

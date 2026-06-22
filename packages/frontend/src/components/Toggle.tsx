@@ -14,8 +14,23 @@ export function Toggle({ checked, onChange, size = 'md', label, className = '' }
     onChange(!checked);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleToggle();
+    }
+  };
+
   return (
-    <div className={`${styles.container} ${className}`} onClick={handleToggle}>
+    <div 
+      className={`${styles.container} ${className}`} 
+      onClick={handleToggle}
+      role="switch"
+      aria-checked={checked}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      aria-label={typeof label === 'string' ? label : undefined}
+    >
       <div 
         className={`${styles.toggleTrack} ${styles[`toggleTrack--${size}`]} ${
           checked ? styles['toggleTrack--on'] : styles['toggleTrack--off']

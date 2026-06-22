@@ -36,15 +36,15 @@ export function StreamActivityFeed({ channel, backendUrl }: Props) {
 
   const filtered = filter === 'all' ? events : events.filter((e) => e.type === filter);
 
-  const TYPE_CONFIG: Record<string, { icon: string; label: string }> = {
-    follow: { icon: '❤️', label: 'Follows' },
-    sub: { icon: '⭐', label: 'Subs' },
-    resub: { icon: '🔄', label: 'Re-subs' },
-    gift: { icon: '🎁', label: 'Gifts' },
-    raid: { icon: '⚔️', label: 'Raids' },
-    cheer: { icon: '💎', label: 'Bits' },
-    redemption: { icon: '🪄', label: 'Canjes' },
-  };
+  const TYPE_CONFIG = (t: (k: string) => string): Record<string, { icon: string; label: string }> => ({
+    follow: { icon: '❤️', label: t('dashboard.typeFollow') },
+    sub: { icon: '⭐', label: t('dashboard.typeSub') },
+    resub: { icon: '🔄', label: t('dashboard.typeResub') },
+    gift: { icon: '🎁', label: t('dashboard.typeGift') },
+    raid: { icon: '⚔️', label: t('dashboard.typeRaid') },
+    cheer: { icon: '💎', label: t('dashboard.typeCheer') },
+    redemption: { icon: '🪄', label: t('dashboard.typeRedeem') },
+  });
 
   return (
     <div className={styles.container}>
@@ -59,8 +59,8 @@ export function StreamActivityFeed({ channel, backendUrl }: Props) {
 
       {/* Filtros */}
       <div className={`glass-card ${styles.filterBar}`}>
-        {['all', ...Object.keys(TYPE_CONFIG)].map((key) => {
-          const cfg = key === 'all' ? null : TYPE_CONFIG[key];
+        {['all', ...Object.keys(TYPE_CONFIG(t))].map((key) => {
+          const cfg = key === 'all' ? null : TYPE_CONFIG(t)[key];
           const active = filter === key;
           return (
             <button
@@ -75,7 +75,7 @@ export function StreamActivityFeed({ channel, backendUrl }: Props) {
       </div>
 
       {/* Lista de eventos */}
-      <div className={`glass-card ${styles.eventsCard}`}>
+      <div className={`glass-card ${styles.eventsCard}`} aria-live="polite">
         {filtered.length === 0 ? (
           <p className={styles.emptyState}>
             {channel ? t('activity.esperando') : t('activity.conectar')}
@@ -84,7 +84,7 @@ export function StreamActivityFeed({ channel, backendUrl }: Props) {
           <div className={styles.eventsList}>
             {filtered.map((event) => (
               <div key={event.id} className={styles.eventItem}>
-                <span className={styles.eventIcon}>{TYPE_CONFIG[event.type]?.icon ?? '📌'}</span>
+                <span className={styles.eventIcon}>{TYPE_CONFIG(t)[event.type]?.icon ?? '📌'}</span>
                 <strong className={styles.eventUser}>{event.user}</strong>
                 <span className={styles.eventMsg}>{event.message}</span>
                 <span className={styles.timeText}>
