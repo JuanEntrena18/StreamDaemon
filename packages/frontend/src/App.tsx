@@ -24,10 +24,11 @@ const APP_VERSION = '0.3.0';
 try {
   const storedVer = localStorage.getItem('streamforger-version');
   if (storedVer !== APP_VERSION) {
-    const preserve = ['streamforger-version'];
     const keys = Object.keys(localStorage);
     for (const k of keys) {
-      if (!preserve.includes(k)) localStorage.removeItem(k);
+      if (k.startsWith('sf-cache-')) {
+        localStorage.removeItem(k);
+      }
     }
     localStorage.setItem('streamforger-version', APP_VERSION);
   }
