@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from './Logo';
 import { Toggle } from './Toggle';
-import type { Locale } from '../i18n/types';
+import type { LocaleSetting } from '../i18n/types';
 import styles from './Sidebar.module.css';
 
 export type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config' | 'bitrate' | 'vertical' | 'alertsounds' | 'achievements';
@@ -21,8 +21,8 @@ interface SidebarProps {
   isDesktop: boolean;
   alwaysOnTop: boolean;
   onToggleAlwaysOnTop: () => void;
-  locale: Locale;
-  onLocaleChange: (locale: Locale) => void;
+  locale: LocaleSetting;
+  onLocaleChange: (locale: LocaleSetting) => void;
   version: string;
   t: (key: string) => string;
   badges?: Record<string, number>;
@@ -146,17 +146,16 @@ export function Sidebar({
         <div className={styles.footer}>
           <div>{version}</div>
           <div className={styles.footerRow}>
-            <select
-              value={locale}
-              onChange={(e) => onLocaleChange(e.target.value as Locale)}
-              className={styles.langSelect}
+            <button
+              onClick={() => {
+                onTabChange('config');
+                if (mobileOpen) onMobileClose();
+              }}
+              title={t('config.languageTitle') || 'Language'}
+              className={styles.globeBtn}
             >
-              <option value="es">ES</option>
-              <option value="en">EN</option>
-              <option value="fr">FR</option>
-              <option value="de">DE</option>
-              <option value="it">IT</option>
-            </select>
+              🌐
+            </button>
           </div>
           <a
             href="https://github.com/JuanEntrena18/StreamForge"

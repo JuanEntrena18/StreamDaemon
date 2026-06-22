@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n/context';
 import { motion } from 'framer-motion';
+import { EmptyState } from './EmptyState';
 import styles from './TrackerPanel.module.css';
 
 interface Props {
@@ -315,12 +316,25 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
         </div>
       )}
 
-      {noData && !loading && (
-        <div className={styles.noDataBox}>
-          <div className={styles.noDataIcon}>📭</div>
-          {t('tracker.empty')}
+      {!channel && !loading ? (
+        <div style={{ marginTop: '2rem' }}>
+          <EmptyState 
+            icon="📊"
+            title={t('tracker.emptyStateTitle') || 'Conecta tu cuenta de Twitch'}
+            description={t('tracker.emptyStateDesc') || 'Vincula tu canal para ver tus estadísticas en tiempo real y recibir consejos de IA personalizados sobre tu stream.'}
+            actionLabel={t('tracker.emptyStateBtn') || 'Ir a Configuración'}
+            onAction={() => window.dispatchEvent(new CustomEvent('navigateTab', { detail: 'config' }))}
+          />
         </div>
-      )}
+      ) : noData && !loading ? (
+        <div style={{ marginTop: '2rem' }}>
+          <EmptyState 
+            icon="📭"
+            title={t('tracker.emptyDataTitle') || 'Sin datos recientes'}
+            description={t('tracker.empty') || 'No se han encontrado datos de transmisiones para el período seleccionado. ¡Haz un stream pronto!'}
+          />
+        </div>
+      ) : null}
 
       {/* Stats cards */}
       {stats && !loading && (

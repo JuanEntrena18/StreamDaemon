@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) {
-  const { t } = useTranslation();
+  const { t, localeSetting, setLocale } = useTranslation();
   const { connected } = useSocket();
   const { authenticated, user, loading: authLoading, login, loginBrowser, logout, deviceState, cancelDeviceLogin } = useAuthStatus();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -236,6 +236,35 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
           </div>
         </div>
       )}
+
+      {/* ── Language ── */}
+      <div className="glass-card sf-card">
+        <p className="sf-section-title">{t('config.languageTitle') || 'Idioma / Language'}</p>
+        <p className="text-sm text-muted" style={{ marginBottom: '1rem', lineHeight: 1.5 }}>
+          {t('config.languageDesc') || 'Selecciona el idioma de la interfaz.'}
+        </p>
+
+        <div className="flex-row flex-wrap" style={{ gap: '0.75rem' }}>
+          {[
+            { id: 'auto', label: 'Auto', icon: '🌐' },
+            { id: 'es', label: 'Español', icon: '🇪🇸' },
+            { id: 'en', label: 'English', icon: '🇬🇧' },
+            { id: 'fr', label: 'Français', icon: '🇫🇷' },
+            { id: 'de', label: 'Deutsch', icon: '🇩🇪' },
+            { id: 'it', label: 'Italiano', icon: '🇮🇹' },
+          ].map(lang => (
+            <button
+              key={lang.id}
+              onClick={() => setLocale(lang.id as any)}
+              className={`sf-btn ${localeSetting === lang.id ? 'sf-btn-primary' : 'sf-btn-ghost'}`}
+              style={{ flex: 1, minWidth: '100px', padding: '0.6rem', justifyContent: 'center' }}
+            >
+              <span style={{ fontSize: '1.2rem', marginRight: '0.5rem' }}>{lang.icon}</span>
+              {lang.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* ── About ── */}
       <div className="glass-card sf-card">

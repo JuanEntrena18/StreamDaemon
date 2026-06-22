@@ -1,15 +1,12 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import type { Locale } from './types';
+import type { Locale, LocaleSetting } from './types';
 
 const LS_KEY = 'streamforger-locale';
 
 function detectLocale(): Locale {
-  try {
-    const stored = localStorage.getItem(LS_KEY);
-    if (stored && ['es', 'en', 'fr', 'de', 'it'].includes(stored)) return stored as Locale;
-  } catch {}
   const langs = navigator.languages ?? [navigator.language];
   for (const l of langs) {
+    if (!l) continue;
     const code = l.split('-')[0];
     if (['es', 'en', 'fr', 'de', 'it'].includes(code)) return code as Locale;
   }
@@ -17,8 +14,9 @@ function detectLocale(): Locale {
 }
 
 interface TranslationContextValue {
-  locale: Locale;
-  setLocale: (l: Locale) => void;
+  locale: Locale; // Active locale
+  localeSetting: LocaleSetting;
+  setLocale: (l: LocaleSetting) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
   dict: Record<string, unknown>;
 }
@@ -51,7 +49,17 @@ const localeModules: Record<Locale, () => Promise<{ default: Record<string, unkn
 };
 
 export function TranslationProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(detectLocale);
+  const [localeSetting, setLocaleSettingState] = useState<LocaleSetting>(() => {
+    try {
+      const stored = localStorage.getItem(LS_KEY);
+      if (stored && ['auto', 'es', 'en', 'fr', 'de', 'it'].includes(stored)) {
+        return stored as LocaleSetting;
+      }
+    } catch {}
+    return 'auto';
+  });
+
+  const locale = localeSetting === 'auto' ? detectLocale() : localeSetting;
   const [dict, setDict] = useState<Record<string, unknown>>({});
 
   useEffect(() => {
@@ -62,8 +70,8 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
     });
   }, [locale]);
 
-  const setLocale = useCallback((l: Locale) => {
-    setLocaleState(l);
+  const setLocale = useCallback((l: LocaleSetting) => {
+    setLocaleSettingState(l);
     try { localStorage.setItem(LS_KEY, l); } catch {}
   }, []);
 
@@ -73,7 +81,7 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
   }, [dict]);
 
   return (
-    <TranslationContext.Provider value={{ locale, setLocale, t, dict }}>
+    <TranslationContext.Provider value={{ locale, localeSetting, setLocale, t, dict }}>
       {children}
     </TranslationContext.Provider>
   );

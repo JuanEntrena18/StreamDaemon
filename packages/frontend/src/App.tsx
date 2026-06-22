@@ -49,7 +49,7 @@ try {
 } catch {}
 
 export function App() {
-  const { t, locale, setLocale } = useTranslation();
+  const { t, locale, localeSetting, setLocale } = useTranslation();
   const [backendReady, setBackendReady] = useState(false);
   const onReady = useCallback(() => setBackendReady(true), []);
   const { connected } = useSocket();
@@ -168,6 +168,15 @@ export function App() {
     setActiveTab(newTab);
   }
 
+  useEffect(() => {
+    const handleNav = (e: Event) => {
+      const customEvent = e as CustomEvent<Tab>;
+      handleTabChange(customEvent.detail);
+    };
+    window.addEventListener('navigateTab', handleNav);
+    return () => window.removeEventListener('navigateTab', handleNav);
+  }, [activeTab]);
+
   function buildNav() {
     const s = (k: string) => t(`nav.${k}`);
     return [
@@ -258,7 +267,7 @@ export function App() {
             isDesktop={isDesktop}
             alwaysOnTop={alwaysOnTop}
             onToggleAlwaysOnTop={toggleAlwaysOnTop}
-            locale={locale}
+            locale={localeSetting}
             onLocaleChange={setLocale}
             version={t('app.version')}
             t={t}

@@ -8,6 +8,7 @@ import { useTts } from '../contexts/TtsContext';
 import { getVoices } from '../utils/tts';
 import { ConfirmModal } from './ConfirmModal';
 import { Toggle } from './Toggle';
+import { EmptyState } from './EmptyState';
 import styles from './ChatPanel.module.css';
 
 const OVERLAY_LS_KEY = 'streamforger-chat-overlay-settings';
@@ -384,12 +385,7 @@ export function ChatPanel({ channel }: Props) {
         </motion.div>
       )}
 
-      {/* Connection status */}
-      {!channel && (
-        <div className={styles.statusWarning}>
-          {t('chat.emptyChannel')}
-        </div>
-      )}
+      {/* Connection status (only when disconnected while channel is active) */}
       {channel && !connected && (
         <div className={styles.statusError}>
           <span>{t('chat.disconnected')}</span>
@@ -401,12 +397,20 @@ export function ChatPanel({ channel }: Props) {
 
       {/* Messages */}
       <div className={`glass-card ${styles.msgContainer}`} ref={listRef}>
-        {messages.length === 0 ? (
-          <div className={styles.msgEmpty}>
-            {channel && connected
-              ? t('chat.waitingMessages')
-              : t('chat.messagesHere')}
-          </div>
+        {!channel ? (
+          <EmptyState 
+            icon="💬"
+            title={t('chat.emptyStateTitle') || 'Conecta a tu canal'}
+            description={t('chat.emptyStateDesc') || 'Introduce el nombre de tu canal en la barra superior o ve a Configuración para iniciar sesión.'}
+            actionLabel={t('chat.emptyStateBtn') || 'Ir a Configuración'}
+            onAction={() => window.dispatchEvent(new CustomEvent('navigateTab', { detail: 'config' }))}
+          />
+        ) : messages.length === 0 ? (
+          <EmptyState 
+            icon="📭"
+            title={t('chat.emptyMessagesTitle') || 'El chat está tranquilo'}
+            description={t('chat.waitingMessages') || 'Esperando mensajes... ¡Rompe el hielo!'}
+          />
         ) : (
           <AnimatePresence initial={false}>
             {messages.map((msg) => (

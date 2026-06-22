@@ -51,22 +51,46 @@ export function getCommandsForChannel(channel: string): Command[] {
   return store.get(channel.toLowerCase()) ?? [];
 }
 
-export async function checkCustomCommand(channel: string, text: string): Promise<string | null> {
+export async function checkCustomCommand(channel: string, user: string, text: string): Promise<string | null> {
   const parts = text.trim().split(/\s+/);
-  const cmdName = parts[0]?.toLowerCase().replace(/^!/, '');
-  if (!cmdName) return null;
+  const firstWord = parts[0]?.toLowerCase();
+  
+  // The command must start with !
+  if (!firstWord || !firstWord.startsWith('!')) return null;
+  const cmdName = firstWord.substring(1);
 
   const cmds = getCommandsForChannel(channel);
-  const cmd = cmds.find((c) => c.enabled && (c.name === cmdName || c.aliases.includes(cmdName)));
+  // Allow matching even if the saved name accidentally includes !
+  const cmd = cmds.find((c) => c.enabled && (
+    c.name.replace(/^!/, '') === cmdName || 
+    c.aliases.map(a => a.replace(/^!/, '')).includes(cmdName)
+  ));
+  
   if (!cmd) {
-    console.log(`  🔍 No custom command matched for "${text}" in #${channel}`);
     return null;
   }
 
-  console.log(`  🤖 Custom command !${cmd.name} matched, responding: "${cmd.response}"`);
+  console.log(`  🤖 Custom command !${cmdName} matched, responding: "${cmd.response}"`);
   cmd.count++;
   save();
-  return cmd.response;
+  
+  let response = cmd.response;
+  response = response.replace(/\{user\}/g, `@${user}`);
+  response = response.replace(/\{channel\}/g, channel);
+  response = response.replace(/\{streamer\}/g, channel);
+  response = response.replace(/\{count\}/g, cmd.count.toString());
+  
+  const args = parts.slice(1).join(' ');
+  response = response.replace(/\{args\}/g, args);
+  
+  response = response.replace(/\{random:(\d+)-(\d+)\}/g, (_, minStr, maxStr) => {
+    const min = parseInt(minStr, 10);
+    const max = parseInt(maxStr, 10);
+    if (isNaN(min) || isNaN(max) || min > max) return '0';
+    return Math.floor(Math.random() * (max - min + 1) + min).toString();
+  });
+
+  return response;
 }
 
 export function setupCommands(app: FastifyInstance) {
@@ -89,13 +113,15 @@ export function setupCommands(app: FastifyInstance) {
     if (!store.has(channel)) store.set(channel, []);
 
     const cmds = store.get(channel)!;
-    if (cmds.find((c) => c.name === body.name)) {
-      return reply.status(409).send({ error: `El comando !${body.name} ya existe` });
+    const cleanName = body.name.trim().toLowerCase().replace(/^!/, '');
+    
+    if (cmds.find((c) => c.name.replace(/^!/, '') === cleanName)) {
+      return reply.status(409).send({ error: `El comando !${cleanName} ya existe` });
     }
 
     const cmd: Command = {
       id: generateId(),
-      name: body.name,
+      name: cleanName,
       response: body.response,
       enabled: true,
       aliases: [],
@@ -153,7 +179,7 @@ export function setupCommands(app: FastifyInstance) {
     if (!cmd) return reply.status(404).send({ error: 'Command not found' });
 
     if (body.response !== undefined) cmd.response = body.response;
-    if (body.aliases !== undefined) cmd.aliases = body.aliases;
+    if (body.aliases !== undefined) cmd.aliases = body.aliases.map(a => a.trim().toLowerCase().replace(/^!/, ''));
     if (body.cooldown !== undefined) cmd.cooldown = body.cooldown;
     if (body.modOnly !== undefined) cmd.modOnly = body.modOnly;
 

@@ -194,7 +194,7 @@ function handleCommands(channel: string, user: string, text: string, subTier = 0
       break;
   }
 
-  checkCustomCommand(channel, text).then((response) => {
+  checkCustomCommand(channel, user, text).then((response) => {
     if (response) {
       sendMessage(channel, response);
     }

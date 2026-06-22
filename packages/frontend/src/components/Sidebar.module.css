@@ -252,16 +252,22 @@
   gap: 4px;
   margin-bottom: 4px;
 }
-.langSelect {
-  padding: 1px 4px;
-  border-radius: 4px;
-  border: 1px solid var(--sf-border);
+.globeBtn {
   background: transparent;
-  color: var(--sf-text-2);
-  font-size: 0.65rem;
-  font-family: inherit;
-  outline: none;
+  border: none;
   cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  outline: none;
+}
+.globeBtn:hover {
+  background: rgba(255,255,255,0.1);
+  transform: scale(1.05);
 }
 .footerLink {
   color: var(--sf-primary-light);
