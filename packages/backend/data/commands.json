@@ -3,12 +3,12 @@
     {
       "id": "1781100266856-dkvoiv",
       "name": "prueba",
-      "response": "Esto es una respuesta de prueba {name}",
+      "response": "Esto es una respuesta de prueba {user}",
       "enabled": true,
       "aliases": [],
       "cooldown": 0,
       "modOnly": false,
-      "count": 18
+      "count": 19
     },
     {
       "id": "1782131047763-zb0mxq",

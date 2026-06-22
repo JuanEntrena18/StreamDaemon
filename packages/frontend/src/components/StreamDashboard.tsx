@@ -8,7 +8,6 @@ import styles from './StreamDashboard.module.css';
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
 interface ActivityEvent {
@@ -65,7 +64,7 @@ function formatNumber(n: number): string {
   return String(n);
 }
 
-export function StreamDashboard({ channel, backendUrl }: Props) {
+export function StreamDashboard({ channel }: Props) {
   const { t, dateLocale } = useTranslation();
   const [previewLoading, setPreviewLoading] = useState(true);
   const [stats, setStats] = useState<HudStats | null>(null);
@@ -93,7 +92,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
     if (!channel) return;
     const fetchStats = async () => {
       try {
-        const r = await fetch(`${backendUrl}/hud/${channel}`);
+        const r = await apiGet(`/hud/${channel}`);
         if (r.ok) {
           const data = await r.json();
           setStats(data);
@@ -105,7 +104,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
     fetchStats();
     const interval = setInterval(fetchStats, 15000);
     return () => clearInterval(interval);
-  }, [channel, backendUrl]);
+  }, [channel]);
 
   useEffect(() => {
     if (!channel) return;
@@ -114,11 +113,11 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
 
   useEffect(() => {
     if (!channel) return;
-    fetch(`${backendUrl}/activity/${channel}`)
+    apiGet(`/activity/${channel}`)
       .then((r) => r.json())
       .then((data) => { if (Array.isArray(data)) setEvents(data); })
       .catch(() => {});
-  }, [channel, backendUrl]);
+  }, [channel]);
 
   const handleGameInput = (value: string) => {
     setGame(value);

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '../i18n/context';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
-import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
+import { apiGet, apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import { ConfirmModal } from './ConfirmModal';
 import { Toggle } from './Toggle';
 import { EmptyState } from './EmptyState';
@@ -10,7 +10,6 @@ import styles from './SubathonPanel.module.css';
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
 function formatTime(totalSeconds: number): string {
@@ -37,7 +36,7 @@ const ACTION_COLORS: Record<SubathonAction['type'], string> = {
   tip: '#ec4899',
 };
 
-export function SubathonPanel({ channel, backendUrl }: Props) {
+export function SubathonPanel({ channel }: Props) {
   const { t } = useTranslation();
   const [state, setState] = useState<SubathonState | null>(null);
   const [remaining, setRemaining] = useState(0);
@@ -102,11 +101,11 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
 
   useEffect(() => {
     if (!channel) return;
-    fetch(`${backendUrl}/subathon/${channel}`)
+    apiGet(`/subathon/${channel}`)
       .then((r) => r.json())
       .then((data) => { setState(data); setRemaining(data.remaining); })
       .catch(() => {});
-  }, [channel, backendUrl]);
+  }, [channel]);
 
   const start = () => apiPost('/subathon/start', {
     channel, initialTime: 3600,

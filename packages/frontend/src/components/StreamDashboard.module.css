@@ -194,3 +194,26 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ══════════════════════════════════════════
+   LIQUID GLASS — Light Mode Overrides
+   ══════════════════════════════════════════ */
+
+:global([data-theme="light"]) .eventItem {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+:global([data-theme="light"]) .previewWrap {
+  background: #e5e5ea;
+}
+
+:global([data-theme="light"]) .gameSearchResults {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+:global([data-theme="light"]) .gameSearchItem:hover {
+  background: rgba(0, 0, 0, 0.04);
+}

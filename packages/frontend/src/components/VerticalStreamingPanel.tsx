@@ -1,14 +1,9 @@
 import { useState } from 'react';
 import styles from './VerticalStreamingPanel.module.css';
 
-interface Props {
-  channel: string;
-  backendUrl?: string;
-}
-
 type Tab = 'guide' | 'requirements' | 'obs' | 'plugins';
 
-export function VerticalStreamingPanel({ }: Props) {
+export function VerticalStreamingPanel() {
   const [activeSection, setActiveSection] = useState<Tab>('guide');
 
   const sections: { id: Tab; label: string; icon: string }[] = [

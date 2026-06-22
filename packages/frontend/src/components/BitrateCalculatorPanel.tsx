@@ -2,10 +2,6 @@ import { useState, useMemo } from 'react';
 import { useTranslation } from '../i18n/context';
 import styles from './BitrateCalculatorPanel.module.css';
 
-interface Props {
-  channel: string;
-  backendUrl: string;
-}
 
 const PRESETS: Record<string, { w: number; h: number }> = {
   '1080p': { w: 1920, h: 1080 },
@@ -53,7 +49,7 @@ function btnStyle(active: boolean, color: string): React.CSSProperties {
   };
 }
 
-export function BitrateCalculatorPanel(_props: Props) {
+export function BitrateCalculatorPanel() {
   const { t } = useTranslation();
 
   const [uploadSpeed, setUploadSpeed] = useState('');

@@ -5,13 +5,13 @@ import { EmptyState } from './EmptyState';
 import { TrackerChart } from './TrackerChart';
 import { SkeletonCard, SkeletonChart } from './Skeletons';
 import { TrackerAdvice } from './TrackerAdvice';
+import { apiGet } from '../utils/api';
 import { StreamList } from './StreamList';
 import { formatDate, formatHours, formatDuration, formatNumber, estimateRevenue, type StreamDetail } from '../utils/trackerUtils';
 import styles from './TrackerPanel.module.css';
 
 interface Props {
   channel: string;
-  backendUrl?: string;
 }
 
 interface TrackerStats {
@@ -43,7 +43,7 @@ const CHART_COLORS: Record<string, string> = {
   duration: '#22d3ee',
 };
 
-export function TrackerPanel({ channel, backendUrl }: Props) {
+export function TrackerPanel({ channel }: Props) {
   const { t, dateLocale } = useTranslation();
   const PERIODS = [
     { id: '7d', label: t('tracker.period7d') },
@@ -59,7 +59,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
   const [error, setError] = useState('');
   const [expandedStream, setExpandedStream] = useState<string | null>(null);
   const [chartMetric, setChartMetric] = useState<'totalViews' | 'followersGained' | 'durationInSeconds'>('totalViews');
-  const baseUrl = backendUrl || 'http://localhost:3000';
+  const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
   useEffect(() => {
     if (!channel) return;
@@ -67,15 +67,15 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
     setError('');
     const params = new URLSearchParams({ period, channel });
     Promise.all([
-      fetch(`${baseUrl}/tracker/stats?${params}`).then((r) => {
+      apiGet(`/tracker/stats?${params}`).then((r) => {
         if (!r.ok) throw new Error('Error al obtener estadísticas');
         return r.json();
       }),
-      fetch(`${baseUrl}/tracker/streams?${params}`).then((r) => {
+      apiGet(`/tracker/streams?${params}`).then((r) => {
         if (!r.ok) throw new Error('Error al obtener streams');
         return r.json();
       }),
-      fetch(`${baseUrl}/tracker/advice?${params}`).then((r) => {
+      apiGet(`/tracker/advice?${params}`).then((r) => {
         if (!r.ok) throw new Error('Error al obtener consejos');
         return r.json();
       }),

@@ -8,7 +8,6 @@ import styles from './SecurityPanel.module.css';
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
 interface SecurityConfig {

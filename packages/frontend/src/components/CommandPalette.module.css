@@ -147,3 +147,32 @@
   border-color: rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.1);
 }
+
+/* ══════════════════════════════════════════
+   LIQUID GLASS — Light Mode Overrides
+   ══════════════════════════════════════════ */
+
+:global([data-theme="light"]) .backdrop {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px) saturate(1.5);
+}
+
+:global([data-theme="light"]) .palette {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 16px 48px rgba(0, 0, 0, 0.1),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.8);
+}
+
+:global([data-theme="light"]) .item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+:global([data-theme="light"]) .itemShortcut {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.06);
+}

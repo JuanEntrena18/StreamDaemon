@@ -139,3 +139,34 @@
   0%, 100% { opacity: 0.3; transform: scale(0.8); }
   50% { opacity: 1; transform: scale(1.2); }
 }
+
+/* ══════════════════════════════════════════
+   LIQUID GLASS — Light Mode Overrides
+   ══════════════════════════════════════════ */
+
+:global([data-theme="light"]) .bgGlow {
+  opacity: 0;
+}
+
+:global([data-theme="light"]) .divider {
+  background: linear-gradient(90deg, transparent, rgba(109, 40, 217, 0.2), transparent);
+}
+
+:global([data-theme="light"]) .ghLink {
+  background: rgba(109, 40, 217, 0.06);
+  border-color: rgba(109, 40, 217, 0.12);
+  color: #6d28d9;
+}
+
+:global([data-theme="light"]) .bmcLink {
+  background: rgba(255, 221, 0, 0.06);
+  border-color: rgba(255, 221, 0, 0.15);
+  color: #b45309;
+}
+
+:global([data-theme="light"]) .loadingLabelSuccess {
+  color: #059669;
+}
+:global([data-theme="light"]) .loadingDotSuccess {
+  background: #059669;
+}

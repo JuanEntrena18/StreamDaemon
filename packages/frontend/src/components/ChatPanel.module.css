@@ -262,3 +262,44 @@
   font-size: 0.72rem;
   line-height: 1;
 }
+
+/* ══════════════════════════════════════════
+   LIQUID GLASS — Light Mode Overrides
+   ══════════════════════════════════════════ */
+
+:global([data-theme="light"]) .msgBubble {
+  background: rgba(0, 0, 0, 0.02);
+}
+:global([data-theme="light"]) .msgBubble:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+:global([data-theme="light"]) .statusWarning {
+  background: rgba(245, 158, 11, 0.06);
+  border-color: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+:global([data-theme="light"]) .statusError {
+  background: rgba(220, 38, 38, 0.06);
+  border-color: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+
+:global([data-theme="light"]) .pillBtn--active {
+  background: rgba(109, 40, 217, 0.08);
+  color: #6d28d9;
+  border-color: rgba(109, 40, 217, 0.25);
+}
+
+:global([data-theme="light"]) .msgMenu {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px) saturate(1.8);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+:global([data-theme="light"]) .cyanChatBox {
+  background: rgba(0, 217, 255, 0.04);
+  border-color: rgba(0, 217, 255, 0.1);
+}

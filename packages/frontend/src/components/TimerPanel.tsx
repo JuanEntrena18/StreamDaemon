@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
-import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
+import { apiGet, apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import type { TimerState } from '@streamforger/shared';
 import styles from './TimerPanel.module.css';
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
 function formatTime(totalSeconds: number): string {
@@ -28,7 +27,7 @@ const DURATION_PRESETS = [
   { label: '1h', value: 3600 },
 ];
 
-export function TimerPanel({ channel, backendUrl }: Props) {
+export function TimerPanel({ channel }: Props) {
   const { t } = useTranslation();
   const [timer, setTimer] = useState<TimerState>({ status: 'stopped', remaining: 0, duration: 0, label: '' });
   const [remaining, setRemaining] = useState(0);
@@ -55,11 +54,11 @@ export function TimerPanel({ channel, backendUrl }: Props) {
 
   useEffect(() => {
     if (!channel) return;
-    fetch(`${backendUrl}/timer/${channel}`)
+    apiGet(`/timer/${channel}`)
       .then((r) => r.json())
       .then((data) => { setTimer(data); setRemaining(data.remaining); })
       .catch(() => {});
-  }, [channel, backendUrl]);
+  }, [channel]);
 
   const start = () => {
     const dur = customMinutes ? parseInt(customMinutes) * 60 : duration;

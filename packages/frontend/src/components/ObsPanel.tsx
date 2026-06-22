@@ -8,7 +8,6 @@ import styles from './ObsPanel.module.css';
 
 interface Props {
   channel: string;
-  backendUrl?: string;
 }
 
 interface SocialLink {
@@ -60,7 +59,7 @@ const END_SCREEN_SOCIALS_INIT: EndScreenSocial[] = [
   { platform: 'tiktok',    label: 'TikTok',     icon: '🎵', color: '#ff0050', username: '', visible: true },
 ];
 
-export function ObsPanel({ channel, backendUrl }: Props) {
+export function ObsPanel({ channel }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
 
@@ -72,7 +71,7 @@ export function ObsPanel({ channel, backendUrl }: Props) {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(DEFAULT_SOCIAL_LINKS);
   const [endScreenSocials, setEndScreenSocials] = useState<EndScreenSocial[]>(END_SCREEN_SOCIALS_INIT);
   const [endSocialExpanded, setEndSocialExpanded] = useState<string | null>(null);
-  const overlayBaseUrl = import.meta.env.DEV ? 'http://localhost:5173' : (backendUrl || 'http://localhost:3000');
+  const overlayBaseUrl = import.meta.env.DEV ? 'http://localhost:5173' : (import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000');
 
   const [customGame, setCustomGame] = useState('');
 
@@ -150,8 +149,8 @@ export function ObsPanel({ channel, backendUrl }: Props) {
       let url = `${overlayBaseUrl}/overlays/${standalone}`;
       if (channel) url += `?channel=${channel}`;
       if (item.mode === 'fortnite' && fnEpicUsername) url += `&epic=${encodeURIComponent(fnEpicUsername)}&mode=${fnStatsMode}&layout=${fnLayout}`;
-      const be = backendUrl || 'http://localhost:3000';
-      if (be !== location.origin) url += `${channel ? '&' : '?'}backend=${encodeURIComponent(be)}`;
+      const be = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+      url += `${channel ? '&' : '?'}backend=${encodeURIComponent(be)}`;
       if (item.mode.endsWith('-end')) {
         const active = endScreenSocials.filter((s) => s.visible && s.username.trim());
         if (active.length > 0) {

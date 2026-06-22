@@ -91,3 +91,48 @@
   background: rgba(255, 255, 255, 0.1);
   width: 100%;
 }
+
+/* ══════════════════════════════════════════
+   LIQUID GLASS — Light Mode Overrides
+   ══════════════════════════════════════════ */
+
+:global([data-theme="light"]) .skeletonCard {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px) saturate(1.5);
+}
+:global([data-theme="light"]) .skeletonCard::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.025) 50%,
+    transparent 100%
+  );
+}
+
+:global([data-theme="light"]) .skeletonText {
+  background: rgba(0, 0, 0, 0.04);
+}
+:global([data-theme="light"]) .skeletonText::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.03) 50%,
+    transparent 100%
+  );
+}
+
+:global([data-theme="light"]) .skeletonChartBar {
+  background: rgba(0, 0, 0, 0.04);
+}
+:global([data-theme="light"]) .skeletonChartBar::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.04) 50%,
+    transparent 100%
+  );
+}
+
+:global([data-theme="light"]) .skeletonChartAxis {
+  background: rgba(0, 0, 0, 0.06);
+}

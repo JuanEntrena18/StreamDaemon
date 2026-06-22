@@ -429,3 +429,46 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ══════════════════════════════════════════
+   LIQUID GLASS — Light Mode Overrides
+   ══════════════════════════════════════════ */
+
+:global([data-theme="light"]) .errorBox {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.2);
+  color: #dc2626;
+}
+
+:global([data-theme="light"]) .noDataBox {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.15);
+}
+
+:global([data-theme="light"]) .revenueBox {
+  background: rgba(5, 150, 105, 0.08);
+  border-color: rgba(5, 150, 105, 0.15);
+}
+:global([data-theme="light"]) .revenueValue,
+:global([data-theme="light"]) .detailRevenueValue {
+  color: #059669;
+}
+
+:global([data-theme="light"]) .iaBadge {
+  background: rgba(5, 150, 105, 0.12);
+  color: #059669;
+}
+
+:global([data-theme="light"]) .streamIconBox {
+  background: rgba(109, 40, 217, 0.08);
+}
+
+:global([data-theme="light"]) .expandedDetails {
+  background: rgba(109, 40, 217, 0.02);
+  border-color: rgba(109, 40, 217, 0.3);
+}
+
+:global([data-theme="light"]) .highlightedCard {
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.08), rgba(99, 102, 241, 0.04));
+  border-color: rgba(109, 40, 217, 0.2);
+}

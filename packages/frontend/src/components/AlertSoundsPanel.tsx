@@ -4,7 +4,6 @@ import styles from './AlertSoundsPanel.module.css';
 
 interface Props {
   channel: string;
-  backendUrl?: string;
 }
 
 interface SoundConfig {

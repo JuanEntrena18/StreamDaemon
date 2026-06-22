@@ -1,13 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
+import { apiGet, apiPost } from '../utils/api';
 import type { HudData, HudConfig } from '@streamforger/shared';
 
 interface Props {
   channel: string;
 }
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 
 export function HudOverlay({ channel }: Props) {
   const { t } = useTranslation();
@@ -30,17 +29,13 @@ export function HudOverlay({ channel }: Props) {
 
   useEffect(() => {
     if (!channel || !connected) return;
-    fetch(`${BACKEND_URL}/hud/${channel}`)
+    apiGet(`/hud/${channel}`)
       .then((r) => r.json())
       .then((data) => { if (data && data.viewers !== undefined) setHud(data); })
       .catch(() => {});
-    fetch(`${BACKEND_URL}/hud/start-poll`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ channel, interval: 15 }),
-    }).catch(() => {});
+    apiPost('/hud/start-poll', { channel, interval: 15 }).catch(() => {});
     return () => {
-      fetch(`${BACKEND_URL}/hud/stop-poll`, { method: 'POST' }).catch(() => {});
+      apiPost('/hud/stop-poll', {}).catch(() => {});
     };
   }, [channel, connected]);
 

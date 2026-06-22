@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
+import { apiGet } from '../utils/api';
 import styles from './StreamActivityFeed.module.css';
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
 interface ActivityEvent {
@@ -17,7 +17,7 @@ interface ActivityEvent {
   amount?: number;
 }
 
-export function StreamActivityFeed({ channel, backendUrl }: Props) {
+export function StreamActivityFeed({ channel }: Props) {
   const { t, dateLocale } = useTranslation();
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [filter, setFilter] = useState<string>('all');
@@ -28,11 +28,11 @@ export function StreamActivityFeed({ channel, backendUrl }: Props) {
 
   useEffect(() => {
     if (!channel) return;
-    fetch(`${backendUrl}/activity/${channel}`)
+    apiGet(`/activity/${channel}`)
       .then((r) => r.json())
       .then((data) => { if (Array.isArray(data)) setEvents(data); })
       .catch(() => {});
-  }, [channel, backendUrl]);
+  }, [channel]);
 
   const filtered = filter === 'all' ? events : events.filter((e) => e.type === filter);
 

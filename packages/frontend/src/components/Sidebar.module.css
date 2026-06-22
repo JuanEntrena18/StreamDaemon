@@ -286,3 +286,75 @@
   color: var(--sf-primary-light);
   text-decoration: none;
 }
+
+/* ══════════════════════════════════════════
+   LIQUID GLASS — Light Mode Overrides
+   ══════════════════════════════════════════ */
+
+:global([data-theme="light"]) .sidebar {
+  background: rgba(245, 245, 247, 0.72);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border-right-color: rgba(0, 0, 0, 0.06);
+}
+
+:global([data-theme="light"]) .drawer {
+  background: rgba(245, 245, 247, 0.88);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border-right-color: rgba(0, 0, 0, 0.06);
+}
+
+:global([data-theme="light"]) .backdrop {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(6px) saturate(1.5);
+}
+
+:global([data-theme="light"]) .brandSectionExpanded {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+:global([data-theme="light"]) .navBtn {
+  color: #6e6e73;
+}
+:global([data-theme="light"]) .navBtn:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1d1d1f;
+}
+:global([data-theme="light"]) .navBtnActive {
+  background: rgba(109, 40, 217, 0.08);
+  color: #6d28d9;
+  box-shadow: none;
+}
+
+:global([data-theme="light"]) .navShortcut {
+  background: rgba(0, 0, 0, 0.04);
+  color: #aeaeb2;
+}
+
+:global([data-theme="light"]) .activeIndicator {
+  background: #6d28d9;
+  box-shadow: none;
+}
+
+:global([data-theme="light"]) .navBadgeExpanded,
+:global([data-theme="light"]) .navBadgeCollapsed {
+  background: #dc2626;
+}
+
+:global([data-theme="light"]) .overlaySection {
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+:global([data-theme="light"]) .footer {
+  border-top-color: rgba(0, 0, 0, 0.06);
+  color: #aeaeb2;
+}
+
+:global([data-theme="light"]) .globeBtn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+:global([data-theme="light"]) .footerLink {
+  color: #6d28d9;
+}

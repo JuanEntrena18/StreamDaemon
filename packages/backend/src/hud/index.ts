@@ -145,22 +145,8 @@ export function setupHud(app: FastifyInstance) {
 
       // Fetch all available stream tags from the Twitch API directly
       let allTags: Array<{ id: string; name: string; isAuto: boolean }> = [];
-      try {
-        const tagsRes = await api.callApi<{
-          data: Array<{ tag_id: string; is_auto: boolean; localization_names: Record<string, string> }>
-        }>({
-          type: 'helix',
-          url: '/tags/streams',
-          query: { first: '100' },
-        });
-        allTags = (tagsRes?.data ?? []).map((t) => ({
-          id: t.tag_id,
-          name: t.localization_names?.['en-us'] ?? t.localization_names?.[Object.keys(t.localization_names ?? {})[0]] ?? t.tag_id,
-          isAuto: t.is_auto,
-        }));
-      } catch (e) {
-        console.warn('Failed to fetch stream tags:', e instanceof Error ? `${e.message} (${e.stack?.split('\n')[1]?.trim() ?? ''})` : e);
-      }
+      // NOTE: The /tags/streams Twitch API is deprecated and returns 410 Gone.
+      // Twitch now uses freeform string tags instead of a predefined dictionary.
 
       // Fallback: if the allTags list is empty but the channel has active tags,
       // create basic entries from the active tag IDs

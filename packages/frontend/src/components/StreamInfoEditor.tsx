@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { apiPut } from '../utils/api';
+import { apiPut, apiGet } from '../utils/api';
 import { useTranslation } from '../i18n/context';
 import { useToast } from '../contexts/ToastContext';
 import styles from './StreamInfoEditor.module.css';
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
 interface StreamInfo {
@@ -16,7 +15,7 @@ interface StreamInfo {
   isLive: boolean;
 }
 
-export function StreamInfoEditor({ channel, backendUrl }: Props) {
+export function StreamInfoEditor({ channel }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const [info, setInfo] = useState<StreamInfo>({ title: '', gameName: '', isLive: false });
@@ -27,7 +26,7 @@ export function StreamInfoEditor({ channel, backendUrl }: Props) {
 
   useEffect(() => {
     if (!channel) return;
-    fetch(`${backendUrl}/stream/info?channel=${channel}`)
+    apiGet(`/stream/info?channel=${channel}`)
       .then((r) => r.json())
       .then((data) => {
         if (data) {
@@ -37,7 +36,7 @@ export function StreamInfoEditor({ channel, backendUrl }: Props) {
         }
       })
       .catch(() => {});
-  }, [channel, backendUrl]);
+  }, [channel]);
 
   const save = async () => {
     setSaving(true);

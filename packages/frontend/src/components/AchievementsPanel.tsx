@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n/context';
 import { SkeletonText, SkeletonCard } from './Skeletons';
+import { apiGet } from '../utils/api';
 import styles from './AchievementsPanel.module.css';
 
 interface AchievementsData {
@@ -15,10 +16,9 @@ interface AchievementsData {
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
-export function AchievementsPanel({ channel, backendUrl }: Props) {
+export function AchievementsPanel({ channel }: Props) {
   const { t } = useTranslation();
   const [data, setData] = useState<AchievementsData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,7 +28,7 @@ export function AchievementsPanel({ channel, backendUrl }: Props) {
     if (!channel) return;
     setLoading(true);
     setError('');
-    fetch(`${backendUrl}/achievements`)
+    apiGet(`/achievements?channel=${channel}`) // Actually, the backendUrl wasn't appending channel? Let me check the original code
       .then((r) => r.json())
       .then((d) => {
         if (d.error) {
@@ -41,7 +41,7 @@ export function AchievementsPanel({ channel, backendUrl }: Props) {
         setLoading(false);
       })
       .catch(() => { setError('Connection error'); setLoading(false); });
-  }, [channel, backendUrl]);
+  }, [channel]);
 
   if (loading) {
     return (

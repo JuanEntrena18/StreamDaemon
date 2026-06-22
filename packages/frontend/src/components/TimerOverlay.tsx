@@ -1,14 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
+import { apiGet } from '../utils/api';
 import type { TimerState } from '@streamforger/shared';
 import styles from './TimerOverlay.module.css';
 
 interface Props {
   channel: string;
 }
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 
 function formatTime(totalSeconds: number): string {
   const h = Math.floor(totalSeconds / 3600);
@@ -41,7 +40,7 @@ export function TimerOverlay({ channel }: Props) {
 
   useEffect(() => {
     if (!channel || !connected) return;
-    fetch(`${BACKEND_URL}/timer/${channel}`)
+    apiGet(`/timer/${channel}`)
       .then((r) => r.json())
       .then((data) => { setTimer(data); setRemaining(data.remaining); })
       .catch(() => {});

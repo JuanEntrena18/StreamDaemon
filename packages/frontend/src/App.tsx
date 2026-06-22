@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSocket, useSocketEvent } from './hooks/useSocket';
 import { useAuthStatus } from './hooks/useAuthStatus';
 import { useTranslation } from './i18n/context';
+import { apiGet } from './utils/api';
 import { Sidebar } from './components/Sidebar';
 import type { Tab, NavSection } from './components/Sidebar';
 import { TopBar } from './components/TopBar';
@@ -14,11 +15,9 @@ import { ToastProvider } from './contexts/ToastContext';
 import { ChatProvider } from './contexts/ChatContext';
 import { TtsManager } from './components/TtsManager';
 import styles from './App.module.css';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-const APP_VERSION = '0.3.0';
+const APP_VERSION = '0.3.5';
 
 // Clear stale localStorage keys when version changes
 try {
@@ -109,7 +108,7 @@ export function App() {
 
   useEffect(() => {
     if (!channel) return;
-    fetch(`${BACKEND_URL}/giveaways/${channel}/active`)
+    apiGet(`/giveaways/${channel}/active`)
       .then((r) => r.json())
       .then((data) => { if (data && data.id) setGiveawayParticipants(data.entries || 0); })
       .catch(() => {});
@@ -298,7 +297,6 @@ export function App() {
               activeTab={activeTab}
               tabDirection={tabDirection}
               channel={channel}
-              backendUrl={BACKEND_URL}
               alwaysOnTop={alwaysOnTop}
               toggleAlwaysOnTop={toggleAlwaysOnTop}
             />

@@ -1,16 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
-import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
+import { apiGet, apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import { useTranslation } from '../i18n/context';
 import type { HudData } from '@streamforger/shared';
 import styles from './HudPanel.module.css';
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
-export function HudPanel({ channel, backendUrl }: Props) {
+export function HudPanel({ channel }: Props) {
   const { t } = useTranslation();
   const [hud, setHud] = useState<HudData | null>(null);
   const [polling, setPolling] = useState(false);
@@ -28,11 +27,11 @@ export function HudPanel({ channel, backendUrl }: Props) {
 
   useEffect(() => {
     if (!channel) return;
-    fetch(`${backendUrl}/hud/${channel}`)
+    apiGet(`/hud/${channel}`)
       .then((r) => r.json())
       .then((data) => { if (data && data.viewers !== undefined) setHud(data); })
       .catch(() => {});
-  }, [channel, backendUrl]);
+  }, [channel]);
 
   const togglePolling = async () => {
     try {
@@ -48,7 +47,7 @@ export function HudPanel({ channel, backendUrl }: Props) {
 
   const refresh = async () => {
     try {
-      const r = await fetch(`${backendUrl}/hud/${channel}`);
+      const r = await apiGet(`/hud/${channel}`);
       const data = await r.json();
       if (data && data.viewers !== undefined) setHud(data);
     } catch {}

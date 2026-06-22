@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n/context';
-import { apiPost } from '../utils/api';
+import { apiPost, apiGet } from '../utils/api';
 import { ConfirmModal } from './ConfirmModal';
 import styles from './ModPanel.module.css';
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
 type ModAction = 'timeout' | 'ban' | 'unban';
 
-export function ModPanel({ channel, backendUrl }: Props) {
+export function ModPanel({ channel }: Props) {
   const { t } = useTranslation();
   const [userName, setUserName] = useState('');
   const [duration, setDuration] = useState(300);
@@ -29,7 +28,7 @@ export function ModPanel({ channel, backendUrl }: Props) {
       setChattersLoading(true);
       setChattersError('');
       try {
-        const r = await fetch(`${backendUrl}/mod/chatters/${encodeURIComponent(channel)}`);
+        const r = await apiGet(`/mod/chatters/${encodeURIComponent(channel)}`);
         if (!r.ok) {
           const d = await r.json();
           setChattersError(d.error || t('mod.errorUsuarios'));

@@ -8,7 +8,6 @@ import styles from './PredictionPanel.module.css';
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
 export function PredictionPanel({ channel }: Props) {

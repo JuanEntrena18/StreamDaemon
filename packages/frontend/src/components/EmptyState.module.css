@@ -55,3 +55,21 @@
 .actionBtn:active {
   transform: translateY(0);
 }
+
+/* ══════════════════════════════════════════
+   LIQUID GLASS — Light Mode Overrides
+   ══════════════════════════════════════════ */
+
+:global([data-theme="light"]) .container {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+:global([data-theme="light"]) .icon {
+  filter: none;
+}
+:global([data-theme="light"]) .actionBtn {
+  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.15);
+}
+:global([data-theme="light"]) .actionBtn:hover {
+  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.2);
+}

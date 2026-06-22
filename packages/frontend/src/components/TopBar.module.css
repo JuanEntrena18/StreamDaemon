@@ -154,3 +154,36 @@
   box-shadow: 0 2px 12px rgba(145,71,255,0.35);
   white-space: nowrap;
 }
+
+/* ══════════════════════════════════════════
+   LIQUID GLASS — Light Mode Overrides
+   ══════════════════════════════════════════ */
+
+:global([data-theme="light"]) .titlebar {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+:global([data-theme="light"]) .titlebarTitle {
+  color: #aeaeb2;
+}
+:global([data-theme="light"]) .winBtn {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+:global([data-theme="light"]) .header {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+:global([data-theme="light"]) .userBadge {
+  background: rgba(109, 40, 217, 0.06);
+  border-color: rgba(109, 40, 217, 0.12);
+}
+
+:global([data-theme="light"]) .connectBtn {
+  box-shadow: 0 1px 4px rgba(145, 71, 255, 0.2);
+}

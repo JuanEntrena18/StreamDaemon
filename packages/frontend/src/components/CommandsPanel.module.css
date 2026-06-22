@@ -238,3 +238,42 @@
   font-size: 0.78rem;
   color: #f87171;
 }
+
+/* ══════════════════════════════════════════
+   LIQUID GLASS — Light Mode Overrides
+   ══════════════════════════════════════════ */
+
+:global([data-theme="light"]) .varPicker {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border-color: rgba(109, 40, 217, 0.2);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+:global([data-theme="light"]) .varPickerHeader {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+:global([data-theme="light"]) .varName,
+:global([data-theme="light"]) .varGridName {
+  color: #6d28d9;
+}
+:global([data-theme="light"]) .exampleCmd {
+  color: #6d28d9;
+}
+:global([data-theme="light"]) .exampleRow,
+:global([data-theme="light"]) .commandRow {
+  background: rgba(0, 0, 0, 0.02);
+}
+:global([data-theme="light"]) .cooldownInput {
+  background: rgba(120, 120, 128, 0.08);
+  border-color: transparent;
+}
+:global([data-theme="light"]) .ghostBtnDanger {
+  color: #dc2626;
+}
+:global([data-theme="light"]) .resultMsgSuccess {
+  color: #059669;
+}
+:global([data-theme="light"]) .resultMsgError,
+:global([data-theme="light"]) .errorText {
+  color: #dc2626;
+}

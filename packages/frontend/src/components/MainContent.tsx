@@ -27,31 +27,30 @@ interface Props {
   activeTab: Tab;
   tabDirection: number;
   channel: string;
-  backendUrl: string;
   alwaysOnTop: boolean;
   toggleAlwaysOnTop: () => void;
 }
 
-export function MainContent({ activeTab, tabDirection, channel, backendUrl, alwaysOnTop, toggleAlwaysOnTop }: Props) {
+export function MainContent({ activeTab, tabDirection, channel, alwaysOnTop, toggleAlwaysOnTop }: Props) {
   const panel = (() => {
     switch (activeTab) {
-      case 'dashboard': return <StreamDashboard channel={channel} backendUrl={backendUrl} />;
-      case 'tracker':   return <TrackerPanel channel={channel} backendUrl={backendUrl} />;
-      case 'security':  return <SecurityPanel channel={channel} backendUrl={backendUrl} />;
+      case 'dashboard': return <StreamDashboard channel={channel} />;
+      case 'tracker':   return <TrackerPanel channel={channel} />;
+      case 'security':  return <SecurityPanel channel={channel} />;
       case 'chat':      return <ChatPanel channel={channel} />;
-      case 'mod':       return <ModPanel channel={channel} backendUrl={backendUrl} />;
-      case 'commands':  return <CommandsPanel channel={channel} backendUrl={backendUrl} />;
-      case 'subathon':  return <SubathonPanel channel={channel} backendUrl={backendUrl} />;
-      case 'giveaway':  return <GiveawayPanel channel={channel} backendUrl={backendUrl} />;
-      case 'prediction': return <PredictionPanel channel={channel} backendUrl={backendUrl} />;
-      case 'hud':       return <HudPanel channel={channel} backendUrl={backendUrl} />;
-      case 'timer':     return <TimerPanel channel={channel} backendUrl={backendUrl} />;
-      case 'scoreboard': return <ScoreboardPanel channel={channel} backendUrl={backendUrl} />;
-      case 'obs':       return <ObsPanel channel={channel} backendUrl={backendUrl} />;
-      case 'bitrate':   return <BitrateCalculatorPanel channel={channel} backendUrl={backendUrl} />;
-      case 'vertical':  return <VerticalStreamingPanel channel={channel} backendUrl={backendUrl} />;
-      case 'alertsounds': return <AlertSoundsPanel channel={channel} backendUrl={backendUrl} />;
-      case 'achievements': return <AchievementsPanel channel={channel} backendUrl={backendUrl} />;
+      case 'mod':       return <ModPanel channel={channel} />;
+      case 'commands':  return <CommandsPanel channel={channel} />;
+      case 'subathon':  return <SubathonPanel channel={channel} />;
+      case 'giveaway':  return <GiveawayPanel channel={channel} />;
+      case 'prediction': return <PredictionPanel channel={channel} />;
+      case 'hud':       return <HudPanel channel={channel} />;
+      case 'timer':     return <TimerPanel channel={channel} />;
+      case 'scoreboard': return <ScoreboardPanel channel={channel} />;
+      case 'obs':       return <ObsPanel channel={channel} />;
+      case 'bitrate':   return <BitrateCalculatorPanel />;
+      case 'vertical':  return <VerticalStreamingPanel />;
+      case 'alertsounds': return <AlertSoundsPanel channel={channel} />;
+      case 'achievements': return <AchievementsPanel channel={channel} />;
       case 'config':    return <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />;
       default:          return null;
     }

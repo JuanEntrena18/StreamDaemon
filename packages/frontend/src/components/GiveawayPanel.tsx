@@ -5,11 +5,11 @@ import { useTranslation } from '../i18n/context';
 import { useToast } from '../contexts/ToastContext';
 import { ConfirmModal } from './ConfirmModal';
 import { SpinWheel, type SpinWheelHandle } from './SpinWheel';
+import { apiGet, apiPost } from '../utils/api';
 import styles from './GiveawayPanel.module.css';
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
 interface ActiveGiveaway {
@@ -26,7 +26,7 @@ interface ActiveGiveaway {
 
 
 
-export function GiveawayPanel({ channel, backendUrl }: Props) {
+export function GiveawayPanel({ channel }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const [prize, setPrize] = useState('');
@@ -74,11 +74,11 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
 
   useEffect(() => {
     if (!channel) return;
-    fetch(`${backendUrl}/giveaways/${channel}/active`)
+    apiGet(`/giveaways/${channel}/active`)
       .then((r) => r.json())
       .then((data) => { if (data && data.id) setActive(data); })
       .catch(() => {});
-  }, [channel, backendUrl]);
+  }, [channel]);
 
 
 
@@ -86,16 +86,12 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
 
   const startGiveaway = async () => {
     if (!prize.trim() || !channel) return;
-    const res = await fetch(`${backendUrl}/giveaways/start`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        channel,
-        prize: prize.trim(),
-        duration,
-        ticketCost: ticketCost || 0,
-        ticketRewardTitle: ticketRewardTitle || '',
-      }),
+    const res = await apiPost('/giveaways/start', {
+      channel,
+      prize: prize.trim(),
+      duration,
+      ticketCost: ticketCost || 0,
+      ticketRewardTitle: ticketRewardTitle || '',
     });
     if (res.ok) {
       setPrize('');
@@ -107,11 +103,7 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
 
   const endGiveaway = async () => {
     if (!active) return;
-    await fetch(`${backendUrl}/giveaways/end`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ channel, id: active.id }),
-    });
+    await apiPost('/giveaways/end', { channel, id: active.id });
     if (active.participants && active.participants.length >= 2) {
       wheelRef.current?.autoSpin([...active.participants]);
     }

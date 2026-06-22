@@ -1,14 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { apiGet } from '../utils/api';
 import type { FighterState } from '@streamforger/shared';
 import styles from './ScoreboardOverlay.module.css';
 
 interface Props {
   channel: string;
 }
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 
 function defaultFighter(): FighterState {
   return {
@@ -121,7 +120,7 @@ export function ScoreboardOverlay({ channel }: Props) {
 
   useEffect(() => {
     if (!channel) return;
-    fetch(`${BACKEND_URL}/fighter/${channel}`)
+    apiGet(`/fighter/${channel}`)
       .then((r) => r.json())
       .then((data) => { if (data) setFighter(data); })
       .catch((err) => console.warn('Fighter fetch failed:', err));

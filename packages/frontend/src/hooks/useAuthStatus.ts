@@ -58,6 +58,15 @@ export function useAuthStatus() {
     }
   }, [refresh, status.authenticated]);
 
+  useEffect(() => {
+    const handleExpired = () => {
+      setStatus({ authenticated: false, user: null });
+      setDeviceState({ status: 'idle' });
+    };
+    window.addEventListener('auth:expired', handleExpired);
+    return () => window.removeEventListener('auth:expired', handleExpired);
+  }, []);
+
   useSocketEvent('auth:changed', refresh);
 
   const startDeviceLogin = useCallback(async () => {

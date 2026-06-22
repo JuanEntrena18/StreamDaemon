@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from '../i18n/context';
-import { apiPost, apiPut } from '../utils/api';
+import { apiGet, apiPost, apiPut } from '../utils/api';
 import { useSocket } from '../hooks/useSocket';
 import { ConfirmModal } from './ConfirmModal';
 import { EmptyState } from './EmptyState';
@@ -8,7 +8,6 @@ import styles from './CommandsPanel.module.css';
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
 interface Command {
@@ -68,7 +67,7 @@ function VarPicker({ onSelect, onClose }: { onSelect: (v: string) => void; onClo
   );
 }
 
-export function CommandsPanel({ channel, backendUrl }: Props) {
+export function CommandsPanel({ channel }: Props) {
   const { t } = useTranslation();
   const [commands, setCommands] = useState<Command[]>([]);
   const [editing, setEditing] = useState<Command | null>(null);
@@ -92,11 +91,11 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
 
   useEffect(() => {
     if (!channel) return;
-    fetch(`${backendUrl}/commands/${channel}`)
+    apiGet(`/commands/${channel}`)
       .then((r) => r.json())
       .then((data) => { if (Array.isArray(data)) setCommands(data); })
       .catch(() => {});
-  }, [channel, backendUrl]);
+  }, [channel]);
 
   const addCommand = async () => {
     if (!newName.trim() || !newResponse.trim()) return;
@@ -169,7 +168,7 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
       if (r.ok) {
         const result = await r.json();
         setImportResult(`✅ ${result.imported} importados, ${result.skipped} omitidos`);
-        const r2 = await fetch(`${backendUrl}/commands/${channel}`);
+        const r2 = await apiGet(`/commands/${channel}`);
         const updated = await r2.json();
         if (Array.isArray(updated)) setCommands(updated);
       } else {

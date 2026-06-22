@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
-import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
+import { apiPost, apiGet, OVERLAY_BASE_URL } from '../utils/api';
 import { useTranslation } from '../i18n/context';
 import type { FighterState } from '@streamforger/shared';
 import styles from './ScoreboardPanel.module.css';
 
 interface Props {
   channel: string;
-  backendUrl: string;
 }
 
 function presetDamage(fighter: FighterState | null, key: string) {
@@ -22,7 +21,7 @@ function presetDamage(fighter: FighterState | null, key: string) {
   return presets[key] || presets.medium;
 }
 
-export function ScoreboardPanel({ channel, backendUrl }: Props) {
+export function ScoreboardPanel({ channel }: Props) {
   const { t } = useTranslation();
   const [fighter, setFighter] = useState<FighterState | null>(null);
   const { socket, connected } = useSocket();
@@ -42,7 +41,7 @@ export function ScoreboardPanel({ channel, backendUrl }: Props) {
 
   useEffect(() => {
     if (!channel) return;
-    fetch(`${backendUrl}/fighter/${channel}`)
+    apiGet(`/fighter/${channel}`)
       .then((r) => r.json())
       .then((data) => {
         if (data) {
@@ -55,7 +54,7 @@ export function ScoreboardPanel({ channel, backendUrl }: Props) {
         }
       })
       .catch(() => {});
-  }, [channel, backendUrl]);
+  }, [channel]);
 
   const saveConfig = () => {
     apiPost('/fighter/config', { channel, ...config });
