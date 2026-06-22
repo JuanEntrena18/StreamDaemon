@@ -1,30 +1,11 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
 import { useSocket, useSocketEvent } from './hooks/useSocket';
 import { useAuthStatus } from './hooks/useAuthStatus';
 import { useTranslation } from './i18n/context';
 import { Sidebar } from './components/Sidebar';
 import type { Tab, NavSection } from './components/Sidebar';
-import { ChatPanel } from './components/ChatPanel';
-import { TabSkeleton } from './components/TabSkeleton';
-
-const GiveawayPanel = lazy(() => import('./components/GiveawayPanel').then(m => ({ default: m.GiveawayPanel })));
-const PredictionPanel = lazy(() => import('./components/PredictionPanel').then(m => ({ default: m.PredictionPanel })));
-const ObsPanel = lazy(() => import('./components/ObsPanel').then(m => ({ default: m.ObsPanel })));
-const ConfigPanel = lazy(() => import('./components/ConfigPanel').then(m => ({ default: m.ConfigPanel })));
-const TrackerPanel = lazy(() => import('./components/TrackerPanel').then(m => ({ default: m.TrackerPanel })));
-const HudPanel = lazy(() => import('./components/HudPanel').then(m => ({ default: m.HudPanel })));
-const TimerPanel = lazy(() => import('./components/TimerPanel').then(m => ({ default: m.TimerPanel })));
-const ScoreboardPanel = lazy(() => import('./components/ScoreboardPanel').then(m => ({ default: m.ScoreboardPanel })));
-const StreamDashboard = lazy(() => import('./components/StreamDashboard').then(m => ({ default: m.StreamDashboard })));
-const ModPanel = lazy(() => import('./components/ModPanel').then(m => ({ default: m.ModPanel })));
-const CommandsPanel = lazy(() => import('./components/CommandsPanel').then(m => ({ default: m.CommandsPanel })));
-const SubathonPanel = lazy(() => import('./components/SubathonPanel').then(m => ({ default: m.SubathonPanel })));
-const SecurityPanel = lazy(() => import('./components/SecurityPanel').then(m => ({ default: m.SecurityPanel })));
-const BitrateCalculatorPanel = lazy(() => import('./components/BitrateCalculatorPanel').then(m => ({ default: m.BitrateCalculatorPanel })));
-const VerticalStreamingPanel = lazy(() => import('./components/VerticalStreamingPanel').then(m => ({ default: m.VerticalStreamingPanel })));
-const AlertSoundsPanel = lazy(() => import('./components/AlertSoundsPanel').then(m => ({ default: m.AlertSoundsPanel })));
-const AchievementsPanel = lazy(() => import('./components/AchievementsPanel').then(m => ({ default: m.AchievementsPanel })));
+import { TopBar } from './components/TopBar';
+import { MainContent } from './components/MainContent';
 import { SplashScreen } from './components/SplashScreen';
 import { SetupWizard, isSetupComplete } from './components/SetupWizard';
 import { CommandPalette } from './components/CommandPalette';
@@ -278,31 +259,22 @@ export function App() {
           `,
         }} />
 
-        {/* ── Full-width top bar ── */}
-        <div className={styles.titlebar} {...{ style: { WebkitAppRegion: 'drag' } as React.CSSProperties }}>
-          <span className={styles.titlebarTitle}>StreamForger</span>
+        <TopBar
+          isDesktop={isDesktop}
+          isMobile={isMobile}
+          onMobileToggle={() => setMobileOpen(true)}
+          channel={channel}
+          onChannelChange={setChannel}
+          authLoading={authLoading}
+          authenticated={authenticated}
+          user={user}
+          connected={connected}
+          activeTab={activeTab}
+          onNavigateConfig={() => setActiveTab('config')}
+          t={t}
+        />
 
-          {isDesktop && (
-            <div className={styles.titlebarActions} {...{ style: { WebkitAppRegion: 'no-drag' } as React.CSSProperties }}>
-              <button
-                onClick={() => window.streamforger?.window.minimize()}
-                title={t('app.minimizar')}
-                className={styles.winBtn}
-                style={{ background: '#f59e0b' }}
-              >-</button>
-              <button
-                onClick={() => window.streamforger?.window.close()}
-                title={t('app.cerrar')}
-                className={styles.winBtn}
-                style={{ background: '#ef4444' }}
-              >x</button>
-            </div>
-          )}
-        </div>
-
-        {/* ── Body row ── */}
         <div className={styles.bodyRow}>
-
           <Sidebar
             collapsed={sidebarCollapsed && !isMobile}
             onToggleCollapse={toggleSidebarCollapse}
@@ -319,119 +291,15 @@ export function App() {
             badges={badges}
           />
 
-          {/* ── Main ── */}
           <main className={styles.main}>
-
-            {/* Top bar */}
-            <header className={styles.header}>
-              <div className={styles.headerLeft}>
-                {isMobile && (
-                  <button
-                    onClick={() => setMobileOpen(true)}
-                    className={styles.hamburger}
-                  >☰</button>
-                )}
-                <div>
-                  <h1 className={styles.pageTitle}>{t(`nav.${activeTab}Tab`)}</h1>
-                  <p className={styles.pageSubtitle}>{t('app.panelControl')}</p>
-                </div>
-              </div>
-
-              <div className={styles.headerRight}>
-                {/* Channel input */}
-                <div className={styles.channelInputWrap}>
-                  <span className={styles.channelInputPrefix}>{t('app.hash')}</span>
-                  <input
-                    type="text"
-                    placeholder={t('app.placeholderCanal')}
-                    value={channel}
-                    onChange={(e) => setChannel(e.target.value.replace(/^#/, '').toLowerCase())}
-                    className={`sf-input ${styles.channelInput}`}
-                  />
-                </div>
-
-                {/* Twitch Auth */}
-                {!authLoading && authenticated && user ? (
-                  <div className={styles.userBadge}>
-                    <div className={styles.userAvatar}>
-                      {user.profileImageUrl ? (
-                        <img src={user.profileImageUrl} alt="Avatar" className={styles.avatarImg} />
-                      ) : (
-                        user.displayName.charAt(0).toUpperCase()
-                      )}
-                    </div>
-                    <span className={styles.userName}>{user.displayName}</span>
-                    <span className={styles.userDot} />
-                  </div>
-                ) : !authLoading ? (
-                  <button
-                    onClick={() => setActiveTab('config')}
-                    className={`sf-btn ${styles.connectBtn}`}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
-                    </svg>
-                    {t('app.conectarTwitch')}
-                  </button>
-                ) : null}
-
-                {/* Connection badge */}
-                <div
-                  className={`sf-badge ${connected ? 'sf-badge-success' : 'sf-badge-danger'}`}
-                  style={{ gap: '0.4rem' }}
-                >
-                  <span
-                    className={connected ? 'animate-pulse-dot' : ''}
-                    style={{
-                      width: 6, height: 6, borderRadius: '50%',
-                      background: connected ? 'var(--sf-success)' : 'var(--sf-danger)',
-                      display: 'inline-block',
-                    }}
-                  />
-                  {connected ? t('app.conectado') : t('app.desconectado')}
-                </div>
-              </div>
-            </header>
-
-            {/* Content */}
-            <div className={styles.content}>
-              <AnimatePresence mode="wait" custom={tabDirection}>
-                <motion.div
-                  key={activeTab}
-                  custom={tabDirection}
-                  variants={{
-                    enter: (dir: number) => ({ opacity: 0, x: dir * 20, y: 0 }),
-                    center: { opacity: 1, x: 0, y: 0 },
-                    exit: { opacity: 0, y: -6, x: 0 },
-                  }}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                >
-                  <Suspense fallback={<TabSkeleton />}>
-                    {activeTab === 'dashboard' && <StreamDashboard channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'tracker'   && <TrackerPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'security' && <SecurityPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'chat'     && <ChatPanel channel={channel} />}
-                    {activeTab === 'mod'         && <ModPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'commands'    && <CommandsPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'subathon'    && <SubathonPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'giveaway'    && <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'prediction'  && <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'hud'         && <HudPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'timer'       && <TimerPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'scoreboard'  && <ScoreboardPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'obs'         && <ObsPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'bitrate'    && <BitrateCalculatorPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'vertical'   && <VerticalStreamingPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'alertsounds' && <AlertSoundsPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'achievements' && <AchievementsPanel channel={channel} backendUrl={BACKEND_URL} />}
-                    {activeTab === 'config'      && <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />}
-                  </Suspense>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+            <MainContent
+              activeTab={activeTab}
+              tabDirection={tabDirection}
+              channel={channel}
+              backendUrl={BACKEND_URL}
+              alwaysOnTop={alwaysOnTop}
+              toggleAlwaysOnTop={toggleAlwaysOnTop}
+            />
           </main>
         </div>
       </div>

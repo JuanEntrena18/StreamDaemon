@@ -1,0 +1,36 @@
+.overlayControlBox {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(124,58,237,0.06);
+  border: 1px solid rgba(124,58,237,0.15);
+  border-radius: var(--sf-radius);
+  overflow: hidden;
+}
+
+.pillBtn {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--sf-border);
+  background: transparent;
+  color: var(--sf-text-3);
+  font-size: 0.72rem;
+  font-weight: 400;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.pillBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pillBtn--active {
+  background: rgba(124,58,237,0.2);
+  color: #a78bfa;
+  border-color: var(--sf-primary);
+  font-weight: 600;
+}
+.pillBtn--sm {
+  font-size: 0.68rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+}

@@ -112,7 +112,11 @@
     "ttsFilterOwn": "Excluir mis mensajes",
     "ttsFilterLinks": "Excluir mensajes con enlaces",
     "ttsFilterBots": "Excluir mensajes de bots",
-    "ttsBotPlaceholder": "Nombres de bots, separados por coma (p. ej. nightbot, streamelements)"
+    "ttsBotPlaceholder": "Nombres de bots, separados por coma (p. ej. nightbot, streamelements)",
+    "emptyStateTitle": "Conecta a tu canal",
+    "emptyStateDesc": "Conecta a tu canal para ver el chat en tiempo real",
+    "emptyStateBtn": "Introducir canal",
+    "emptyMessagesTitle": "El chat está tranquilo"
   },
   "dashboard": {
     "title": "Gestor del Stream",
@@ -473,7 +477,8 @@
     "removeWhitelist": "Quitar de whitelist",
     "banning": "Baneando...",
     "unbanning": "Desbaneando...",
-    "helpText": "🧠 El sistema Anti-Bots analiza patrones en nombres de usuario y mensajes del chat para detectar cuentas sospechosas. Los Follow Bots se detectan automáticamente al seguir el canal. El filtro de spam revisa mensajes con enlaces acortados y promociones. Activa Auto-ban para bloquear automáticamente, o revisa las detecciones y usa los botones manuales. Usa la lista blanca para excluir usuarios legítimos."
+    "helpText": "🧠 El sistema Anti-Bots analiza patrones en nombres de usuario y mensajes del chat para detectar cuentas sospechosas. Los Follow Bots se detectan automáticamente al seguir el canal. El filtro de spam revisa mensajes con enlaces acortados y promociones. Activa Auto-ban para bloquear automáticamente, o revisa las detecciones y usa los botones manuales. Usa la lista blanca para excluir usuarios legítimos.",
+    "emptyTitle": "Todo despejado"
   },
   "tracker": {
     "period7d": "7 días",
@@ -508,7 +513,11 @@
     "duracion": "Duración",
     "views": "Views",
     "ingresosEst": "Ingresos est.",
-    "verVod": "↗ Ver VOD en Twitch"
+    "verVod": "↗ Ver VOD en Twitch",
+    "emptyStateTitle": "Conecta tu cuenta Twitch",
+    "emptyStateDesc": "Conecta tu cuenta Twitch para ver tus estadísticas",
+    "emptyStateBtn": "Ir a Configuración",
+    "emptyDataTitle": "Sin datos recientes"
   },
   "giveaway": {
     "dur30s": "30 seg",
@@ -663,7 +672,9 @@
     "accentColor": "Acento",
     "bgColor": "Fondo",
     "textColor": "Texto",
-    "fontFamily": "Fuente"
+    "fontFamily": "Fuente",
+    "emptyTitle": "Sin actividad",
+    "emptyDesc": "Aún no hay acciones registradas. ¡Inicia el subathon y espera a que tu comunidad participe!"
   },
   "timer": {
     "title": "⏱️ Temporizador",

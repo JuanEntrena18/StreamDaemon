@@ -9,6 +9,16 @@
       "cooldown": 0,
       "modOnly": false,
       "count": 18
+    },
+    {
+      "id": "1782131047763-zb0mxq",
+      "name": "redes",
+      "response": " Sígueme en {channel}: https://twitch.tv/{channel}",
+      "enabled": true,
+      "aliases": [],
+      "cooldown": 0,
+      "modOnly": false,
+      "count": 0
     }
   ]
 }

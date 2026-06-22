@@ -1,0 +1,41 @@
+.soundRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.volRange {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: auto;
+}
+
+.pillBtn {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--sf-border);
+  background: transparent;
+  color: var(--sf-text-3);
+  font-size: 0.72rem;
+  font-weight: 400;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.pillBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pillBtn--active {
+  background: rgba(124,58,237,0.2);
+  color: #a78bfa;
+  border-color: var(--sf-primary);
+  font-weight: 600;
+}
+.pillBtn--xs {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}

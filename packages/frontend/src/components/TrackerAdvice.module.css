@@ -1,0 +1,61 @@
+.adviceSection {
+  margin-bottom: 2rem;
+}
+
+.adviceTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sf-text);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.iaBadge {
+  font-size: 0.6rem;
+  padding: 0.15rem 0.4rem;
+  background: rgba(52, 211, 153, 0.12);
+  color: #34d399;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.adviceList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.adviceCard {
+  padding: 0.875rem 1rem;
+  border-radius: var(--sf-radius-sm);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.adviceIconBox {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.adviceTextTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--sf-text);
+  margin-bottom: 0.15rem;
+}
+
+.adviceTextDesc {
+  font-size: 0.78rem;
+  color: var(--sf-text-2);
+  line-height: 1.5;
+}

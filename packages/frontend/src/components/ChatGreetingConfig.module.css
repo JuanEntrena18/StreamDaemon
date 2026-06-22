@@ -1,0 +1,39 @@
+.greetingBox {
+  margin-bottom: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--sf-radius-sm);
+}
+.greetingBoxEnabled {
+  background: rgba(16,185,129,0.06);
+  border: 1px solid rgba(16,185,129,0.15);
+}
+.greetingBoxDisabled {
+  background: transparent;
+  border: 1px solid var(--sf-border);
+}
+
+.collapseArrow {
+  background: none;
+  border: none;
+  color: var(--sf-text-3);
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-family: inherit;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  transition: transform 0.2s;
+}
+
+.greetingPreview {
+  font-size: 0.68rem;
+  color: var(--sf-text-3);
+  background: rgba(124,58,237,0.06);
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+}
+
+.greetingHint {
+  font-size: 0.62rem;
+  color: var(--sf-text-3);
+  opacity: 0.6;
+}

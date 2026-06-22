@@ -1,0 +1,41 @@
+.ttsBox {
+  margin-bottom: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--sf-radius-sm);
+}
+.ttsBoxEnabled {
+  background: rgba(124,58,237,0.06);
+  border: 1px solid rgba(124,58,237,0.15);
+}
+.ttsBoxDisabled {
+  background: transparent;
+  border: 1px solid var(--sf-border);
+}
+
+.collapseArrow {
+  background: none;
+  border: none;
+  color: var(--sf-text-3);
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-family: inherit;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  transition: transform 0.2s;
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.filterLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.65rem;
+  color: var(--sf-text-2);
+  cursor: pointer;
+}
