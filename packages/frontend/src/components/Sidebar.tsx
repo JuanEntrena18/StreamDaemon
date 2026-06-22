@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from './Logo';
 import { Toggle } from './Toggle';
+import { useColorMode } from '../hooks/useColorMode';
 import styles from './Sidebar.module.css';
 
 export type Tab = 'dashboard' | 'tracker' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config' | 'bitrate' | 'vertical' | 'alertsounds' | 'achievements';
@@ -36,6 +37,7 @@ export function Sidebar({
 }: SidebarProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
 
+  const { mode, toggleMode } = useColorMode();
   const isActive = (tab: Tab) => activeTab === tab;
 
   const sidebarContent = (
@@ -146,7 +148,16 @@ export function Sidebar({
       {/* Footer */}
       <div className={styles.footer} style={{ display: collapsed ? 'flex' : 'block', flexDirection: 'column', alignItems: 'center' }}>
         {!collapsed && <div>{version}</div>}
-        <div className={styles.footerRow} style={collapsed ? { justifyContent: 'center', marginBottom: 0 } : {}}>
+        <div className={styles.footerRow} style={collapsed ? { justifyContent: 'center', marginBottom: 0, gap: '0.2rem' } : {}}>
+          <button
+            onClick={toggleMode}
+            title={t('app.toggleTheme') || 'Tema Claro / Oscuro'}
+            aria-label={t('app.toggleTheme') || 'Tema Claro / Oscuro'}
+            className={styles.globeBtn}
+            style={collapsed ? { fontSize: '1.2rem', padding: '0.4rem' } : {}}
+          >
+            {mode === 'light' ? '☀️' : '🌙'}
+          </button>
           <button
             onClick={() => {
               onTabChange('config');

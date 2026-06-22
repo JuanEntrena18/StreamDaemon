@@ -45,6 +45,33 @@
   --theme-glow: none;
 }
 
+[data-theme="light"] {
+  --sf-bg: #f8fafc;
+  --sf-bg-2: #f1f5f9;
+  --sf-bg-3: #e2e8f0;
+  --sf-surface: rgba(255, 255, 255, 0.6);
+  --sf-surface-hover: rgba(255, 255, 255, 0.9);
+  --sf-border: rgba(0, 0, 0, 0.08);
+  --sf-border-accent: rgba(124, 58, 237, 0.5);
+
+  --sf-primary: #7c3aed;
+  --sf-primary-light: #8b5cf6;
+  --sf-primary-glow: rgba(124, 58, 237, 0.25);
+  --sf-accent: #6366f1;
+  --sf-accent-2: #8b5cf6;
+  --sf-teal: #0891b2;
+  --sf-success: #059669;
+  --sf-danger: #dc2626;
+  --sf-warning: #d97706;
+
+  --sf-text: #0f172a;
+  --sf-text-2: #475569;
+  --sf-text-3: #64748b;
+
+  --sf-shadow-glow: 0 0 30px rgba(124, 58, 237, 0.15);
+  --sf-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.05);
+}
+
 /* ── Reset ── */
 *, *::before, *::after {
   margin: 0;
