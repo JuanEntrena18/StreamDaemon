@@ -43,7 +43,7 @@ const CHART_COLORS: Record<string, string> = {
 };
 
 export function TrackerPanel({ channel, backendUrl }: Props) {
-  const { t } = useTranslation();
+  const { t, dateLocale } = useTranslation();
   const PERIODS = [
     { id: '7d', label: t('tracker.period7d') },
     { id: '30d', label: t('tracker.period30d') },
@@ -194,7 +194,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
             </div>
             {stats.peakDate && (
               <div className={styles.statSubtext}>
-                {formatDate(stats.peakDate)}
+                {formatDate(stats.peakDate, dateLocale)}
               </div>
             )}
           </div>
@@ -223,7 +223,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
               {t('tracker.ultimoStream')}
             </h3>
             <p className={styles.lastStreamMeta}>
-              {lastStream.title} · {formatDate(lastStream.creationDate)} · {formatDuration(lastStream.durationInSeconds)}
+              {lastStream.title} · {formatDate(lastStream.creationDate, dateLocale)} · {formatDuration(lastStream.durationInSeconds)}
             </p>
           </div>
 
@@ -267,7 +267,7 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
               {t('tracker.ingresosEstimados')}
             </span>
             <span className={styles.revenueValue}>
-              {estimateRevenue(lastStream.subsGained, lastStream.bitsDonated)}
+              {estimateRevenue(lastStream.subsGained, lastStream.bitsDonated, dateLocale)}
             </span>
           </div>
         </motion.div>

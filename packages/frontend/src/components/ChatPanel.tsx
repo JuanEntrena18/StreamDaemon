@@ -16,12 +16,12 @@ interface Props {
   channel: string;
 }
 
-function formatTimestamp(ts: number): string {
-  return new Date(ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+function formatTimestamp(ts: number, locale: string): string {
+  return new Date(ts).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 }
 
 export function ChatPanel({ channel }: Props) {
-  const { t } = useTranslation();
+  const { t, dateLocale } = useTranslation();
   const { messages, onNewMessage } = useChat();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [input, setInput] = useState('');
@@ -257,7 +257,7 @@ export function ChatPanel({ channel }: Props) {
                   >
                     {msg.user.displayName}
                   </span>
-                  <span className={styles.timestamp}>{formatTimestamp(msg.timestamp)}</span>
+                  <span className={styles.timestamp}>{formatTimestamp(msg.timestamp, dateLocale || 'es-ES')}</span>
                 </div>
                 <div className={styles.msgText}>{msg.text}</div>
 

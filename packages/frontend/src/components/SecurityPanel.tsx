@@ -53,7 +53,7 @@ const DETECTION_TYPE_COLORS: Record<string, string> = {
 };
 
 export function SecurityPanel({ channel }: Props) {
-  const { t } = useTranslation();
+  const { t, dateLocale } = useTranslation();
   const [config, setConfig] = useState<SecurityConfig>({
     followBotProtection: true,
     spamFilter: true,
@@ -329,7 +329,7 @@ export function SecurityPanel({ channel }: Props) {
                   </div>
                 </div>
                 <div className={styles.detectionMeta}>
-                  {d.reason} — {new Date(d.timestamp).toLocaleString('es-ES')}
+                  {d.reason} — {new Date(d.timestamp).toLocaleString(dateLocale || 'es-ES')}
                 </div>
                 <div className={styles.detectionActions}>
                   {d.action === 'flagged' && (

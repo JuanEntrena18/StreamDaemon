@@ -18,7 +18,7 @@ interface ActivityEvent {
 }
 
 export function StreamActivityFeed({ channel, backendUrl }: Props) {
-  const { t } = useTranslation();
+  const { t, dateLocale } = useTranslation();
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [filter, setFilter] = useState<string>('all');
 
@@ -87,8 +87,8 @@ export function StreamActivityFeed({ channel, backendUrl }: Props) {
                 <span className={styles.eventIcon}>{TYPE_CONFIG[event.type]?.icon ?? '📌'}</span>
                 <strong className={styles.eventUser}>{event.user}</strong>
                 <span className={styles.eventMsg}>{event.message}</span>
-                <span className={styles.eventTime}>
-                  {new Date(event.timestamp).toLocaleTimeString()}
+                <span className={styles.timeText}>
+                  {new Date(event.timestamp).toLocaleTimeString(dateLocale || 'es-ES')}
                 </span>
               </div>
             ))}

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { formatNumber, formatDuration, formatShortDate, type StreamDetail } from '../utils/trackerUtils';
+import { useTranslation } from '../i18n/context';
 
 interface Props {
   data: StreamDetail[];
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function TrackerChart({ data, dataKey, color }: Props) {
+  const { dateLocale } = useTranslation();
   if (data.length === 0) return null;
   const values = data.map((d) => d[dataKey] as number);
   const max = Math.max(...values, 1);
@@ -66,9 +68,9 @@ export function TrackerChart({ data, dataKey, color }: Props) {
               fontSize="9"
               style={{ fontFamily: 'system-ui, sans-serif' }}
             >
-              {formatShortDate(d.creationDate)}
+              {formatShortDate(d.creationDate, dateLocale)}
             </text>
-            <title>{`${formatShortDate(d.creationDate)}: ${label}`}</title>
+            <title>{`${formatShortDate(d.creationDate, dateLocale)}: ${label}`}</title>
           </g>
         );
       })}

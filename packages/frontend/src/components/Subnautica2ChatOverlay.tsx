@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { useTranslation } from '../i18n/context';
 import type { ChatMessage } from '@streamforger/shared';
 import styles from './Subnautica2ChatOverlay.module.css';
 
@@ -178,14 +179,15 @@ function ScannerBracket({ position }: { position: 'bottom-left' | 'bottom-right'
 
 /** Subnautica 2 HUD header bar */
 function HudHeader() {
-  const [time, setTime] = useState(() => new Date().toLocaleTimeString('es-ES', { hour12: false }));
+  const { dateLocale } = useTranslation();
+  const [time, setTime] = useState(() => new Date().toLocaleTimeString(dateLocale || 'es-ES', { hour12: false }));
 
   useEffect(() => {
     const id = setInterval(() => {
-      setTime(new Date().toLocaleTimeString('es-ES', { hour12: false }));
+      setTime(new Date().toLocaleTimeString(dateLocale || 'es-ES', { hour12: false }));
     }, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [dateLocale]);
 
   return (
     <div className={styles.headerBar}>

@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function StreamList({ streams, expandedStream, onToggleExpand }: Props) {
-  const { t } = useTranslation();
+  const { t, dateLocale } = useTranslation();
   if (streams.length === 0) return null;
 
   return (
@@ -57,7 +57,7 @@ export function StreamList({ streams, expandedStream, onToggleExpand }: Props) {
                     {s.title}
                   </div>
                   <div className={styles.streamMeta}>
-                    {formatDateTime(s.creationDate)} · {formatDuration(s.durationInSeconds)} · {formatNumber(s.totalViews)} {t('tracker.visualizaciones')}
+                    {formatDateTime(s.creationDate, dateLocale)} · {formatDuration(s.durationInSeconds)} · {formatNumber(s.totalViews)} {t('tracker.visualizaciones')}
                   </div>
                 </div>
                 <div className={styles.streamGains}>
@@ -126,7 +126,7 @@ export function StreamList({ streams, expandedStream, onToggleExpand }: Props) {
                         {t('tracker.ingresosEst')}
                       </div>
                       <div className={styles.detailRevenueValue}>
-                        {estimateRevenue(s.subsGained, s.bitsDonated)}
+                        {estimateRevenue(s.subsGained, s.bitsDonated, dateLocale)}
                       </div>
                     </div>
                   </div>

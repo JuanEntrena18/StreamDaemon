@@ -19,7 +19,16 @@ interface TranslationContextValue {
   setLocale: (l: LocaleSetting) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
   dict: Record<string, unknown>;
+  dateLocale: string;
 }
+
+export const LOCALE_MAP: Record<Locale, string> = {
+  es: 'es-ES',
+  en: 'en-US',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  it: 'it-IT',
+};
 
 export const TranslationContext = createContext<TranslationContextValue>(null!);
 
@@ -80,8 +89,10 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
     return interpolate(val, params);
   }, [dict]);
 
+  const dateLocale = LOCALE_MAP[locale] || 'es-ES';
+
   return (
-    <TranslationContext.Provider value={{ locale, localeSetting, setLocale, t, dict }}>
+    <TranslationContext.Provider value={{ locale, localeSetting, setLocale, t, dict, dateLocale }}>
       {children}
     </TranslationContext.Provider>
   );

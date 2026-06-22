@@ -11,9 +11,9 @@ export interface StreamDetail {
   bitsDonated: number;
 }
 
-export function formatDate(iso: string): string {
+export function formatDate(iso: string, locale: string = 'es-ES'): string {
   if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('es-ES', {
+  return new Date(iso).toLocaleDateString(locale, {
     day: 'numeric', month: 'long', year: 'numeric',
   });
 }
@@ -44,19 +44,19 @@ export function formatNumber(n: number): string {
   return String(n);
 }
 
-export function estimateRevenue(subs: number, bits: number): string {
+export function estimateRevenue(subs: number, bits: number, locale: string = 'es-ES'): string {
   const revenue = subs * 2.49 + bits * 0.01;
   if (revenue === 0) return '—';
-  return revenue.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 });
+  return revenue.toLocaleString(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 });
 }
 
-export function formatDateTime(iso: string): string {
+export function formatDateTime(iso: string, locale: string = 'es-ES'): string {
   if (!iso) return '—';
   const d = new Date(iso);
-  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) +
-    ' · ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString(locale, { day: 'numeric', month: 'short' }) +
+    ' · ' + d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 }
 
-export function formatShortDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+export function formatShortDate(iso: string, locale: string = 'es-ES'): string {
+  return new Date(iso).toLocaleDateString(locale, { day: 'numeric', month: 'short' });
 }

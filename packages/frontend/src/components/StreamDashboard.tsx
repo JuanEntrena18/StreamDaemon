@@ -66,7 +66,7 @@ function formatNumber(n: number): string {
 }
 
 export function StreamDashboard({ channel, backendUrl }: Props) {
-  const { t } = useTranslation();
+  const { t, dateLocale } = useTranslation();
   const [previewLoading, setPreviewLoading] = useState(true);
   const [stats, setStats] = useState<HudStats | null>(null);
   const { socket: sock } = useSocket();
@@ -272,7 +272,7 @@ export function StreamDashboard({ channel, backendUrl }: Props) {
                 <span className={styles.eventIcon}>{TYPE_CONFIG[event.type]?.icon ?? '📌'}</span>
                 <strong className={styles.eventUser}>{event.user}</strong>
                 <span className={styles.eventMsg}>{event.message}</span>
-                <span className={styles.eventTime}>{new Date(event.timestamp).toLocaleTimeString()}</span>
+                <span className={styles.eventTime}>{new Date(event.timestamp).toLocaleTimeString(dateLocale || 'es-ES')}</span>
               </div>
             ))}
           </div>

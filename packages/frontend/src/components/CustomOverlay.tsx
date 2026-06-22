@@ -19,7 +19,7 @@ interface Activity {
 }
 
 export function CustomOverlay({ channel }: Props) {
-  const { t } = useTranslation();
+  const { t, dateLocale } = useTranslation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const { socket, connected } = useSocket();
@@ -120,7 +120,7 @@ export function CustomOverlay({ channel }: Props) {
                     {msg.user.displayName}
                   </span>
                   <span className={styles.msgTime}>
-                    {new Date(msg.timestamp).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(msg.timestamp).toLocaleTimeString(dateLocale || 'es-ES', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
                 <div className={styles.msgBody}>
