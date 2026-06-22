@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Tab } from './Sidebar';
 import { TabSkeleton } from './TabSkeleton';
 import { ChatPanel } from './ChatPanel';
+import styles from '../App.module.css';
 
 const GiveawayPanel = lazy(() => import('./GiveawayPanel').then(m => ({ default: m.GiveawayPanel })));
 const PredictionPanel = lazy(() => import('./PredictionPanel').then(m => ({ default: m.PredictionPanel })));
@@ -60,6 +61,7 @@ export function MainContent({ activeTab, tabDirection, channel, backendUrl, alwa
     <AnimatePresence mode="wait" custom={tabDirection}>
       <motion.div
         key={activeTab}
+        className={styles.content}
         custom={tabDirection}
         variants={{
           enter: (dir: number) => ({ opacity: 0, x: dir * 20, y: 0 }),
