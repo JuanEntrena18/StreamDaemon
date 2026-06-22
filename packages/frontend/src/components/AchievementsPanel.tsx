@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n/context';
+import { SkeletonText, SkeletonCard } from './Skeletons';
 import styles from './AchievementsPanel.module.css';
 
 interface AchievementsData {
@@ -43,7 +44,16 @@ export function AchievementsPanel({ channel, backendUrl }: Props) {
   }, [channel, backendUrl]);
 
   if (loading) {
-    return <div className={styles.loadingContainer}><h2>{t('achievements.title')}</h2><p>{t('common.loading')}</p></div>;
+    return (
+      <div className={styles.container}>
+        <div className={styles.titleRow}>
+          <SkeletonText width={200} height={32} />
+        </div>
+        <SkeletonText width={150} height={16} className={styles.subtitle} />
+        <SkeletonCard style={{ minHeight: 180, marginBottom: '1rem' }} />
+        <SkeletonCard style={{ minHeight: 100 }} />
+      </div>
+    );
   }
 
   if (error) {

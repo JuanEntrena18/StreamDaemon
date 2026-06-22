@@ -3,6 +3,7 @@ import { useTranslation } from '../i18n/context';
 import { motion } from 'framer-motion';
 import { EmptyState } from './EmptyState';
 import { TrackerChart } from './TrackerChart';
+import { SkeletonCard, SkeletonChart } from './Skeletons';
 import { TrackerAdvice } from './TrackerAdvice';
 import { StreamList } from './StreamList';
 import { formatDate, formatHours, formatDuration, formatNumber, estimateRevenue, type StreamDetail } from '../utils/trackerUtils';
@@ -134,9 +135,14 @@ export function TrackerPanel({ channel, backendUrl }: Props) {
       </div>
 
       {loading && (
-        <div className={styles.loadingState}>
-          <div className={styles.loadingIcon}>⏳</div>
-          {t('tracker.cargando')}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+          <div className={styles.statsGrid}>
+            <SkeletonCard style={{ minHeight: '130px' }} />
+            <SkeletonCard style={{ minHeight: '130px' }} />
+            <SkeletonCard style={{ minHeight: '130px' }} />
+          </div>
+          <SkeletonCard style={{ minHeight: '200px' }} />
+          <SkeletonChart height={280} />
         </div>
       )}
 
