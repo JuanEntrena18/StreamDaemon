@@ -1,10 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import { useSocket } from '../hooks/useSocket';
 import { SOUNDS, setMasterVolume, type SoundKey } from '../utils/sounds';
 import { useTranslation } from '../i18n/context';
 import { apiGet, apiPut } from '../utils/api';
 import { useTts } from '../contexts/TtsContext';
+import { useChat, type ChatMsg } from '../contexts/ChatContext';
 import { getVoices } from '../utils/tts';
 import { ConfirmModal } from './ConfirmModal';
 import { Toggle } from './Toggle';
@@ -31,27 +32,13 @@ interface Props {
   channel: string;
 }
 
-interface ChatMsg {
-  id: string;
-  user: {
-    id: string;
-    displayName: string;
-    color: string;
-    badges: string[];
-  };
-  text: string;
-  timestamp: number;
-}
-
-const MAX_MSGS = 100;
-
 function formatTimestamp(ts: number): string {
   return new Date(ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 }
 
 export function ChatPanel({ channel }: Props) {
   const { t } = useTranslation();
-  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const { messages, onNewMessage } = useChat();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [input, setInput] = useState('');
   const [replyTo, setReplyTo] = useState<{ id: string; user: string } | null>(null);
@@ -100,10 +87,10 @@ export function ChatPanel({ channel }: Props) {
     SOUNDS[selectedSound]();
   }, [selectedSound, soundVolume]);
 
-  useSocketEvent('chat:message', useCallback((msg: ChatMsg) => {
-    setMessages((prev) => [...prev.slice(-MAX_MSGS + 1), msg]);
-    playSound();
-  }, [playSound]));
+  useEffect(() => {
+    const unsub = onNewMessage(playSound);
+    return unsub;
+  }, [onNewMessage, playSound]);
 
   useEffect(() => {
     if (listRef.current) {

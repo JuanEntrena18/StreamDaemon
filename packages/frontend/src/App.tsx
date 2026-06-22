@@ -30,6 +30,7 @@ import { SetupWizard, isSetupComplete } from './components/SetupWizard';
 import { CommandPalette } from './components/CommandPalette';
 import { TtsProvider, useTts } from './contexts/TtsContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { ChatProvider } from './contexts/ChatContext';
 import { TtsManager } from './components/TtsManager';
 import styles from './App.module.css';
 
@@ -247,6 +248,7 @@ export function App() {
 
   return (
     <ToastProvider>
+    <ChatProvider>
     <TtsProvider>
       <TtsManager />
       <TtsUserSync />
@@ -434,6 +436,7 @@ export function App() {
         </div>
       </div>
     </TtsProvider>
+    </ChatProvider>
     </ToastProvider>
   );
 }
