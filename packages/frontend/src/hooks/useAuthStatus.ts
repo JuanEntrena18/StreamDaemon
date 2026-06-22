@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from '../i18n/context';
+import { useSocketEvent } from './useSocket';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 
@@ -51,9 +52,13 @@ export function useAuthStatus() {
   useEffect(() => {
     refresh();
 
-    const id = setInterval(refresh, 3000);
-    return () => clearInterval(id);
-  }, [refresh]);
+    if (status.authenticated) {
+      const id = setInterval(refresh, 60000);
+      return () => clearInterval(id);
+    }
+  }, [refresh, status.authenticated]);
+
+  useSocketEvent('auth:changed', refresh);
 
   const startDeviceLogin = useCallback(async () => {
     setDeviceState({ status: 'loading' });

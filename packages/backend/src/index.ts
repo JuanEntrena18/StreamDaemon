@@ -8,7 +8,7 @@ import { config } from './config.js';
 import { setupAuth, onAuth } from './auth/index.js';
 import { requireLocalAuth } from './auth/api-auth.js';
 import { setupChat, setEnterGiveaway, setAddTickets, setupChatGreeting } from './chat/index.js';
-import { setupSocketIO } from './socket/index.js';
+import { setupSocketIO, getIO } from './socket/index.js';
 import { setupGiveaways, enterGiveaway, addTickets } from './giveaways/index.js';
 import { setupPredictions } from './predictions/index.js';
 import { setupEventSub, stopEventSub } from './eventsub/index.js';
@@ -90,7 +90,11 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   await setupChat();
   setupChatGreeting(app);
   setupEventSub();
-  onAuth(() => { setupChat(); setupEventSub(); });
+  onAuth(() => { 
+    setupChat(); 
+    setupEventSub(); 
+    try { getIO().emit('auth:changed'); } catch {}
+  });
   setupPredictions(app);
   setupTracker(app);
   setupHud(app);
