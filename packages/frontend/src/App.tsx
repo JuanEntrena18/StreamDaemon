@@ -1,30 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from './hooks/useSocket';
 import { useAuthStatus } from './hooks/useAuthStatus';
 import { useTranslation } from './i18n/context';
 import { Sidebar } from './components/Sidebar';
 import type { Tab, NavSection } from './components/Sidebar';
-import { GiveawayPanel } from './components/GiveawayPanel';
-import { PredictionPanel } from './components/PredictionPanel';
-import { ObsPanel } from './components/ObsPanel';
 import { ChatPanel } from './components/ChatPanel';
-import { ConfigPanel } from './components/ConfigPanel';
-import { TrackerPanel } from './components/TrackerPanel';
-import { HudPanel } from './components/HudPanel';
-import { TimerPanel } from './components/TimerPanel';
-import { ScoreboardPanel } from './components/ScoreboardPanel';
-import { StreamDashboard } from './components/StreamDashboard';
-import { ModPanel } from './components/ModPanel';
-import { CommandsPanel } from './components/CommandsPanel';
-import { SubathonPanel } from './components/SubathonPanel';
+import { TabSkeleton } from './components/TabSkeleton';
+
+const GiveawayPanel = lazy(() => import('./components/GiveawayPanel').then(m => ({ default: m.GiveawayPanel })));
+const PredictionPanel = lazy(() => import('./components/PredictionPanel').then(m => ({ default: m.PredictionPanel })));
+const ObsPanel = lazy(() => import('./components/ObsPanel').then(m => ({ default: m.ObsPanel })));
+const ConfigPanel = lazy(() => import('./components/ConfigPanel').then(m => ({ default: m.ConfigPanel })));
+const TrackerPanel = lazy(() => import('./components/TrackerPanel').then(m => ({ default: m.TrackerPanel })));
+const HudPanel = lazy(() => import('./components/HudPanel').then(m => ({ default: m.HudPanel })));
+const TimerPanel = lazy(() => import('./components/TimerPanel').then(m => ({ default: m.TimerPanel })));
+const ScoreboardPanel = lazy(() => import('./components/ScoreboardPanel').then(m => ({ default: m.ScoreboardPanel })));
+const StreamDashboard = lazy(() => import('./components/StreamDashboard').then(m => ({ default: m.StreamDashboard })));
+const ModPanel = lazy(() => import('./components/ModPanel').then(m => ({ default: m.ModPanel })));
+const CommandsPanel = lazy(() => import('./components/CommandsPanel').then(m => ({ default: m.CommandsPanel })));
+const SubathonPanel = lazy(() => import('./components/SubathonPanel').then(m => ({ default: m.SubathonPanel })));
+const SecurityPanel = lazy(() => import('./components/SecurityPanel').then(m => ({ default: m.SecurityPanel })));
+const BitrateCalculatorPanel = lazy(() => import('./components/BitrateCalculatorPanel').then(m => ({ default: m.BitrateCalculatorPanel })));
+const VerticalStreamingPanel = lazy(() => import('./components/VerticalStreamingPanel').then(m => ({ default: m.VerticalStreamingPanel })));
+const AlertSoundsPanel = lazy(() => import('./components/AlertSoundsPanel').then(m => ({ default: m.AlertSoundsPanel })));
+const AchievementsPanel = lazy(() => import('./components/AchievementsPanel').then(m => ({ default: m.AchievementsPanel })));
 import { SplashScreen } from './components/SplashScreen';
-import { SecurityPanel } from './components/SecurityPanel';
-import { BitrateCalculatorPanel } from './components/BitrateCalculatorPanel';
-import { VerticalStreamingPanel } from './components/VerticalStreamingPanel';
-import { AlertSoundsPanel } from './components/AlertSoundsPanel';
-import { AchievementsPanel } from './components/AchievementsPanel';
 import { SetupWizard, isSetupComplete } from './components/SetupWizard';
+import { CommandPalette } from './components/CommandPalette';
 import { TtsProvider, useTts } from './contexts/TtsContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { TtsManager } from './components/TtsManager';
@@ -62,6 +65,7 @@ export function App() {
     try { return localStorage.getItem('streamforger-sidebar-collapsed') === 'true'; } catch { return false; }
   });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)');
@@ -177,6 +181,12 @@ export function App() {
         handleTabChange('chat');
         return;
       }
+
+      if (ctrl && key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(prev => !prev);
+        return;
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -251,6 +261,13 @@ export function App() {
           </div>
         </div>
       )}
+      <CommandPalette 
+        isOpen={commandPaletteOpen} 
+        onClose={() => setCommandPaletteOpen(false)} 
+        onNavigate={handleTabChange} 
+        alwaysOnTop={alwaysOnTop} 
+        onToggleAlwaysOnTop={isDesktop ? toggleAlwaysOnTop : undefined}
+      />
       <div className={styles.root}>
         <div className={styles.bgGlow} style={{
           background: `
@@ -390,24 +407,26 @@ export function App() {
                   exit="exit"
                   transition={{ duration: 0.25, ease: 'easeOut' }}
                 >
-                  {activeTab === 'dashboard' && <StreamDashboard channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'tracker'   && <TrackerPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'security' && <SecurityPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'chat'     && <ChatPanel channel={channel} />}
-                  {activeTab === 'mod'         && <ModPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'commands'    && <CommandsPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'subathon'    && <SubathonPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'giveaway'    && <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'prediction'  && <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'hud'         && <HudPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'timer'       && <TimerPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'scoreboard'  && <ScoreboardPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'obs'         && <ObsPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'bitrate'    && <BitrateCalculatorPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'vertical'   && <VerticalStreamingPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'alertsounds' && <AlertSoundsPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'achievements' && <AchievementsPanel channel={channel} backendUrl={BACKEND_URL} />}
-                  {activeTab === 'config'      && <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />}
+                  <Suspense fallback={<TabSkeleton />}>
+                    {activeTab === 'dashboard' && <StreamDashboard channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'tracker'   && <TrackerPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'security' && <SecurityPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'chat'     && <ChatPanel channel={channel} />}
+                    {activeTab === 'mod'         && <ModPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'commands'    && <CommandsPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'subathon'    && <SubathonPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'giveaway'    && <GiveawayPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'prediction'  && <PredictionPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'hud'         && <HudPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'timer'       && <TimerPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'scoreboard'  && <ScoreboardPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'obs'         && <ObsPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'bitrate'    && <BitrateCalculatorPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'vertical'   && <VerticalStreamingPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'alertsounds' && <AlertSoundsPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'achievements' && <AchievementsPanel channel={channel} backendUrl={BACKEND_URL} />}
+                    {activeTab === 'config'      && <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />}
+                  </Suspense>
                 </motion.div>
               </AnimatePresence>
             </div>

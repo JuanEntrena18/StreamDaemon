@@ -4,6 +4,7 @@ import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import { ConfirmModal } from './ConfirmModal';
 import { Toggle } from './Toggle';
+import { EmptyState } from './EmptyState';
 import type { SubathonState, SubathonAction } from '@streamforger/shared';
 import styles from './SubathonPanel.module.css';
 
@@ -377,9 +378,9 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
       </div>
 
       {/* Actions log */}
-      {state && state.actions.length > 0 && (
-        <div className="glass-card sf-card--tight mb-5">
-          <p className="sf-section-title">{t('subathon.historial')}</p>
+      <div className="glass-card sf-card--tight mb-5">
+        <p className="sf-section-title">{t('subathon.historial')}</p>
+        {state && state.actions.length > 0 ? (
           <div className={styles.logContainer}>
             {state.actions.map((a) => (
               <div key={a.id} className={styles.logRow}>
@@ -395,8 +396,14 @@ export function SubathonPanel({ channel, backendUrl }: Props) {
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <EmptyState
+            icon="⏳"
+            title={t('subathon.emptyTitle') || 'Sin actividad'}
+            description={t('subathon.emptyDesc') || 'Aún no hay acciones registradas. ¡Inicia el subathon y espera a que tu comunidad participe!'}
+          />
+        )}
+      </div>
 
       {/* Overlay URL */}
       <div className="glass-card sf-card--tight">

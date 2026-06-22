@@ -142,21 +142,22 @@ export function Sidebar({
       )}
 
       {/* Footer */}
-      {!collapsed && (
-        <div className={styles.footer}>
-          <div>{version}</div>
-          <div className={styles.footerRow}>
-            <button
-              onClick={() => {
-                onTabChange('config');
-                if (mobileOpen) onMobileClose();
-              }}
-              title={t('config.languageTitle') || 'Language'}
-              className={styles.globeBtn}
-            >
-              🌐
-            </button>
-          </div>
+      <div className={styles.footer} style={{ display: collapsed ? 'flex' : 'block', flexDirection: 'column', alignItems: 'center' }}>
+        {!collapsed && <div>{version}</div>}
+        <div className={styles.footerRow} style={collapsed ? { justifyContent: 'center', marginBottom: 0 } : {}}>
+          <button
+            onClick={() => {
+              onTabChange('config');
+              if (mobileOpen) onMobileClose();
+            }}
+            title={t('config.languageTitle') || 'Language'}
+            className={styles.globeBtn}
+            style={collapsed ? { fontSize: '1.2rem', padding: '0.4rem' } : {}}
+          >
+            🌐
+          </button>
+        </div>
+        {!collapsed && (
           <a
             href="https://github.com/JuanEntrena18/StreamForge"
             target="_blank" rel="noreferrer"
@@ -164,8 +165,8 @@ export function Sidebar({
           >
             GitHub ↗
           </a>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 

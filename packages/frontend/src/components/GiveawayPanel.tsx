@@ -4,6 +4,7 @@ import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import { useToast } from '../contexts/ToastContext';
 import { ConfirmModal } from './ConfirmModal';
+import { EmptyState } from './EmptyState';
 import styles from './GiveawayPanel.module.css';
 
 interface Props {
@@ -552,8 +553,12 @@ export function GiveawayPanel({ channel, backendUrl }: Props) {
 
             <div className={styles.wheelContainer}>
               {wheelNames.length < 2 ? (
-                <div className={styles.wheelPlaceholder}>
-                  {t('giveaway.minimoNombres')}
+                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <EmptyState
+                    icon="🎡"
+                    title={t('giveaway.emptyTitle') || 'Ruleta vacía'}
+                    description={t('giveaway.minimoNombres') || 'Añade al menos 2 nombres para girar la ruleta.'}
+                  />
                 </div>
               ) : (
                 <>

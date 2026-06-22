@@ -3,6 +3,7 @@ import { apiGet, apiPost, apiPut } from '../utils/api';
 import { useTranslation } from '../i18n/context';
 import { ConfirmModal } from './ConfirmModal';
 import { Toggle } from './Toggle';
+import { EmptyState } from './EmptyState';
 import styles from './SecurityPanel.module.css';
 
 interface Props {
@@ -293,9 +294,11 @@ export function SecurityPanel({ channel }: Props) {
           {t('security.detections')}
         </h3>
         {(!stats?.recentDetections || stats.recentDetections.length === 0) ? (
-          <div className={styles.emptyText}>
-            {t('security.detectionsEmpty')}
-          </div>
+          <EmptyState
+            icon="🛡️"
+            title={t('security.emptyTitle') || 'Todo despejado'}
+            description={t('security.detectionsEmpty') || 'No se han detectado bots o spam recientes.'}
+          />
         ) : (
           <div className={styles.detectionList}>
             {stats.recentDetections.map((d) => {

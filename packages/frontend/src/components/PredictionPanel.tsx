@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from '../i18n/context';
 import { useToast } from '../contexts/ToastContext';
 import { apiPost } from '../utils/api';
+import { EmptyState } from './EmptyState';
 import styles from './PredictionPanel.module.css';
 
 interface Props {
@@ -71,7 +72,16 @@ export function PredictionPanel({ channel }: Props) {
       <div className={`glass-card ${styles.card}`}>
         <p className="sf-section-title">{t('predictions.nuevaPrediccion')}</p>
 
-        <div className={styles.formFields}>
+        {!channel ? (
+          <EmptyState
+            icon="🔮"
+            title={t('predictions.emptyTitle') || 'Sin conexión'}
+            description={t('predictions.emptyChannel') || 'Conecta tu cuenta de Twitch en Configuración para crear predicciones.'}
+            actionLabel={t('predictions.emptyAction') || 'Ir a Configuración'}
+            onAction={() => window.dispatchEvent(new CustomEvent('navigateTab', { detail: 'config' }))}
+          />
+        ) : (
+          <div className={styles.formFields}>
           {/* Title */}
           <div>
             <label className={styles.fieldLabel}>
@@ -149,14 +159,8 @@ export function PredictionPanel({ channel }: Props) {
           >
             {loading ? t('predictions.creando') : t('predictions.crear')}
           </button>
-
-
-          {!channel && (
-            <p className={styles.emptyChannel}>
-              {t('predictions.emptyChannel')}
-            </p>
-          )}
         </div>
+        )}
       </div>
     </div>
   );

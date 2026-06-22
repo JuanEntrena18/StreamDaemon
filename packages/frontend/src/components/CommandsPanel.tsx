@@ -3,6 +3,7 @@ import { useTranslation } from '../i18n/context';
 import { apiPost, apiPut } from '../utils/api';
 import { useSocket } from '../hooks/useSocket';
 import { ConfirmModal } from './ConfirmModal';
+import { EmptyState } from './EmptyState';
 import styles from './CommandsPanel.module.css';
 
 interface Props {
@@ -295,9 +296,13 @@ export function CommandsPanel({ channel, backendUrl }: Props) {
       {/* Command list */}
       <div className="glass-card" style={{ padding: '1rem' }}>
         {commands.length === 0 ? (
-          <p className={styles.emptyText}>
-            {channel ? t('commands.empty') : t('commands.emptyChannel')}
-          </p>
+          <EmptyState
+            icon="🤖"
+            title={t('commands.emptyTitle') || 'Sin comandos'}
+            description={channel ? (t('commands.empty') || 'Crea tu primer comando personalizado arriba para interactuar con tu chat.') : (t('commands.emptyChannel') || 'Conecta tu cuenta de Twitch para crear comandos.')}
+            actionLabel={!channel ? (t('commands.emptyAction') || 'Ir a Configuración') : undefined}
+            onAction={!channel ? () => window.dispatchEvent(new CustomEvent('navigateTab', { detail: 'config' })) : undefined}
+          />
         ) : (
           <div className="flex-col flex-col--gap-sm">
             {commands.map((cmd) => (
