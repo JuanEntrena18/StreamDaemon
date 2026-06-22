@@ -148,7 +148,7 @@ export function Sidebar({
       {/* Footer */}
       <div className={styles.footer} style={{ display: collapsed ? 'flex' : 'block', flexDirection: 'column', alignItems: 'center' }}>
         {!collapsed && <div>{version}</div>}
-        <div className={styles.footerRow} style={collapsed ? { justifyContent: 'center', marginBottom: 0, gap: '0.2rem' } : {}}>
+        <div className={styles.footerRow} style={collapsed ? { flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginBottom: 0, gap: '0.75rem' } : {}}>
           <button
             onClick={toggleMode}
             title={t('app.toggleTheme') || 'Tema Claro / Oscuro'}
