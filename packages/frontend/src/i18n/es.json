@@ -112,6 +112,7 @@
     "ttsFilterOwn": "Excluir mis mensajes",
     "ttsFilterLinks": "Excluir mensajes con enlaces",
     "ttsFilterBots": "Excluir mensajes de bots",
+    "ttsReadAuthor": "Leer nombre del autor",
     "ttsBotPlaceholder": "Nombres de bots, separados por coma (p. ej. nightbot, streamelements)",
     "emptyStateTitle": "Conecta a tu canal",
     "emptyStateDesc": "Conecta a tu canal para ver el chat en tiempo real",

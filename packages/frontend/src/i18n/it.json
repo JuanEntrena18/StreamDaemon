@@ -108,7 +108,8 @@
     "ttsFilterOwn": "Escludere i miei messaggi",
     "ttsFilterLinks": "Escludere messaggi con link",
     "ttsFilterBots": "Escludere messaggi dei bot",
-    "ttsBotPlaceholder": "Nomi bot, separati da virgola (es: nightbot, streamelements)"
+    "ttsReadAuthor": "Leggi il nome dell'autore",
+    "ttsBotPlaceholder": "Nomi dei bot, separati da virgole (es. nightbot, streamelements)"
   },
   "dashboard": {
     "title": "Gestione Stream",

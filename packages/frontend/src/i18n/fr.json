@@ -108,6 +108,7 @@
     "ttsFilterOwn": "Exclure mes messages",
     "ttsFilterLinks": "Exclure les messages avec liens",
     "ttsFilterBots": "Exclure les messages de bots",
+    "ttsReadAuthor": "Lire le nom de l'auteur",
     "ttsBotPlaceholder": "Noms des bots, séparés par des virgules (ex: nightbot, streamelements)"
   },
   "dashboard": {

@@ -5,6 +5,7 @@ export interface TtsFilters {
   excludeLinks: boolean;
   excludeBots: boolean;
   botNames: string;
+  readAuthor: boolean;
 }
 
 interface TtsContextValue {
@@ -22,7 +23,7 @@ interface TtsContextValue {
   setCurrentUserId: (id: string | null) => void;
 }
 
-const defaultFilters: TtsFilters = { excludeOwn: false, excludeLinks: false, excludeBots: false, botNames: '' };
+const defaultFilters: TtsFilters = { excludeOwn: false, excludeLinks: false, excludeBots: false, botNames: '', readAuthor: false };
 
 const TtsContext = createContext<TtsContextValue>({
   enabled: false,

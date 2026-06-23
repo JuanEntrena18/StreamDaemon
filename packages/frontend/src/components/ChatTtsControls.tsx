@@ -86,19 +86,23 @@ export function ChatTtsControls() {
             <span className="text-dim" style={{ fontSize: '0.65rem', minWidth: 24 }}>{Math.round(tts.volume * 100)}%</span>
           </div>
           <div className="sf-divider" style={{ margin: '0.35rem 0' }} />
-          <div className={styles.filterRow}>
-            <label className={styles.filterLabel}>
-              <input type="checkbox" checked={tts.filters.excludeOwn} onChange={(e) => tts.setFilters({ ...tts.filters, excludeOwn: e.target.checked })} style={{ accentColor: '#7c3aed', cursor: 'pointer' }} />
-              {t('chat.ttsFilterOwn')}
-            </label>
-            <label className={styles.filterLabel}>
-              <input type="checkbox" checked={tts.filters.excludeLinks} onChange={(e) => tts.setFilters({ ...tts.filters, excludeLinks: e.target.checked })} style={{ accentColor: '#7c3aed', cursor: 'pointer' }} />
-              {t('chat.ttsFilterLinks')}
-            </label>
-            <label className={styles.filterLabel}>
-              <input type="checkbox" checked={tts.filters.excludeBots} onChange={(e) => tts.setFilters({ ...tts.filters, excludeBots: e.target.checked })} style={{ accentColor: '#7c3aed', cursor: 'pointer' }} />
-              {t('chat.ttsFilterBots')}
-            </label>
+          <div className="flex-col--gap-sm">
+            <div className="flex-between">
+              <span className="text-dim" style={{ fontSize: '0.65rem' }}>{t('chat.ttsFilterOwn')}</span>
+              <Toggle checked={tts.filters.excludeOwn} onChange={(c) => tts.setFilters({ ...tts.filters, excludeOwn: c })} size="sm" />
+            </div>
+            <div className="flex-between">
+              <span className="text-dim" style={{ fontSize: '0.65rem' }}>{t('chat.ttsFilterLinks')}</span>
+              <Toggle checked={tts.filters.excludeLinks} onChange={(c) => tts.setFilters({ ...tts.filters, excludeLinks: c })} size="sm" />
+            </div>
+            <div className="flex-between">
+              <span className="text-dim" style={{ fontSize: '0.65rem' }}>{t('chat.ttsFilterBots')}</span>
+              <Toggle checked={tts.filters.excludeBots} onChange={(c) => tts.setFilters({ ...tts.filters, excludeBots: c })} size="sm" />
+            </div>
+            <div className="flex-between">
+              <span className="text-dim" style={{ fontSize: '0.65rem' }}>{t('chat.ttsReadAuthor')}</span>
+              <Toggle checked={tts.filters.readAuthor} onChange={(c) => tts.setFilters({ ...tts.filters, readAuthor: c })} size="sm" />
+            </div>
           </div>
           {tts.filters.excludeBots && (
             <input

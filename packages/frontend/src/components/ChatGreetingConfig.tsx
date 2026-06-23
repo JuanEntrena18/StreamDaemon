@@ -11,7 +11,7 @@ interface Props {
 export function ChatGreetingConfig({ channel }: Props) {
   const { t } = useTranslation();
   const [greetingEnabled, setGreetingEnabled] = useState(false);
-  const [greetingMessage, setGreetingMessage] = useState('¡Bienvenido @{user} al canal!');
+  const [greetingMessage, setGreetingMessage] = useState('¡Bienvenido {user} al canal!');
   const [greetingOpen, setGreetingOpen] = useState(false);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export function ChatGreetingConfig({ channel }: Props) {
               value={greetingMessage}
               onChange={(e) => setGreetingMessage(e.target.value)}
               onBlur={() => apiPut('/chat/greeting-config', { channel, message: greetingMessage })}
-              placeholder="¡Bienvenido @{user} al canal!"
+              placeholder="¡Bienvenido {user} al canal!"
               className="sf-input"
               style={{ flex: 1, fontSize: '0.78rem', fontFamily: 'monospace' }}
             />

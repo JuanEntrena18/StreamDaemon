@@ -112,6 +112,7 @@
     "ttsFilterOwn": "Exclude my messages",
     "ttsFilterLinks": "Exclude messages with links",
     "ttsFilterBots": "Exclude bot messages",
+    "ttsReadAuthor": "Read author name",
     "ttsBotPlaceholder": "Bot usernames, comma separated (e.g. nightbot, streamelements)"
   },
   "dashboard": {

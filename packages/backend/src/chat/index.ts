@@ -28,7 +28,7 @@ const joinedChannels = new Set<string>();
 let greetingConfigs: Record<string, ChannelGreetingConfig> = {};
 const pendingGreetings = new Map<string, NodeJS.Timeout>();
 
-const DEFAULT_GREETING_MESSAGE = '¡Bienvenido @{user} al canal!';
+const DEFAULT_GREETING_MESSAGE = '¡Bienvenido {user} al canal!';
 
 function loadGreetingConfigs() {
   try {

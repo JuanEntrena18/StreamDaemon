@@ -28,7 +28,8 @@ export function TtsManager() {
     if (!enabled || msg.text === lastMsgRef.current) return;
     if (shouldSkip(msg, currentUserId, filters)) return;
     lastMsgRef.current = msg.text;
-    speak(msg.text, voiceURI, rate, volume);
+    const textToSpeak = filters.readAuthor ? `${msg.user.displayName}: ${msg.text}` : msg.text;
+    speak(textToSpeak, voiceURI, rate, volume);
   }, [enabled, voiceURI, rate, volume, filters, currentUserId]));
 
   useEffect(() => {
