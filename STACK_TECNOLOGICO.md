@@ -18,7 +18,7 @@ Aplicación modular para creadores de contenido que permite gestionar el canal d
 | **@twurple/chat** | ^6.x | Cliente IRC para leer el chat de Twitch (en backend, expuesto vía WS al frontend) |
 | **@twurple/eventsub-ws** | ^7.x | EventSub WebSocket (follows, subs, gifts, redemptions, cheers) |
 | **Inter (Google Fonts)** | — | Tipografía principal del dashboard |
-| **Web Speech API** | — | Text-to-Speech integrado en el panel de chat con selección de voz, velocidad y volumen |
+| **Web Speech API** | — | Text-to-Speech integrado en el panel de chat con selección de voz, velocidad, volumen, filtros de contenido (excluir propios, links, bots) y modo "leer autor" |
 
 ### Overlays independientes (HTML/CSS/JS puro)
 
@@ -58,6 +58,7 @@ Aplicación modular para creadores de contenido que permite gestionar el canal d
 | `OverlayErrorBoundary.tsx` | Captura errores de React en el overlay y muestra un mensaje visible en lugar de dejar la ventana transparente invisible |
 | `ChatOverlay.tsx` | Overlay de chat con soporte para tipografía personalizada, tamaño de texto y modo de fondo (negro/transparente) |
 | `ChannelNotifications.tsx` | Notificaciones animadas de EventSub (follows, subs, gifts, redemptions, cheers) en el overlay |
+| `HudOverlay.tsx` | Overlay del Stream HUD: stats en vivo con configuración por campo vía parámetros URL (`viewers`, `followers`, `subs`, `uptime`, `game`, `title`, `lastFollower`, `lastSub`). Sin dependencia de React, se controla desde HudPanel en el dashboard |
 
 ### Sistema de Diseño
 
@@ -78,18 +79,20 @@ El dashboard usa tokens CSS + clases utilitarias + CSS Modules:
 
 **CSS Modules** (`*.module.css`) por componente — estilos encapsulados que reemplazan ~1.190 estilos `style={{}}` inline. Solo se mantienen inline los valores verdaderamente dinámicos (colores de usuario, posiciones de toggle, accent-color de ranges).
 
+**Escalado UI responsive** — El tamaño base de fuente (`html { font-size: 16px }`) escala automáticamente en monitores 2K (≥2500px → 20px) y 4K (≥3800px → 28px). Control manual desde ConfigPanel con niveles 100%, 125%, 150%, 200%, persistido en localStorage vía atributo `data-zoom` en `<html>`. Los overlays mantienen tamaño fijo de 16px para evitar roturas de layout.
+
 ### Componentes del Dashboard
 
 | Componente | Descripción |
 |---|---|
 | `App.tsx` + `App.module.css` | Layout principal con sidebar state management, header + tab transitions, ?auth=success handler y version migration |
 | `StreamDashboard.tsx` | Gestor unificado: preview embed, editor título/juego, stats en vivo, feed actividad con filtros |
-| `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación, selector sonido con volumen, **TTS (voz, velocidad, volumen)**, overlay controls (tamaño, opacidad, tipografía, fondo negro/transparente) |
+| `ChatPanel.tsx` | Visor chat en vivo con envío, reply, moderación, selector sonido con volumen, **TTS (voz, velocidad, volumen, filtros, leer autor)**, overlay controls (tamaño, opacidad, tipografía, fondo negro/transparente) |
 | `SecurityPanel.tsx` | Anti-Bots: estadísticas, toggles de protección, escaneo manual, lista blanca, log de detecciones con acciones ban/unban/whitelist por fila, tarjeta de ayuda del sistema |
 | `GiveawayPanel.tsx` | Panel sorteos con ruleta canvas e importación masiva |
 | `PredictionPanel.tsx` | Panel de predicciones con opciones A/B/C |
 | `TrackerPanel.tsx` | Twitch Tracker: estadísticas históricas, resumen del último stream, gráficos SVG de evolución (views/seguidores/duración), consejos inteligentes multi-factor e integración Ollama |
-| `HudPanel.tsx` | Stream HUD: botones iniciar/detener polling, stats en vivo |
+| `HudPanel.tsx` | Stream HUD: botones iniciar/detener polling, stats en vivo (viewers, followers, subs, uptime, game, title, last follower, last subscriber), panel de configuración con toggles por campo y persistencia en localStorage, generación dinámica de URL overlay con parámetros por campo |
 | `TimerPanel.tsx` | Temporizador: configurar duración, iniciar, pausar, reanudar, reset |
 | `ScoreboardPanel.tsx` | Scoreboard clásico + Fighter Overlay: presets de daño, rondas, timer, configuración de jugadores/personajes/retratos |
 | `BitrateCalculatorPanel` | Calculadora de bitrate para streaming: input de velocidad de subida con recomendación automática, selector de resolución, FPS, BPP, audio bitrate y % de uso de subida. Resultados con comparación "conexión vs. necesario", advertencia del límite de Twitch y guía paso a paso de configuración en OBS con valores dinámicos. Sin dependencia de backend |
@@ -97,8 +100,8 @@ El dashboard usa tokens CSS + clases utilitarias + CSS Modules:
 | `ModPanel.tsx` | Moderación: timeout/ban/unban + lista de chatters conectados |
 | `CommandsPanel.tsx` | Comandos personalizados: crear, editar, toggle, cooldown |
 | `ObsPanel.tsx` | URLs OBS con copiar al portapapeles y selector de overlays standalone |
-| `ConfigPanel.tsx` | Config: conexión Twitch OAuth, logout, acerca de |
-| `Sidebar.tsx` + `Sidebar.module.css` | Barra lateral colapsable con 8 secciones (GESTOR, ESTADÍSTICAS, SEGURIDAD, Chat, MOD, COMANDOS, Herramientas, Config). Se colapsa a 56px mostrando solo iconos con animación Framer Motion. En < 768px se convierte en drawer overlay con botón hamburguesa. Estado persistido en localStorage |
+| `ConfigPanel.tsx` | Config: conexión Twitch OAuth (Device Code + Browser), logout, UI Zoom (100%/125%/150%/200% para 2K/4K), acerca de |
+| `Sidebar.tsx` + `Sidebar.module.css` | Barra lateral colapsable con 8 secciones (GESTOR, ESTADÍSTICAS, SEGURIDAD, Chat, MOD, COMANDOS, Herramientas, Config). Se colapsa a 56px mostrando solo iconos con animación Framer Motion. Ancho expandido aumentado de 220px a 260px con hover effect en botones de navegación. En < 768px se convierte en drawer overlay con botón hamburguesa. Estado persistido en localStorage |
 
 > Todos los componentes del dashboard y overlays tienen su `*.module.css` correspondiente. Consultar el listado completo de archivos en el repositorio.
 
@@ -122,12 +125,12 @@ El dashboard usa tokens CSS + clases utilitarias + CSS Modules:
 
 | Módulo | Archivo | Descripción |
 |---|---|---|
-| **Auth** | `src/auth/index.ts` | OAuth Twitch (Authorization Code + Device Code Grant), refresco automático de tokens |
+| **Auth** | `src/auth/index.ts` | OAuth Twitch (Authorization Code + Device Code Grant), refresco automático de tokens, polling con retroalimentación de errores, restauración de sesión resiliente, soporte ELECTRON_RUN_AS_NODE |
 | **Chat** | `src/chat/index.ts` | ChatClient IRC, comandos (`!sorteo`), reenvío de mensajes vía socket, integración con detección de spam |
 | **Socket** | `src/socket/index.ts` | Socket.IO server, eventos `join:channel`, `leave:channel`, `chat:send` |
 | **Giveaways** | `src/giveaways/index.ts` | Sorteos: crear, finalizar, entrada vía chat, selección aleatoria |
 | **Predictions** | `src/predictions/index.ts` | Predicciones Twitch: crear, resolver |
-| **HUD** | `src/hud/index.ts` | Stream HUD: polling Twitch API cada 10-15s, emisión `hud:update` |
+| **HUD** | `src/hud/index.ts` | Stream HUD: polling Twitch API cada 10-15s, emisión `hud:update` con nuevos campos `lastFollower` y `lastSubscriber` |
 | **Timer** | `src/timer/index.ts` | Temporizador: cuenta regresiva in-memory con tick cada 1s vía Socket.IO, REST start/pause/resume/reset |
 | **Scoreboard** | `src/scoreboard/index.ts` | Scoreboard clásico + **Fighter**: barras de vida, rondas, timer server-side (setInterval 1s), daño/curación, resolución automática de rondas. Emisiones `scoreboard:update` y `fighter:update` |
 | **EventSub** | `src/eventsub/index.ts` | EventSub WebSocket listener: follows, subs, resubs, gifts, redemptions, cheers. Integrado con detección de follow bots |
@@ -338,3 +341,8 @@ twitch_overlay/
 | **49** | **⌨️ Atajos de teclado (keyboard shortcuts)** — `Ctrl+1` a `Ctrl+9` para navegar entre los primeros 9 paneles, `Ctrl+Shift+C` para abrir Chat, `Escape` para cerrar modales. Indicadores visuales en la sidebar (badge al lado del label en modo expandido, tooltip en modo colapsado). Los atajos se desactivan automáticamente al escribir en inputs de texto. Preparado para integración con Stream Deck. | ✅ |
 | **50** | **🔍 Global Command Palette** — Barra de búsqueda y comandos global accesible con `Ctrl+K`. Filtrado en tiempo real con soporte para palabras clave (keywords). Navegación por teclado (`ArrowUp`/`ArrowDown`, `Enter`). Animaciones de entrada/salida fluidas con Framer Motion. | ✅ |
 | **51** | **⚡ Lazy Loading de Pestañas** — Optimización del rendimiento dividiendo el bundle principal. Importación dinámica de paneles con `React.lazy()` y un componente `<Suspense>` que renderiza un `TabSkeleton` animado mientras el chunk se descarga. Mejora drástica del tiempo de carga inicial en la app de escritorio de Electron. | ✅ |
+| **52** | **🔍 UI Zoom & Escalado 2K/4K** — Escalado responsive automático para monitores de alta densidad: font-size base 16px, 2K (≥2500px → 20px) y 4K (≥3800px → 28px). Control manual desde ConfigPanel con niveles 100%, 125%, 150%, 200%. Persistencia en localStorage vía `data-zoom`. Zoom bloqueado a 16px en overlays. | ✅ |
+| **53** | **⚙️ HUD Configurable** — Panel de configuración del Stream HUD con toggles para cada campo (viewers, followers, subs, uptime, game, title, last follower, last subscriber). URL de overlay dinámica con parámetros individuales por campo. Persistencia en localStorage. Nuevos campos `lastFollower` y `lastSubscriber` en backend y shared types. | ✅ |
+| **54** | **🎤 TTS "Leer autor"** — Nuevo filtro TTS que antepone el nombre de usuario al mensaje. Interfaz de filtros migrada de checkboxes a componentes Toggle. Traducciones actualizadas en 5 idiomas. | ✅ |
+| **55** | **🔐 Auth resiliente** — Restauración de sesión con try-catch para base de datos no inicializada. Polling con retroalimentación real de errores. Rate limit aumentado de 12 a 30 peticiones/min. Soporte `ELECTRON_RUN_AS_NODE` para DB schema push en Electron. | ✅ |
+| **56** | **🖥️ Sidebar mejorada** — Ancho expandido aumentado de 220px a 260px. Hover effect en botones de navegación. Layout mejorado del footer en modo colapsado (columna con más gap). | ✅ |
