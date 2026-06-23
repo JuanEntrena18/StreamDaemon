@@ -14,7 +14,7 @@
   bottom: 0;
   z-index: 101;
   width: 80vw;
-  max-width: 220px;
+  max-width: 260px;
   background: rgba(13,13,30,0.98);
   border-right: 1px solid var(--sf-border);
   display: flex;
@@ -154,6 +154,10 @@
 }
 .navLabel {
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  text-align: left;
 }
 
 .navShortcut {

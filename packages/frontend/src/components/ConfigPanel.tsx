@@ -19,6 +19,16 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
   const { authenticated, user, loading: authLoading, login, loginBrowser, logout, deviceState, cancelDeviceLogin } = useAuthStatus();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
+  const [uiZoom, setUiZoom] = useState(() => {
+    try { return localStorage.getItem('sf-ui-zoom') || 'auto'; } catch { return 'auto'; }
+  });
+
+  const handleZoomChange = (val: string) => {
+    setUiZoom(val);
+    try { localStorage.setItem('sf-ui-zoom', val); } catch {}
+    document.documentElement.setAttribute('data-zoom', val);
+  };
+
   return (
     <div className={styles.container}>
       <div className="mb-5">
@@ -259,6 +269,33 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
             >
               <span style={{ fontSize: '1.2rem', marginRight: '0.5rem' }}>{lang.icon}</span>
               {lang.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── UI Zoom ── */}
+      <div className="glass-card sf-card">
+        <p className="sf-section-title">{t('config.uiZoomTitle') || 'Tamaño de la interfaz'}</p>
+        <p className="text-sm text-muted" style={{ marginBottom: '1rem', lineHeight: 1.5 }}>
+          {t('config.uiZoomDesc') || 'Ajusta el zoom para monitores 2K/4K o según tu preferencia visual.'}
+        </p>
+
+        <div className="flex-row flex-wrap" style={{ gap: '0.75rem' }}>
+          {[
+            { id: 'auto', label: t('config.zoomAuto') || 'Auto' },
+            { id: '100', label: t('config.zoomNormal') || '100%' },
+            { id: '125', label: t('config.zoomLarge') || '125%' },
+            { id: '150', label: t('config.zoomXLarge') || '150%' },
+            { id: '200', label: t('config.zoomHuge') || '200%' },
+          ].map(opt => (
+            <button
+              key={opt.id}
+              onClick={() => handleZoomChange(opt.id)}
+              className={`sf-btn ${uiZoom === opt.id ? 'sf-btn-primary' : 'sf-btn-ghost'}`}
+              style={{ flex: 1, minWidth: '80px', padding: '0.6rem', justifyContent: 'center' }}
+            >
+              {opt.label}
             </button>
           ))}
         </div>

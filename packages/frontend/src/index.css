@@ -286,6 +286,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── UI Scaling (2K & 4K Auto Support) ── */
+html { font-size: 16px; }
+
+/* 2K Screens (~2560px width) */
+@media (min-width: 2500px) {
+  html { font-size: 20px; }
+}
+
+/* 4K Screens (~3840px width) */
+@media (min-width: 3800px) {
+  html { font-size: 28px; }
+}
+
+/* Manual Zoom Overrides */
+html[data-zoom="100"] { font-size: 16px !important; }
+html[data-zoom="125"] { font-size: 20px !important; }
+html[data-zoom="150"] { font-size: 24px !important; }
+html[data-zoom="200"] { font-size: 32px !important; }
+
 /* ── Accessibility ── */
 :focus-visible {
   outline: 2px solid var(--sf-primary-light);
@@ -321,6 +340,7 @@ body {
   position: relative;
   overflow: hidden;
   background: transparent;
+  font-size: 16px; /* Prevent UI scaling from breaking overlay layouts */
 }
 
 /* Overlay floating control bar */

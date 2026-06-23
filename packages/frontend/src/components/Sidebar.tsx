@@ -26,7 +26,7 @@ interface SidebarProps {
   badges?: Record<string, number>;
 }
 
-const SIDEBAR_WIDTH_EXPANDED = 220;
+const SIDEBAR_WIDTH_EXPANDED = 260;
 const SIDEBAR_WIDTH_COLLAPSED = 56;
 
 export function Sidebar({

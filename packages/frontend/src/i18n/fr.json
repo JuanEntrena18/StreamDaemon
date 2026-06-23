@@ -189,7 +189,16 @@
     "licencia": "Licence AGPLv3 · Usage commercial nécessite licence duale",
     "apoyoTitle": "☕ Soutenir le développement",
     "apoyoDesc": "StreamForger est open-source et gratuit. Si vous aimez le projet, offrez-moi un café.",
-    "invitameCafe": "Offrez-moi un café"
+    "invitameCafe": "Offrez-moi un café",
+    "languageTitle": "Langue / Language",
+    "languageDesc": "Sélectionnez la langue de l'interface.",
+    "uiZoomTitle": "Taille de l'interface",
+    "uiZoomDesc": "Ajustez le zoom pour les écrans 2K/4K.",
+    "zoomAuto": "Auto",
+    "zoomNormal": "100%",
+    "zoomLarge": "125%",
+    "zoomXLarge": "150%",
+    "zoomHuge": "200%"
   },
   "obs": {
     "start": "Début",

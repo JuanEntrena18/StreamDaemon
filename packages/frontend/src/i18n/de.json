@@ -188,8 +188,17 @@
     "irRepo": "Zum Repo ↗",
     "licencia": "AGPLv3-Lizenz · Kommerzielle Nutzung erfordert Dual-Lizenz",
     "apoyoTitle": "☕ Entwicklung unterstützen",
-    "apoyoDesc": "StreamForger ist Open Source und kostenlos. Wenn dir das Projekt gefällt, lad mich auf einen Kaffee ein.",
-    "invitameCafe": "Kauf mir einen Kaffee"
+    "apoyoDesc": "StreamForger ist Open Source und kostenlos. Wenn dir das Projekt gefällt, spendiere mir einen Kaffee.",
+    "invitameCafe": "Kauf mir einen Kaffee",
+    "languageTitle": "Sprache / Language",
+    "languageDesc": "Wählen Sie die Sprache der Schnittstelle.",
+    "uiZoomTitle": "Schnittstellengröße",
+    "uiZoomDesc": "Passen Sie den Zoom für 2K/4K-Monitore an.",
+    "zoomAuto": "Auto",
+    "zoomNormal": "100%",
+    "zoomLarge": "125%",
+    "zoomXLarge": "150%",
+    "zoomHuge": "200%"
   },
   "obs": {
     "start": "Start",
