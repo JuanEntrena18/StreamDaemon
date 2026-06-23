@@ -692,8 +692,18 @@
     "iniciarActualizacion": "Aktualisierung starten",
     "actualizarAhora": "Jetzt aktualisieren",
     "actualizando": "⏺ Aktualisiert alle 10s",
-    "manual": "⏹ Manuelle Aktualisierung",
-    "overlayUrl": "🔌 Overlay-URL"
+    "manual": "⏹ Manuelles Update",
+    "overlayUrl": "🔌 Overlay-URL",
+    "configTitle": "HUD Konfiguration",
+    "configDesc": "Wählen Sie aus, welche Elemente im Stream-HUD-Overlay angezeigt werden sollen.",
+    "showViewers": "Zuschauer",
+    "showFollowers": "Follower",
+    "showSubs": "Abonnenten",
+    "showUptime": "Uptime",
+    "showGame": "Aktuelles Spiel",
+    "showTitle": "Stream-Titel",
+    "showLastFollower": "Letzter Follower",
+    "showLastSubscriber": "Letzter Abonnent"
   },
   "scoreboard": {
     "title": "🏆 Scoreboard",

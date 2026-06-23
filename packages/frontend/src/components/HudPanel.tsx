@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiGet, apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import { useTranslation } from '../i18n/context';
-import type { HudData } from '@streamforger/shared';
+import type { HudData, HudConfig } from '@streamforger/shared';
+import { Toggle } from './Toggle';
 import styles from './HudPanel.module.css';
 
 interface Props {
@@ -14,6 +15,38 @@ export function HudPanel({ channel }: Props) {
   const [hud, setHud] = useState<HudData | null>(null);
   const [polling, setPolling] = useState(false);
   const { socket, connected } = useSocket();
+  const [config, setConfig] = useState<HudConfig>(() => {
+    try {
+      const saved = localStorage.getItem('sf-hud-config');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      showViewers: true, showFollowers: true, showSubs: true,
+      showUptime: true, showGame: true, showTitle: false,
+      showLastFollower: false, showLastSubscriber: false,
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sf-hud-config', JSON.stringify(config));
+  }, [config]);
+
+  const updateConfig = (key: keyof HudConfig, value: boolean) => {
+    setConfig(prev => ({ ...prev, [key]: value }));
+  };
+
+  const overlayParams = new URLSearchParams();
+  overlayParams.set('mode', 'hud');
+  overlayParams.set('channel', channel);
+  overlayParams.set('viewers', config.showViewers ? '1' : '0');
+  overlayParams.set('followers', config.showFollowers ? '1' : '0');
+  overlayParams.set('subs', config.showSubs ? '1' : '0');
+  overlayParams.set('uptime', config.showUptime ? '1' : '0');
+  overlayParams.set('game', config.showGame ? '1' : '0');
+  overlayParams.set('title', config.showTitle ? '1' : '0');
+  overlayParams.set('lastFollower', config.showLastFollower ? '1' : '0');
+  overlayParams.set('lastSub', config.showLastSubscriber ? '1' : '0');
+  const overlayUrl = `${OVERLAY_BASE_URL}/overlay.html?${overlayParams.toString()}`;
 
   useEffect(() => {
     if (channel && connected) {
@@ -109,6 +142,48 @@ export function HudPanel({ channel }: Props) {
         )}
       </div>
 
+      {/* Config Panel */}
+      <div className={`glass-card ${styles.card}`}>
+        <p className="sf-section-title">{t('hud.configTitle') || 'Configuración del HUD'}</p>
+        <p className="text-sm text-muted mb-4">
+          {t('hud.configDesc') || 'Selecciona qué elementos mostrar en el overlay del Stream HUD.'}
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.85rem' }}>{t('hud.showViewers') || 'Viewers'}</span>
+            <Toggle checked={config.showViewers} onChange={() => updateConfig('showViewers', !config.showViewers)} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.85rem' }}>{t('hud.showFollowers') || 'Followers'}</span>
+            <Toggle checked={config.showFollowers} onChange={() => updateConfig('showFollowers', !config.showFollowers)} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.85rem' }}>{t('hud.showSubs') || 'Subs'}</span>
+            <Toggle checked={config.showSubs} onChange={() => updateConfig('showSubs', !config.showSubs)} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.85rem' }}>{t('hud.showUptime') || 'Uptime'}</span>
+            <Toggle checked={config.showUptime} onChange={() => updateConfig('showUptime', !config.showUptime)} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.85rem' }}>{t('hud.showGame') || 'Juego actual'}</span>
+            <Toggle checked={config.showGame} onChange={() => updateConfig('showGame', !config.showGame)} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.85rem' }}>{t('hud.showTitle') || 'Título del stream'}</span>
+            <Toggle checked={config.showTitle} onChange={() => updateConfig('showTitle', !config.showTitle)} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.85rem' }}>{t('hud.showLastFollower') || 'Último Follower'}</span>
+            <Toggle checked={config.showLastFollower} onChange={() => updateConfig('showLastFollower', !config.showLastFollower)} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '0.85rem' }}>{t('hud.showLastSubscriber') || 'Último Subscriptor'}</span>
+            <Toggle checked={config.showLastSubscriber} onChange={() => updateConfig('showLastSubscriber', !config.showLastSubscriber)} />
+          </div>
+        </div>
+      </div>
+
       <div className={`glass-card ${styles.card}`}>
         <p className="sf-section-title">{t('hud.autoTitle')}</p>
         <p className="text-sm text-muted mb-4">
@@ -133,7 +208,7 @@ export function HudPanel({ channel }: Props) {
           Agregá esta URL como Browser Source en OBS:
         </p>
         <div className={styles.urlBox}>
-          {OVERLAY_BASE_URL}/overlay.html?mode=hud&amp;channel={channel}
+          {overlayUrl}
         </div>
       </div>
     </div>

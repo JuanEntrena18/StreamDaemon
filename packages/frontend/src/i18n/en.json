@@ -704,7 +704,17 @@
     "actualizarAhora": "Update now",
     "actualizando": "⏺ Updating every 10s",
     "manual": "⏹ Manual update",
-    "overlayUrl": "🔌 Overlay URL"
+    "overlayUrl": "🔌 Overlay URL",
+    "configTitle": "HUD Configuration",
+    "configDesc": "Select which elements to show on the Stream HUD overlay.",
+    "showViewers": "Viewers",
+    "showFollowers": "Followers",
+    "showSubs": "Subs",
+    "showUptime": "Uptime",
+    "showGame": "Current game",
+    "showTitle": "Stream title",
+    "showLastFollower": "Last Follower",
+    "showLastSubscriber": "Last Subscriber"
   },
   "scoreboard": {
     "title": "⚔️ Fighter Scoreboard",

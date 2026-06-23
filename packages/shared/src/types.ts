@@ -131,6 +131,8 @@ export interface HudData {
   gameName: string;
   startedAt: string | null;
   isLive: boolean;
+  lastFollower?: string | null;
+  lastSubscriber?: string | null;
 }
 
 export interface HudConfig {
@@ -140,6 +142,8 @@ export interface HudConfig {
   showUptime: boolean;
   showGame: boolean;
   showTitle: boolean;
+  showLastFollower: boolean;
+  showLastSubscriber: boolean;
 }
 
 export interface TimerState {

@@ -11,10 +11,25 @@ interface Props {
 export function HudOverlay({ channel }: Props) {
   const { t } = useTranslation();
   const [hud, setHud] = useState<HudData | null>(null);
-  const [config] = useState<HudConfig>({
+  const [config, setConfig] = useState<HudConfig>({
     showViewers: true, showFollowers: true, showSubs: true,
     showUptime: true, showGame: true, showTitle: false,
+    showLastFollower: false, showLastSubscriber: false,
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setConfig(prev => ({
+      showViewers: params.has('viewers') ? params.get('viewers') === '1' : prev.showViewers,
+      showFollowers: params.has('followers') ? params.get('followers') === '1' : prev.showFollowers,
+      showSubs: params.has('subs') ? params.get('subs') === '1' : prev.showSubs,
+      showUptime: params.has('uptime') ? params.get('uptime') === '1' : prev.showUptime,
+      showGame: params.has('game') ? params.get('game') === '1' : prev.showGame,
+      showTitle: params.has('title') ? params.get('title') === '1' : prev.showTitle,
+      showLastFollower: params.has('lastFollower') ? params.get('lastFollower') === '1' : prev.showLastFollower,
+      showLastSubscriber: params.has('lastSub') ? params.get('lastSub') === '1' : prev.showLastSubscriber,
+    }));
+  }, []);
   const { socket, connected } = useSocket();
 
   useEffect(() => {
@@ -62,6 +77,8 @@ export function HudOverlay({ channel }: Props) {
     { key: 'followers', show: config.showFollowers, icon: '❤️', label: 'Followers', value: hud.followers.toLocaleString() },
     { key: 'subs', show: config.showSubs, icon: '⭐', label: 'Subs', value: hud.subscribers.toLocaleString() },
     { key: 'uptime', show: config.showUptime, icon: '⏱️', label: 'Uptime', value: formatUptime(hud.uptimeSeconds) },
+    { key: 'lastFollower', show: config.showLastFollower && !!hud.lastFollower, icon: '👤', label: 'Last Follower', value: hud.lastFollower || '' },
+    { key: 'lastSub', show: config.showLastSubscriber && !!hud.lastSubscriber, icon: '💎', label: 'Last Sub', value: hud.lastSubscriber || '' },
   ];
 
   const visibleItems = items.filter((i) => i.show);

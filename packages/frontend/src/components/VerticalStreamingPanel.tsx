@@ -221,7 +221,7 @@ function PluginsSection() {
         <StepList steps={[
           {
             title: 'Instalación',
-            desc: 'Descarga la最新 versión beta desde aitum.tv/vertical. Cierra OBS antes de instalar.',
+            desc: 'Descarga la última versión beta desde aitum.tv/vertical. Cierra OBS antes de instalar.',
           },
           {
             title: 'Configuración en OBS',
