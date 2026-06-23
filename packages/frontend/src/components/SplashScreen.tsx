@@ -83,7 +83,7 @@ export function SplashScreen({ onReady }: Props) {
         <div className={styles.divider} />
 
         <div className={styles.version}>
-          <div>v0.3.5</div>
+          <div>v0.3.7</div>
           <div>by Cyber Haute Couture</div>
         </div>
 
