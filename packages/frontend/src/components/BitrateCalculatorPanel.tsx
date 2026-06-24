@@ -4,6 +4,7 @@ import styles from './BitrateCalculatorPanel.module.css';
 
 
 const PRESETS: Record<string, { w: number; h: number }> = {
+  '1440p': { w: 2560, h: 1440 },
   '1080p': { w: 1920, h: 1080 },
   '900p': { w: 1600, h: 900 },
   '720p': { w: 1280, h: 720 },
@@ -19,6 +20,8 @@ interface Tier {
 }
 
 const TIERS: Tier[] = [
+  { label: '1440p60', res: '1440p', w: 2560, h: 1440, fps: 60, bpp: 0.025, audio: 160 },
+  { label: '1440p30', res: '1440p', w: 2560, h: 1440, fps: 30, bpp: 0.05, audio: 128 },
   { label: '1080p60', res: '1080p', w: 1920, h: 1080, fps: 60, bpp: 0.05, audio: 160 },
   { label: '1080p30', res: '1080p', w: 1920, h: 1080, fps: 30, bpp: 0.10, audio: 160 },
   { label: '900p60',  res: '900p',  w: 1600, h: 900,  fps: 60, bpp: 0.08, audio: 128 },

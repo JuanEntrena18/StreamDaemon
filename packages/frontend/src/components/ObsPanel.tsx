@@ -114,7 +114,10 @@ export function ObsPanel({ channel }: Props) {
       }
       if (selectedTheme === 'fortnite') {
         return item.id === 'fortnite' || item.id === 'fortnite-alerts'
-          || item.id === 'fortnite-vertical' || item.id === 'fortnite-alerts-vertical';
+          || item.id === 'fortnite-vertical' || item.id === 'fortnite-alerts-vertical'
+          || item.id === 'fortnite-vertical-inicio' || item.id === 'fortnite-vertical-despedida'
+          || item.id === 'fortnite-vertical-brb' || item.id === 'fortnite-vertical-gameplay'
+          || item.id === 'fortnite-vertical-just-chatting';
       }
       if (selectedTheme === 'subnautica2') return item.id === 'subnautica2_standalone';
       const cat = CATEGORIES.find((c) => c.id === item.category);
