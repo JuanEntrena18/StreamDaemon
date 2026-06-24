@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortnite Vertical Gameplay</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Roboto:wght@700&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: transparent;
+            overflow: hidden; position: relative;
+        }
+
+        /* Área Principal Transparente para el Juego (80% superior) */
+        .game-area {
+            width: 1080px; height: 1550px;
+            background-color: transparent; position: relative; z-index: 1;
+        }
+
+        /* Etiqueta flotante superior izquierda (Support a Creator simulado) */
+        .sac-tag {
+            position: absolute; top: 40px; left: 40px;
+            background: rgba(0,0,0,0.6); border: 4px solid #fff;
+            padding: 10px 20px; border-radius: 8px; transform: skewX(-10deg);
+            font-family: 'Luckiest Guy', cursive; color: #fff; font-size: 24px;
+            -webkit-text-stroke: 1px #000; text-shadow: 2px 2px 0 #000;
+        }
+        .sac-tag span { display: block; transform: skewX(10deg); }
+
+        /* Panel Inferior de Chat (Inclinado y Estilizado) */
+        .bottom-panel {
+            width: 1080px; height: 370px;
+            background: linear-gradient(0deg, #1a0033 0%, rgba(26,0,51,0.8) 100%);
+            border-top: 8px solid #00ffff; position: relative;
+            display: flex; flex-direction: column; z-index: 5;
+            box-shadow: 0 -10px 30px rgba(0,255,255,0.2);
+        }
+
+        .chat-header {
+            background: #ffea00; color: #000; padding: 15px 30px;
+            font-family: 'Luckiest Guy', cursive; font-size: 35px; letter-spacing: 3px;
+            transform: skewX(-15deg); margin: -20px 0 0 40px; width: max-content;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.5); border: 4px solid #fff;
+        }
+        .chat-header-text { display: block; transform: skewX(15deg); }
+
+        /* Contenedor del Chat */
+        .chat-container {
+            flex: 1; padding: 20px 40px; display: flex; flex-direction: column;
+            justify-content: flex-end; overflow: hidden; z-index: 10;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .chat-msg {
+            background: rgba(0, 0, 0, 0.5); border-left: 6px solid #00ffff;
+            padding: 15px 20px; margin-top: 15px; border-radius: 0 10px 10px 0;
+            font-size: 24px; color: #fff; line-height: 1.4;
+            animation: slideIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform-origin: left center;
+        }
+
+        @keyframes slideIn { 
+            0% { opacity: 0; transform: scale(0.8) translateX(-50px); } 
+            100% { opacity: 1; transform: scale(1) translateX(0); } 
+        }
+
+        .chat-user { font-weight: 900; color: #ffea00; margin-right: 10px; font-size: 26px; text-transform: uppercase; text-shadow: 2px 2px 4px #000; }
+
+        /* Ancla React */
+        #overlay-root { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        #overlay-root > * { pointer-events: auto; }
+
+    </style>
+</head>
+<body>
+
+    <div id="overlay-root"></div>
+
+    <div class="game-area">
+        <div class="sac-tag"><span>CÓDIGO CREADOR</span></div>
+    </div>
+
+    <div class="bottom-panel">
+        <div class="chat-header">
+            <span class="chat-header-text">CHAT DEL ESCUADRÓN</span>
+        </div>
+        <div class="chat-container" id="chatWrapper">
+            <!-- JS inyecta mensajes aquí -->
+        </div>
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MESSAGES = 5; // Altura reducida requiere menos mensajes
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#ffea00';
+
+            msgNode.innerHTML = `<span class="chat-user" style="color: ${finalColor}">${safeUsername}:</span><span class="chat-text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MESSAGES) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(event.data.username, event.data.message, event.data.color);
+            }
+        });
+    </script>
+    
+    <script type="module" src="./src/overlay.tsx"></script>
+</body>
+</html>

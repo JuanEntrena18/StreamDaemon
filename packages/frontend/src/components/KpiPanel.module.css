@@ -1,0 +1,266 @@
+.panel {
+  padding: 1.5rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.subTabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color, #2d2d3d);
+  padding-bottom: 0.5rem;
+}
+
+.subTab {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #8b8ba7);
+  cursor: pointer;
+  font-size: 0.875rem;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.2s;
+}
+
+.subTab:hover {
+  color: var(--text-primary, #e0e0f0);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.subTabActive {
+  color: var(--accent, #6366f1);
+  background: rgba(99, 102, 241, 0.12);
+  font-weight: 600;
+}
+
+.tabContent {
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.loading {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary, #8b8ba7);
+}
+
+/* Period bar */
+.periodBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #8b8ba7);
+}
+
+.periodBtn {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--border-color, #2d2d3d);
+  background: transparent;
+  color: var(--text-secondary, #8b8ba7);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.periodBtn:hover {
+  border-color: var(--accent, #6366f1);
+  color: var(--accent, #6366f1);
+}
+
+.periodBtn.active {
+  background: var(--accent, #6366f1);
+  color: #fff;
+  border-color: var(--accent, #6366f1);
+}
+
+/* KPI card grid */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.kpiCard {
+  background: var(--surface, #1a1a2e);
+  border: 1px solid var(--border-color, #2d2d3d);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.kpiLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary, #8b8ba7);
+}
+
+.kpiValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent, #6366f1);
+}
+
+/* Raids */
+.raidSection {
+  margin-top: 1rem;
+}
+
+.raidSection h3 {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary, #e0e0f0);
+}
+
+.raidList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.raidItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  background: var(--surface, #1a1a2e);
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.raidFrom {
+  font-weight: 600;
+  color: var(--accent, #6366f1);
+}
+
+.raidViewers {
+  color: var(--text-secondary, #8b8ba7);
+}
+
+.raidTime {
+  margin-left: auto;
+  color: var(--text-tertiary, #6b6b8a);
+  font-size: 0.75rem;
+}
+
+/* Audience */
+.audienceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.activeViewers strong {
+  color: var(--accent, #6366f1);
+  font-size: 1.2rem;
+}
+
+.snapshotCount {
+  color: var(--text-secondary, #8b8ba7);
+  font-size: 0.8rem;
+}
+
+.chartContainer {
+  background: var(--surface, #1a1a2e);
+  border: 1px solid var(--border-color, #2d2d3d);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.chartSvg {
+  width: 100%;
+  height: 100px;
+}
+
+.chartEmpty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary, #8b8ba7);
+  font-size: 0.85rem;
+}
+
+/* Game table */
+.gameTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.gameTable th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-color, #2d2d3d);
+  color: var(--text-secondary, #8b8ba7);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.gameTable td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-color, #2d2d3d);
+  color: var(--text-primary, #e0e0f0);
+}
+
+.gameTable tbody tr:hover {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+/* Slots */
+.slotsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.slotBar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.slotLabel {
+  width: 140px;
+  font-size: 0.8rem;
+  color: var(--text-primary, #e0e0f0);
+  flex-shrink: 0;
+}
+
+.slotBarTrack {
+  flex: 1;
+  height: 20px;
+  background: var(--surface, #1a1a2e);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.slotBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  min-width: 2px;
+}
+
+.slotValue {
+  width: 60px;
+  text-align: right;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent, #6366f1);
+  flex-shrink: 0;
+}

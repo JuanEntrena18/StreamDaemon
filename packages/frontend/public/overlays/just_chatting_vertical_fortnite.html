@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortnite Vertical Just Chatting</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Roboto:wght@700&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: #1a0033;
+            overflow: hidden; position: relative; display: flex; flex-direction: column;
+        }
+
+        /* Mitad Superior: Webcam (Canal Alfa para OBS) */
+        .cam-area {
+            width: 1080px; height: 960px; background-color: transparent;
+            position: relative; z-index: 5;
+            border-bottom: 12px solid #00ffff;
+            box-shadow: 0 10px 40px rgba(0,255,255,0.4);
+        }
+
+        /* Cartel "En Vivo" en la cámara */
+        .live-tag {
+            position: absolute; top: 40px; right: 40px;
+            background: #ff0055; color: #fff; padding: 10px 25px;
+            transform: skewX(-15deg); font-family: 'Luckiest Guy', cursive;
+            font-size: 35px; border: 4px solid #fff; box-shadow: 5px 5px 0 #000;
+            animation: pulseLive 2s infinite;
+        }
+        .live-tag span { display: block; transform: skewX(15deg); -webkit-text-stroke: 2px #000; text-shadow: 3px 3px 0 #000; }
+        
+        @keyframes pulseLive { 0%, 100% { transform: skewX(-15deg) scale(1); } 50% { transform: skewX(-15deg) scale(1.05); } }
+
+        /* Mitad Inferior: Lobby & Chat */
+        .bottom-area {
+            width: 1080px; height: 960px;
+            background: radial-gradient(circle at bottom, #3a0088 0%, #1a0033 100%);
+            position: relative; display: flex; flex-direction: column; z-index: 1;
+        }
+
+        /* Efecto de fondo sutil del lobby */
+        .lobby-grid {
+            position: absolute; width: 100%; height: 100%; z-index: 1;
+            background-image: linear-gradient(rgba(0, 255, 255, 0.05) 2px, transparent 2px), linear-gradient(90deg, rgba(0, 255, 255, 0.05) 2px, transparent 2px);
+            background-size: 60px 60px; pointer-events: none;
+        }
+
+        /* Logo Contenedor (Escudo) */
+        .logo-container {
+            position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+            width: 200px; height: 200px; background: #fffb00;
+            border-radius: 50%; border: 8px solid #fff; z-index: 10;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8), inset 0 0 20px #000;
+        }
+        /* INSTRUCCIÓN: Cambia la imagen de fondo por tu avatar/logo */
+        .logo-inner {
+            width: 180px; height: 180px; border-radius: 50%;
+            background-color: #000; background-image: url(''); background-size: cover;
+        }
+
+        /* Contenedor del Chat */
+        .chat-container {
+            flex: 1; padding: 120px 50px 40px 50px; display: flex; flex-direction: column;
+            justify-content: flex-end; overflow: hidden; z-index: 10;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .chat-msg {
+            background: rgba(0, 0, 0, 0.6); border: 2px solid #00ffff;
+            border-left: 10px solid #ffea00; border-radius: 8px;
+            padding: 20px 25px; margin-top: 20px;
+            font-size: 28px; color: #fff; line-height: 1.5;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+            animation: bounceIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform-origin: bottom center; opacity: 0;
+        }
+
+        @keyframes bounceIn { to { opacity: 1; transform: scale(1); } }
+
+        .chat-user { font-weight: 900; color: #00d2ff; margin-right: 15px; font-size: 30px; text-transform: uppercase; text-shadow: 2px 2px 0 #000; -webkit-text-stroke: 1px #000;}
+
+        #overlay-root { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        #overlay-root > * { pointer-events: auto; }
+    </style>
+</head>
+<body>
+
+    <div id="overlay-root"></div>
+
+    <div class="cam-area">
+        <div class="live-tag"><span>EN DIRECTO</span></div>
+    </div>
+
+    <div class="bottom-area">
+        <div class="lobby-grid"></div>
+        
+        <div class="logo-container">
+            <div class="logo-inner"></div>
+        </div>
+        
+        <div class="chat-container" id="chatWrapper">
+            <!-- Mensajes JS -->
+        </div>
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MESSAGES = 7; 
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#00d2ff';
+
+            msgNode.innerHTML = `<span class="chat-user" style="color: ${finalColor}">${safeUsername}:</span><span class="chat-text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MESSAGES) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(event.data.username, event.data.message, event.data.color);
+            }
+        });
+    </script>
+    
+    <script type="module" src="./src/overlay.tsx"></script>
+</body>
+</html>

@@ -3,6 +3,7 @@ import { ApiClient } from '@twurple/api';
 import { authProvider } from '../auth/index.js';
 import { getIO } from '../socket/index.js';
 import type { HudData } from '@streamforger/shared';
+import { recordSnapshot } from '../kpi/index.js';
 
 let pollInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -74,7 +75,10 @@ export function setupHud(app: FastifyInstance) {
     if (pollInterval) clearInterval(pollInterval);
     pollInterval = setInterval(async () => {
       const data = await fetchHud(channel);
-      if (data) getIO().to(`channel:${channel}`).emit('hud:update', data);
+      if (data) {
+        getIO().to(`channel:${channel}`).emit('hud:update', data);
+        recordSnapshot(channel, data.viewers, 0);
+      }
     }, interval * 1000);
     reply.send({ ok: true, interval });
   });

@@ -185,6 +185,18 @@ export async function setupEventSub() {
     });
   });
 
+  trySubscribe('channel.raid', () => {
+    listener!.onChannelRaidTo(userId, (e) => {
+      emit(channelName, 'channel:raid', {
+        fromChannel: e.raidingBroadcasterName,
+        fromDisplayName: e.raidingBroadcasterDisplayName,
+        viewerCount: e.viewers,
+        timestamp: Date.now(),
+      });
+      recordEvent(channelName, 'raid', e.raidingBroadcasterDisplayName, `hizo raid con ${e.viewers} espectadores`, e.viewers);
+    });
+  });
+
   console.log(`✅ EventSub listener started for ${currentUser.displayName}`);
 }
 

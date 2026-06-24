@@ -242,3 +242,50 @@ export interface SubathonAction {
   timestamp: number;
   tier?: string;
 }
+
+export interface ViewerSnapshot {
+  timestamp: number;
+  viewers: number;
+  chattersActive: number;
+}
+
+export interface KpiOverview {
+  channel: string;
+  followers: number;
+  subscribers: number;
+  subToFollowRatio: number;
+  avgViewers: number;
+  peakViewers: number;
+  totalViews: number;
+  totalHoursStreamed: number;
+  followersGained: number;
+  subsGained: number;
+  bitsDonated: number;
+  estimatedRevenue: number;
+  streamsThisPeriod: number;
+  isLive: boolean;
+}
+
+export interface GamePerformance {
+  gameName: string;
+  streamCount: number;
+  totalViews: number;
+  avgViewers: number;
+  maxViewers: number;
+  followersGained: number;
+  avgDuration: number;
+}
+
+export interface BestSlot {
+  dayOfWeek: number;
+  hourStart: number;
+  avgViewers: number;
+  streamCount: number;
+}
+
+export interface ChannelRaidEvent {
+  fromChannel: string;
+  fromDisplayName: string;
+  viewerCount: number;
+  timestamp: number;
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortnite Vertical Ending</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Roboto:wght@900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: #1a0033;
+            overflow: hidden; font-family: 'Luckiest Guy', cursive; color: #ffffff;
+        }
+
+        .sky-bg {
+            position: absolute; width: 100%; height: 100%; z-index: 1;
+            background: linear-gradient(180deg, #00d2ff 0%, #1a0033 100%);
+        }
+
+        .ui-container {
+            position: absolute; z-index: 10; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding-top: 150px; text-align: center;
+        }
+
+        .victory-banner {
+            background: #ffea00; color: #000; padding: 30px 60px;
+            transform: skewX(-15deg); border: 8px solid #fff;
+            box-shadow: 15px 15px 0px rgba(0,0,0,0.5);
+            margin-bottom: 120px;
+        }
+        
+        .victory-banner span { 
+            display: block; transform: skewX(15deg); font-size: 100px; 
+            letter-spacing: 5px; line-height: 1; -webkit-text-stroke: 2px #000;
+        }
+
+        /* Contenedor de Redes */
+        .social-container {
+            display: flex; flex-direction: column; gap: 50px; width: 850px;
+        }
+
+        .social-box {
+            background: rgba(0, 0, 0, 0.6); border: 6px solid #00ffff;
+            border-radius: 20px; padding: 30px; display: flex; flex-direction: column; align-items: center;
+            box-shadow: 10px 10px 0 rgba(0,0,0,0.8);
+            transform: skewX(-5deg); transition: transform 0.2s;
+        }
+
+        .social-inner { transform: skewX(5deg); display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+        .platform { font-size: 40px; color: #ff0055; margin-bottom: 15px; letter-spacing: 4px; -webkit-text-stroke: 1px #fff; text-shadow: 3px 3px 0 #000; }
+        .username { font-family: 'Roboto', sans-serif; font-size: 50px; color: #ffffff; text-shadow: 3px 3px 0 #000; }
+
+    </style>
+</head>
+<body>
+    <div class="sky-bg"></div>
+
+    <div class="ui-container">
+        <div class="victory-banner">
+            <span>FIN DE LA<br>PARTIDA</span>
+        </div>
+
+        <div class="social-container">
+            <div class="social-box">
+                <div class="social-inner">
+                    <div class="platform">TWITCH</div>
+                    <div class="username">@tu_usuario</div>
+                </div>
+            </div>
+            <div class="social-box">
+                <div class="social-inner">
+                    <div class="platform">X / TWITTER</div>
+                    <div class="username">@tu_usuario</div>
+                </div>
+            </div>
+            <div class="social-box">
+                <div class="social-inner">
+                    <div class="platform">YOUTUBE</div>
+                    <div class="username">@tu_canal</div>
+                </div>
+            </div>
+            <div class="social-box">
+                <div class="social-inner">
+                    <div class="platform">INSTAGRAM</div>
+                    <div class="username">@tu_usuario</div>
+                </div>
+            </div>
+            <div class="social-box">
+                <div class="social-inner">
+                    <div class="platform">TIKTOK</div>
+                    <div class="username">@tu_usuario</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

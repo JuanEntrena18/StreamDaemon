@@ -203,7 +203,8 @@ export function App() {
       { id: 'gestor', label: s('gestorDelStream'), items: [{ id: 'dashboard' as Tab, icon: '📡', label: s('gestorTab'), shortcut: 'Ctrl+1' }] },
       { id: 'tracker-section', label: s('estadisticas'), items: [
         { id: 'tracker' as Tab, icon: '📈', label: s('trackerTab'), shortcut: 'Ctrl+2' },
-        { id: 'achievements' as Tab, icon: '🏆', label: s('achievementsTab'), shortcut: 'Ctrl+3' },
+        { id: 'kpi' as Tab, icon: '📊', label: s('kpiTab'), shortcut: 'Ctrl+3' },
+        { id: 'achievements' as Tab, icon: '🏆', label: s('achievementsTab') },
       ]},
       { id: 'chat-section', label: s('chat'), items: [{ id: 'chat' as Tab, icon: '💬', label: s('chatTab'), shortcut: 'Ctrl+4' }] },
       { id: 'security-section', label: s('seguridad'), items: [{ id: 'security' as Tab, icon: '🔒', label: s('antiBotsTab'), shortcut: 'Ctrl+5' }] },
