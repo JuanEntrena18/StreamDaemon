@@ -154,12 +154,15 @@ export function setupKpi(app: FastifyInstance) {
         ? videos.data.filter(v => v.creationDate >= startDate)
         : videos.data;
 
-      const gameMap = new Map<string, { views: number[]; durations: number[]; count: number; followersGained: number }>();
+      const channelInfo = await apiClient.channels.getChannelInfoById(user.id);
+      const fallbackGameName = channelInfo?.gameName || 'General';
+      const fallbackGameId = channelInfo?.gameId || '';
+
+      const gameMap = new Map<string, { views: number[]; durations: number[]; count: number; followersGained: number; boxArtUrl?: string }>();
       const events = getEvents(channel.toLowerCase());
 
       for (const video of filteredVideos) {
-        const raw = getRawData(video) as Record<string, any>;
-        const gameName = raw.game_name || 'Unknown';
+        const gameName = (raw.game_name && raw.game_name !== 'Unknown') ? raw.game_name : fallbackGameName;
         if (!gameMap.has(gameName)) gameMap.set(gameName, { views: [], durations: [], count: 0, followersGained: 0 });
         const entry = gameMap.get(gameName)!;
         entry.views.push(video.views);
@@ -170,8 +173,22 @@ export function setupKpi(app: FastifyInstance) {
         entry.followersGained += events.filter(e => e.timestamp >= startTime && e.timestamp <= endTime && e.type === 'follow').length;
       }
 
+      // Fetch box art URLs for games
+      for (const gameName of gameMap.keys()) {
+        try {
+          const game = await apiClient.games.getGameByName(gameName);
+          if (game) {
+            // Replace {width}x{height} with e.g. 144x192
+            gameMap.get(gameName)!.boxArtUrl = game.boxArtUrl.replace('{width}', '144').replace('{height}', '192');
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+
       const games: GamePerformance[] = Array.from(gameMap.entries()).map(([gameName, data]) => ({
         gameName,
+        boxArtUrl: data.boxArtUrl,
         streamCount: data.count,
         totalViews: data.views.reduce((a, b) => a + b, 0),
         avgViewers: Math.round(data.views.reduce((a, b) => a + b, 0) / data.count),

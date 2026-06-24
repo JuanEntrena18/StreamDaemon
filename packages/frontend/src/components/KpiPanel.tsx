@@ -3,6 +3,8 @@ import { useSocketEvent } from '../hooks/useSocket';
 import { apiGet } from '../utils/api';
 import { useTranslation } from '../i18n/context';
 import type { KpiOverview, ViewerSnapshot, GamePerformance, BestSlot, ChannelRaidEvent } from '@streamforger/shared';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { SkeletonCard } from './Skeletons';
 import styles from './KpiPanel.module.css';
 
 type SubTab = 'overview' | 'audience' | 'games' | 'slots';
@@ -29,22 +31,6 @@ function formatDuration(seconds: number): string {
 
 const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
-function MiniChart({ data, color = '#6366f1' }: { data: ViewerSnapshot[]; color?: string }) {
-  if (data.length < 2) return <div className={styles.chartEmpty}>Esperando datos...</div>;
-  const values = data.map(d => d.viewers);
-  const max = Math.max(...values, 1);
-  const w = 400;
-  const h = 100;
-  const stepX = w / (values.length - 1);
-  const points = values.map((v, i) => `${i * stepX},${h - (v / max) * h}`).join(' ');
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} className={styles.chartSvg} preserveAspectRatio="none">
-      <polyline points={points} fill="none" stroke={color} strokeWidth="2" />
-      <path d={`M0,${h} ${points} ${w},${h}Z`} fill={color} fillOpacity="0.1" />
-    </svg>
-  );
-}
-
 function OverviewTab({ channel }: { channel: string }) {
   const { t } = useTranslation();
   const [data, setData] = useState<KpiOverview | null>(null);
@@ -67,28 +53,41 @@ function OverviewTab({ channel }: { channel: string }) {
     setRaids(prev => [e, ...prev].slice(0, 20));
   }, []));
 
-  if (loading) return <div className={styles.loading}>Cargando...</div>;
+  if (loading) {
+    return (
+      <div className={styles.tabContent}>
+        <div className={styles.periodBar}>
+          <SkeletonCard style={{ width: 300, height: 32 }} />
+        </div>
+        <div className={styles.kpiGrid}>
+          {Array.from({ length: 9 }).map((_, i) => (
+            <SkeletonCard key={i} style={{ height: 80 }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
   if (!data) return <div className={styles.loading}>Seleccioná un período</div>;
 
   const cards = [
-    { label: t('kpi.avgViewers'), value: formatNumber(data.avgViewers) },
-    { label: t('kpi.peakViewers'), value: formatNumber(data.peakViewers) },
-    { label: t('kpi.followersGained'), value: formatNumber(data.followersGained) },
-    { label: t('kpi.subsGained'), value: formatNumber(data.subsGained) },
-    { label: t('kpi.bitsDonated'), value: formatNumber(data.bitsDonated) },
-    { label: t('kpi.estimatedRevenue'), value: formatCurrency(data.estimatedRevenue) },
-    { label: t('kpi.totalViews'), value: formatNumber(data.totalViews) },
-    { label: t('kpi.totalHours'), value: data.totalHoursStreamed.toFixed(1) + 'h' },
-    { label: t('kpi.streams'), value: data.streamsThisPeriod.toString() },
+    { label: t('kpi.avgViewers') || 'Promedio Viewers', value: formatNumber(data.avgViewers) },
+    { label: t('kpi.peakViewers') || 'Pico Viewers', value: formatNumber(data.peakViewers) },
+    { label: t('kpi.followersGained') || 'Nuevos Seguidores', value: formatNumber(data.followersGained) },
+    { label: t('kpi.subsGained') || 'Nuevas Subs', value: formatNumber(data.subsGained) },
+    { label: t('kpi.bitsDonated') || 'Bits Donados', value: formatNumber(data.bitsDonated) },
+    { label: t('kpi.estimatedRevenue') || 'Ingresos Estimados', value: formatCurrency(data.estimatedRevenue) },
+    { label: t('kpi.totalViews') || 'Vistas Totales', value: formatNumber(data.totalViews) },
+    { label: t('kpi.totalHours') || 'Horas Transmitidas', value: data.totalHoursStreamed.toFixed(1) + 'h' },
+    { label: t('kpi.streams') || 'Streams', value: data.streamsThisPeriod.toString() },
   ];
 
   return (
     <div className={styles.tabContent}>
       <div className={styles.periodBar}>
-        <span>{t('kpi.period')}:</span>
+        <span>{t('kpi.period') || 'Período'}:</span>
         {['7d', '30d', '90d', 'all'].map(p => (
           <button key={p} className={`${styles.periodBtn} ${period === p ? styles.active : ''}`} onClick={() => setPeriod(p)}>
-            {t(`kpi.period${p}`)}
+            {t(`kpi.period${p}`) || p}
           </button>
         ))}
       </div>
@@ -102,7 +101,7 @@ function OverviewTab({ channel }: { channel: string }) {
       </div>
       {raids.length > 0 && (
         <div className={styles.raidSection}>
-          <h3>{t('kpi.recentRaids')}</h3>
+          <h3>{t('kpi.recentRaids') || 'Raids Recientes'}</h3>
           <div className={styles.raidList}>
             {raids.map((r, i) => (
               <div key={i} className={styles.raidItem}>
@@ -124,7 +123,7 @@ function AudienceTab({ channel }: { channel: string }) {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const fetchHistory = async () => {
       try {
         const res = await apiGet(`/kpi/viewers-history/${encodeURIComponent(channel)}`);
         if (res.ok) {
@@ -133,18 +132,43 @@ function AudienceTab({ channel }: { channel: string }) {
           setActive(d.activeViewers);
         }
       } catch { /* ignore */ }
-    }, 5000);
+    };
+    fetchHistory();
+    const interval = setInterval(fetchHistory, 15000);
     return () => clearInterval(interval);
   }, [channel]);
+
+  const formattedData = snapshots.map(s => ({
+    time: new Date(s.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    viewers: s.viewers,
+    chatters: s.chattersActive,
+  }));
 
   return (
     <div className={styles.tabContent}>
       <div className={styles.audienceHeader}>
-        <span className={styles.activeViewers}>{t('kpi.activeViewers')}: <strong>{active}</strong></span>
-        <span className={styles.snapshotCount}>{snapshots.length} {t('kpi.snapshots')}</span>
+        <span className={styles.activeViewers}>{t('kpi.activeViewers') || 'Viewers Activos'}: <strong>{active}</strong></span>
+        <span className={styles.snapshotCount}>{snapshots.length} {t('kpi.snapshots') || 'registros'}</span>
       </div>
       <div className={styles.chartContainer}>
-        <MiniChart data={snapshots} />
+        {snapshots.length < 2 ? (
+          <div className={styles.chartEmpty}>{t('kpi.waitingData') || 'Esperando más datos para mostrar la gráfica...'}</div>
+        ) : (
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2d2d3d" vertical={false} />
+              <XAxis dataKey="time" stroke="#8b8ba7" fontSize={12} tickMargin={10} minTickGap={30} />
+              <YAxis stroke="#8b8ba7" fontSize={12} tickFormatter={formatNumber} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #2d2d3d', borderRadius: '8px', color: '#e0e0f0' }}
+                itemStyle={{ fontWeight: 600 }}
+              />
+              <Legend wrapperStyle={{ paddingTop: '10px' }} />
+              <Line type="monotone" name={t('kpi.viewers') || 'Viewers'} dataKey="viewers" stroke="#6366f1" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
+              <Line type="monotone" name={t('kpi.chatters') || 'Chatters'} dataKey="chatters" stroke="#10b981" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );
@@ -163,39 +187,61 @@ function GamesTab({ channel }: { channel: string }) {
       .finally(() => setLoading(false));
   }, [channel]);
 
-  if (loading) return <div className={styles.loading}>Cargando...</div>;
+  if (loading) {
+    return (
+      <div className={styles.tabContent}>
+        <div className={styles.gamesGrid}>
+          {Array.from({ length: 6 }).map((_, i) => (
+             <SkeletonCard key={i} style={{ height: 160 }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (games.length === 0) {
+    return <div className={styles.loading}>{t('kpi.noGamesData') || 'No hay datos de juegos para mostrar en este período.'}</div>;
+  }
 
   return (
     <div className={styles.tabContent}>
-      <table className={styles.gameTable}>
-        <thead>
-          <tr>
-            <th>{t('kpi.game')}</th>
-            <th>{t('kpi.streams')}</th>
-            <th>{t('kpi.avgViewers')}</th>
-            <th>{t('kpi.maxViewers')}</th>
-            <th>{t('kpi.followersGained')}</th>
-            <th>{t('kpi.avgDuration')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {games.map(g => (
-            <tr key={g.gameName}>
-              <td>{g.gameName}</td>
-              <td>{g.streamCount}</td>
-              <td>{formatNumber(g.avgViewers)}</td>
-              <td>{formatNumber(g.maxViewers)}</td>
-              <td>{formatNumber(g.followersGained)}</td>
-              <td>{formatDuration(g.avgDuration)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className={styles.gamesGrid}>
+        {games.map(g => (
+          <div key={g.gameName} className={styles.gameCard}>
+            <div className={styles.gameHeader}>
+              {g.boxArtUrl && <img src={g.boxArtUrl} alt={g.gameName} className={styles.gameBoxArt} />}
+              <div className={styles.gameTitleWrapper}>
+                <h4 className={styles.gameTitle}>{g.gameName}</h4>
+                <span className={styles.gameStreamCount}>{g.streamCount} {t('kpi.streamsCount') || 'streams'}</span>
+              </div>
+            </div>
+            <div className={styles.gameStatsGrid}>
+              <div className={styles.gameStat}>
+                <span className={styles.gameStatLabel}>{t('kpi.avgViewers') || 'Prom. Viewers'}</span>
+                <span className={styles.gameStatValue}>{formatNumber(g.avgViewers)}</span>
+              </div>
+              <div className={styles.gameStat}>
+                <span className={styles.gameStatLabel}>{t('kpi.maxViewers') || 'Max Viewers'}</span>
+                <span className={styles.gameStatValue}>{formatNumber(g.maxViewers)}</span>
+              </div>
+              <div className={styles.gameStat}>
+                <span className={styles.gameStatLabel}>{t('kpi.followersGained') || 'Nuevos Seguidores'}</span>
+                <span className={styles.gameStatValue} style={{ color: '#10b981' }}>+{formatNumber(g.followersGained)}</span>
+              </div>
+              <div className={styles.gameStat}>
+                <span className={styles.gameStatLabel}>{t('kpi.avgDuration') || 'Duración Promedio'}</span>
+                <span className={styles.gameStatValue}>{formatDuration(g.avgDuration)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
 function SlotsTab({ channel }: { channel: string }) {
+  const { t } = useTranslation();
   const [slots, setSlots] = useState<BestSlot[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -207,16 +253,31 @@ function SlotsTab({ channel }: { channel: string }) {
       .finally(() => setLoading(false));
   }, [channel]);
 
-  if (loading) return <div className={styles.loading}>Cargando...</div>;
+  if (loading) {
+    return (
+      <div className={styles.tabContent}>
+         <div className={styles.slotsGrid}>
+            {Array.from({ length: 10 }).map((_, i) => (
+              <SkeletonCard key={i} style={{ height: 40 }} />
+            ))}
+         </div>
+      </div>
+    );
+  }
+
+  if (slots.length === 0) {
+    return <div className={styles.loading}>{t('kpi.noSlotsData') || 'No hay suficientes datos para determinar los mejores horarios.'}</div>;
+  }
 
   const maxAvg = Math.max(...slots.map(s => s.avgViewers), 1);
 
   return (
     <div className={styles.tabContent}>
+      <p className={styles.slotsSubtitle}>{t('kpi.slotsSubtitle') || 'Basado en el promedio de viewers de streams anteriores:'}</p>
       <div className={styles.slotsGrid}>
         {slots.slice(0, 20).map((s, i) => (
           <div key={i} className={styles.slotBar}>
-            <span className={styles.slotLabel}>{DAY_NAMES[s.dayOfWeek]} {s.hourStart}:00</span>
+            <span className={styles.slotLabel}>{DAY_NAMES[s.dayOfWeek]} {s.hourStart.toString().padStart(2, '0')}:00</span>
             <div className={styles.slotBarTrack}>
               <div className={styles.slotBarFill} style={{ width: `${(s.avgViewers / maxAvg) * 100}%` }} />
             </div>
@@ -233,10 +294,10 @@ export function KpiPanel({ channel }: Props) {
   const [subTab, setSubTab] = useState<SubTab>('overview');
 
   const subTabs: { id: SubTab; label: string }[] = [
-    { id: 'overview', label: t('kpi.subOverview') },
-    { id: 'audience', label: t('kpi.subAudience') },
-    { id: 'games', label: t('kpi.subGames') },
-    { id: 'slots', label: t('kpi.subSlots') },
+    { id: 'overview', label: t('kpi.subOverview') || 'Resumen' },
+    { id: 'audience', label: t('kpi.subAudience') || 'Audiencia' },
+    { id: 'games', label: t('kpi.subGames') || 'Por Juego' },
+    { id: 'slots', label: t('kpi.subSlots') || 'Mejor Horario' },
   ];
 
   return (

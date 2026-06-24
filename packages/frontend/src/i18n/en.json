@@ -561,7 +561,14 @@
     "snapshots": "snapshots",
     "game": "Game",
     "maxViewers": "Max Viewers",
-    "avgDuration": "Avg Duration"
+    "avgDuration": "Avg Duration",
+    "streamsCount": "streams",
+    "waitingData": "Waiting for more data to display the chart...",
+    "viewers": "Viewers",
+    "chatters": "Chatters",
+    "noGamesData": "No game data to show for this period.",
+    "noSlotsData": "Not enough data to determine best slots.",
+    "slotsSubtitle": "Based on average viewers from past streams:"
   },
   "giveaway": {
     "dur30s": "30 sec",

@@ -268,6 +268,7 @@ export interface KpiOverview {
 
 export interface GamePerformance {
   gameName: string;
+  boxArtUrl?: string;
   streamCount: number;
   totalViews: number;
   avgViewers: number;

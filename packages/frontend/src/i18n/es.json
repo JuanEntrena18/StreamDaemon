@@ -594,7 +594,14 @@
     "snapshots": "capturas",
     "game": "Juego",
     "maxViewers": "Máx Espectadores",
-    "avgDuration": "Duración Prom."
+    "avgDuration": "Duración Prom.",
+    "streamsCount": "streams",
+    "waitingData": "Esperando más datos para mostrar la gráfica...",
+    "viewers": "Viewers",
+    "chatters": "Chatters",
+    "noGamesData": "No hay datos de juegos para mostrar en este período.",
+    "noSlotsData": "No hay suficientes datos para determinar los mejores horarios.",
+    "slotsSubtitle": "Basado en el promedio de viewers de streams anteriores:"
   },
   "giveaway": {
     "dur30s": "30 seg",
