@@ -12,7 +12,7 @@ Available in two modes:
 
 ## ✨ Features
 
-- **🎨 Standalone themed overlays** — 51 standalone overlays in pure HTML+CSS+JS (no React) for multiple games and styles: Subnautica 2, Fortnite, Animated Alerts, Subathon, **Retro 8-bit**, **Retro Win95**, **RetroWave**, **Tactical Sci-Fi**, **WoW Horde/Alliance** and **12 vertical (1080×1920)** variants with orientation selector in the OBS panel. Each overlay includes particle Canvas, CSS animations, real-time event queue and Socket.IO connection with WebSocket-only transport. The Socket.IO client is served from `/overlays/js/socket.io.js` (Vite) to prevent Fastify v5 from intercepting the download. Loaded as static files (`/overlays/`) in OBS.
+- **🎨 Standalone themed overlays** — 57 standalone overlays in pure HTML+CSS+JS (no React) for multiple games and styles: Subnautica 2, Fortnite, Animated Alerts, Subathon, **Retro 8-bit**, **Retro Win95**, **RetroWave**, **Tactical Sci-Fi**, **WoW Horde/Alliance** and **12 vertical (1080×1920)** variants with orientation selector in the OBS panel. Each overlay includes particle Canvas, CSS animations, real-time event queue and Socket.IO connection with WebSocket-only transport. The Socket.IO client is served from `/overlays/js/socket.io.js` (Vite) to prevent Fastify v5 from intercepting the download. Loaded as static files (`/overlays/`) in OBS.
 - **📱 Vertical Streaming (Dual Format)** — Complete setup guide for Twitch's new Dual Format streaming. Covers Aitum Vertical and SE.Live plugins, Enhanced Broadcasting, system requirements, OBS configuration steps, and mobile-first design tips. Includes **12 dedicated vertical overlays (1080×1920)** — 6 fullscreen and 6 alert variants for all styled themes (Fortnite, 8-bit, Win95, RetroWave, Tactical Sci-Fi, Horde), compatible with OBS Browser Source.
 - **🔴 Subathon** — Live extendable timer: viewers add time through subscriptions (+5 min), bits (+1 min per 100 bits), tips, follows or channel rewards. Configurable max limit (12/24h). Control panel with start/pause/resume/stop, manual time addition, action history, and dedicated OBS overlay with countdown, progress bar, statistics and activity feed.
 - **📡 Unified Stream Manager** — Dashboard combining stream preview (iframe embed with multi-parent support for Electron and browser), title/game editor, live stats (viewers, followers, subs, uptime) and channel activity feed with filters — all in one screen.
@@ -127,12 +127,20 @@ Add a **Browser Source** in OBS and use the following URLs:
 | **Win95 (theme)** | `http://localhost:5173/overlays/pantalla_comienzo_win95.html?backend=http://localhost:3000&channel=yourchannel` |
 | **RetroWave (theme)** | `http://localhost:5173/overlays/pantalla_comienzo_retrowave.html?backend=http://localhost:3000&channel=yourchannel` |
 | **Tactical Sci-Fi (theme)** | `http://localhost:5173/overlays/pantalla_de_inicio_t_ctica.html?backend=http://localhost:3000&channel=yourchannel` |
+| **Fortnite · BRB** | `http://localhost:3000/overlays/brb_fortnite_sala_de_espera.html?channel=yourchannel` |
+| **8-bit · BRB** | `http://localhost:3000/overlays/brb_8_bits_salvapantallas_bouncing.html?channel=yourchannel` |
+| **Win95 · BRB** | `http://localhost:3000/overlays/brb_win95_error_screensaver.html?channel=yourchannel` |
+| **RetroWave · BRB** | `http://localhost:3000/overlays/brb_retrowave_autopista_vhs.html?channel=yourchannel` |
+| **Tactical · BRB** | `http://localhost:3000/overlays/brb_bsg_t_ctico_dradis_sweeping.html?channel=yourchannel` |
+| **Horde · BRB** | `http://localhost:3000/overlays/brb_horda.html?channel=yourchannel` |
 | **Fortnite Vertical** | `http://localhost:3000/overlays/fortnite-vertical.html?channel=yourchannel` |
 | **8-bit Vertical** | `http://localhost:3000/overlays/8bits-vertical.html?channel=yourchannel` |
 | **Win95 Vertical** | `http://localhost:3000/overlays/win95-vertical.html?channel=yourchannel` |
 | **RetroWave Vertical** | `http://localhost:3000/overlays/retrowave-vertical.html?channel=yourchannel` |
 | **Tactical Sci-Fi Vertical** | `http://localhost:3000/overlays/tactical-vertical.html?channel=yourchannel` |
-| **Horde Vertical** | `http://localhost:3000/overlays/horde-vertical.html?channel=yourchannel` |
+| **Horde Vertical · Start** | `http://localhost:3000/overlays/inicio_vertical_horda.html?channel=yourchannel` |
+| **Horde Vertical · End** | `http://localhost:3000/overlays/despedida_vertical_horda.html?channel=yourchannel` |
+| **Horde Vertical · BRB** | `http://localhost:3000/overlays/brb_vertical_horda.html?channel=yourchannel` |
 | **Fortnite Alerts Vertical** | `http://localhost:3000/overlays/alerta_fortnite_vertical.html?channel=yourchannel` |
 | **8-bit Alerts Vertical** | `http://localhost:3000/overlays/alerta_retro_8_bits_vertical.html?channel=yourchannel` |
 | **Win95 Alerts Vertical** | `http://localhost:3000/overlays/alerta_windows_95_vertical.html?channel=yourchannel` |
@@ -186,7 +194,7 @@ StreamForge/
 │   │   │   ├── hooks/         # Custom hooks (useSocket, useAuthStatus)
 │   │   │   ├── i18n/          # Translations (es, en, de, fr, it)
 │   │   │   └── utils/         # Utilities (api, sounds, tts)
-│   │   └── public/overlays/   # 51 standalone HTML overlays
+│   │   └── public/overlays/   # 57 standalone HTML overlays
 │   │       ├── js/
 │   │       │   └── socket.io.js  # Socket.IO client (non-minified, v4.8.3)
 │   │       ├── subnautica2.html
@@ -199,7 +207,9 @@ StreamForge/
 │   │       ├── hud_* # Tactical Sci-Fi (gameplay, just chatting)
 │   │       ├── pantalla_de_inicio_t_ctica.html
 │   │       ├── pantalla_despedida_t_ctica.html
+│   │       ├── brb_*           # BRB overlays (fortnite, 8bits, win95, retrowave, tactical, horde)
 │   │       ├── *-vertical.html # 6 fullscreen vertical overlays (1080×1920)
+│   │       ├── *vertical_horda* # Horde vertical overlays (start, end, brb, alert)
 │   │       ├── alerta_*_vertical.html # 6 alert vertical overlays (1080×1920)
 │   │       └── ...
 │   ├── desktop/           # Electron + SQLite

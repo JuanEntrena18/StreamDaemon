@@ -22,7 +22,7 @@ Aplicación modular para creadores de contenido que permite gestionar el canal d
 
 ### Overlays independientes (HTML/CSS/JS puro)
 
-39 overlays standalone en `public/overlays/` que se sirven como archivos estáticos. No requieren React ni Vite — conexión directa a Socket.IO con transporte WebSocket-only y cliente servido desde `public/overlays/js/socket.io.js`:
+46 overlays standalone en `public/overlays/` que se sirven como archivos estáticos. No requieren React ni Vite — conexión directa a Socket.IO con transporte WebSocket-only y cliente servido desde `public/overlays/js/socket.io.js`:
 
 | Overlay | Archivo | Descripción |
 |---|---|---|
@@ -175,13 +175,14 @@ El overlay de chat se renderiza con React en una ventana Electron separada (o co
 | Juego / Tema | Estilo visual | Overlays |
 |---|---|---|
 | **Subnautica 2** | Azul profundo, neón bioluminiscente, interfaz HUD de PDA. Canvas partículas, sonar, chat, alertas por tipo | `subnautica2.html` |
-| **Fortnite** | Hexágonos, azul/dorado/púrpura, estilo battle royale. Partículas, cuadrícula, alertas, uptime, **panel de stats** (kills, wins, partidas, K/D, win rate) con fetch directo a backend cada 5 min | `fortnite.html` |
+| **Fortnite** | Hexágonos, azul/dorado/púrpura, estilo battle royale. Partículas, cuadrícula, alertas, uptime, **panel de stats** (kills, wins, partidas, K/D, win rate) con fetch directo a backend cada 5 min | `fortnite.html`, `brb_fortnite_sala_de_espera.html` |
 | **Alertas genéricas** | Oscuro con bordes de color por tipo. Confetti Canvas, shimmer, glow ring. 7 tipos de evento | `alerts.html` |
 | **Subathon** | Rojo/gradiente, timer grande con pulso crítico. Barra progreso, feed actividad, stats | `subathon.html` |
-| **Retro 8-bits** | Pixel art NES, bordes estilo RPG, colores rojo/amarillo/azul. Scanlines CRT, fuentes Press Start 2P | 4 overlays (start, gameplay, just chatting, end) |
-| **Retro Win95** | Interfaz Windows 95: ventanas grises, título azul marino, bordes en relieve. Fuente MS Sans Serif | 4 overlays (start, gameplay, just chatting, end) |
-| **RetroWave** | Estilo outrun/synthwave: sol radiante, cuadrícula 3D, neón magenta/cyan. Fuentes VT323 + Righteous | 4 overlays (start, gameplay, just chatting, end) |
-| **Tactical Sci-Fi** | Estilo Battlestar Galactica: paneles octogonales, radar DRADIS, ámbar/verde táctico, scanlines. Fuente Share Tech Mono | 4 overlays (start, gameplay, just chatting, end) |
+| **Retro 8-bits** | Pixel art NES, bordes estilo RPG, colores rojo/amarillo/azul. Scanlines CRT, fuentes Press Start 2P | 5 overlays (start, gameplay, just chatting, end, brb) |
+| **Retro Win95** | Interfaz Windows 95: ventanas grises, título azul marino, bordes en relieve. Fuente MS Sans Serif | 5 overlays (start, gameplay, just chatting, end, brb) |
+| **RetroWave** | Estilo outrun/synthwave: sol radiante, cuadrícula 3D, neón magenta/cyan. Fuentes VT323 + Righteous | 5 overlays (start, gameplay, just chatting, end, brb) |
+| **Tactical Sci-Fi** | Estilo Battlestar Galactica: paneles octogonales, radar DRADIS, ámbar/verde táctico, scanlines. Fuente Share Tech Mono | 5 overlays (start, gameplay, just chatting, end, brb) |
+| **Horde (WOW)** | Rojo oscuro/negro, estilo bastión oscuro, ascuas, sello Horda. Chat de guerra | 6 overlays (start, gameplay, just chatting, end, brb, alerts) |
 
 ---
 
@@ -240,7 +241,7 @@ Esto provoca que Fastify responda con 404 (rutas no registradas) o 401 (protegid
 
 4. **connect_error handler** — Se agregó `socket.on('connect_error', ...)` con `console.error` a todos los overlays para visibilidad de errores de conexión.
 
-Estos cambios se aplicaron a los 39 overlays standalone en `public/overlays/`.
+Estos cambios se aplicaron a los 46 overlays standalone en `public/overlays/`.
 
 ---
 
@@ -279,7 +280,7 @@ twitch_overlay/
 │   │   └── fortnite/      # Stats Fortnite
 │   ├── frontend/
 │   │   ├── src/components/  # Dashboard React
-│   │   └── public/overlays/ # 39 overlays HTML standalone
+│   │   └── public/overlays/ # 46 overlays HTML standalone
 │   │       ├── js/
 │   │       │   └── socket.io.js  # Socket.IO client (non-minified, v4.8.3)
 │   │       ├── subnautica2.html
@@ -292,6 +293,9 @@ twitch_overlay/
 │   │       ├── hud_*            # Tactical Sci-Fi theme
 │   │       ├── pantalla_de_inicio_t_ctica.html
 │   │       ├── pantalla_despedida_t_ctica.html
+│   │       ├── brb_*            # BRB overlays (fortnite, 8bits, win95, retrowave, tactical, horde)
+│   │       ├── inicio_vertical_horda.html
+│   │       ├── despedida_vertical_horda.html
 │   │       └── ...
 │   ├── desktop/           # Electron
 │   └── shared/            # Tipos compartidos
