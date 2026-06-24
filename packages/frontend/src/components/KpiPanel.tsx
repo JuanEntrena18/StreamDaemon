@@ -2,12 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSocketEvent } from '../hooks/useSocket';
 import { apiGet } from '../utils/api';
 import { useTranslation } from '../i18n/context';
-import type { KpiOverview, ViewerSnapshot, GamePerformance, BestSlot, ChannelRaidEvent } from '@streamforger/shared';
+import type { KpiOverview, ViewerSnapshot, GamePerformance, BestSlot, ChannelRaidEvent, TwitchTopGame } from '@streamforger/shared';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { SkeletonCard } from './Skeletons';
 import styles from './KpiPanel.module.css';
 
-type SubTab = 'overview' | 'audience' | 'games' | 'slots';
+type SubTab = 'overview' | 'audience' | 'games' | 'slots' | 'topGames';
 
 interface Props {
   channel: string;
@@ -156,16 +156,16 @@ function AudienceTab({ channel }: { channel: string }) {
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2d2d3d" vertical={false} />
-              <XAxis dataKey="time" stroke="#8b8ba7" fontSize={12} tickMargin={10} minTickGap={30} />
-              <YAxis stroke="#8b8ba7" fontSize={12} tickFormatter={formatNumber} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--sf-border)" vertical={false} />
+              <XAxis dataKey="time" stroke="var(--sf-text-2)" fontSize={12} tickMargin={10} minTickGap={30} />
+              <YAxis stroke="var(--sf-text-2)" fontSize={12} tickFormatter={formatNumber} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #2d2d3d', borderRadius: '8px', color: '#e0e0f0' }}
+                contentStyle={{ backgroundColor: 'var(--sf-bg)', border: '1px solid var(--sf-border)', borderRadius: '8px', color: 'var(--sf-text)' }}
                 itemStyle={{ fontWeight: 600 }}
               />
               <Legend wrapperStyle={{ paddingTop: '10px' }} />
-              <Line type="monotone" name={t('kpi.viewers') || 'Viewers'} dataKey="viewers" stroke="#6366f1" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
-              <Line type="monotone" name={t('kpi.chatters') || 'Chatters'} dataKey="chatters" stroke="#10b981" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
+              <Line type="monotone" name={t('kpi.viewers') || 'Viewers'} dataKey="viewers" stroke="var(--sf-primary)" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
+              <Line type="monotone" name={t('kpi.chatters') || 'Chatters'} dataKey="chatters" stroke="var(--sf-success)" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -226,7 +226,7 @@ function GamesTab({ channel }: { channel: string }) {
               </div>
               <div className={styles.gameStat}>
                 <span className={styles.gameStatLabel}>{t('kpi.followersGained') || 'Nuevos Seguidores'}</span>
-                <span className={styles.gameStatValue} style={{ color: '#10b981' }}>+{formatNumber(g.followersGained)}</span>
+                <span className={styles.gameStatValue} style={{ color: 'var(--sf-success)' }}>+{formatNumber(g.followersGained)}</span>
               </div>
               <div className={styles.gameStat}>
                 <span className={styles.gameStatLabel}>{t('kpi.avgDuration') || 'Duración Promedio'}</span>
@@ -289,6 +289,55 @@ function SlotsTab({ channel }: { channel: string }) {
   );
 }
 
+function TopTwitchGamesTab() {
+  const { t } = useTranslation();
+  const [games, setGames] = useState<TwitchTopGame[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiGet('/kpi/top-twitch-games')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setGames(d.games); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className={styles.tabContent}>
+        <div className={styles.gamesGrid}>
+          {Array.from({ length: 12 }).map((_, i) => (
+             <SkeletonCard key={i} style={{ height: 160 }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.tabContent}>
+      <div className={styles.gamesGrid}>
+        {games.map((g, index) => (
+          <div key={g.id} className={styles.gameCard}>
+            <div className={styles.gameHeader}>
+              {g.boxArtUrl && <img src={g.boxArtUrl} alt={g.name} className={styles.gameBoxArt} />}
+              <div className={styles.gameTitleWrapper}>
+                <h4 className={styles.gameTitle}>{index + 1}. {g.name}</h4>
+              </div>
+            </div>
+            <div className={styles.gameStatsGrid} style={{ gridTemplateColumns: '1fr' }}>
+              <div className={styles.gameStat}>
+                <span className={styles.gameStatLabel}>{t('kpi.estimatedGlobalViewers') || 'Espectadores en vivo (Top 100)'}</span>
+                <span className={styles.gameStatValue} style={{ color: 'var(--sf-success)' }}>{formatNumber(g.estimatedViewers)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function KpiPanel({ channel }: Props) {
   const { t } = useTranslation();
   const [subTab, setSubTab] = useState<SubTab>('overview');
@@ -298,6 +347,7 @@ export function KpiPanel({ channel }: Props) {
     { id: 'audience', label: t('kpi.subAudience') || 'Audiencia' },
     { id: 'games', label: t('kpi.subGames') || 'Por Juego' },
     { id: 'slots', label: t('kpi.subSlots') || 'Mejor Horario' },
+    { id: 'topGames', label: t('kpi.subTopGames') || 'Top Espectadores' },
   ];
 
   return (
@@ -313,6 +363,7 @@ export function KpiPanel({ channel }: Props) {
       {subTab === 'audience' && <AudienceTab channel={channel} />}
       {subTab === 'games' && <GamesTab channel={channel} />}
       {subTab === 'slots' && <SlotsTab channel={channel} />}
+      {subTab === 'topGames' && <TopTwitchGamesTab />}
     </div>
   );
 }

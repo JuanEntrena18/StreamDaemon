@@ -255,4 +255,42 @@ export function setupKpi(app: FastifyInstance) {
     recordSnapshot(channel.toLowerCase(), viewers, chattersActive ?? 0);
     return { ok: true };
   });
+
+  app.get('/kpi/top-twitch-games', async (req, reply) => {
+    try {
+      if (!authProvider) return reply.status(401).send({ error: 'Not authenticated' });
+      const apiClient = new ApiClient({ authProvider });
+
+      const topGamesPage = await apiClient.games.getTopGames({ limit: 12 });
+      const games = topGamesPage.data;
+
+      const results = await Promise.all(games.map(async (game) => {
+        try {
+          const streamsPage = await apiClient.streams.getStreams({ game: game.id, limit: 100 });
+          const estimatedViewers = streamsPage.data.reduce((acc, stream) => acc + stream.viewers, 0);
+          return {
+            id: game.id,
+            name: game.name,
+            boxArtUrl: game.boxArtUrl.replace('{width}', '144').replace('{height}', '192'),
+            estimatedViewers
+          };
+        } catch {
+          return {
+            id: game.id,
+            name: game.name,
+            boxArtUrl: game.boxArtUrl.replace('{width}', '144').replace('{height}', '192'),
+            estimatedViewers: 0
+          };
+        }
+      }));
+
+      // Sort just in case, though Twitch already ranks them
+      results.sort((a, b) => b.estimatedViewers - a.estimatedViewers);
+
+      return { games: results };
+    } catch (err) {
+      req.log.error(err, 'Failed to fetch top games');
+      return reply.status(500).send({ error: 'Failed to fetch top games' });
+    }
+  });
 }

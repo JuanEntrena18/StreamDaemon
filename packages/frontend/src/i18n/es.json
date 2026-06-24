@@ -601,7 +601,9 @@
     "chatters": "Chatters",
     "noGamesData": "No hay datos de juegos para mostrar en este período.",
     "noSlotsData": "No hay suficientes datos para determinar los mejores horarios.",
-    "slotsSubtitle": "Basado en el promedio de viewers de streams anteriores:"
+    "slotsSubtitle": "Basado en el promedio de viewers de streams anteriores:",
+    "subTopGames": "Top Espectadores",
+    "estimatedGlobalViewers": "Espectadores en vivo (Top 100)"
   },
   "giveaway": {
     "dur30s": "30 seg",

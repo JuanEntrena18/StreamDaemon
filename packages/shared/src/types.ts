@@ -290,3 +290,10 @@ export interface ChannelRaidEvent {
   viewerCount: number;
   timestamp: number;
 }
+
+export interface TwitchTopGame {
+  id: string;
+  name: string;
+  boxArtUrl: string;
+  estimatedViewers: number;
+}

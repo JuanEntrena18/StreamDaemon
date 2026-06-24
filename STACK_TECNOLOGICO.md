@@ -92,6 +92,7 @@ El dashboard usa tokens CSS + clases utilitarias + CSS Modules:
 | `GiveawayPanel.tsx` | Panel sorteos con ruleta canvas e importación masiva |
 | `PredictionPanel.tsx` | Panel de predicciones con opciones A/B/C |
 | `TrackerPanel.tsx` | Twitch Tracker: estadísticas históricas, resumen del último stream, gráficos SVG de evolución (views/seguidores/duración), consejos inteligentes multi-factor e integración Ollama |
+| `KpiPanel.tsx` | KPIs Analíticas: panel avanzado con pestañas de Resumen, Audiencia (gráficas con Recharts), Rendimiento Por Juego (con portadas automáticas), Mejor Horario y Top Espectadores de Twitch. Integración total con modo Claro/Oscuro (Liquid Glass) |
 | `HudPanel.tsx` | Stream HUD: botones iniciar/detener polling, stats en vivo (viewers, followers, subs, uptime, game, title, last follower, last subscriber), panel de configuración con toggles por campo y persistencia en localStorage, generación dinámica de URL overlay con parámetros por campo |
 | `TimerPanel.tsx` | Temporizador: configurar duración, iniciar, pausar, reanudar, reset |
 | `ScoreboardPanel.tsx` | Scoreboard clásico + Fighter Overlay: presets de daño, rondas, timer, configuración de jugadores/personajes/retratos |
@@ -350,3 +351,4 @@ twitch_overlay/
 | **54** | **🎤 TTS "Leer autor"** — Nuevo filtro TTS que antepone el nombre de usuario al mensaje. Interfaz de filtros migrada de checkboxes a componentes Toggle. Traducciones actualizadas en 5 idiomas. | ✅ |
 | **55** | **🔐 Auth resiliente** — Restauración de sesión con try-catch para base de datos no inicializada. Polling con retroalimentación real de errores. Rate limit aumentado de 12 a 30 peticiones/min. Soporte `ELECTRON_RUN_AS_NODE` para DB schema push en Electron. | ✅ |
 | **56** | **🖥️ Sidebar mejorada** — Ancho expandido aumentado de 220px a 260px. Hover effect en botones de navegación. Layout mejorado del footer en modo colapsado (columna con más gap). | ✅ |
+| **57** | **📈 KPIs Analíticas & Top Espectadores** — Nuevo dashboard avanzado para creadores de contenido. Pestañas de Resumen, Audiencia en vivo (gráficas Recharts), Rendimiento Por Juego (con fetch automático de portadas), Mejores Horarios y Top Espectadores Globales en tiempo real. Soporte nativo para temas Claro y Oscuro con estética Liquid Glass. | ✅ |
