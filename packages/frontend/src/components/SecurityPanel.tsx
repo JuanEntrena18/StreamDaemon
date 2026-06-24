@@ -10,11 +10,18 @@ interface Props {
   channel: string;
 }
 
+interface WhitelistEntry {
+  username: string;
+  reason?: string | null;
+  createdAt: string;
+}
+
 interface SecurityConfig {
   followBotProtection: boolean;
   spamFilter: boolean;
   autoBan: boolean;
-  whitelist: string[];
+  accountAgeFilter: number;
+  whitelist: WhitelistEntry[];
 }
 
 interface BotDetection {
@@ -57,6 +64,7 @@ export function SecurityPanel({ channel }: Props) {
     followBotProtection: true,
     spamFilter: true,
     autoBan: true,
+    accountAgeFilter: 0,
     whitelist: [],
   });
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -64,6 +72,7 @@ export function SecurityPanel({ channel }: Props) {
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<{ found: number; banned: number } | null>(null);
   const [newWhitelistUser, setNewWhitelistUser] = useState('');
+  const [newWhitelistReason, setNewWhitelistReason] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [confirmBanUser, setConfirmBanUser] = useState<string | null>(null);
 
@@ -84,25 +93,32 @@ export function SecurityPanel({ channel }: Props) {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  const toggleConfig = async (key: keyof SecurityConfig, value: boolean) => {
+  const toggleConfig = async (key: keyof SecurityConfig, value: any) => {
     const updated = { ...config, [key]: value };
     setConfig(updated);
     await apiPut('/security/config', updated);
   };
 
   const removeFromWhitelist = async (user: string) => {
-    await apiPost('/security/whitelist/remove', { user });
-    const updated = config.whitelist.filter((w) => w !== user);
-    setConfig({ ...config, whitelist: updated });
+    const r = await apiPost('/security/whitelist/remove', { user });
+    if (r.ok) {
+      const data = await r.json();
+      setConfig({ ...config, whitelist: data.whitelist });
+    }
   };
 
   const addWhitelist = async () => {
     const user = newWhitelistUser.trim();
     if (!user) return;
-    if (config.whitelist.includes(user)) return;
-    await apiPut('/security/whitelist', { user });
-    setConfig({ ...config, whitelist: [...config.whitelist, user] });
-    setNewWhitelistUser('');
+    if (config.whitelist.some((w) => w.username.toLowerCase() === user.toLowerCase())) return;
+    
+    const r = await apiPut('/security/whitelist', { user, reason: newWhitelistReason });
+    if (r.ok) {
+      const data = await r.json();
+      setConfig({ ...config, whitelist: data.whitelist });
+      setNewWhitelistUser('');
+      setNewWhitelistReason('');
+    }
   };
 
   const runScan = async () => {
@@ -218,6 +234,24 @@ export function SecurityPanel({ channel }: Props) {
           checked={config.autoBan}
           onChange={(v) => toggleConfig('autoBan', v)}
         />
+        <div className={styles.toggleRow}>
+          <div className="flex-1" style={{ marginLeft: 6 }}>
+            <div className={styles.toggleLabel}>
+              {t('security.accountAge')}
+            </div>
+            <div className={styles.toggleDesc}>
+              {t('security.accountAgeDesc')}
+            </div>
+          </div>
+          <input 
+            type="number" 
+            min="0" 
+            className="sf-input" 
+            style={{ width: 80, textAlign: 'center' }} 
+            value={config.accountAgeFilter} 
+            onChange={(e) => toggleConfig('accountAgeFilter', parseInt(e.target.value) || 0)} 
+          />
+        </div>
       </div>
 
       {/* Manual scan */}
@@ -261,6 +295,14 @@ export function SecurityPanel({ channel }: Props) {
             placeholder={t('security.whitelistPlaceholder')}
             className="sf-input flex-1"
           />
+          <input
+            type="text"
+            value={newWhitelistReason}
+            onChange={(e) => setNewWhitelistReason(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') addWhitelist(); }}
+            placeholder={t('security.whitelistReasonPlaceholder')}
+            className="sf-input flex-1"
+          />
           <button onClick={addWhitelist} disabled={!newWhitelistUser.trim()} className={`sf-btn ${styles.addButton}`}>
             {t('security.agregar')}
           </button>
@@ -271,17 +313,24 @@ export function SecurityPanel({ channel }: Props) {
             {t('security.whitelistEmpty')}
           </div>
         ) : (
-          <div className={styles.whitelistWrap}>
-            {config.whitelist.map((user) => (
-              <span key={user} className={styles.whitelistChip}>
-                {user}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {config.whitelist.map((w) => (
+              <div key={w.username} className="sf-card--tight flex-row flex-row--between" style={{ background: 'var(--sf-surface)', padding: '8px 12px', borderRadius: 6, border: '1px solid var(--sf-border)' }}>
+                <div>
+                  <div style={{ fontWeight: 600 }}>{w.username}</div>
+                  {w.reason && <div className="text-xs text-muted" style={{ marginTop: 2 }}>{w.reason}</div>}
+                  <div className="text-xs" style={{ color: 'var(--sf-text-3)', fontSize: '0.7rem', marginTop: 4 }}>
+                    {t('security.added')}: {new Date(w.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
                 <button
-                  onClick={() => removeFromWhitelist(user)}
-                  className={styles.chipRemove}
+                  onClick={() => removeFromWhitelist(w.username)}
+                  className={`sf-btn ${styles.actionBtnDanger}`}
+                  style={{ padding: '4px 8px' }}
                 >
-                  ×
+                  {t('security.quitar')}
                 </button>
-              </span>
+              </div>
             ))}
           </div>
         )}
@@ -301,7 +350,7 @@ export function SecurityPanel({ channel }: Props) {
         ) : (
           <div className={styles.detectionList}>
             {stats.recentDetections.map((d) => {
-              const isWhitelisted = config.whitelist.some((w) => w.toLowerCase() === d.user.toLowerCase());
+              const isWhitelisted = config.whitelist.some((w) => w.username.toLowerCase() === d.user.toLowerCase());
               const loadingKey = actionLoading;
               const isBanLoading = loadingKey === `ban:${d.user}`;
               const isUnbanLoading = loadingKey === `unban:${d.user}`;

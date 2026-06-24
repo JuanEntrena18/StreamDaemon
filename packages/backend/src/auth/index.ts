@@ -12,7 +12,7 @@ import { encryptToken, decryptToken } from './token-crypto.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const _require = createRequire(import.meta.url);
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
 const SCOPES = [
   'chat:read',

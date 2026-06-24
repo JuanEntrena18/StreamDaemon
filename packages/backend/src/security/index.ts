@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { ApiClient } from '@twurple/api';
-import { authProvider, currentUser } from '../auth/index.js';
+import { authProvider, currentUser, prisma } from '../auth/index.js';
 import { getIO } from '../socket/index.js';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -9,7 +9,13 @@ interface SecurityConfig {
   followBotProtection: boolean;
   spamFilter: boolean;
   autoBan: boolean;
-  whitelist: string[];
+  accountAgeFilter: number;
+}
+
+interface WhitelistEntry {
+  username: string;
+  reason?: string | null;
+  createdAt: Date;
 }
 
 interface BotDetection {
@@ -57,8 +63,10 @@ let config: SecurityConfig = {
   followBotProtection: true,
   spamFilter: true,
   autoBan: true,
-  whitelist: [],
+  accountAgeFilter: 0,
 };
+
+let whitelist: WhitelistEntry[] = [];
 
 let detections: BotDetection[] = [];
 let stats: SecurityStats = {
@@ -74,17 +82,63 @@ function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-function loadConfig() {
+async function loadConfig() {
+  if (!currentUser) return;
   try {
-    if (fs.existsSync(CONFIG_PATH)) {
-      config = { ...config, ...JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8')) };
+    const dbConfig = await prisma.securityConfig.findUnique({
+      where: { userId: currentUser.id },
+    });
+    if (dbConfig) {
+      config = {
+        followBotProtection: dbConfig.followBotProtection,
+        spamFilter: dbConfig.spamFilter,
+        autoBan: dbConfig.autoBan,
+        accountAgeFilter: dbConfig.accountAgeFilter,
+      };
+    } else {
+      // Create default
+      await prisma.securityConfig.create({
+        data: {
+          userId: currentUser.id,
+        },
+      });
     }
-  } catch { /* usar defaults */ }
+
+    const dbWhitelist = await prisma.securityWhitelist.findMany({
+      where: { userId: currentUser.id },
+    });
+    whitelist = dbWhitelist.map((w) => ({
+      username: w.username,
+      reason: w.reason,
+      createdAt: w.createdAt,
+    }));
+  } catch (error) {
+    console.error('Error loading security config from DB', error);
+  }
 }
 
-function saveConfig() {
-  ensureDataDir();
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+async function saveConfig() {
+  if (!currentUser) return;
+  try {
+    await prisma.securityConfig.upsert({
+      where: { userId: currentUser.id },
+      update: {
+        followBotProtection: config.followBotProtection,
+        spamFilter: config.spamFilter,
+        autoBan: config.autoBan,
+        accountAgeFilter: config.accountAgeFilter,
+      },
+      create: {
+        userId: currentUser.id,
+        followBotProtection: config.followBotProtection,
+        spamFilter: config.spamFilter,
+        autoBan: config.autoBan,
+        accountAgeFilter: config.accountAgeFilter,
+      },
+    });
+  } catch (error) {
+    console.error('Error saving security config to DB', error);
+  }
 }
 
 function loadBotList() {
@@ -118,7 +172,7 @@ function emitUpdate() {
 }
 
 function isWhitelisted(userName: string): boolean {
-  return config.whitelist.some((w) => w.toLowerCase() === userName.toLowerCase());
+  return whitelist.some((w) => w.username.toLowerCase() === userName.toLowerCase());
 }
 
 export async function checkFollow(userId: string, userName: string): Promise<boolean> {
@@ -142,6 +196,28 @@ export async function checkFollow(userId: string, userName: string): Promise<boo
         addDetection('suspicious', userName, userId, 'flagged', `Nombre sospechoso (${pattern.source})`);
       }
       return true;
+    }
+  }
+
+  // Check account age
+  if (config.accountAgeFilter > 0) {
+    try {
+      const api = new ApiClient({ authProvider });
+      const userObj = await api.users.getUserById(userId);
+      if (userObj) {
+        const ageHours = (Date.now() - userObj.creationDate.getTime()) / (1000 * 60 * 60);
+        if (ageHours < config.accountAgeFilter) {
+          const reason = `Cuenta demasiado nueva (${Math.floor(ageHours)}h, min ${config.accountAgeFilter}h)`;
+          if (config.autoBan) {
+            await executeBan(userId, userName, 'follow-bot', reason);
+          } else {
+            addDetection('follow-bot', userName, userId, 'flagged', reason);
+          }
+          return true;
+        }
+      }
+    } catch {
+      // Ignore API errors
     }
   }
 
@@ -251,8 +327,16 @@ async function scanFollowers(username: string): Promise<{ found: number; banned:
 
 export function setupSecurity(app: FastifyInstance) {
   ensureDataDir();
-  loadConfig();
   loadBotList();
+  
+  // We need to wait for currentUser to be available to load DB config.
+  // Using an interval to poll until it's loaded, since auth might take a bit.
+  const loadInterval = setInterval(() => {
+    if (currentUser) {
+      clearInterval(loadInterval);
+      loadConfig();
+    }
+  }, 1000);
 
   // GET config
   app.get('/security/config', async (_req, reply) => {
@@ -260,18 +344,21 @@ export function setupSecurity(app: FastifyInstance) {
       followBotProtection: config.followBotProtection,
       spamFilter: config.spamFilter,
       autoBan: config.autoBan,
-      whitelist: config.whitelist,
+      accountAgeFilter: config.accountAgeFilter,
+      whitelist: whitelist,
     };
   });
 
   // PUT config
   app.put('/security/config', async (req, reply) => {
+    if (!currentUser) return reply.status(401).send({ error: 'Not authenticated' });
     const body = req.body as Partial<SecurityConfig>;
     if (typeof body.followBotProtection === 'boolean') config.followBotProtection = body.followBotProtection;
     if (typeof body.spamFilter === 'boolean') config.spamFilter = body.spamFilter;
     if (typeof body.autoBan === 'boolean') config.autoBan = body.autoBan;
-    if (Array.isArray(body.whitelist)) config.whitelist = body.whitelist;
-    saveConfig();
+    if (typeof body.accountAgeFilter === 'number') config.accountAgeFilter = body.accountAgeFilter;
+    
+    await saveConfig();
     return { ok: true };
   });
 
@@ -295,22 +382,50 @@ export function setupSecurity(app: FastifyInstance) {
 
   // PUT whitelist add
   app.put('/security/whitelist', async (req, reply) => {
-    const { user } = req.body as { user: string };
+    if (!currentUser) return reply.status(401).send({ error: 'Not authenticated' });
+    const { user, reason } = req.body as { user: string; reason?: string };
     if (!user) return reply.status(400).send({ error: 'Missing user' });
-    if (!config.whitelist.includes(user)) {
-      config.whitelist.push(user);
-      saveConfig();
+    
+    if (!whitelist.some((w) => w.username.toLowerCase() === user.toLowerCase())) {
+      try {
+        const dbWhitelist = await prisma.securityWhitelist.create({
+          data: {
+            userId: currentUser.id,
+            username: user,
+            reason: reason || null,
+          },
+        });
+        whitelist.push({
+          username: dbWhitelist.username,
+          reason: dbWhitelist.reason,
+          createdAt: dbWhitelist.createdAt,
+        });
+      } catch (e) {
+        console.error('Error adding to whitelist', e);
+      }
     }
-    return { whitelist: config.whitelist };
+    return { whitelist };
   });
 
   // POST whitelist remove
   app.post('/security/whitelist/remove', async (req, reply) => {
+    if (!currentUser) return reply.status(401).send({ error: 'Not authenticated' });
     const { user } = req.body as { user: string };
     if (!user) return reply.status(400).send({ error: 'Missing user' });
-    config.whitelist = config.whitelist.filter((w) => w !== user);
-    saveConfig();
-    return { whitelist: config.whitelist };
+    
+    try {
+      await prisma.securityWhitelist.deleteMany({
+        where: {
+          userId: currentUser.id,
+          username: user,
+        },
+      });
+      whitelist = whitelist.filter((w) => w.username.toLowerCase() !== user.toLowerCase());
+    } catch (e) {
+      console.error('Error removing from whitelist', e);
+    }
+    
+    return { whitelist };
   });
 
   // POST ban user

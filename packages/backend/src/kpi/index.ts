@@ -162,6 +162,7 @@ export function setupKpi(app: FastifyInstance) {
       const events = getEvents(channel.toLowerCase());
 
       for (const video of filteredVideos) {
+        const raw = getRawData(video) as Record<string, any>;
         const gameName = (raw.game_name && raw.game_name !== 'Unknown') ? raw.game_name : fallbackGameName;
         if (!gameMap.has(gameName)) gameMap.set(gameName, { views: [], durations: [], count: 0, followersGained: 0 });
         const entry = gameMap.get(gameName)!;
