@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horde Vertical Ending</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: #050000;
+            overflow: hidden; font-family: 'Cinzel', serif; color: #ffffff;
+        }
+
+        .environment {
+            position: absolute; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #200000 0%, #020000 100%); z-index: 1;
+        }
+
+        .embers {
+            position: absolute; width: 100%; height: 100%; z-index: 2;
+            background-image: radial-gradient(#ff0000 3px, transparent 3px);
+            background-size: 150px 150px; opacity: 0.1;
+            animation: riseEmbers 15s linear infinite;
+        }
+
+        @keyframes riseEmbers { 0% { transform: translateY(0); opacity: 0.1; } 100% { transform: translateY(-400px); opacity: 0; } }
+
+        .ui-container {
+            position: absolute; z-index: 10; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding-top: 150px; text-align: center;
+        }
+
+        .horde-logo {
+            width: 350px; filter: drop-shadow(0 0 20px #ff0000); margin-bottom: 50px;
+        }
+
+        .main-title {
+            font-size: 90px; color: #ff2222; letter-spacing: 10px;
+            text-shadow: 4px 4px 15px #000, 0 0 40px rgba(255,0,0,0.8);
+            margin-bottom: 80px; line-height: 1.1; font-weight: 900;
+        }
+
+        /* Estructura vertical de Estandartes Sociales */
+        .social-container {
+            display: flex; flex-direction: column; gap: 40px; width: 800px;
+        }
+
+        .social-banner {
+            background: linear-gradient(90deg, transparent, rgba(60, 0, 0, 0.8), transparent);
+            border-top: 3px solid #ff0000; border-bottom: 3px solid #ff0000;
+            padding: 25px; display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            animation: pulseBanner 4s infinite alternate;
+        }
+
+        @keyframes pulseBanner { from { background-color: rgba(60,0,0,0.8); } to { background-color: rgba(90,0,0,0.8); } }
+
+        .platform { font-size: 30px; color: #ffaa00; margin-bottom: 10px; letter-spacing: 4px; }
+        .username { font-size: 45px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 5px #000; }
+
+    </style>
+</head>
+<body>
+    <div class="environment"></div>
+    <div class="embers"></div>
+
+    <div class="ui-container">
+        <img src="horda_logo.png" alt="Horda" class="horde-logo">
+        <div class="main-title">FIN DE LA<br>INCURSIÓN</div>
+
+        <div class="social-container">
+            <div class="social-banner">
+                <div class="platform">TWITCH</div>
+                <div class="username">@tu_usuario</div>
+            </div>
+            <div class="social-banner">
+                <div class="platform">X / TWITTER</div>
+                <div class="username">@tu_usuario</div>
+            </div>
+            <div class="social-banner">
+                <div class="platform">YOUTUBE</div>
+                <div class="username">@tu_canal</div>
+            </div>
+            <div class="social-banner">
+                <div class="platform">INSTAGRAM</div>
+                <div class="username">@tu_usuario</div>
+            </div>
+            <div class="social-banner">
+                <div class="platform">TIKTOK</div>
+                <div class="username">@tu_usuario</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

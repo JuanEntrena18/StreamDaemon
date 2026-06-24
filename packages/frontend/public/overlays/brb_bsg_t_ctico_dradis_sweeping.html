@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSG BRB Screen</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: #020302;
+            overflow: hidden; font-family: 'Share Tech Mono', monospace; color: #ffb300;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        .scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.3));
+            background-size: 100% 4px; pointer-events: none; z-index: 100;
+        }
+
+        .dradis-huge {
+            width: 700px; height: 700px; border-radius: 50%;
+            border: 4px solid #4caf50; position: relative;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, rgba(0,0,0,0) 70%);
+            box-shadow: 0 0 50px rgba(76, 175, 80, 0.2), inset 0 0 50px rgba(76, 175, 80, 0.3);
+            margin-bottom: 50px; overflow: hidden;
+        }
+
+        .dradis-grid {
+            position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            background-image: 
+                linear-gradient(0deg, transparent 49.8%, rgba(76, 175, 80, 0.5) 50%, transparent 50.2%),
+                linear-gradient(90deg, transparent 49.8%, rgba(76, 175, 80, 0.5) 50%, transparent 50.2%);
+        }
+
+        .dradis-grid::before {
+            content: ''; position: absolute; top: 25%; left: 25%; right: 25%; bottom: 25%;
+            border: 2px solid rgba(76, 175, 80, 0.3); border-radius: 50%;
+        }
+
+        .dradis-sweep {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, rgba(76, 175, 80, 0.6) 0deg, transparent 60deg);
+            animation: sweep 3s linear infinite;
+        }
+
+        @keyframes sweep { 100% { transform: rotate(360deg); } }
+
+        .status-box {
+            text-align: center; background: rgba(10, 15, 10, 0.8);
+            border: 2px solid #ffb300; padding: 20px 60px;
+            clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 20px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0 calc(100% - 20px), 0 20px);
+        }
+
+        .title { font-size: 40px; color: #ffb300; letter-spacing: 10px; margin-bottom: 10px; }
+        .warning { 
+            font-size: 30px; color: #f44336; letter-spacing: 5px; font-weight: bold;
+            animation: pulseWarning 1.5s infinite;
+        }
+
+        @keyframes pulseWarning { 50% { opacity: 0.2; } }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+
+    <div class="dradis-huge">
+        <div class="dradis-grid"></div>
+        <div class="dradis-sweep"></div>
+        <!-- Sin contactos DRADIS, zona segura -->
+    </div>
+
+    <div class="status-box">
+        <div class="title">SISTEMAS EN ESPERA</div>
+        <div class="warning">PILOTO AUTOMÁTICO ACTIVADO</div>
+    </div>
+</body>
+</html>

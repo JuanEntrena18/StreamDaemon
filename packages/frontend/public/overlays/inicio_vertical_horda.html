@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horde Vertical Starting Soon</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px;
+            background-color: #050000; overflow: hidden;
+            font-family: 'Cinzel', serif; color: #ffffff;
+        }
+
+        .environment {
+            position: absolute; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #300000 0%, #050000 80%); z-index: 1;
+        }
+
+        .embers {
+            position: absolute; width: 100%; height: 100%; z-index: 2;
+            background-image: radial-gradient(#ff3300 3px, transparent 3px);
+            background-size: 100px 100px; opacity: 0.15;
+            animation: riseEmbers 12s linear infinite;
+        }
+
+        @keyframes riseEmbers {
+            0% { transform: translateY(0) scale(1); opacity: 0.15; }
+            50% { opacity: 0.3; }
+            100% { transform: translateY(-300px) scale(1.5); opacity: 0; }
+        }
+
+        .ui-container {
+            position: absolute; z-index: 10; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 50px; text-align: center;
+        }
+
+        .horde-logo {
+            width: 500px; filter: drop-shadow(0 0 35px rgba(255, 0, 0, 0.8));
+            animation: breath 4s ease-in-out infinite; margin-bottom: 80px;
+        }
+
+        @keyframes breath {
+            0% { transform: scale(1); filter: drop-shadow(0 0 30px rgba(255, 0, 0, 0.5)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 60px rgba(255, 30, 0, 0.9)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 30px rgba(255, 0, 0, 0.5)); }
+        }
+
+        .status-text {
+            font-size: 80px; letter-spacing: 15px; text-transform: uppercase;
+            color: #ff2222; text-shadow: 3px 3px 15px #000, 0 0 40px #a00000;
+            margin-bottom: 40px; line-height: 1.2;
+        }
+
+        .countdown-timer {
+            font-size: 220px; font-weight: 900;
+            text-shadow: 0 0 50px rgba(255, 0, 0, 0.8), 8px 8px 15px #000;
+            letter-spacing: 10px; margin-bottom: 80px;
+        }
+
+        .forge-bar-container {
+            width: 800px; height: 20px; background: #111;
+            border: 4px solid #4a0000; border-radius: 8px;
+            box-shadow: inset 0 0 15px #000, 0 0 30px rgba(255, 0, 0, 0.3);
+            position: relative; overflow: hidden;
+        }
+
+        .forge-bar-fill {
+            height: 100%; width: 100%;
+            background: linear-gradient(90deg, #8b0000, #ff1a1a, #8b0000);
+            background-size: 200% 100%; box-shadow: 0 0 30px #ff0000;
+            transition: width 1s linear; animation: flowMagma 2s linear infinite;
+        }
+
+        @keyframes flowMagma { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+    </style>
+</head>
+<body>
+    <div class="environment"></div>
+    <div class="embers"></div>
+
+    <div class="ui-container">
+        <img src="horda_logo.png" alt="Horda" class="horde-logo">
+        <div class="status-text" id="statusText">PREPARANDO<br>LA BATALLA</div>
+        <div class="countdown-timer" id="timerDisplay">05:00</div>
+        
+        <div class="forge-bar-container">
+            <div class="forge-bar-fill" id="timerProgress"></div>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_MINUTES = 5;
+        let totalSeconds = TOTAL_MINUTES * 60;
+        const initialSeconds = totalSeconds;
+
+        const displayEl = document.getElementById('timerDisplay');
+        const progressEl = document.getElementById('timerProgress');
+        const statusEl = document.getElementById('statusText');
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function engineTick() {
+            displayEl.textContent = formatTime(totalSeconds);
+            const percentage = (totalSeconds / initialSeconds) * 100;
+            progressEl.style.width = percentage + '%';
+
+            if (totalSeconds > 0) {
+                totalSeconds--;
+                setTimeout(engineTick, 1000);
+            } else {
+                displayEl.textContent = "00:00";
+                displayEl.style.color = "#fff";
+                displayEl.style.textShadow = "0 0 80px #ff0000, 0 0 30px #fff";
+                statusEl.innerHTML = "LOK'TAR OGAR<br>EN VIVO";
+            }
+        }
+        engineTick();
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Win95 BRB Screen</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: #008080; /* Teal clásico */
+            overflow: hidden; font-family: "Arial", sans-serif;
+            position: relative;
+        }
+
+        #bouncing-window {
+            position: absolute; z-index: 10;
+            background: #c0c0c0; border: 3px outset #dfdfdf;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+            width: 500px; display: flex; flex-direction: column;
+        }
+
+        .title-bar {
+            background: #000080; color: #fff; padding: 6px 10px; font-weight: bold; font-size: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .btn-close {
+            background: #c0c0c0; border: 2px outset #dfdfdf; width: 20px; height: 20px;
+            color: #000; display: flex; justify-content: center; align-items: center;
+            font-size: 12px; font-weight: bold;
+        }
+
+        .content {
+            padding: 30px; display: flex; align-items: center; gap: 20px;
+        }
+
+        /* Reloj de arena animado en CSS */
+        .hourglass {
+            width: 40px; height: 60px;
+            background: 
+                linear-gradient(to bottom, #000 4px, transparent 4px, transparent 56px, #000 56px),
+                linear-gradient(to bottom, #000 4px, #fff 4px, #fff 28px, #000 28px, #000 32px, #fff 32px, #fff 56px, #000 56px);
+            border: 2px solid #000; border-radius: 4px;
+            animation: spinHourglass 2s ease-in-out infinite;
+        }
+
+        @keyframes spinHourglass {
+            0%, 20% { transform: rotate(0deg); }
+            80%, 100% { transform: rotate(180deg); }
+        }
+
+        .text-box {
+            font-size: 20px; color: #000;
+        }
+
+        .text-box span { font-weight: bold; display: block; margin-bottom: 10px; font-size: 24px; }
+    </style>
+</head>
+<body>
+    <div id="bouncing-window">
+        <div class="title-bar">
+            <span>Standby_Mode.exe</span>
+            <div class="btn-close">X</div>
+        </div>
+        <div class="content">
+            <div class="hourglass"></div>
+            <div class="text-box">
+                <span>Ausente</span>
+                El sistema se encuentra en pausa. Vuelvo en unos instantes...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const win = document.getElementById('bouncing-window');
+        let x = 800; let y = 400;
+        let dx = 2.5; let dy = 2.5;
+        const screenW = 1920; const screenH = 1080;
+        let winW = 500; let winH = 150; 
+
+        window.onload = () => {
+            winW = win.offsetWidth; winH = win.offsetHeight;
+            requestAnimationFrame(animateWindow);
+        }
+
+        function animateWindow() {
+            x += dx; y += dy;
+            if (x + winW >= screenW || x <= 0) dx = -dx;
+            if (y + winH >= screenH || y <= 0) dy = -dy;
+            win.style.left = x + 'px'; win.style.top = y + 'px';
+            requestAnimationFrame(animateWindow);
+        }
+    </script>
+</body>
+</html>

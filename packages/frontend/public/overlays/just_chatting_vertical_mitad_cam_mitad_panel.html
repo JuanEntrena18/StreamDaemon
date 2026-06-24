@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horde Vertical Just Chatting</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: transparent;
+            overflow: hidden; position: relative; display: flex; flex-direction: column;
+        }
+
+        /* Mitad Superior: Webcam */
+        .cam-area {
+            width: 1080px; height: 960px; /* Exactamente el 50% */
+            background-color: transparent; position: relative;
+            border: 8px solid #5a0000;
+            box-shadow: inset 0 0 80px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.9);
+            z-index: 2;
+        }
+
+        /* Remaches en las esquinas de la webcam */
+        .rivet { position: absolute; width: 24px; height: 24px; background: #333; border-radius: 50%; border: 2px solid #111; box-shadow: inset -2px -2px 5px rgba(0,0,0,0.8), 2px 2px 5px rgba(255,255,255,0.2); }
+        .r-tl { top: 15px; left: 15px; } .r-tr { top: 15px; right: 15px; }
+        .r-bl { bottom: 15px; left: 15px; } .r-br { bottom: 15px; right: 15px; }
+
+        /* Mitad Inferior: Diseño y Chat */
+        .bottom-area {
+            width: 1080px; height: 960px;
+            background: linear-gradient(to bottom, #110000, #000000);
+            position: relative; display: flex; flex-direction: column;
+            z-index: 1;
+        }
+
+        /* Logo Gigante de Fondo */
+        .bg-logo {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 800px; opacity: 0.05; pointer-events: none;
+        }
+
+        .chat-header {
+            display: flex; align-items: center; justify-content: center;
+            padding: 25px; background: rgba(40,0,0,0.8);
+            border-bottom: 4px solid #ff0000;
+        }
+        
+        .chat-logo { width: 60px; filter: drop-shadow(0 0 15px #ff0000); margin-right: 20px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px #ff0000); } 50% { transform: scale(1.1); filter: drop-shadow(0 0 25px #ff3300); } }
+        
+        .chat-title { font-family: 'Cinzel', serif; color: #fff; font-size: 40px; letter-spacing: 8px; text-shadow: 3px 3px 10px #000; }
+
+        /* Contenedor del Chat */
+        .chat-container {
+            flex: 1; padding: 30px 50px; display: flex; flex-direction: column;
+            justify-content: flex-end; overflow: hidden; z-index: 10;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .chat-msg {
+            background: rgba(20, 0, 0, 0.85); border: 2px solid #5a0000; border-left: 6px solid #ff0000;
+            padding: 20px 25px; margin-top: 20px; border-radius: 8px;
+            font-size: 28px; color: #e0e0e0; line-height: 1.5;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.7);
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .chat-user { font-weight: 700; color: #ff4444; margin-right: 15px; font-size: 30px; text-transform: uppercase; }
+
+        #overlay-root { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        #overlay-root > * { pointer-events: auto; }
+    </style>
+</head>
+<body>
+
+    <div id="overlay-root"></div>
+
+    <!-- ZONA WEBCAM (Transparente para OBS) -->
+    <div class="cam-area">
+        <div class="rivet r-tl"></div><div class="rivet r-tr"></div>
+        <div class="rivet r-bl"></div><div class="rivet r-br"></div>
+    </div>
+
+    <!-- ZONA INFERIOR (Chat y Diseño) -->
+    <div class="bottom-area">
+        <img src="horda_logo.png" class="bg-logo" alt="Fondo">
+        
+        <div class="chat-header">
+            <img src="horda_logo.png" class="chat-logo" alt="Horda">
+            <span class="chat-title">CONCILIO DE GUERRA</span>
+        </div>
+        
+        <div class="chat-container" id="chatWrapper">
+            <!-- Mensajes JS -->
+        </div>
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MESSAGES = 8; 
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#ff4444';
+
+            msgNode.innerHTML = `<span class="chat-user" style="color: ${finalColor}">${safeUsername}:</span><span class="chat-text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MESSAGES) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+    
+    <script type="module" src="./src/overlay.tsx"></script>
+</body>
+</html>

@@ -40,8 +40,6 @@
     "files": [
       "dist/**/*",
       "prisma/**/*",
-      "node_modules/**/*",
-      "node_modules/.prisma/client/**/*",
       "extra/**/*",
       "!**/.env*"
     ],

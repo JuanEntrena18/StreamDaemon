@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horde BRB Screen</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: #050000;
+            overflow: hidden; font-family: 'Cinzel', serif; color: #ffffff;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        .environment {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #2a0000 0%, #020000 100%);
+            z-index: 1;
+        }
+
+        .embers {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;
+            background-image: radial-gradient(#ff3300 3px, transparent 3px);
+            background-size: 100px 100px; opacity: 0.15;
+            animation: riseEmbers 10s linear infinite;
+        }
+
+        @keyframes riseEmbers {
+            0% { transform: translateY(0) scale(1); opacity: 0.1; }
+            50% { opacity: 0.4; }
+            100% { transform: translateY(-200px) scale(1.5); opacity: 0; }
+        }
+
+        .content-wrapper {
+            position: relative; z-index: 10;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .shield-container {
+            position: relative;
+            width: 400px; height: 400px;
+            display: flex; justify-content: center; align-items: center;
+            margin-bottom: 40px;
+        }
+
+        /* Anillo rúnico giratorio para mantener el movimiento */
+        .rotating-ring {
+            position: absolute;
+            width: 380px; height: 380px;
+            border: 4px dashed #8b0000;
+            border-radius: 50%;
+            animation: spinRing 20s linear infinite;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.2), inset 0 0 20px rgba(255, 0, 0, 0.2);
+        }
+
+        @keyframes spinRing { 100% { transform: rotate(360deg); } }
+
+        .horde-logo {
+            width: 250px; z-index: 5;
+            filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.8));
+            animation: pulseLogo 3s ease-in-out infinite;
+        }
+
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.6)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 40px rgba(255, 30, 0, 1)); }
+        }
+
+        .main-text {
+            font-size: 80px; font-weight: 900; color: #ff1a1a;
+            letter-spacing: 15px; text-transform: uppercase;
+            text-shadow: 5px 5px 15px #000, 0 0 40px rgba(255, 0, 0, 0.8);
+            margin-bottom: 10px;
+        }
+
+        .sub-text {
+            font-size: 30px; color: #b0b0b0; letter-spacing: 5px;
+            text-shadow: 2px 2px 5px #000;
+            animation: blinkText 2s infinite;
+        }
+
+        @keyframes blinkText {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="environment"></div>
+    <div class="embers"></div>
+
+    <div class="content-wrapper">
+        <div class="shield-container">
+            <div class="rotating-ring"></div>
+            <img src="horda_logo.png" alt="Horda" class="horde-logo">
+        </div>
+        <div class="main-text">REAGRUPANDO</div>
+        <div class="sub-text">VOLVEMOS A LA BATALLA EN BREVE...</div>
+    </div>
+</body>
+</html>
