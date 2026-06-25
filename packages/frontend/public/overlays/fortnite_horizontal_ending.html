@@ -36,7 +36,6 @@
         }
         @keyframes spinBg { 100% { transform: rotate(360deg); } }
 
-        /* Utilidad universal para enderezar el texto dentro de contenedores inclinados */
         .unskew { transform: skewX(15deg); display: flex; flex-direction: column; width: 100%; height: 100%; }
 
         .layout-container {
@@ -44,9 +43,6 @@
             display: flex; flex-direction: row; padding: 60px 80px; gap: 60px;
         }
 
-        /* ---------------------------------------------------
-           COLUMNA IZQUIERDA: Marca y Redes
-           --------------------------------------------------- */
         .left-col {
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
@@ -71,7 +67,6 @@
             100% { transform: skewX(-15deg) scale(1.03); } 
         }
 
-        /* Redes Sociales en Grid 2x2/3x2 */
         .social-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 100%; max-width: 800px;
         }
@@ -98,9 +93,6 @@
             text-shadow: 2px 2px 0 #000; font-weight: 900; letter-spacing: 1px; text-align: center;
         }
 
-        /* ---------------------------------------------------
-           COLUMNA DERECHA: Resumen de Partida (Créditos)
-           --------------------------------------------------- */
         .right-col {
             flex: 1.2; display: flex; flex-direction: column;
         }
@@ -125,7 +117,6 @@
             -webkit-text-stroke: 2px #000; text-shadow: 4px 4px 0 #000;
         }
 
-        /* Máscara para que el texto se difumine arriba y abajo al hacer scroll */
         .credits-mask {
             flex: 1; overflow: hidden; position: relative;
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
@@ -136,11 +127,10 @@
         .credits-scroll {
             display: flex; flex-direction: column; gap: 50px;
             animation: scrollCredits 25s linear infinite;
-            padding-top: 100%; /* Empieza desde abajo del todo */
-            padding-bottom: 100%; /* Termina cuando el último elemento sale por arriba */
+            padding-top: 100%;
+            padding-bottom: 100%;
         }
 
-        /* Pausa la animación si pasas el ratón por encima (útil para OBS si interactúas) */
         .credits-scroll:hover {
             animation-play-state: paused;
         }
@@ -169,10 +159,13 @@
             text-shadow: 2px 2px 0px #000;
         }
 
-        /* Variaciones de color para categorías */
         .cat-subs .category-title { color: var(--purple); }
         .cat-bits .category-title { color: #00ffff; }
 
+        .empty-msg {
+            font-family: 'Roboto', sans-serif; font-size: 24px; color: #888;
+            text-align: center; margin: 40px 0;
+        }
     </style>
 </head>
 <body>
@@ -181,42 +174,14 @@
 
     <div class="layout-container">
         
-        <!-- COLUMNA IZQUIERDA: Marca y Redes -->
         <div class="left-col">
             <div class="victory-banner">
                 <span>FIN DE LA<br>TRANSMISIÓN</span>
             </div>
 
-            <!-- INSTRUCCIONES: Cambia '@tu_usuario' por tus datos reales -->
-            <div class="social-grid">
-                <div class="social-box">
-                    <div class="unskew" style="align-items: center; justify-content: center;">
-                        <div class="platform">TWITCH</div>
-                        <div class="username">@tu_usuario</div>
-                    </div>
-                </div>
-                <div class="social-box">
-                    <div class="unskew" style="align-items: center; justify-content: center;">
-                        <div class="platform">X / TWITTER</div>
-                        <div class="username">@tu_usuario</div>
-                    </div>
-                </div>
-                <div class="social-box">
-                    <div class="unskew" style="align-items: center; justify-content: center;">
-                        <div class="platform">YOUTUBE</div>
-                        <div class="username">@tu_canal</div>
-                    </div>
-                </div>
-                <div class="social-box">
-                    <div class="unskew" style="align-items: center; justify-content: center;">
-                        <div class="platform">INSTAGRAM</div>
-                        <div class="username">@tu_usuario</div>
-                    </div>
-                </div>
-            </div>
+            <div class="social-grid" id="socialContainer"></div>
         </div>
 
-        <!-- COLUMNA DERECHA: Resumen de Partida -->
         <div class="right-col">
             <div class="credits-panel">
                 <div class="credits-header">
@@ -224,60 +189,7 @@
                 </div>
                 
                 <div class="credits-mask">
-                    <div class="credits-scroll" id="creditsContainer">
-                        
-                        <!-- Categoría Follows -->
-                        <div class="credit-category">
-                            <div class="category-title">NUEVOS RECLUTAS</div>
-                            <div class="credit-names">
-                                NinjaGamer99<br>
-                                Tfue_Fan<br>
-                                xX_SniperPro_Xx<br>
-                                PeelyLover<br>
-                                JonesyTheGreat<br>
-                                BuilderMaster<br>
-                                TomatoHeadReal
-                            </div>
-                        </div>
-
-                        <!-- Categoría Subs -->
-                        <div class="credit-category cat-subs">
-                            <div class="category-title">PASES DE BATALLA (SUBS)</div>
-                            <div class="credit-names">
-                                RubiusOMG (Tier 3)<br>
-                                Ibai_Llanos (Tier 1)<br>
-                                Grefg_Oficial (Gifted x5)<br>
-                                AriGameplays (Tier 1)<br>
-                                TheGrefg (Tier 2)
-                            </div>
-                        </div>
-
-                        <!-- Categoría Donaciones / Bits -->
-                        <div class="credit-category cat-bits">
-                            <div class="category-title">ENTREGAS DE PAVOS (BITS)</div>
-                            <div class="credit-names">
-                                MidasKing - 5000 Bits<br>
-                                Aura_Sniper - 1500 Bits<br>
-                                Raven_Dark - 500 Bits<br>
-                                CuddleTeam - 100 Bits
-                            </div>
-                        </div>
-                        
-                        <!-- Categoría Host / Raids -->
-                        <div class="credit-category">
-                            <div class="category-title">EMBOSCADAS (RAIDS)</div>
-                            <div class="credit-names">
-                                Clan_Uchiha (540 Viewers)<br>
-                                Los_Tryhards (120 Viewers)
-                            </div>
-                        </div>
-
-                        <!-- Mensaje de agradecimiento final -->
-                        <div class="credit-category" style="margin-top: 80px;">
-                            <div class="category-title" style="color: #fff; font-size: 50px; border:none;">¡GRACIAS POR JUGAR!</div>
-                        </div>
-
-                    </div>
+                    <div class="credits-scroll" id="creditsContainer"></div>
                 </div>
             </div>
         </div>
@@ -285,10 +197,140 @@
     </div>
 
     <script>
-        // Si más adelante integras esto a React o a tu backend, 
-        // puedes usar JS para borrar el contenido de #creditsContainer
-        // y rellenarlo dinámicamente con los datos de la sesión actual
-        // creando divs con las clases 'credit-category', 'category-title' y 'credit-names'.
+        (function() {
+            var SOCIAL_INFO = {
+                twitch:    { label: 'TWITCH' },
+                x:         { label: 'X / TWITTER' },
+                youtube:   { label: 'YOUTUBE' },
+                instagram: { label: 'INSTAGRAM' },
+                tiktok:    { label: 'TIKTOK' }
+            };
+            var p = new URLSearchParams(window.location.search);
+            var channel = p.get('channel');
+            var backend = p.get('backend') || 'http://localhost:3000';
+
+            var raw = p.get('socials');
+            if (raw) {
+                try {
+                    var list = JSON.parse(raw);
+                    var map = {};
+                    for (var i = 0; i < list.length; i++) map[list[i].p] = list[i].u;
+                    var container = document.getElementById('socialContainer');
+                    var html = '';
+                    for (var key in SOCIAL_INFO) {
+                        if (!SOCIAL_INFO.hasOwnProperty(key)) continue;
+                        var username = map[key];
+                        if (!username) continue;
+                        html += '<div class="social-box"><div class="unskew" style="align-items:center;justify-content:center;">' +
+                            '<div class="platform">' + SOCIAL_INFO[key].label + '</div>' +
+                            '<div class="username">@' + esc(username) + '</div></div></div>';
+                    }
+                    if (html) container.innerHTML = html;
+                } catch(e) {}
+            }
+
+            var data = {
+                followers: [],
+                subs: [],
+                bits: [],
+                raids: []
+            };
+
+            function esc(s) { return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+            function fmtTime(ts) {
+                var d = new Date(ts);
+                var h = d.getHours().toString().padStart(2,'0');
+                var m = d.getMinutes().toString().padStart(2,'0');
+                return h + ':' + m;
+            }
+
+            function restartAnim(el) {
+                el.style.animation = 'none';
+                void el.offsetWidth;
+                el.style.animation = 'scrollCredits 25s linear infinite';
+            }
+
+            function render() {
+                var container = document.getElementById('creditsContainer');
+                if (!container) return;
+                var html = '';
+                var f = data.followers;
+                if (f.length) {
+                    html += '<div class="credit-category"><div class="category-title">NUEVOS RECLUTAS (' + f.length + ')</div><div class="credit-names">';
+                    for (var i = Math.max(0, f.length - 30); i < f.length; i++) {
+                        html += esc(f[i].name) + ' <span style="font-size:16px;opacity:0.5">' + fmtTime(f[i].time) + '</span><br>';
+                    }
+                    html += '</div></div>';
+                }
+                var s = data.subs;
+                if (s.length) {
+                    html += '<div class="credit-category cat-subs"><div class="category-title">PASES DE BATALLA (SUBS) (' + s.length + ')</div><div class="credit-names">';
+                    for (var i = Math.max(0, s.length - 30); i < s.length; i++) {
+                        html += esc(s[i].name) + ' (' + esc(s[i].detail) + ') <span style="font-size:16px;opacity:0.5">' + fmtTime(s[i].time) + '</span><br>';
+                    }
+                    html += '</div></div>';
+                }
+                var b = data.bits;
+                if (b.length) {
+                    var total = 0;
+                    for (var i = 0; i < b.length; i++) total += b[i].bits;
+                    html += '<div class="credit-category cat-bits"><div class="category-title">ENTREGAS DE PAVOS (BITS) (' + total + ')</div><div class="credit-names">';
+                    for (var i = Math.max(0, b.length - 30); i < b.length; i++) {
+                        html += esc(b[i].name) + ' - ' + b[i].bits + ' Bits <span style="font-size:16px;opacity:0.5">' + fmtTime(b[i].time) + '</span><br>';
+                    }
+                    html += '</div></div>';
+                }
+                var r = data.raids;
+                if (r.length) {
+                    var totalViewers = 0;
+                    for (var i = 0; i < r.length; i++) totalViewers += r[i].viewers;
+                    html += '<div class="credit-category"><div class="category-title">EMBOSCADAS (RAIDS) (' + r.length + ')</div><div class="credit-names">';
+                    for (var i = Math.max(0, r.length - 30); i < r.length; i++) {
+                        html += esc(r[i].from) + ' (' + r[i].viewers + ' Viewers) <span style="font-size:16px;opacity:0.5">' + fmtTime(r[i].time) + '</span><br>';
+                    }
+                    html += '</div></div>';
+                }
+                if (!f.length && !s.length && !b.length && !r.length) {
+                    html += '<div class="empty-msg">Esperando eventos en vivo...</div>';
+                }
+                html += '<div class="credit-category" style="margin-top:80px;"><div class="category-title" style="color:#fff;font-size:50px;border:none;">¡GRACIAS POR JUGAR!</div></div>';
+                container.innerHTML = html;
+                restartAnim(container);
+            }
+
+            render();
+
+            if (channel && backend) {
+                var script = document.createElement('script');
+                script.src = backend + '/socket.io/socket.io.js';
+                script.onload = function() {
+                    var socket = io(backend, { transports: ['websocket', 'polling'] });
+                    socket.emit('join', { channel: channel });
+                    socket.on('channel:follow', function(ev) {
+                        data.followers.push({ name: ev.userDisplayName, time: Date.now() });
+                        render();
+                    });
+                    socket.on('channel:subscribe', function(ev) {
+                        data.subs.push({ name: ev.userDisplayName, detail: 'Tier ' + ev.tier, time: Date.now() });
+                        render();
+                    });
+                    socket.on('channel:subgift', function(ev) {
+                        data.subs.push({ name: ev.gifterDisplayName, detail: 'Regalados x' + ev.amount, time: Date.now() });
+                        render();
+                    });
+                    socket.on('channel:cheer', function(ev) {
+                        data.bits.push({ name: ev.userDisplayName, bits: ev.bits, time: Date.now() });
+                        render();
+                    });
+                    socket.on('channel:raid', function(ev) {
+                        data.raids.push({ from: ev.fromDisplayName, viewers: ev.viewerCount, time: Date.now() });
+                        render();
+                    });
+                };
+                document.head.appendChild(script);
+            }
+        })();
     </script>
 </body>
 </html>
