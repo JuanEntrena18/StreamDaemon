@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamForge – Fortnite HUD Overlay</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Roboto:wght@500;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --blue:    #00d2ff;
+    --blue-dark:#0077ff;
+    --yellow:  #ffea00;
+    --purple:  #b829ff;
+    --dark:    rgba(26, 0, 51, 0.9);
+    --panel:   rgba(0, 0, 0, 0.7);
+    --stroke:  #ffffff;
+  }
+
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Luckiest Guy', cursive;
+    color: #fff;
+  }
+
+  /* CANVAS DE PARTÍCULAS */
+  #particles {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Utilidad para deshacer la inclinación en textos */
+  .unskew { transform: skewX(15deg); display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+  
+  #hud {
+    position: absolute;
+    top: 28px; left: 28px;
+    display: flex; flex-direction: column; gap: 12px;
+    z-index: 10;
+  }
+
+  .stat-row {
+    display: flex; align-items: stretch; gap: 0;
+    height: 46px;
+    filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.5));
+  }
+
+  .stat-icon-wrap {
+    width: 55px;
+    background: var(--blue);
+    transform: skewX(-15deg);
+    border: 3px solid var(--stroke);
+    border-right: none;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 2;
+    margin-left: 10px; /* Compensa el skew */
+  }
+  .stat-icon-wrap.yellow { background: var(--yellow); }
+  .stat-icon-wrap.purple { background: var(--purple); }
+
+  .stat-icon-wrap svg {
+    width: 24px; height: 24px;
+    fill: #000;
+  }
+
+  .stat-body {
+    background: var(--panel);
+    border: 3px solid var(--stroke);
+    transform: skewX(-15deg);
+    padding: 0 20px;
+    min-width: 130px;
+    display: flex; flex-direction: column; justify-content: center;
+    position: relative;
+    margin-left: -5px; /* Superposición sutil */
+  }
+
+  .stat-label {
+    font-family: 'Roboto', sans-serif;
+    font-size: 11px; font-weight: 900;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .stat-value {
+    font-size: 26px; line-height: 1;
+    letter-spacing: 2px;
+    -webkit-text-stroke: 1px #000;
+    transition: all 0.3s ease;
+  }
+
+  .stat-value.blue  { color: var(--blue); }
+  .stat-value.yellow{ color: var(--yellow); }
+  .stat-value.purple{ color: var(--purple); }
+
+  #uptime-block {
+    position: absolute;
+    top: 28px; right: 28px;
+    background: var(--yellow);
+    border: 4px solid var(--stroke);
+    padding: 5px 25px;
+    transform: skewX(-15deg);
+    box-shadow: 5px 5px 0px rgba(0,0,0,0.5);
+    text-align: center;
+    min-width: 180px;
+    z-index: 10;
+  }
+
+  .uptime-label {
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px; font-weight: 900;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #000;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .uptime-value {
+    font-size: 40px;
+    color: #ffffff;
+    letter-spacing: 3px;
+    line-height: 1;
+    -webkit-text-stroke: 2px #000;
+    text-shadow: 3px 3px 0 #000;
+  }
+
+  #fn-stats {
+    position: absolute;
+    top: 110px; right: 28px;
+    display: flex; flex-direction: column; gap: 8px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 10;
+    align-items: flex-end;
+  }
+  #fn-stats.visible { opacity: 1; }
+
+  .fn-stat-title-wrap {
+    background: var(--blue);
+    border: 3px solid var(--stroke);
+    padding: 6px 30px;
+    transform: skewX(-15deg);
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+    margin-bottom: 4px;
+  }
+  
+  .fn-stat-title {
+    font-size: 18px; letter-spacing: 2px;
+    color: #000; text-shadow: none;
+  }
+
+  .fn-stat-row {
+    display: flex; justify-content: flex-end; align-items: stretch;
+    height: 38px;
+    filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.5));
+  }
+
+  .fn-stat-label-wrap {
+    background: var(--panel);
+    border: 3px solid var(--stroke);
+    border-right: none;
+    transform: skewX(-15deg);
+    padding: 0 20px 0 25px; /* Padding extra para evitar cortes */
+    display: flex; align-items: center;
+    margin-right: -10px; /* Solapamiento visual con el valor */
+    z-index: 1;
+  }
+
+  .fn-stat-label { 
+    font-family: 'Roboto', sans-serif; font-weight: 900;
+    color: rgba(255,255,255,0.8); font-size: 12px; text-transform: uppercase; letter-spacing: 2px;
+  }
+
+  .fn-stat-val-wrap {
+    background: rgba(0,0,0,0.8);
+    border: 3px solid var(--stroke);
+    transform: skewX(-15deg);
+    padding: 0 35px 0 25px; /* Padding de seguridad amplio a la derecha para que los números largos no se corten */
+    display: flex; align-items: center; justify-content: center;
+    min-width: 90px;
+    z-index: 2;
+  }
+
+  .fn-stat-value { font-family: 'Luckiest Guy', cursive; color: #fff; font-size: 22px; letter-spacing: 1px; -webkit-text-stroke: 1px #000; }
+  .fn-stat-value.yellow { color: var(--yellow); }
+  .fn-stat-value.purple { color: var(--purple); }
+
+  #stream-title-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: var(--dark);
+    border-top: 4px solid var(--blue);
+    display: flex; align-items: center; gap: 20px;
+    padding: 0 40px;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+    z-index: 10;
+  }
+
+  #live-badge {
+    background: #FF3B3B;
+    border: 2px solid #fff;
+    padding: 4px 15px;
+    transform: skewX(-15deg);
+    font-size: 20px; letter-spacing: 3px;
+    color: #fff; -webkit-text-stroke: 1px #000;
+    animation: pulse-live 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse-live { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  #game-label {
+    font-size: 22px; color: var(--yellow); letter-spacing: 2px;
+    -webkit-text-stroke: 1px #000;
+  }
+
+  #title-sep { color: #fff; font-size: 20px; opacity: 0.5; }
+
+  #title-text {
+    font-family: 'Roboto', sans-serif;
+    font-size: 18px; font-weight: 700;
+    color: #fff; text-transform: uppercase;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  #alert-zone {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; align-items: center;
+    pointer-events: none; z-index: 100;
+  }
+
+  .alert-wrapper {
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .alert-wrapper.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  .alert-wrapper.hide { opacity: 0; transform: translate(-50%, -50%) scale(0.5) translateY(100px); transition: all 0.3s ease-in; }
+
+  .victory-banner {
+    background: linear-gradient(180deg, var(--blue) 0%, var(--blue-dark) 100%);
+    border-top: 6px solid #ffffff; border-bottom: 6px solid #ffffff;
+    padding: 20px 80px;
+    transform: skewX(-15deg);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255,255,255,0.3);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-width: 600px; text-align: center;
+  }
+
+  /* Variantes de color de alerta */
+  .alert-wrapper.sub .victory-banner { background: linear-gradient(180deg, var(--purple) 0%, #4a0080 100%); }
+  .alert-wrapper.bits .victory-banner { background: linear-gradient(180deg, var(--yellow) 0%, #ff8800 100%); }
+
+  .content-fix { transform: skewX(15deg); display: flex; flex-direction: column; align-items: center; }
+
+  .alert-type {
+    font-size: 30px; color: #ffffff; letter-spacing: 3px; margin-bottom: 5px;
+    text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+  }
+
+  .alert-user {
+    font-size: 80px; color: var(--yellow); letter-spacing: 5px; line-height: 1;
+    -webkit-text-stroke: 3px #000; text-shadow: 5px 5px 0 rgba(0,0,0,0.8);
+    margin-bottom: 10px;
+  }
+  .alert-wrapper.bits .alert-user { color: #fff; } /* Contraste si el fondo es amarillo */
+
+  .alert-detail { font-size: 35px; color: #fff; -webkit-text-stroke: 1px #000; text-shadow: 3px 3px 0 #000; }
+  
+  .alert-msg {
+    font-family: 'Roboto', sans-serif; font-size: 20px; font-weight: 700;
+    color: #fff; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 5px;
+    margin-top: 15px;
+  }
+
+  #recent-follow {
+    position: absolute; bottom: 85px; right: 28px;
+    background: var(--panel); border: 3px solid var(--stroke);
+    padding: 5px 20px; transform: skewX(-15deg);
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+    min-width: 250px; opacity: 0; transition: opacity 0.5s ease; z-index: 10;
+  }
+  #recent-follow.visible { opacity: 1; }
+
+  .rf-label { font-family: 'Roboto', sans-serif; font-size: 12px; font-weight: 900; color: var(--blue); text-transform: uppercase; margin-bottom: 2px; }
+  .rf-name { font-size: 24px; color: #fff; -webkit-text-stroke: 1px #000; letter-spacing: 1px; }
+
+  .fn-chat {
+    position: absolute; bottom: 85px;
+    width: 400px; max-height: 350px;
+    background: var(--panel); border: 3px solid var(--stroke);
+    transform: skewX(-10deg); box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+    padding: 15px; display: none; flex-direction: column; gap: 8px;
+    overflow: hidden; z-index: 20;
+  }
+  .fn-chat.visible { display: flex; }
+  .fn-chat.left  { left: 28px; }
+  .fn-chat.right { right: 28px; }
+  
+  .fn-chat-header {
+    font-size: 20px; letter-spacing: 2px; color: var(--blue);
+    border-bottom: 2px solid rgba(255,255,255,0.2); padding-bottom: 5px;
+    -webkit-text-stroke: 1px #000;
+  }
+  
+  .fn-chat-messages { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; }
+  
+  .fn-chat-msg {
+    font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; line-height: 1.4;
+    word-break: break-word; background: rgba(0,0,0,0.4); padding: 6px 10px; border-radius: 4px;
+  }
+  .fn-chat-msg .un { font-size: 16px; text-transform: uppercase; text-shadow: 1px 1px 0 #000; margin-right: 5px;}
+  .fn-chat-msg .txt { color: #fff; }
+
+  /* MODO OFFLINE & DEMO */
+  #demo-badge, #offline-notice {
+    position: absolute; top: 28px; left: 50%; transform: translateX(-50%) skewX(-15deg);
+    border: 3px solid #fff; padding: 5px 20px; font-size: 18px; letter-spacing: 2px;
+    display: none; z-index: 55; -webkit-text-stroke: 1px #000; box-shadow: 5px 5px 0 #000;
+  }
+  #demo-badge { background: var(--yellow); color: #fff; }
+  #demo-badge.show { display: block; }
+  #offline-notice { background: #FF3B3B; color: #fff; }
+  #offline-notice.show { display: block; }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- HUD Stats – esquina superior izquierda -->
+<div id="hud">
+  <!-- Espectadores -->
+  <div class="stat-row">
+    <div class="stat-icon-wrap">
+      <div class="unskew">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+        </svg>
+      </div>
+    </div>
+    <div class="stat-body">
+      <div class="unskew" style="flex-direction: column; align-items: flex-start;">
+        <div class="stat-label">Espectadores</div>
+        <div class="stat-value blue" id="val-viewers">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seguidores -->
+  <div class="stat-row">
+    <div class="stat-icon-wrap yellow">
+      <div class="unskew">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </div>
+    </div>
+    <div class="stat-body">
+      <div class="unskew" style="flex-direction: column; align-items: flex-start;">
+        <div class="stat-label">Seguidores</div>
+        <div class="stat-value yellow" id="val-followers">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Suscriptores -->
+  <div class="stat-row">
+    <div class="stat-icon-wrap purple">
+      <div class="unskew">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z"/>
+        </svg>
+      </div>
+    </div>
+    <div class="stat-body">
+      <div class="unskew" style="flex-direction: column; align-items: flex-start;">
+        <div class="stat-label">Suscriptores</div>
+        <div class="stat-value purple" id="val-subs">0</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Uptime -->
+<div id="uptime-block">
+  <div class="unskew" style="flex-direction: column;">
+    <div class="uptime-label">Tiempo en Directo</div>
+    <div class="uptime-value" id="val-uptime">00:00:00</div>
+  </div>
+</div>
+
+<!-- FN Stats -->
+<div id="fn-stats">
+  <div class="fn-stat-title-wrap">
+    <div class="unskew fn-stat-title">TRAYECTORIA FN</div>
+  </div>
+  <div class="fn-stat-row">
+    <div class="fn-stat-label-wrap"><div class="unskew fn-stat-label">Kills</div></div>
+    <div class="fn-stat-val-wrap"><div class="unskew fn-stat-value" id="fn-kills">—</div></div>
+  </div>
+  <div class="fn-stat-row">
+    <div class="fn-stat-label-wrap"><div class="unskew fn-stat-label">Victorias</div></div>
+    <div class="fn-stat-val-wrap"><div class="unskew fn-stat-value yellow" id="fn-wins">—</div></div>
+  </div>
+  <div class="fn-stat-row">
+    <div class="fn-stat-label-wrap"><div class="unskew fn-stat-label">Partidas</div></div>
+    <div class="fn-stat-val-wrap"><div class="unskew fn-stat-value" id="fn-matches">—</div></div>
+  </div>
+  <div class="fn-stat-row">
+    <div class="fn-stat-label-wrap"><div class="unskew fn-stat-label">K/D</div></div>
+    <div class="fn-stat-val-wrap"><div class="unskew fn-stat-value purple" id="fn-kd">—</div></div>
+  </div>
+  <div class="fn-stat-row">
+    <div class="fn-stat-label-wrap"><div class="unskew fn-stat-label">Win Rate</div></div>
+    <div class="fn-stat-val-wrap"><div class="unskew fn-stat-value" id="fn-winrate">—</div></div>
+  </div>
+</div>
+
+<!-- Último Follow -->
+<div id="recent-follow">
+  <div class="unskew" style="flex-direction: column; align-items: flex-start;">
+    <div class="rf-label">NUEVO RECLUTA</div>
+    <div class="rf-name" id="last-follow-name">–</div>
+  </div>
+</div>
+
+<!-- Barra inferior -->
+<div id="stream-title-bar">
+  <div id="live-badge"><div class="unskew">EN DIRECTO</div></div>
+  <div id="game-label">FORTNITE</div>
+  <div id="title-sep">◆</div>
+  <div id="title-text">Cargando datos del servidor...</div>
+</div>
+
+<!-- Zona de alertas central -->
+<div id="alert-zone"></div>
+
+<!-- Avisos -->
+<div id="offline-notice"><div class="unskew">ERROR: SIN CONEXIÓN</div></div>
+<div id="demo-badge"><div class="unskew">MODO DE PRUEBA</div></div>
+
+<!-- Chat en vivo -->
+<div class="fn-chat left" id="fn-chat">
+  <div class="unskew" style="flex-direction: column; align-items: stretch; height: 100%; width: 100%;">
+    <div class="fn-chat-header">CHAT DEL ESCUADRÓN</div>
+    <div class="fn-chat-messages" id="fn-chat-msgs"></div>
+  </div>
+</div>
+
+<script>
+const CHANNEL     = new URLSearchParams(location.search).get('channel') || '';
+const DEMO_MODE   = new URLSearchParams(location.search).get('demo') === 'true';
+const BACKEND_URL = new URLSearchParams(location.search).get('backend') || 'http://localhost:3000';
+const EPIC_USER   = new URLSearchParams(location.search).get('epic') || '';
+const STATS_MODE  = new URLSearchParams(location.search).get('mode') || 'overall';
+const LAYOUT      = new URLSearchParams(location.search).get('layout') || 'stats'; // stats, chat-left, chat-right
+
+let uptimeSeconds = 0;
+let uptimeInterval = null;
+
+function fmtNum(n) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+  if (n >= 1_000)     return (n / 1_000).toFixed(1) + 'K';
+  return String(n);
+}
+
+function fmtTime(s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return [h, m, sec].map(v => String(v).padStart(2,'0')).join(':');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function applyHud(data) {
+  document.getElementById('val-viewers').textContent   = fmtNum(data.viewers   ?? 0);
+  document.getElementById('val-followers').textContent = fmtNum(data.followers ?? 0);
+  document.getElementById('val-subs').textContent      = fmtNum(data.subscribers ?? 0);
+
+  const titleEl = document.getElementById('title-text');
+  if (data.streamTitle) titleEl.textContent = data.streamTitle;
+  
+  if (data.gameName) {
+    const gl = document.getElementById('game-label');
+    gl.textContent = data.gameName;
+  }
+
+  if (data.uptimeSeconds != null) {
+    uptimeSeconds = data.uptimeSeconds;
+    document.getElementById('val-uptime').textContent = fmtTime(uptimeSeconds);
+  }
+
+  if (!uptimeInterval && data.isLive) {
+    uptimeInterval = setInterval(() => {
+      uptimeSeconds++;
+      document.getElementById('val-uptime').textContent = fmtTime(uptimeSeconds);
+    }, 1000);
+  }
+}
+
+async function fetchFnStats() {
+  if (!EPIC_USER) return;
+  try {
+    const r = await fetch(`${BACKEND_URL}/fortnite/stats/${encodeURIComponent(EPIC_USER)}?mode=${STATS_MODE}`);
+    if (!r.ok) return;
+    const data = await r.json();
+    document.getElementById('fn-kills').textContent    = fmtNum(data.kills ?? 0);
+    document.getElementById('fn-wins').textContent     = fmtNum(data.wins ?? 0);
+    document.getElementById('fn-matches').textContent  = fmtNum(data.matches ?? 0);
+    document.getElementById('fn-kd').textContent       = (data.kd ?? 0).toFixed(2);
+    document.getElementById('fn-winrate').textContent  = (data.winRate ?? 0).toFixed(1) + '%';
+    document.getElementById('fn-stats').classList.add('visible');
+  } catch {}
+}
+
+const MAX_CHAT_MSGS = 15;
+
+function initChatLayout() {
+  const el = document.getElementById('fn-chat');
+  if (!el) return;
+  if (LAYOUT === 'chat-left') {
+    el.classList.add('visible', 'left'); el.classList.remove('right');
+  } else if (LAYOUT === 'chat-right') {
+    el.classList.add('visible', 'right'); el.classList.remove('left');
+  } else if (LAYOUT === 'stats') {
+    document.getElementById('fn-stats').classList.add('visible');
+  }
+}
+
+function addChatMessage(displayName, text, color) {
+  const container = document.getElementById('fn-chat-msgs');
+  if (!container) return;
+  const row = document.createElement('div');
+  row.className = 'fn-chat-msg';
+  row.innerHTML = `<span class="un" style="color:${color || '#00d2ff'}">${escHtml(displayName)}:</span><span class="txt">${escHtml(text)}</span>`;
+  container.appendChild(row);
+  if (container.children.length > MAX_CHAT_MSGS) container.removeChild(container.firstChild);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showLastFollow(name) {
+  document.getElementById('last-follow-name').textContent = name;
+  document.getElementById('recent-follow').classList.add('visible');
+}
+
+const alertQueue = [];
+let alertBusy = false;
+const ALERT_DURATION = 6000;
+
+function enqueueAlert(cfg) {
+  alertQueue.push(cfg);
+  if (!alertBusy) processAlertQueue();
+}
+
+function processAlertQueue() {
+  if (!alertQueue.length) { alertBusy = false; return; }
+  alertBusy = true;
+  const cfg = alertQueue.shift();
+  showAlert(cfg);
+  setTimeout(processAlertQueue, ALERT_DURATION + 600); // Dar tiempo a animación salida
+}
+
+function showAlert({ type, user, detail, msg }) {
+  const zone = document.getElementById('alert-zone');
+  
+  // Nomenclatura Fortnite
+  const typeLabels = {
+    follow: 'NUEVO MIEMBRO DEL ESCUADRÓN',
+    sub:    'PASE DE BATALLA OBTENIDO',
+    resub:  'PASE DE BATALLA RENOVADO',
+    subgift:'REGALO DE PASE DE BATALLA',
+    bits:   'ENTREGA DE PAVOS (V-BUCKS)',
+    cheer:  'ENTREGA DE PAVOS (V-BUCKS)',
+    redemption: 'RECOMPENSA DE GRIETA',
+  };
+
+  const wrapper = document.createElement('div');
+  wrapper.className = `alert-wrapper ${type}`;
+
+  // Inyectando estructura Victory Royale
+  wrapper.innerHTML = `
+    <div class="victory-banner">
+        <div class="content-fix">
+            <div class="alert-type">${typeLabels[type] ?? type.toUpperCase()}</div>
+            <div class="alert-user">${escHtml(user)}</div>
+            ${detail ? `<div class="alert-detail">${escHtml(detail)}</div>` : ''}
+            ${msg    ? `<div class="alert-msg">${escHtml(msg)}</div>` : ''}
+        </div>
+    </div>
+  `;
+
+  zone.appendChild(wrapper);
+  
+  // Forzar reflow para animación CSS
+  void wrapper.offsetWidth;
+  wrapper.classList.add('show');
+
+  setTimeout(() => {
+    wrapper.classList.remove('show');
+    wrapper.classList.add('hide');
+    setTimeout(() => { if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper); }, 400);
+  }, ALERT_DURATION);
+}
+
+function initSocket() {
+  let socket;
+  try {
+    socket = io(BACKEND_URL, { transports: ['websocket'] });
+  } catch(e) {
+    document.getElementById('offline-notice').classList.add('show');
+    return;
+  }
+
+  socket.on('connect', () => {
+    document.getElementById('offline-notice').classList.remove('show');
+    socket.emit('join:channel', CHANNEL);
+
+    fetch(`${BACKEND_URL}/hud/start-poll`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ channel: CHANNEL, interval: 10 })
+    }).catch(() => {});
+
+    fetch(`${BACKEND_URL}/hud/${CHANNEL}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) applyHud(d); })
+      .catch(() => {});
+  });
+
+  socket.on('disconnect', () => document.getElementById('offline-notice').classList.add('show'));
+  
+  socket.on('hud:update', applyHud);
+
+  socket.on('channel:follow', ({ userDisplayName }) => {
+    showLastFollow(userDisplayName);
+    enqueueAlert({ type: 'follow', user: userDisplayName });
+  });
+
+  socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+    if (isGift) return;
+    enqueueAlert({ type: 'sub', user: userDisplayName, detail: tier === '1000' ? 'Tier 1' : 'Tier 2/3' });
+  });
+
+  socket.on('channel:subscription-message', ({ userDisplayName, cumulativeMonths, messageText }) => {
+    enqueueAlert({ type: 'resub', user: userDisplayName, detail: `${cumulativeMonths} Meses de lealtad`, msg: messageText });
+  });
+
+  socket.on('channel:subgift', ({ gifterDisplayName, amount }) => {
+    enqueueAlert({ type: 'subgift', user: gifterDisplayName, detail: `Regaló ${amount} Pases` });
+  });
+
+  socket.on('channel:cheer', ({ userDisplayName, bits, message }) => {
+    enqueueAlert({ type: 'bits', user: userDisplayName, detail: `${bits.toLocaleString()} Bits`, msg: message });
+  });
+
+  socket.on('chat:message', ({ user, text }) => addChatMessage(user.displayName, text, user.color));
+}
+
+// Background Particles System
+(function initParticles() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  canvas.width  = 1920; canvas.height = 1080;
+
+  const particles = Array.from({ length: 40 }, () => ({
+    x: Math.random() * 1920, y: Math.random() * 1080,
+    r: Math.random() * 3 + 1,
+    vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
+    alpha: Math.random() * 0.5 + 0.1,
+  }));
+
+  function tick() {
+    ctx.clearRect(0, 0, 1920, 1080);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = 1920; if (p.x > 1920) p.x = 0;
+      if (p.y < 0) p.y = 1080; if (p.y > 1080) p.y = 0;
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = '#00d2ff'; // Cyan particles
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    });
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+function loadSocketIO(cb) {
+  const script = document.createElement('script');
+  script.onload = () => cb();
+  script.onerror = () => cb(new Error('load failed'));
+  script.src = './js/socket.io.js';
+  document.head.appendChild(script);
+}
+
+loadSocketIO(function(err) {
+  if (!err) initSocket();
+  else setTimeout(() => loadSocketIO((err2) => { if (!err2) initSocket(); }), 3000);
+  
+  initChatLayout();
+
+  if (DEMO_MODE) {
+    document.getElementById('demo-badge').classList.add('show');
+    startDemo();
+  }
+  
+  fetchFnStats();
+  setInterval(fetchFnStats, 5 * 60 * 1000);
+});
+
+function startDemo() {
+  applyHud({
+    viewers: 1337, followers: 8502, subscribers: 420,
+    uptimeSeconds: 7245, streamTitle: 'INTENTANDO LLEGAR A UNREAL 🏆', gameName: 'FORTNITE', isLive: true
+  });
+
+  const demoStats = { kills: 24510, wins: 842, matches: 3105, kd: 4.12, winRate: 27.1 };
+  document.getElementById('fn-kills').textContent   = fmtNum(demoStats.kills);
+  document.getElementById('fn-wins').textContent    = fmtNum(demoStats.wins);
+  document.getElementById('fn-matches').textContent = fmtNum(demoStats.matches);
+  document.getElementById('fn-kd').textContent      = demoStats.kd.toFixed(2);
+  document.getElementById('fn-winrate').textContent = demoStats.winRate.toFixed(1) + '%';
+  document.getElementById('fn-stats').classList.add('visible');
+
+  if (LAYOUT === 'chat-left' || LAYOUT === 'chat-right') {
+    setTimeout(() => addChatMessage('Jonesy_Pro', '¿Dónde caemos?', '#ffea00'), 2000);
+    setTimeout(() => addChatMessage('Peely', 'Tengo minis, ven', '#00d2ff'), 5000);
+    setTimeout(() => addChatMessage('SweatyBuilder', 'Buen edit bro', '#b829ff'), 9000);
+  }
+
+  showLastFollow('Jonesy_Pro');
+  setTimeout(() => enqueueAlert({ type: 'follow', user: 'Jonesy_Pro' }), 3000);
+  setTimeout(() => enqueueAlert({ type: 'sub', user: 'SweatyBuilder', detail: 'Tier 1' }), 11000);
+  setTimeout(() => enqueueAlert({ type: 'bits', user: 'Peely', detail: '1000 V-Bucks (Bits)', msg: '¡A por la victoria!' }), 19000);
+}
+</script>
+</body>
+</html>

@@ -118,7 +118,8 @@ export function ObsPanel({ channel }: Props) {
           || item.id === 'fortnite-vertical-inicio' || item.id === 'fortnite-vertical-despedida'
           || item.id === 'fortnite-vertical-brb' || item.id === 'fortnite-vertical-gameplay'
           || item.id === 'fortnite-vertical-just-chatting'
-          || item.id === 'fortnite-starting-soon' || item.id === 'fortnite-ending';
+          || item.id === 'fortnite-starting-soon' || item.id === 'fortnite-ending'
+          || item.id === 'fortnite-hud-api';
       }
       if (selectedTheme === 'subnautica2') return item.id === 'subnautica2_standalone';
       const cat = CATEGORIES.find((c) => c.id === item.category);

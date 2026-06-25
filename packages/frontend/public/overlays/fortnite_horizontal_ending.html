@@ -5,9 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fortnite Horizontal Ending</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Roboto:wght@900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Roboto:wght@700;900&display=swap');
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --blue:    #00d2ff;
+            --blue-dark:#0077ff;
+            --yellow:  #ffea00;
+            --purple:  #b829ff;
+            --dark:    rgba(26, 0, 51, 0.9);
+            --panel:   rgba(10, 14, 26, 0.85);
+            --stroke:  #ffffff;
+        }
 
         body, html {
             width: 1920px; height: 1080px; background-color: #1a0033;
@@ -22,65 +32,146 @@
         .sunburst {
             position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; z-index: 2;
             background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.05) 0deg 10deg, transparent 10deg 20deg);
-            animation: spinBg 60s linear infinite;
+            animation: spinBg 90s linear infinite;
         }
         @keyframes spinBg { 100% { transform: rotate(360deg); } }
 
-        .ui-container {
+        /* Utilidad universal para enderezar el texto dentro de contenedores inclinados */
+        .unskew { transform: skewX(15deg); display: flex; flex-direction: column; width: 100%; height: 100%; }
+
+        .layout-container {
             position: absolute; z-index: 10; width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center;
+            display: flex; flex-direction: row; padding: 60px 80px; gap: 60px;
+        }
+
+        /* ---------------------------------------------------
+           COLUMNA IZQUIERDA: Marca y Redes
+           --------------------------------------------------- */
+        .left-col {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
         .victory-banner {
-            background: #ffea00; color: #000; padding: 30px 100px;
-            transform: skewX(-15deg); border: 8px solid #fff;
-            box-shadow: 20px 20px 0px rgba(0,0,0,0.5);
-            margin-bottom: 150px;
+            background: var(--yellow); color: #000; padding: 25px 80px;
+            transform: skewX(-15deg); border: 6px solid #fff;
+            box-shadow: 15px 15px 0px rgba(0,0,0,0.5);
+            margin-bottom: 80px;
             animation: bounceBanner 2s ease-in-out infinite alternate;
+            text-align: center;
         }
         
         .victory-banner span { 
-            display: block; transform: skewX(15deg); font-size: 130px; 
-            letter-spacing: 8px; line-height: 1; -webkit-text-stroke: 3px #000;
+            display: block; transform: skewX(15deg); font-size: 110px; 
+            letter-spacing: 5px; line-height: 0.95; -webkit-text-stroke: 3px #000;
+            text-shadow: 5px 5px 0 rgba(0,0,0,0.3);
         }
 
         @keyframes bounceBanner { 
             0% { transform: skewX(-15deg) scale(1); } 
-            100% { transform: skewX(-15deg) scale(1.05); } 
+            100% { transform: skewX(-15deg) scale(1.03); } 
         }
 
-        .social-container {
-            display: flex; flex-direction: row; gap: 40px; 
-            width: 100%; max-width: 1700px; justify-content: center;
+        /* Redes Sociales en Grid 2x2/3x2 */
+        .social-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 100%; max-width: 800px;
         }
 
         .social-box {
-            background: rgba(0, 0, 0, 0.7); border: 6px solid #00ffff;
-            border-radius: 20px; padding: 25px 40px; display: flex; flex-direction: column; align-items: center;
-            box-shadow: 10px 10px 0 rgba(0,0,0,0.8);
-            transform: skewX(-10deg); transition: transform 0.2s, box-shadow 0.2s;
-            flex: 1; /* Permite que las cajas se distribuyan uniformemente */
+            background: rgba(0, 0, 0, 0.7); border: 4px solid var(--blue);
+            padding: 20px 30px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.6);
+            transform: skewX(-15deg); transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .social-box:hover {
-            transform: skewX(-10deg) translateY(-10px);
-            box-shadow: 15px 15px 0 rgba(0, 255, 255, 0.5);
-        }
-
-        .social-inner { 
-            transform: skewX(10deg); display: flex; flex-direction: column; align-items: center; width: 100%; 
+            transform: skewX(-15deg) translateY(-8px);
+            box-shadow: 12px 12px 0 rgba(0, 210, 255, 0.5);
         }
 
         .platform { 
-            font-size: 35px; color: #ff0055; margin-bottom: 10px; letter-spacing: 4px; 
-            -webkit-text-stroke: 1px #fff; text-shadow: 3px 3px 0 #000; 
+            font-size: 26px; color: #ff0055; margin-bottom: 5px; letter-spacing: 3px; 
+            -webkit-text-stroke: 1px #fff; text-shadow: 2px 2px 0 #000; text-align: center;
         }
         
         .username { 
-            font-family: 'Roboto', sans-serif; font-size: 35px; color: #ffffff; 
-            text-shadow: 3px 3px 0 #000; font-weight: 900; letter-spacing: 1px;
+            font-family: 'Roboto', sans-serif; font-size: 28px; color: #ffffff; 
+            text-shadow: 2px 2px 0 #000; font-weight: 900; letter-spacing: 1px; text-align: center;
         }
+
+        /* ---------------------------------------------------
+           COLUMNA DERECHA: Resumen de Partida (Créditos)
+           --------------------------------------------------- */
+        .right-col {
+            flex: 1.2; display: flex; flex-direction: column;
+        }
+
+        .credits-panel {
+            flex: 1; background: var(--panel); border: 6px solid var(--blue);
+            transform: skewX(-10deg); box-shadow: -15px 15px 0px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; position: relative;
+        }
+
+        .credits-header {
+            background: linear-gradient(90deg, var(--blue-dark), var(--blue));
+            border-bottom: 6px solid var(--stroke);
+            padding: 25px; text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            z-index: 5;
+        }
+
+        .credits-header span {
+            display: block; transform: skewX(10deg);
+            font-size: 55px; letter-spacing: 4px; color: #fff;
+            -webkit-text-stroke: 2px #000; text-shadow: 4px 4px 0 #000;
+        }
+
+        /* Máscara para que el texto se difumine arriba y abajo al hacer scroll */
+        .credits-mask {
+            flex: 1; overflow: hidden; position: relative;
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+            padding: 20px 40px;
+        }
+
+        .credits-scroll {
+            display: flex; flex-direction: column; gap: 50px;
+            animation: scrollCredits 25s linear infinite;
+            padding-top: 100%; /* Empieza desde abajo del todo */
+            padding-bottom: 100%; /* Termina cuando el último elemento sale por arriba */
+        }
+
+        /* Pausa la animación si pasas el ratón por encima (útil para OBS si interactúas) */
+        .credits-scroll:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes scrollCredits {
+            0%   { transform: translateY(0); }
+            100% { transform: translateY(-100%); }
+        }
+
+        .credit-category {
+            text-align: center; margin-bottom: 20px;
+        }
+
+        .category-title {
+            display: inline-block; transform: skewX(10deg);
+            font-size: 40px; color: var(--yellow); letter-spacing: 3px;
+            -webkit-text-stroke: 1px #000; text-shadow: 3px 3px 0 #000;
+            border-bottom: 4px dotted rgba(255,255,255,0.3); padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .credit-names {
+            transform: skewX(10deg);
+            font-family: 'Roboto', sans-serif; font-size: 28px; font-weight: 700;
+            color: #ffffff; line-height: 1.6; text-align: center;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        /* Variaciones de color para categorías */
+        .cat-subs .category-title { color: var(--purple); }
+        .cat-bits .category-title { color: #00ffff; }
 
     </style>
 </head>
@@ -88,44 +179,116 @@
     <div class="sky-bg"></div>
     <div class="sunburst"></div>
 
-    <div class="ui-container">
-        <div class="victory-banner">
-            <span>FIN DE LA<br>TRANSMISIÓN</span>
+    <div class="layout-container">
+        
+        <!-- COLUMNA IZQUIERDA: Marca y Redes -->
+        <div class="left-col">
+            <div class="victory-banner">
+                <span>FIN DE LA<br>TRANSMISIÓN</span>
+            </div>
+
+            <!-- INSTRUCCIONES: Cambia '@tu_usuario' por tus datos reales -->
+            <div class="social-grid">
+                <div class="social-box">
+                    <div class="unskew" style="align-items: center; justify-content: center;">
+                        <div class="platform">TWITCH</div>
+                        <div class="username">@tu_usuario</div>
+                    </div>
+                </div>
+                <div class="social-box">
+                    <div class="unskew" style="align-items: center; justify-content: center;">
+                        <div class="platform">X / TWITTER</div>
+                        <div class="username">@tu_usuario</div>
+                    </div>
+                </div>
+                <div class="social-box">
+                    <div class="unskew" style="align-items: center; justify-content: center;">
+                        <div class="platform">YOUTUBE</div>
+                        <div class="username">@tu_canal</div>
+                    </div>
+                </div>
+                <div class="social-box">
+                    <div class="unskew" style="align-items: center; justify-content: center;">
+                        <div class="platform">INSTAGRAM</div>
+                        <div class="username">@tu_usuario</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- INSTRUCCIONES: Cambia '@tu_usuario' por tus datos reales -->
-        <div class="social-container">
-            <div class="social-box">
-                <div class="social-inner">
-                    <div class="platform">TWITCH</div>
-                    <div class="username">@tu_usuario</div>
+        <!-- COLUMNA DERECHA: Resumen de Partida -->
+        <div class="right-col">
+            <div class="credits-panel">
+                <div class="credits-header">
+                    <span>HÉROES DEL ESCUADRÓN</span>
                 </div>
-            </div>
-            <div class="social-box">
-                <div class="social-inner">
-                    <div class="platform">X / TWITTER</div>
-                    <div class="username">@tu_usuario</div>
-                </div>
-            </div>
-            <div class="social-box">
-                <div class="social-inner">
-                    <div class="platform">YOUTUBE</div>
-                    <div class="username">@tu_canal</div>
-                </div>
-            </div>
-            <div class="social-box">
-                <div class="social-inner">
-                    <div class="platform">INSTAGRAM</div>
-                    <div class="username">@tu_usuario</div>
-                </div>
-            </div>
-            <div class="social-box">
-                <div class="social-inner">
-                    <div class="platform">TIKTOK</div>
-                    <div class="username">@tu_usuario</div>
+                
+                <div class="credits-mask">
+                    <div class="credits-scroll" id="creditsContainer">
+                        
+                        <!-- Categoría Follows -->
+                        <div class="credit-category">
+                            <div class="category-title">NUEVOS RECLUTAS</div>
+                            <div class="credit-names">
+                                NinjaGamer99<br>
+                                Tfue_Fan<br>
+                                xX_SniperPro_Xx<br>
+                                PeelyLover<br>
+                                JonesyTheGreat<br>
+                                BuilderMaster<br>
+                                TomatoHeadReal
+                            </div>
+                        </div>
+
+                        <!-- Categoría Subs -->
+                        <div class="credit-category cat-subs">
+                            <div class="category-title">PASES DE BATALLA (SUBS)</div>
+                            <div class="credit-names">
+                                RubiusOMG (Tier 3)<br>
+                                Ibai_Llanos (Tier 1)<br>
+                                Grefg_Oficial (Gifted x5)<br>
+                                AriGameplays (Tier 1)<br>
+                                TheGrefg (Tier 2)
+                            </div>
+                        </div>
+
+                        <!-- Categoría Donaciones / Bits -->
+                        <div class="credit-category cat-bits">
+                            <div class="category-title">ENTREGAS DE PAVOS (BITS)</div>
+                            <div class="credit-names">
+                                MidasKing - 5000 Bits<br>
+                                Aura_Sniper - 1500 Bits<br>
+                                Raven_Dark - 500 Bits<br>
+                                CuddleTeam - 100 Bits
+                            </div>
+                        </div>
+                        
+                        <!-- Categoría Host / Raids -->
+                        <div class="credit-category">
+                            <div class="category-title">EMBOSCADAS (RAIDS)</div>
+                            <div class="credit-names">
+                                Clan_Uchiha (540 Viewers)<br>
+                                Los_Tryhards (120 Viewers)
+                            </div>
+                        </div>
+
+                        <!-- Mensaje de agradecimiento final -->
+                        <div class="credit-category" style="margin-top: 80px;">
+                            <div class="category-title" style="color: #fff; font-size: 50px; border:none;">¡GRACIAS POR JUGAR!</div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
+
+    <script>
+        // Si más adelante integras esto a React o a tu backend, 
+        // puedes usar JS para borrar el contenido de #creditsContainer
+        // y rellenarlo dinámicamente con los datos de la sesión actual
+        // creando divs con las clases 'credit-category', 'category-title' y 'credit-names'.
+    </script>
 </body>
 </html>
