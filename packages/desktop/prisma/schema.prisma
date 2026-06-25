@@ -19,9 +19,11 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  channelConfig ChannelConfig?
-  giveaways     Giveaway[]
-  predictions   Prediction[]
+  channelConfig     ChannelConfig?
+  giveaways         Giveaway[]
+  predictions       Prediction[]
+  securityConfig    SecurityConfig?
+  securityWhitelist SecurityWhitelist[]
 }
 
 model ChannelConfig {
@@ -55,4 +57,25 @@ model Prediction {
   outcome   String?
   createdAt DateTime @default(now())
   endedAt   DateTime?
+}
+
+model SecurityConfig {
+  id                  String @id @default(cuid())
+  userId              String @unique
+  user                User   @relation(fields: [userId], references: [id])
+  followBotProtection Boolean @default(true)
+  spamFilter          Boolean @default(true)
+  autoBan             Boolean @default(true)
+  accountAgeFilter    Int    @default(0)
+}
+
+model SecurityWhitelist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  username  String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, username])
 }
