@@ -1,6 +1,6 @@
 {
   "name": "@streamforger/shared",
-  "version": "0.3.9",
+  "version": "0.3.95",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
