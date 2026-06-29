@@ -130,6 +130,7 @@ export function ObsPanel({ channel }: Props) {
       { name: 'Juego', patterns: ['gameplay', '-juego', '-vertical-gameplay'] },
       { name: 'BRB', patterns: ['brb', '-vertical-brb'] },
       { name: 'Just Chatting', patterns: ['just-chatting', 'justchatting', '-vertical-just-chatting'] },
+      { name: 'Final', patterns: ['-end', 'ending', 'despedida', '-vertical-end', '-vertical-despedida'] },
     ];
 
     const result: { name: string; url: string; width: number; height: number }[] = [];
