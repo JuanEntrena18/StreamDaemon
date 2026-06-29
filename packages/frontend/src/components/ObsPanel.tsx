@@ -126,19 +126,21 @@ export function ObsPanel({ channel }: Props) {
     }
 
     const sceneMap: { name: string; patterns: string[] }[] = [
-      { name: 'Inicio', patterns: ['starting-soon', '-start', 'inicio'] },
-      { name: 'Juego', patterns: ['gameplay', '-juego'] },
-      { name: 'BRB', patterns: ['brb'] },
-      { name: 'Just Chatting', patterns: ['just-chatting', 'justchatting'] },
+      { name: 'Inicio', patterns: ['starting-soon', '-start', 'inicio', '-vertical-start'] },
+      { name: 'Juego', patterns: ['gameplay', '-juego', '-vertical-gameplay'] },
+      { name: 'BRB', patterns: ['brb', '-vertical-brb'] },
+      { name: 'Just Chatting', patterns: ['just-chatting', 'justchatting', '-vertical-just-chatting'] },
     ];
 
     const result: { name: string; url: string; width: number; height: number }[] = [];
     for (const scene of sceneMap) {
-      const match = overlays.find((ov) => scene.patterns.some((p) => ov.id.includes(p)));
-      if (match) {
-        const w = match.orientation === 'vertical' ? 1080 : 1920;
-        const h = match.orientation === 'vertical' ? 1920 : 1080;
-        result.push({ name: scene.name, url: makeUrl(match), width: w, height: h });
+      const hMatch = overlays.find((ov) => ov.orientation === 'horizontal' && scene.patterns.some((p) => ov.id.includes(p) && !ov.id.includes('-vertical-')));
+      if (hMatch) {
+        result.push({ name: scene.name, url: makeUrl(hMatch), width: 1920, height: 1080 });
+      }
+      const vMatch = overlays.find((ov) => ov.orientation === 'vertical' && scene.patterns.some((p) => ov.id.includes(p)));
+      if (vMatch) {
+        result.push({ name: `${scene.name} · Vertical`, url: makeUrl(vMatch), width: 1080, height: 1920 });
       }
     }
     return result;
