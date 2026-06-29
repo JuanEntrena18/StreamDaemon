@@ -402,6 +402,7 @@
     "obsWsHelp": "Connect to OBS via WebSocket (Tools → WebSocket Server in OBS). Enable it in OBS: Tools → WebSocket Server Settings, note the port and password.",
     "obsApplyTheme": "Apply Theme",
     "obsThemeApplied": "✓ Theme applied to OBS successfully!",
+    "obsApplyBtn": "⚡ Apply to OBS",
     "orientacion": "Orientation",
     "orientationAll": "All",
     "orientationHorizontal": "Horizontal",

@@ -398,6 +398,7 @@
     "obsWsHelp": "Connettiti a OBS via WebSocket. Attivalo in OBS: Strumenti → WebSocket Server Settings, annota la porta e la password.",
     "obsApplyTheme": "Applica tema",
     "obsThemeApplied": "✓ Tema applicato a OBS con successo!",
+    "obsApplyBtn": "⚡ Applica in OBS",
     "orientacion": "Orientamento",
     "orientationAll": "Tutti",
     "orientationHorizontal": "Orizzontale",

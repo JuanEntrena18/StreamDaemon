@@ -429,6 +429,7 @@
     "obsWsHelp": "Conéctate a OBS vía WebSocket. Actívalo en OBS: Herramientas → WebSocket Server Settings, anota el puerto y la contraseña.",
     "obsApplyTheme": "Aplicar Tema",
     "obsThemeApplied": "¡Tema aplicado a OBS correctamente!",
+    "obsApplyBtn": "⚡ Aplicar en OBS",
     "orientacion": "Orientación",
     "orientationAll": "Todos",
     "orientationHorizontal": "Horizontales",

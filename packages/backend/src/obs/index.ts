@@ -48,6 +48,59 @@ export function setupObs(app: FastifyInstance) {
     return { connected, host: currentHost };
   });
 
+  async function upsertSceneSource(sc: SceneConfig) {
+    const result = await obs.call('GetSceneList') as { scenes: any[] };
+    const existingNames = result.scenes.map((s: any) => s.sceneName);
+    if (!existingNames.includes(sc.name)) {
+      await obs.call('CreateScene', { sceneName: sc.name });
+    }
+    const inputs = await obs.call('GetSceneItemList', { sceneName: sc.name });
+    const browserItems = (inputs.sceneItems || []).filter(
+      (item: any) => item.inputKind === 'browser_source'
+    );
+    if (browserItems.length > 0) {
+      const browserItem = browserItems[0];
+      await obs.call('SetInputSettings', {
+        inputName: String(browserItem.sourceName),
+        inputSettings: { url: sc.url, width: sc.width, height: sc.height },
+      });
+    } else {
+      const sourceName = `${sc.name} - StreamForger`;
+      await obs.call('CreateInput', {
+        sceneName: sc.name,
+        inputName: sourceName,
+        inputKind: 'browser_source',
+        inputSettings: {
+          url: sc.url,
+          width: sc.width,
+          height: sc.height,
+          fps: 60,
+          css: '',
+          reroute_audio: false,
+        },
+      });
+    }
+  }
+
+  app.post('/obs/apply-scene', async (req, reply) => {
+    if (!connected) {
+      reply.status(400);
+      return { ok: false, error: 'Not connected to OBS' };
+    }
+    const { name, url, width, height } = req.body as SceneConfig;
+    if (!name || !url) {
+      reply.status(400);
+      return { ok: false, error: 'Missing name or url' };
+    }
+    try {
+      await upsertSceneSource({ name, url, width: width || 1920, height: height || 1080 });
+      return { ok: true, scene: name };
+    } catch (err: any) {
+      reply.status(500);
+      return { ok: false, error: err.message || 'Failed to apply scene' };
+    }
+  });
+
   app.post('/obs/apply-theme', async (req, reply) => {
     if (!connected) {
       reply.status(400);
@@ -59,39 +112,8 @@ export function setupObs(app: FastifyInstance) {
       return { ok: false, error: 'No scenes provided' };
     }
     try {
-      const result = await obs.call('GetSceneList') as { scenes: any[] };
-      const existingNames = result.scenes.map((s: any) => s.sceneName);
-
       for (const sc of scenes) {
-        if (!existingNames.includes(sc.name)) {
-          await obs.call('CreateScene', { sceneName: sc.name });
-        }
-        const inputs = await obs.call('GetSceneItemList', { sceneName: sc.name });
-        const browserItems = (inputs.sceneItems || []).filter(
-          (item: any) => item.inputKind === 'browser_source'
-        );
-        if (browserItems.length > 0) {
-          const browserItem = browserItems[0];
-          await obs.call('SetInputSettings', {
-            inputName: String(browserItem.sourceName),
-            inputSettings: { url: sc.url, width: sc.width, height: sc.height },
-          });
-        } else {
-          const sourceName = `${sc.name} - StreamForger`;
-          await obs.call('CreateInput', {
-            sceneName: sc.name,
-            inputName: sourceName,
-            inputKind: 'browser_source',
-            inputSettings: {
-              url: sc.url,
-              width: sc.width,
-              height: sc.height,
-              fps: 60,
-              css: '',
-              reroute_audio: false,
-            },
-          });
-        }
+        await upsertSceneSource(sc);
       }
       return { ok: true, scenes: scenes.map((s) => s.name) };
     } catch (err: any) {

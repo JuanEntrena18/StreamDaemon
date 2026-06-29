@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '../i18n/context';
 import { useSocket } from '../hooks/useSocket';
 import { useAuthStatus } from '../hooks/useAuthStatus';
+import { apiGet, apiPost } from '../utils/api';
 import { ConfirmModal } from './ConfirmModal';
 import { Logo } from './Logo';
 import { Toggle } from './Toggle';
@@ -22,6 +23,48 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
   const [uiZoom, setUiZoom] = useState(() => {
     try { return localStorage.getItem('sf-ui-zoom') || 'auto'; } catch { return 'auto'; }
   });
+
+  const [obsHost, setObsHost] = useState('127.0.0.1');
+  const [obsPort, setObsPort] = useState('4455');
+  const [obsPassword, setObsPassword] = useState('');
+  const [obsConnected, setObsConnected] = useState(false);
+  const [obsConnecting, setObsConnecting] = useState(false);
+  const [obsError, setObsError] = useState('');
+
+  useEffect(() => {
+    apiGet('/obs/status').then(async (r) => {
+      if (!r.ok) return;
+      const data = await r.json();
+      setObsConnected(data.connected);
+    }).catch(() => {});
+  }, []);
+
+  const connectObs = useCallback(async () => {
+    setObsConnecting(true);
+    setObsError('');
+    try {
+      const r = await apiPost('/obs/connect', { host: obsHost, port: parseInt(obsPort, 10), password: obsPassword });
+      const data = await r.json();
+      if (!r.ok || !data.ok) {
+        setObsError(data.error || 'Connection failed');
+        setObsConnected(false);
+      } else {
+        setObsConnected(true);
+      }
+    } catch (err: any) {
+      setObsError(err.message || 'Connection error');
+      setObsConnected(false);
+    } finally {
+      setObsConnecting(false);
+    }
+  }, [obsHost, obsPort, obsPassword]);
+
+  const disconnectObs = useCallback(async () => {
+    try {
+      await apiPost('/obs/disconnect');
+      setObsConnected(false);
+    } catch {}
+  }, []);
 
   const handleZoomChange = (val: string) => {
     setUiZoom(val);
@@ -271,6 +314,39 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
               {lang.label}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* ── OBS WebSocket ── */}
+      <div className="glass-card sf-card">
+        <p className="sf-section-title">{t('obs.obsWsTitle')}</p>
+        <p className="text-sm text-muted" style={{ marginBottom: '1rem', lineHeight: 1.5 }}>
+          {t('obs.obsWsHelp')}
+        </p>
+
+        <div className="flex-col flex-col--gap-sm">
+          {!obsConnected ? (
+            <>
+              <div className="flex-row flex-row--gap-sm" style={{ alignItems: 'center' }}>
+                <input type="text" value={obsHost} onChange={(e) => setObsHost(e.target.value)} placeholder={t('obs.obsWsHost')} className="sf-input text-xs" style={{ width: 140 }} />
+                <span style={{ color: 'var(--sf-text-3)' }}>:</span>
+                <input type="text" value={obsPort} onChange={(e) => setObsPort(e.target.value)} placeholder="4455" className="sf-input text-xs" style={{ width: 70 }} />
+                <input type="password" value={obsPassword} onChange={(e) => setObsPassword(e.target.value)} placeholder={t('obs.obsWsPassword')} className="sf-input text-xs" style={{ width: 140 }} />
+                <button onClick={connectObs} disabled={obsConnecting} className="sf-btn sf-btn-primary" style={{ fontSize: '0.78rem', padding: '0.3rem 0.75rem' }}>
+                  {obsConnecting ? '...' : t('obs.obsWsConnect')}
+                </button>
+              </div>
+              {obsError && <p className="text-xs" style={{ color: '#ef4444' }}>{obsError}</p>}
+            </>
+          ) : (
+            <div className="flex-row flex-row--gap-sm" style={{ alignItems: 'center' }}>
+              <span className="sf-badge sf-badge-success text-xs">{t('obs.obsWsConnected')}</span>
+              <span className="text-xs" style={{ color: 'var(--sf-text-3)' }}>{t('obs.obsWsConnectedTo')} {obsHost}:{obsPort}</span>
+              <button onClick={disconnectObs} className="sf-btn" style={{ fontSize: '0.72rem', padding: '0.2rem 0.6rem' }}>
+                {t('obs.obsWsDisconnect')}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
