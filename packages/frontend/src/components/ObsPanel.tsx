@@ -40,6 +40,7 @@ const THEMES = [
   { id: 'win95', labelKey: 'obs.temaWin95' },
   { id: 'retrowave', labelKey: 'obs.temaRetrowave' },
   { id: 'tactical', labelKey: 'obs.temaTactical' },
+  { id: 'cyberpunk', labelKey: 'obs.temaCyberpunk' },
 ];
 
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [

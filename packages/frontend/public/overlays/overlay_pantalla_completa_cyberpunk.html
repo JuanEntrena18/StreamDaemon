@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Fullscreen Gameplay Overlay</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: transparent;
+            overflow: hidden; font-family: 'Rajdhani', sans-serif;
+            position: relative;
+        }
+
+        /* */
+        .cyber-floating-cam {
+            position: absolute;
+            top: 40px; right: 40px;
+            width: 480px; height: 310px;
+            background: rgba(5, 5, 5, 0.85);
+            border-top: 3px solid #00F0FF;
+            border-bottom: 3px solid #FF003C;
+            clip-path: polygon(25px 0, 100% 0, 100% calc(100% - 25px), calc(100% - 25px) 100%, 0 100%, 0 25px);
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .cyber-floating-cam::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 30px; height: 30px; background: #FCEE0A;
+            clip-path: polygon(0 0, 100% 0, 0 100%); z-index: 10;
+        }
+
+        .box-header {
+            background: #FCEE0A; color: #000;
+            font-size: 16px; padding: 4px 15px 4px 30px;
+            text-transform: uppercase; letter-spacing: 3px; font-weight: 900;
+        }
+
+        .cam-placeholder { flex: 1; background: transparent; }
+
+        /* Contenedor React global */
+        #overlay-root {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1000;
+        }
+        #overlay-root > * { pointer-events: auto; }
+
+    </style>
+</head>
+<body>
+    <!-- CONTENEDOR REACT APP -->
+    <div id="overlay-root"></div>
+
+    <!-- Webcam Flotante -->
+    <div class="cyber-floating-cam">
+        <div class="box-header">OPT_LINK // LIVE</div>
+        <div class="cam-placeholder"></div>
+    </div>
+    
+    <!-- Script de Integración de React / Vite -->
+    <script type="module" src="./src/overlay.tsx"></script>
+</body>
+</html>

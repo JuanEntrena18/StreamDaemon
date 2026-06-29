@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Standalone Chat</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 100vw; height: 100vh; background-color: transparent;
+            overflow: hidden; font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* */
+        .cyber-box {
+            width: 100%; height: 100%;
+            background: rgba(5, 5, 5, 0.85);
+            border-left: 3px solid #00F0FF;
+            border-right: 3px solid #FF003C;
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .box-header {
+            background: #FF003C; color: #fff;
+            font-family: 'Rajdhani', sans-serif; font-size: 16px;
+            padding: 8px 15px; text-transform: uppercase;
+            letter-spacing: 3px; font-weight: 900;
+        }
+
+        .chat-content {
+            flex: 1; padding: 15px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;
+        }
+
+        /* */
+        .chat-msg {
+            margin-bottom: 10px; font-size: 14px; line-height: 1.4;
+            background: rgba(252, 238, 10, 0.05); border-left: 3px solid #FCEE0A;
+            padding: 8px 10px; color: #fff;
+            animation: slideIn 0.2s ease-out forwards;
+            word-wrap: break-word;
+        }
+        @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        
+        .chat-user { color: #00F0FF; font-weight: bold; font-family: 'Rajdhani', sans-serif; font-size: 16px;}
+        .chat-text { color: #e0e0e0; }
+    </style>
+</head>
+<body>
+
+    <div class="cyber-box">
+        <div class="box-header">NET_TRAFFIC_LOG</div>
+        <div class="chat-content" id="chatWrapper">
+            <!-- Mensajes inyectados -->
+        </div>
+    </div>
+
+    <!-- -->
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MESSAGES = 18;
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const userColor = color || '#00F0FF';
+
+            msgNode.innerHTML = `<span class="chat-user" style="color: ${userColor}">${safeUsername}:</span> <span class="chat-text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MESSAGES) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+</body>
+</html>

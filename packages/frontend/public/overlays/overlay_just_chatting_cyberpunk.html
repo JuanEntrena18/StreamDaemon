@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Just Chatting Overlay</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: transparent; 
+            overflow: hidden; font-family: 'Share Tech Mono', monospace;
+            display: grid; padding: 20px; gap: 20px;
+            grid-template-columns: 1260px 600px;
+            grid-template-rows: 1040px; 
+        }
+
+        /* */
+        .cyber-box {
+            position: relative; background: rgba(5, 5, 5, 0.9);
+            border: 2px solid #00F0FF;
+            clip-path: polygon(40px 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%, 0 40px);
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+
+        .cyber-box::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 100px; height: 100px; background: #FF003C;
+            clip-path: polygon(0 0, 100% 0, 0 100%); z-index: 10;
+        }
+
+        .box-header {
+            background: #FF003C; color: #fff;
+            font-family: 'Rajdhani', sans-serif; font-size: 26px;
+            padding: 10px 20px 10px 50px; text-transform: uppercase;
+            letter-spacing: 5px; font-weight: 900;
+        }
+
+        /* */
+        .main-cam-area { background-color: transparent; }
+
+        .side-panel { display: grid; grid-template-rows: 680px 340px; gap: 20px; }
+
+        .chat-content {
+            flex-grow: 1; padding: 20px; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            background: linear-gradient(180deg, transparent 80%, rgba(255, 0, 60, 0.1) 100%);
+        }
+
+        .logo-area {
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            background-image: repeating-linear-gradient(45deg, rgba(252, 238, 10, 0.05) 0, rgba(252, 238, 10, 0.05) 2px, transparent 2px, transparent 10px);
+        }
+
+        .cyber-logo {
+            width: 180px; height: 180px;
+            background-color: #111; /* Color base */
+            background-image: url(''); /* <-- AÑADE LA URL DE TU LOGO AQUÍ */
+            background-size: cover; background-position: center;
+            border: 4px solid #FCEE0A;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%);
+            animation: pulse-neon 2s infinite alternate;
+        }
+
+        @keyframes pulse-neon {
+            from { box-shadow: 0 0 10px #FCEE0A; filter: drop-shadow(0 0 5px #FCEE0A); }
+            to { box-shadow: 0 0 25px #00F0FF; filter: drop-shadow(0 0 15px #00F0FF); border-color: #00F0FF; }
+        }
+
+        /* */
+        .chat-msg {
+            font-size: 18px; margin-bottom: 15px; padding: 12px;
+            background: rgba(5, 5, 5, 0.8); border: 1px solid #FF003C;
+            border-left: 6px solid #FCEE0A; color: #fff;
+            animation: slideIn 0.2s ease-out forwards;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        .user { font-weight: 700; color: #00F0FF; margin-right: 10px; font-family: 'Rajdhani', sans-serif; font-size: 22px;}
+
+        #overlay-root { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        #overlay-root > * { pointer-events: auto; }
+
+    </style>
+</head>
+<body>
+
+    <div id="overlay-root"></div>
+
+    <!-- Izquierda: Webcam -->
+    <div class="cyber-box main-cam-area">
+        <div class="box-header" style="background: #00F0FF; color: #000;">NEURAL_LINK // ACTIVE</div>
+        <div style="flex-grow: 1; background: transparent;"></div>
+    </div>
+
+    <!-- Derecha: Chat y Logo -->
+    <div class="side-panel">
+        
+        <!-- Chat -->
+        <div class="cyber-box">
+            <div class="box-header">NET_TRAFFIC</div>
+            <div class="chat-content" id="chatWrapper"></div>
+        </div>
+
+        <!-- Logo -->
+        <div class="cyber-box logo-area">
+            <div class="cyber-logo"></div>
+            <div style="font-family: 'Rajdhani', sans-serif; color: #FCEE0A; font-size: 28px; margin-top: 15px; letter-spacing: 8px; text-shadow: 2px 2px 0 #FF003C;">
+                HOST ONLINE
+            </div>
+        </div>
+
+    </div>
+
+    <!-- -->
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MSG = 12;
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#00F0FF';
+
+            msgNode.innerHTML = `<span class="user" style="color: ${finalColor};">${safeUsername}:</span><span class="text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MSG) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Vertical Gameplay</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: transparent;
+            overflow: hidden; position: relative;
+        }
+
+        /* Área de Juego (Transparente para OBS) */
+        .game-area {
+            width: 1080px; height: 1450px; /* ~75% de la pantalla vertical */
+            background-color: transparent;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Marco Cyberpunk sutil para la zona de juego */
+        .game-frame {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border-top: 6px solid #00F0FF;
+            border-left: 6px solid #00F0FF;
+            border-right: 6px solid #FF003C;
+            pointer-events: none;
+        }
+
+        .bottom-panel {
+            width: 1080px; height: 470px;
+            background: rgba(5, 5, 5, 0.95);
+            border-top: 4px solid #FCEE0A;
+            position: relative; display: flex; flex-direction: column;
+            box-shadow: 0 -10px 30px rgba(0,240,255,0.1);
+        }
+
+        .panel-header {
+            background: #FCEE0A; color: #050505;
+            font-family: 'Rajdhani', sans-serif; font-size: 28px;
+            padding: 10px 40px; text-transform: uppercase;
+            letter-spacing: 5px; font-weight: 900;
+            clip-path: polygon(0 0, 100% 0, calc(100% - 20px) 100%, 0 100%);
+            width: fit-content;
+            margin-top: -4px;
+        }
+
+        .chat-container {
+            flex: 1; padding: 20px 40px; display: flex; flex-direction: column;
+            justify-content: flex-end; overflow: hidden; z-index: 1;
+            font-family: 'Share Tech Mono', monospace;
+            background-image: repeating-linear-gradient(45deg, rgba(0, 240, 255, 0.02) 0, rgba(0, 240, 255, 0.02) 2px, transparent 2px, transparent 10px);
+        }
+
+        .chat-msg {
+            background: rgba(0, 240, 255, 0.05); border-left: 6px solid #00F0FF;
+            padding: 15px 20px; margin-top: 15px;
+            font-size: 24px; color: #fff; line-height: 1.4;
+            animation: glitch-in 0.2s ease-out forwards;
+            word-wrap: break-word;
+        }
+
+        @keyframes glitch-in {
+            0% { transform: translateX(30px) skewX(-10deg); opacity: 0; filter: drop-shadow(-5px 0 0 #FF003C); }
+            100% { transform: translateX(0) skewX(0); opacity: 1; filter: none; }
+        }
+
+        .chat-user { font-family: 'Rajdhani', sans-serif; font-weight: 700; color: #FCEE0A; margin-right: 10px; font-size: 26px; }
+
+        /* Ancla React */
+        #overlay-root { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        #overlay-root > * { pointer-events: auto; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Capa para Alertas React -->
+    <div id="overlay-root"></div>
+
+    <!-- Zona de Juego -->
+    <div class="game-area">
+        <div class="game-frame"></div>
+    </div>
+
+    <!-- Panel de Chat Inferior -->
+    <div class="bottom-panel">
+        <div class="panel-header">
+            PUBLIC_COMMS // SYS.CHAT
+        </div>
+        <div class="chat-container" id="chatWrapper">
+            <!-- JS inyecta mensajes aquí -->
+        </div>
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MESSAGES = 6; 
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#FCEE0A';
+
+            msgNode.innerHTML = `<span class="chat-user" style="color: ${finalColor}">${safeUsername}:</span><span class="chat-text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MESSAGES) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+    
+    <!-- Script de React -->
+    <script type="module" src="./src/overlay.tsx"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-export type OverlayCategory = 'general' | 'dj' | '8bits' | 'win95' | 'retrowave' | 'tactical' | 'wow-alliance' | 'wow-horde';
+export type OverlayCategory = 'general' | 'dj' | '8bits' | 'win95' | 'retrowave' | 'tactical' | 'wow-alliance' | 'wow-horde' | 'cyberpunk';
 
 export interface OverlayEntry {
   id: string;
@@ -31,6 +31,7 @@ export const CATEGORIES: CategoryInfo[] = [
   { id: 'tactical',     labelKey: 'obs.catTactical',    icon: '🛸', color: '#ffb300', themeId: 'tactical' },
   { id: 'wow-alliance', labelKey: 'obs.catAlliance',    icon: '🔵', color: '#4a8cff', themeId: 'alliance' },
   { id: 'wow-horde',    labelKey: 'obs.catHorde',       icon: '🔴', color: '#ff2222', themeId: 'wow' },
+  { id: 'cyberpunk',    labelKey: 'obs.catCyberpunk',   icon: '🌆', color: '#ff003c', themeId: 'cyberpunk' },
 ];
 
 export const OVERLAY_REGISTRY: OverlayEntry[] = [
@@ -53,6 +54,16 @@ export const OVERLAY_REGISTRY: OverlayEntry[] = [
   { id: 'fortnite-ending',        icon: '🏁', labelKey: 'obs.fortniteEnding',       descKey: 'obs.fortniteEndingDesc',       mode: 'fortnite-end',        supportsTheme: false, color: '#00D4FF', filename: 'fortnite_horizontal_ending.html',                      category: 'general', orientation: 'horizontal' },
   { id: 'fortnite-hud-api',       icon: '🎮', labelKey: 'obs.fortniteHudApi',       descKey: 'obs.fortniteHudApiDesc',       mode: 'fortnite-hud-api',       supportsTheme: false, color: '#00D4FF', filename: 'fortnite_horizontal_hud_api.html',                      category: 'general', orientation: 'horizontal' },
   { id: 'alerts',        icon: '🔔', labelKey: 'obs.alertas',         descKey: 'obs.alertasDesc',         mode: 'alerts',             supportsTheme: false, color: '#c84bff',   filename: 'alerts.html',                                             category: 'general', orientation: 'horizontal' },
+
+  // ── Cyberpunk ──
+  { id: 'cyberpunk-starting-soon', icon: '🚀', labelKey: 'obs.cyberpunkStartingSoon', descKey: 'obs.cyberpunkStartingSoonDesc', mode: 'cyberpunk-starting-soon', supportsTheme: false, color: '#ff003c', filename: 'cyberpunk_starting_soon.html',                               category: 'cyberpunk', orientation: 'horizontal' },
+  { id: 'cyberpunk-brb',           icon: '💤', labelKey: 'obs.cyberpunkBrb',          descKey: 'obs.cyberpunkBrbDesc',          mode: 'cyberpunk-brb',          supportsTheme: false, color: '#ff003c', filename: 'cyberpunk_brb.html',                                        category: 'cyberpunk', orientation: 'horizontal' },
+  { id: 'cyberpunk-end',           icon: '🏁', labelKey: 'obs.cyberpunkEnd',          descKey: 'obs.cyberpunkEndDesc',          mode: 'cyberpunk-end',          supportsTheme: false, color: '#00f0ff', filename: 'cyberpunk_ending.html',                                     category: 'cyberpunk', orientation: 'horizontal' },
+  { id: 'cyberpunk-gameplay',       icon: '🎮', labelKey: 'obs.cyberpunkGameplay',     descKey: 'obs.cyberpunkGameplayDesc',     mode: 'cyberpunk-gameplay',      supportsTheme: false, color: '#ff003c', filename: 'overlay_gameplay_cyberpunk.html',                              category: 'cyberpunk', orientation: 'horizontal' },
+  { id: 'cyberpunk-just-chatting',  icon: '💬', labelKey: 'obs.cyberpunkJustChatting', descKey: 'obs.cyberpunkJustChattingDesc', mode: 'cyberpunk-just-chatting', supportsTheme: false, color: '#00f0ff', filename: 'overlay_just_chatting_cyberpunk.html',                          category: 'cyberpunk', orientation: 'horizontal' },
+  { id: 'cyberpunk-fullscreen',     icon: '🖥️', labelKey: 'obs.cyberpunkFullscreen',   descKey: 'obs.cyberpunkFullscreenDesc',   mode: 'cyberpunk-fullscreen',    supportsTheme: false, color: '#ff003c', filename: 'overlay_pantalla_completa_cyberpunk.html',                        category: 'cyberpunk', orientation: 'horizontal' },
+  { id: 'cyberpunk-chat-standalone', icon: '💬', labelKey: 'obs.cyberpunkChatStandalone', descKey: 'obs.cyberpunkChatStandaloneDesc', mode: 'cyberpunk-chat-standalone', supportsTheme: false, color: '#00f0ff', filename: 'chat_independiente_cyberpunk.html',                           category: 'cyberpunk', orientation: 'horizontal' },
+  { id: 'cyberpunk-alerts',         icon: '🔔', labelKey: 'obs.cyberpunkAlerts',        descKey: 'obs.cyberpunkAlertsDesc',       mode: 'cyberpunk-alerts',        supportsTheme: false, color: '#00f0ff', filename: 'alerta_cyberpunk.html',                                        category: 'cyberpunk', orientation: 'horizontal' },
 
   // ── DJ ──
   { id: 'dj-webcam',            icon: '🎥', labelKey: 'obs.djWebcam',          descKey: 'obs.djWebcamDesc',          mode: 'dj-webcam',            supportsTheme: false, color: '#00f0ff', filename: 'dj-webcam.html',                category: 'dj', orientation: 'horizontal' },
@@ -147,4 +158,11 @@ export const OVERLAY_REGISTRY: OverlayEntry[] = [
   { id: 'wow-horde-vertical-end',      icon: '🏁', labelKey: 'obs.hordeVerticalEnd',        descKey: 'obs.hordeVerticalEndDesc',       mode: 'wow-horde-vertical-end',   supportsTheme: false, color: '#8b0000', filename: 'despedida_vertical_horda.html',                  category: 'wow-horde', orientation: 'vertical' },
   { id: 'wow-horde-vertical-brb',      icon: '⏳', labelKey: 'obs.hordeVerticalBrb',        descKey: 'obs.hordeVerticalBrbDesc',       mode: 'wow-horde-vertical-brb',   supportsTheme: false, color: '#ff2222', filename: 'brb_vertical_horda.html',                        category: 'wow-horde', orientation: 'vertical' },
   { id: 'wow-horde-alerts-vertical', icon: '🔔', labelKey: 'obs.hordeAlertsV',          descKey: 'obs.hordeAlertsVDesc',         mode: 'wow-horde-alerts-vertical', supportsTheme: false, color: '#ff2222', filename: 'alerta_horda_vertical.html',                    category: 'wow-horde', orientation: 'vertical' },
+
+  // ── Cyberpunk Vertical ──
+  { id: 'cyberpunk-vertical-start',    icon: '📱', labelKey: 'obs.cyberpunkVerticalStart',     descKey: 'obs.cyberpunkVerticalStartDesc',     mode: 'cyberpunk-vertical-start',    supportsTheme: false, color: '#ff003c', filename: 'inicio_vertical_cyberpunk.html',                  category: 'cyberpunk', orientation: 'vertical' },
+  { id: 'cyberpunk-vertical-end',      icon: '🏁', labelKey: 'obs.cyberpunkVerticalEnd',       descKey: 'obs.cyberpunkVerticalEndDesc',       mode: 'cyberpunk-vertical-end',      supportsTheme: false, color: '#00f0ff', filename: 'despedida_vertical_cyberpunk.html',               category: 'cyberpunk', orientation: 'vertical' },
+  { id: 'cyberpunk-vertical-brb',      icon: '⏳', labelKey: 'obs.cyberpunkVerticalBrb',        descKey: 'obs.cyberpunkVerticalBrbDesc',       mode: 'cyberpunk-vertical-brb',      supportsTheme: false, color: '#ff003c', filename: 'brb_vertical_cyberpunk.html',                    category: 'cyberpunk', orientation: 'vertical' },
+  { id: 'cyberpunk-vertical-gameplay',      icon: '🎮', labelKey: 'obs.cyberpunkVerticalGameplay',     descKey: 'obs.cyberpunkVerticalGameplayDesc',     mode: 'cyberpunk-vertical-gameplay', supportsTheme: false, color: '#ff003c', filename: 'gameplay_vertical_cyberpunk.html',                 category: 'cyberpunk', orientation: 'vertical' },
+  { id: 'cyberpunk-vertical-just-chatting', icon: '💬', labelKey: 'obs.cyberpunkVerticalJustChatting', descKey: 'obs.cyberpunkVerticalJustChattingDesc', mode: 'cyberpunk-vertical-just-chatting', supportsTheme: false, color: '#00f0ff', filename: 'just_chatting_vertical_cyberpunk.html',             category: 'cyberpunk', orientation: 'vertical' },
 ];

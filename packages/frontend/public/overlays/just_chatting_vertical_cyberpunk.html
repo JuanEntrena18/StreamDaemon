@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Vertical Just Chatting</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: transparent;
+            overflow: hidden; position: relative; display: flex; flex-direction: column;
+        }
+
+        /* Mitad Superior: Webcam */
+        .cam-area {
+            width: 1080px; height: 960px; /* 50% de la altura */
+            background-color: transparent; position: relative;
+            border: 6px solid #00F0FF;
+            box-shadow: inset 0 0 60px rgba(0, 240, 255, 0.2);
+            z-index: 2;
+        }
+
+        .live-tag {
+            position: absolute; top: 40px; right: 40px;
+            background: #FF003C; color: #fff;
+            font-family: 'Rajdhani', sans-serif; font-size: 32px;
+            padding: 10px 25px; letter-spacing: 4px;
+            clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
+            animation: pulse-live 2s infinite;
+        }
+
+        @keyframes pulse-live { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .bottom-area {
+            width: 1080px; height: 960px;
+            background: rgba(5, 5, 5, 0.95);
+            position: relative; display: flex; flex-direction: column;
+            z-index: 1; border-top: 4px solid #FF003C;
+        }
+
+        /* Logo Neural */
+        .logo-container {
+            position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+            width: 200px; height: 200px; background: #00F0FF;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            z-index: 10; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.5);
+            animation: floatLogo 4s ease-in-out infinite;
+        }
+
+        @keyframes floatLogo { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -15px); } }
+
+        .logo-inner {
+            width: 184px; height: 184px; background: #050505;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            /* INSTRUCCIONES: Reemplaza la URL del background por tu logo real */
+            background-image: url(''); background-size: cover; background-position: center;
+        }
+
+        .chat-container {
+            flex: 1; padding: 130px 50px 40px 50px; display: flex; flex-direction: column;
+            justify-content: flex-end; overflow: hidden; z-index: 10;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .chat-msg {
+            background: rgba(0, 240, 255, 0.05); border: 2px solid #00F0FF; border-left: 8px solid #FCEE0A;
+            padding: 20px 25px; margin-top: 20px; clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+            font-size: 26px; color: #fff; line-height: 1.4;
+            animation: slideIn 0.2s ease-out forwards;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+
+        .chat-user { font-family: 'Rajdhani', sans-serif; font-weight: 700; color: #00F0FF; margin-right: 15px; font-size: 28px; }
+
+        #overlay-root { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        #overlay-root > * { pointer-events: auto; }
+    </style>
+</head>
+<body>
+
+    <div id="overlay-root"></div>
+
+    <!-- ZONA WEBCAM (Transparente para OBS) -->
+    <div class="cam-area">
+        <div class="live-tag">OPTICAL_LINK // ONLINE</div>
+    </div>
+
+    <!-- ZONA INFERIOR (Chat y Diseño) -->
+    <div class="bottom-area">
+        
+        <div class="logo-container">
+            <div class="logo-inner"></div>
+        </div>
+        
+        <div class="chat-container" id="chatWrapper">
+            <!-- Mensajes JS -->
+        </div>
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MESSAGES = 7; 
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#00F0FF';
+
+            msgNode.innerHTML = `<span class="chat-user" style="color: ${finalColor}">${safeUsername}:</span><span class="chat-text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MESSAGES) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+    
+    <script type="module" src="./src/overlay.tsx"></script>
+</body>
+</html>

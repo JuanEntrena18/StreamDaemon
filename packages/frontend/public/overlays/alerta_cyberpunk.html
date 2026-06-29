@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Fullscreen Alert</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: transparent;
+            overflow: hidden; font-family: 'Rajdhani', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* */
+        #alert-wrapper {
+            position: relative; opacity: 0; transform: scale(1.5) skewX(20deg);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: blur(10px);
+        }
+
+        #alert-wrapper.show { opacity: 1; transform: scale(1) skewX(0); filter: blur(0); animation: glitch-shake 0.3s forwards; }
+        #alert-wrapper.hide { opacity: 0; transform: scale(0.8) translateY(-50px); filter: blur(20px); transition: all 0.3s ease-in; }
+
+        @keyframes glitch-shake {
+            0% { transform: translate(10px, 10px) skewX(-10deg); }
+            50% { transform: translate(-10px, -10px) skewX(10deg); }
+            100% { transform: translate(0, 0) skewX(0); }
+        }
+
+        /* */
+        .cyber-banner {
+            background: rgba(5, 5, 5, 0.9);
+            border-top: 4px solid #00F0FF; border-bottom: 4px solid #FF003C;
+            padding: 30px 100px;
+            clip-path: polygon(40px 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%, 0 40px);
+            box-shadow: 0 0 50px rgba(0, 240, 255, 0.4), inset 0 0 20px rgba(255, 0, 60, 0.3);
+            text-align: center; position: relative;
+        }
+
+        .cyber-banner::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 60px; height: 60px; background: #FCEE0A;
+            clip-path: polygon(0 0, 100% 0, 0 100%);
+        }
+
+        #alert-type { 
+            font-family: 'Share Tech Mono', monospace; font-size: 24px; color: #FCEE0A; 
+            letter-spacing: 5px; margin-bottom: 10px; background: #000; display: inline-block; padding: 5px 15px;
+        }
+        
+        #alert-user { 
+            font-size: 80px; color: #fff; letter-spacing: 8px; text-transform: uppercase; 
+            text-shadow: 4px 4px 0 #00F0FF, -4px -4px 0 #FF003C;
+            margin-bottom: 10px; line-height: 1;
+        }
+
+        #alert-extra { font-size: 35px; color: #00F0FF; text-shadow: 2px 2px 0 #FF003C; font-weight: 900; }
+
+        .warning-tape {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 10px;
+            background: repeating-linear-gradient(-45deg, #FCEE0A, #FCEE0A 10px, #000 10px, #000 20px);
+        }
+
+    </style>
+</head>
+<body>
+
+    <audio id="alert-sound" src="cyber_glitch.mp3" preload="auto"></audio>
+
+    <div id="alert-wrapper">
+        <div class="cyber-banner">
+            <div id="alert-type">SYS_EVENT</div>
+            <div id="alert-user">USER_NAME</div>
+            <div id="alert-extra"></div>
+            <div class="warning-tape"></div>
+        </div>
+    </div>
+
+    <!-- -->
+    <script>
+        const queue = [];
+        let isPlaying = false;
+        const container = document.getElementById('alert-wrapper');
+        const sound = document.getElementById('alert-sound');
+        
+        const elType = document.getElementById('alert-type');
+        const elUser = document.getElementById('alert-user');
+        const elExtra = document.getElementById('alert-extra');
+
+        const alertDic = {
+            'FOLLOWER': 'NEW_NETRUNNER_DETECTED',
+            'SUBSCRIBER': 'SYSTEM_UPGRADE: SUB',
+            'DONATION': 'CREDITS_TRANSFERRED',
+            'RAID': 'GANG_INVASION_WARNING',
+            'BITS': 'EDDIES_RECEIVED',
+            'HOST': 'SIGNAL_HIJACKED'
+        };
+
+        window.addEventListener('message', (e) => {
+            const data = e.data;
+            if (data && data.action === 'NEW_ALERT') {
+                queue.push(data);
+                processQueue();
+            }
+        });
+
+        function processQueue() {
+            if (isPlaying || queue.length === 0) return;
+            isPlaying = true;
+            
+            const data = queue.shift();
+            
+            elType.textContent = alertDic[data.type] || 'SYSTEM_NOTIFICATION';
+            elUser.textContent = data.username.toUpperCase();
+            elExtra.textContent = data.amount ? data.amount : '';
+
+            sound.currentTime = 0; sound.play().catch(err => console.log("Autoplay bloq.", err));
+
+            container.classList.remove('hide');
+            container.classList.add('show');
+
+            setTimeout(() => {
+                container.classList.remove('show');
+                container.classList.add('hide');
+                
+                setTimeout(() => { isPlaying = false; processQueue(); }, 400); 
+            }, 7500);
+        }
+    </script>
+</body>
+</html>

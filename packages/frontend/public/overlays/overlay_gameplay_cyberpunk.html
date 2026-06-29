@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Gameplay Overlay</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px; background-color: transparent;
+            overflow: hidden; font-family: 'Share Tech Mono', monospace;
+            display: grid; padding: 20px; gap: 20px;
+            grid-template-columns: 1260px 600px;
+            grid-template-rows: 1040px;
+        }
+
+        /* */
+        .cyber-box {
+            position: relative;
+            background: rgba(5, 5, 5, 0.85);
+            border-top: 3px solid #00F0FF;
+            border-bottom: 3px solid #FF003C;
+            clip-path: polygon(30px 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%, 0 30px);
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+
+        .cyber-box::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 50px; height: 50px; background: #FCEE0A;
+            clip-path: polygon(0 0, 100% 0, 0 100%); z-index: 10;
+        }
+
+        .box-header {
+            background: #FCEE0A; color: #050505;
+            font-family: 'Rajdhani', sans-serif; font-size: 22px;
+            padding: 8px 15px 8px 40px; text-transform: uppercase;
+            letter-spacing: 3px; font-weight: 900;
+        }
+
+        /* */
+        .game-area {
+            background-color: transparent; /* El juego se ve aquí */
+            border-left: 2px solid #FCEE0A; border-right: 2px solid #FCEE0A;
+        }
+
+        .side-panel {
+            display: grid; grid-template-rows: 340px 680px; gap: 20px;
+        }
+
+        .webcam-content {
+            flex-grow: 1; background-color: transparent; /* La cámara va aquí */
+            background-image: linear-gradient(rgba(0, 240, 255, 0.1) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 240, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .chat-content {
+            flex-grow: 1; padding: 20px; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: flex-end;
+        }
+
+        .chat-msg {
+            font-size: 16px; margin-bottom: 12px; padding: 10px 15px;
+            background: rgba(0, 240, 255, 0.05); border-left: 4px solid #00F0FF;
+            color: #fff; animation: glitch-in 0.2s ease-out forwards;
+            word-wrap: break-word;
+        }
+
+        @keyframes glitch-in {
+            0% { transform: translateX(20px) skewX(-10deg); opacity: 0; filter: drop-shadow(-5px 0 0 #FF003C); }
+            100% { transform: translateX(0) skewX(0); opacity: 1; filter: none; }
+        }
+
+        .user { font-weight: 700; color: #FCEE0A; margin-right: 8px; font-family: 'Rajdhani', sans-serif; font-size: 20px;}
+        .text { color: #e0e0e0; }
+
+        /* Ancla para alertas (React) */
+        #overlay-root { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        #overlay-root > * { pointer-events: auto; }
+
+    </style>
+</head>
+<body>
+
+    <div id="overlay-root"></div>
+
+    <!-- Monitor Izquierdo (Juego) -->
+    <div class="cyber-box game-area">
+        <div class="box-header">SYS.LINK // MAINFRAME_OVERRIDE</div>
+        <div style="flex-grow: 1; background: transparent;"></div>
+    </div>
+
+    <!-- Panel Derecho -->
+    <div class="side-panel">
+        
+        <!-- Webcam -->
+        <div class="cyber-box">
+            <div class="box-header" style="background: #00F0FF;">OPTICAL_SENSOR // CAM.01</div>
+            <div class="webcam-content"></div>
+        </div>
+
+        <!-- Chat -->
+        <div class="cyber-box">
+            <div class="box-header" style="background: #FF003C; color: #fff;">PUBLIC_COMMS // NETWORK</div>
+            <div class="chat-content" id="chatWrapper">
+                <!-- Mensajes inyectados por JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- -->
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MSG = 14;
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#FCEE0A';
+
+            msgNode.innerHTML = `<span class="user" style="color: ${finalColor};">${safeUsername}:</span><span class="text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MSG) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    </script>
+</body>
+</html>

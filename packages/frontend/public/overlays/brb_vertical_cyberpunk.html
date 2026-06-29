@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Vertical BRB</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --cyber-yellow: #FCEE0A;
+            --cyber-cyan: #00F0FF;
+            --cyber-pink: #FF003C;
+            --cyber-dark: #050505;
+        }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: var(--cyber-dark);
+            overflow: hidden; font-family: 'Rajdhani', sans-serif;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        .warning-tape {
+            position: absolute; width: 200%; height: 120px;
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--cyber-yellow),
+                var(--cyber-yellow) 50px,
+                #000 50px,
+                #000 100px
+            );
+            z-index: 1; opacity: 0.15;
+            animation: slideTape 5s linear infinite;
+        }
+        .tape-top { top: 15%; transform: rotate(-15deg); }
+        .tape-bottom { bottom: 15%; transform: rotate(15deg); }
+
+        @keyframes slideTape { 0% { background-position: 0 0; } 100% { background-position: -141px 0; } }
+
+        .scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.4));
+            background-size: 100% 8px; pointer-events: none; z-index: 100;
+        }
+
+        .cyber-panel {
+            position: relative; z-index: 10; width: 900px;
+            background: rgba(5, 5, 5, 0.9);
+            border-top: 6px solid var(--cyber-pink);
+            border-bottom: 6px solid var(--cyber-cyan);
+            padding: 100px 50px; text-align: center;
+            box-shadow: 0 0 60px rgba(255, 0, 60, 0.2);
+            clip-path: polygon(60px 0, 100% 0, 100% calc(100% - 60px), calc(100% - 60px) 100%, 0 100%, 0 60px);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        .brb-main {
+            font-size: 150px; color: #fff;
+            letter-spacing: 20px; margin-bottom: 30px;
+            text-shadow: 5px 5px 0px var(--cyber-cyan), -5px -5px 0px var(--cyber-pink);
+            text-transform: uppercase; line-height: 1;
+        }
+
+        .brb-sub {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 45px; color: var(--cyber-yellow);
+            background: #000; display: inline-block; padding: 15px 40px;
+            border: 2px solid var(--cyber-yellow);
+            animation: blink 1.5s infinite step-end;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    </style>
+</head>
+<body>
+    <div class="warning-tape tape-top"></div>
+    <div class="warning-tape tape-bottom"></div>
+    <div class="scanlines"></div>
+
+    <div class="cyber-panel">
+        <div class="brb-main">AFK<br>MODE</div>
+        <div class="brb-sub">USER DISCONNECTED</div>
+    </div>
+</body>
+</html>

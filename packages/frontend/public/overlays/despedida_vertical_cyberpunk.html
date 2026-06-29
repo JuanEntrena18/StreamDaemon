@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Vertical Ending</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Share+Tech+Mono&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --cyber-yellow: #FCEE0A;
+            --cyber-cyan: #00F0FF;
+            --cyber-pink: #FF003C;
+            --cyber-dark: #050505;
+        }
+
+        body, html {
+            width: 1080px; height: 1920px; background-color: var(--cyber-dark);
+            overflow: hidden; font-family: 'Rajdhani', sans-serif; color: #fff;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+        }
+
+        .bg-glitch {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #151515 0%, #000 100%);
+            z-index: 1;
+        }
+
+        .scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.5));
+            background-size: 100% 6px; pointer-events: none; z-index: 100;
+        }
+
+        .header-box {
+            position: relative; z-index: 10; margin-top: 150px;
+            background: var(--cyber-yellow); color: #000;
+            padding: 25px 80px; font-size: 80px; letter-spacing: 12px;
+            clip-path: polygon(30px 0, 100% 0, calc(100% - 30px) 100%, 0 100%);
+            margin-bottom: 120px; font-weight: 900; line-height: 1.1;
+            text-align: center;
+        }
+
+        .social-column {
+            position: relative; z-index: 10;
+            display: flex; flex-direction: column; gap: 50px; width: 850px;
+        }
+
+        .social-card {
+            background: rgba(10, 10, 10, 0.85);
+            border: 4px solid var(--cyber-pink);
+            width: 100%; padding: 30px 50px;
+            clip-path: polygon(40px 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%, 0 40px);
+            display: flex; flex-direction: column; align-items: flex-start;
+            position: relative;
+        }
+
+        .social-card::after {
+            content: ''; position: absolute; bottom: 0; right: 0;
+            width: 40px; height: 40px; background: var(--cyber-cyan);
+            clip-path: polygon(100% 0, 100% 100%, 0 100%);
+        }
+
+        .platform {
+            font-family: 'Share Tech Mono', monospace; font-size: 28px; color: var(--cyber-cyan);
+            margin-bottom: 10px; border-bottom: 2px dashed var(--cyber-cyan); padding-bottom: 5px; width: 100%;
+        }
+
+        .username {
+            font-size: 55px; color: #fff; font-weight: 700;
+            text-shadow: 3px 3px 0px var(--cyber-pink);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="bg-glitch"></div>
+    <div class="scanlines"></div>
+
+    <div class="header-box">SESSION<br>TERMINATED</div>
+
+    <div class="social-column" id="socialContainer">
+    </div>
+    <script>
+        var SOCIAL_DATA = [
+            { p:'twitch',    label:'SYS.TWITCH' },
+            { p:'x',         label:'SYS.X_CORP' },
+            { p:'youtube',   label:'SYS.YOUTUBE' },
+            { p:'instagram', label:'SYS.INSTAGRAM' },
+            { p:'tiktok',    label:'SYS.TIKTOK' },
+        ];
+        (function() {
+            var p = new URLSearchParams(window.location.search);
+            var raw = p.get('socials');
+            if (!raw) {
+                document.getElementById('socialContainer').innerHTML =
+                    '<div style="grid-column:1/-1;color:#666;font-family:Share Tech Mono,monospace;font-size:18px;padding:20px;text-align:center;">[Configure your socials in the OBS panel]</div>';
+                return;
+            }
+            var list;
+            try { list = JSON.parse(raw); } catch(e) { return; }
+            if (!list || !list.length) return;
+            var map = {};
+            for (var i = 0; i < list.length; i++) map[list[i].p] = list[i].u;
+            var html = '';
+            for (var i = 0; i < SOCIAL_DATA.length; i++) {
+                var sd = SOCIAL_DATA[i];
+                var username = map[sd.p] || '';
+                if (!username) continue;
+                html += '<div class="social-card">' +
+                    '<div class="platform">' + sd.label + '</div>' +
+                    '<div class="username">@' + _e(username) + '</div>' +
+                    '</div>';
+            }
+            if (!html) {
+                html = '<div style="grid-column:1/-1;color:#666;font-family:Share Tech Mono,monospace;font-size:18px;padding:20px;text-align:center;">[Configure your socials in the OBS panel]</div>';
+            }
+            document.getElementById('socialContainer').innerHTML = html;
+        })();
+        function _e(t) { return t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    </script>
+</body>
+</html>
