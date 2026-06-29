@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { apiGet, apiPut } from '../utils/api';
+import { apiGet, apiPut, apiPost } from '../utils/api';
 import { useTranslation } from '../i18n/context';
 import { useToast } from '../contexts/ToastContext';
 import { OVERLAY_REGISTRY, CATEGORIES, type OverlayEntry, type OverlayCategory } from '../config/overlayRegistry';
@@ -84,6 +84,116 @@ export function ObsPanel({ channel }: Props) {
   const [fnStatsMode, setFnStatsMode] = useState('overall');
   const [fnLayout, setFnLayout] = useState('stats');
   const [fnSaved, setFnSaved] = useState(false);
+
+  const [obsHost, setObsHost] = useState('127.0.0.1');
+  const [obsPort, setObsPort] = useState('4455');
+  const [obsPassword, setObsPassword] = useState('');
+  const [obsConnected, setObsConnected] = useState(false);
+  const [obsConnecting, setObsConnecting] = useState(false);
+  const [obsError, setObsError] = useState('');
+  const [obsApplying, setObsApplying] = useState<string | null>(null);
+
+  useEffect(() => {
+    apiGet('/obs/status').then(async (r) => {
+      if (!r.ok) return;
+      const data = await r.json();
+      setObsConnected(data.connected);
+    }).catch(() => {});
+  }, []);
+
+  const getObsSceneConfigs = useCallback((themeId: string): { name: string; url: string; width: number; height: number }[] => {
+    const cat = CATEGORIES.find((c) => c.themeId === themeId);
+    if (!cat) return [];
+    const overlays = OVERLAY_REGISTRY.filter((item) => item.category === cat.id);
+    const socials = endScreenSocials.filter((s) => s.visible && s.username.trim());
+    const socialsParam = socials.length > 0 ? encodeURIComponent(JSON.stringify(socials.map((s) => ({ p: s.platform, u: s.username })))) : '';
+    const be = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
+    function makeUrl(ov: OverlayEntry): string {
+      let url: string;
+      if (ov.filename) {
+        url = `${overlayBaseUrl}/overlays/${ov.filename}`;
+        url += `?channel=${channel}`;
+        url += `&backend=${encodeURIComponent(be)}`;
+        if (ov.mode === 'fortnite' && fnEpicUsername) url += `&epic=${encodeURIComponent(fnEpicUsername)}&mode=${fnStatsMode}&layout=${fnLayout}`;
+        if (ov.mode.endsWith('-end') && socialsParam) url += `&socials=${socialsParam}`;
+      } else {
+        url = `${overlayBaseUrl}/overlay.html?mode=${ov.mode}`;
+        url += `&channel=${channel}`;
+        if (ov.supportsTheme && selectedTheme) url += `&theme=${selectedTheme}`;
+      }
+      return url;
+    }
+
+    const sceneMap: { name: string; patterns: string[] }[] = [
+      { name: 'Inicio', patterns: ['starting-soon', '-start', 'inicio'] },
+      { name: 'Juego', patterns: ['gameplay', '-juego'] },
+      { name: 'BRB', patterns: ['brb'] },
+      { name: 'Just Chatting', patterns: ['just-chatting', 'justchatting'] },
+    ];
+
+    const result: { name: string; url: string; width: number; height: number }[] = [];
+    for (const scene of sceneMap) {
+      const match = overlays.find((ov) => scene.patterns.some((p) => ov.id.includes(p)));
+      if (match) {
+        const w = match.orientation === 'vertical' ? 1080 : 1920;
+        const h = match.orientation === 'vertical' ? 1920 : 1080;
+        result.push({ name: scene.name, url: makeUrl(match), width: w, height: h });
+      }
+    }
+    return result;
+  }, [channel, overlayBaseUrl, selectedTheme, fnEpicUsername, fnStatsMode, fnLayout, endScreenSocials]);
+
+  const connectObs = useCallback(async () => {
+    setObsConnecting(true);
+    setObsError('');
+    try {
+      const r = await apiPost('/obs/connect', { host: obsHost, port: parseInt(obsPort, 10), password: obsPassword });
+      const data = await r.json();
+      if (!r.ok || !data.ok) {
+        setObsError(data.error || 'Connection failed');
+        setObsConnected(false);
+      } else {
+        setObsConnected(true);
+      }
+    } catch (err: any) {
+      setObsError(err.message || 'Connection error');
+      setObsConnected(false);
+    } finally {
+      setObsConnecting(false);
+    }
+  }, [obsHost, obsPort, obsPassword]);
+
+  const disconnectObs = useCallback(async () => {
+    try {
+      await apiPost('/obs/disconnect');
+      setObsConnected(false);
+    } catch {}
+  }, []);
+
+  const applyTheme = useCallback(async (themeId: string) => {
+    setObsApplying(themeId);
+    setObsError('');
+    try {
+      const scenes = getObsSceneConfigs(themeId);
+      if (scenes.length === 0) {
+        setObsError('No overlays found for this theme');
+        setObsApplying(null);
+        return;
+      }
+      const r = await apiPost('/obs/apply-theme', { scenes });
+      const data = await r.json();
+      if (!r.ok || !data.ok) {
+        setObsError(data.error || 'Failed to apply theme');
+      } else {
+        toast.success(t('obs.obsThemeApplied'));
+      }
+    } catch (err: any) {
+      setObsError(err.message || 'Apply error');
+    } finally {
+      setObsApplying(null);
+    }
+  }, [getObsSceneConfigs, toast, t]);
 
   useEffect(() => {
     apiGet('/fortnite/config').then(async (r) => {
@@ -442,6 +552,61 @@ export function ObsPanel({ channel }: Props) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* OBS WebSocket */}
+      <div className="glass-card mb-5" style={{ padding: '1rem 1.25rem' }}>
+        <div className="flex-row flex-row--gap-lg mb-2" style={{ alignItems: 'center' }}>
+          <span className="text-sm" style={{ fontWeight: 600, color: 'var(--sf-text-2)', whiteSpace: 'nowrap' }}>
+            🔌 {t('obs.obsWsTitle')}
+          </span>
+          {obsConnected && <span className="sf-badge sf-badge-success text-xs">{t('obs.obsWsConnected')}</span>}
+        </div>
+
+        {!obsConnected ? (
+          <div className="flex-col flex-col--gap-sm">
+            <div className="flex-row flex-row--gap-sm" style={{ alignItems: 'center' }}>
+              <input type="text" value={obsHost} onChange={(e) => setObsHost(e.target.value)} placeholder={t('obs.obsWsHost')} className="sf-input text-xs" style={{ width: 140 }} />
+              <span style={{ color: 'var(--sf-text-3)' }}>:</span>
+              <input type="text" value={obsPort} onChange={(e) => setObsPort(e.target.value)} placeholder="4455" className="sf-input text-xs" style={{ width: 70 }} />
+              <input type="password" value={obsPassword} onChange={(e) => setObsPassword(e.target.value)} placeholder={t('obs.obsWsPassword')} className="sf-input text-xs" style={{ width: 140 }} />
+              <button onClick={connectObs} disabled={obsConnecting} className="sf-btn sf-btn-primary" style={{ fontSize: '0.78rem', padding: '0.3rem 0.75rem' }}>
+                {obsConnecting ? '...' : t('obs.obsWsConnect')}
+              </button>
+            </div>
+            {obsError && <p className="text-xs" style={{ color: '#ef4444' }}>{obsError}</p>}
+            <p className="text-xs" style={{ color: 'var(--sf-text-3)' }}>{t('obs.obsWsHelp')}</p>
+          </div>
+        ) : (
+          <div className="flex-col flex-col--gap-sm">
+            <div className="flex-row flex-row--gap-sm mb-1" style={{ alignItems: 'center' }}>
+              <span className="text-xs" style={{ color: 'var(--sf-text-3)' }}>{t('obs.obsWsConnectedTo')} {obsHost}:{obsPort}</span>
+              <button onClick={disconnectObs} className="sf-btn" style={{ fontSize: '0.72rem', padding: '0.2rem 0.6rem' }}>
+                {t('obs.obsWsDisconnect')}
+              </button>
+            </div>
+            <div className="flex-wrap" style={{ gap: '0.35rem' }}>
+              {THEMES.filter((th) => th.id).map((th) => {
+                const applying = obsApplying === th.id;
+                return (
+                  <button
+                    key={th.id}
+                    onClick={() => applyTheme(th.id)}
+                    disabled={!!obsApplying}
+                    className="sf-pill-selector__pill"
+                    style={{
+                      borderColor: 'var(--sf-border)',
+                      opacity: applying ? 0.6 : 1,
+                      cursor: applying ? 'wait' : 'pointer',
+                    }}
+                  >
+                    {applying ? '...' : `⚡ ${t('obs.obsApplyTheme')} ${t(th.labelKey)}`}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Orientation & Search */}

@@ -44,7 +44,7 @@
     "siempreEncima": "🎮 Toujours au premier plan",
     "desactivarSiempreEncima": "Désactiver toujours au premier plan",
     "activarSiempreEncima": "Activer toujours au premier plan",
-    "version": "v0.3.95 · Open Source",
+    "version": "v0.4.0 · Open Source",
     "panelControl": "Tableau de bord · StreamForger",
     "hash": "#",
     "placeholderCanal": "chaîne twitch...",
@@ -388,6 +388,16 @@
     "guardadoConfig": "✓ Enregistré",
     "tip": "💡 Astuce :",
     "obsTip": "Dans OBS, allez à Sources → + → Browser et collez l'URL. Assurez-vous que StreamForger tourne.",
+    "obsWsTitle": "OBS WebSocket",
+    "obsWsConnected": "Connecté",
+    "obsWsHost": "Hôte",
+    "obsWsPassword": "Mot de passe",
+    "obsWsConnect": "Connexion",
+    "obsWsDisconnect": "Déconnexion",
+    "obsWsConnectedTo": "Connecté à",
+    "obsWsHelp": "Connectez-vous à OBS via WebSocket. Activez-le dans OBS : Outils → WebSocket Server Settings, notez le port et le mot de passe.",
+    "obsApplyTheme": "Appliquer le thème",
+    "obsThemeApplied": "✓ Thème appliqué à OBS avec succès !",
     "orientacion": "Orientation",
     "orientationAll": "Tous",
     "orientationHorizontal": "Horizontale",
@@ -1085,3 +1095,4 @@
     "connectFirst": "Connectez Twitch d'abord"
   }
 }
+

@@ -44,7 +44,7 @@
     "siempreEncima": "🎮 Always on top",
     "desactivarSiempreEncima": "Disable always on top",
     "activarSiempreEncima": "Enable always on top",
-    "version": "v0.3.95 · Open Source",
+    "version": "v0.4.0 · Open Source",
     "panelControl": "Dashboard · StreamForger",
     "hash": "#",
     "placeholderCanal": "twitch channel...",
@@ -392,6 +392,16 @@
     "guardadoConfig": "✓ Saved",
     "tip": "💡 Tip:",
     "obsTip": "In OBS, go to Sources → + → Browser and paste the URL. Make sure StreamForger is running so the overlay receives data in real time.",
+    "obsWsTitle": "OBS WebSocket",
+    "obsWsConnected": "Connected",
+    "obsWsHost": "Host",
+    "obsWsPassword": "Password",
+    "obsWsConnect": "Connect",
+    "obsWsDisconnect": "Disconnect",
+    "obsWsConnectedTo": "Connected to",
+    "obsWsHelp": "Connect to OBS via WebSocket (Tools → WebSocket Server in OBS). Enable it in OBS: Tools → WebSocket Server Settings, note the port and password.",
+    "obsApplyTheme": "Apply Theme",
+    "obsThemeApplied": "✓ Theme applied to OBS successfully!",
     "orientacion": "Orientation",
     "orientationAll": "All",
     "orientationHorizontal": "Horizontal",
@@ -1105,3 +1115,4 @@
     "connectFirst": "Connect Twitch first"
   }
 }
+

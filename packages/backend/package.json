@@ -1,6 +1,6 @@
 {
   "name": "@streamforger/backend",
-  "version": "0.3.95",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -24,6 +24,7 @@
     "@twurple/eventsub-ws": "^7.4.0",
     "dotenv": "^16.4.0",
     "fastify": "^5.0.0",
+    "obs-websocket-js": "^5.0.8",
     "socket.io": "^4.7.0",
     "zod": "^3.22.0"
   },
@@ -33,3 +34,4 @@
     "typescript": "^5.4.0"
   }
 }
+

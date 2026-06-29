@@ -17,7 +17,7 @@ import { TtsManager } from './components/TtsManager';
 import styles from './App.module.css';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-const APP_VERSION = '0.3.95';
+const APP_VERSION = '0.4.0';
 
 // Clear stale localStorage keys when version changes
 try {
@@ -318,3 +318,4 @@ function TtsUserSync() {
   }, [user?.id, setCurrentUserId]);
   return null;
 }
+
