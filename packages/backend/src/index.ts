@@ -20,6 +20,7 @@ import { setupMod } from './mod/index.js';
 import { setupSubathon } from './subathon/index.js';
 import { setupActivity } from './activity/index.js';
 import { setupCommands } from './commands/index.js';
+import { setupChatTimers } from './chat-timers/index.js';
 import { setupFortnite } from './fortnite/index.js';
 import { setupSecurity } from './security/index.js';
 import { setupAlertSounds } from './alert-sounds/index.js';
@@ -106,6 +107,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupSubathon(app);
   setupActivity(app);
   setupCommands(app);
+  setupChatTimers(app);
   setupFortnite(app);
   setupSecurity(app);
   setupAlertSounds(app);

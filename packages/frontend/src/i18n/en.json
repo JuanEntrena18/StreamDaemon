@@ -715,7 +715,20 @@
     "habilitar": "Enable",
     "eliminar": "Delete",
     "confirmDeleteTitle": "Delete command?",
-    "confirmDeleteMsg": "Are you sure you want to delete !{{cmd}}? This cannot be undone."
+    "confirmDeleteMsg": "Are you sure you want to delete !{{cmd}}? This cannot be undone.",
+    "tabCommands": "Commands",
+    "tabTimers": "Timers",
+    "timersTitle": "⏱️ Timers",
+    "timersSubtitle": "Automated messages sent periodically to chat",
+    "nuevoTimer": "➕ New timer",
+    "nombreTimerPlaceholder": "Descriptive name",
+    "intervaloMinutos": "Interval (min)",
+    "lineasMinimas": "Min chat lines",
+    "crearTimer": "Create timer",
+    "emptyTimers": "No timers configured. Create your first one above.",
+    "timerEdit": "Edit timer",
+    "confirmDeleteTimerTitle": "Delete timer?",
+    "confirmDeleteTimerMsg": "Are you sure you want to delete the timer {{name}}? This cannot be undone."
   },
   "subathon": {
     "sub": "Subscription",

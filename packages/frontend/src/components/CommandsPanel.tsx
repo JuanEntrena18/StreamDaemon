@@ -4,6 +4,7 @@ import { apiGet, apiPost, apiPut } from '../utils/api';
 import { useSocket } from '../hooks/useSocket';
 import { ConfirmModal } from './ConfirmModal';
 import { EmptyState } from './EmptyState';
+import { TimersTab } from './TimersTab';
 import styles from './CommandsPanel.module.css';
 
 interface Props {
@@ -78,6 +79,7 @@ export function CommandsPanel({ channel }: Props) {
   const [importResult, setImportResult] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showVarPicker, setShowVarPicker] = useState<'new' | 'edit' | null>(null);
+  const [activeTab, setActiveTab] = useState<'commands' | 'timers'>('commands');
   const [confirmDeleteCmd, setConfirmDeleteCmd] = useState<Command | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
@@ -203,17 +205,34 @@ export function CommandsPanel({ channel }: Props) {
 
   return (
     <div className={styles.container}>
-      <div className="mb-5">
-        <h2 className="sf-heading flex-row flex-row--gap-md">
-          {t('commands.title')}
-          <button onClick={() => setShowHelp(!showHelp)} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', marginLeft: 'auto' }}>
-            {showHelp ? t('commands.cerrarAyuda') : t('commands.ayuda')}
-          </button>
-        </h2>
-        <p className="text-sm text-muted">
-          {t('commands.subtitle')}
-        </p>
+      <div className="flex-row flex-row--gap-md mb-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <button 
+          className={`sf-tab-btn ${activeTab === 'commands' ? 'active' : ''}`}
+          onClick={() => setActiveTab('commands')}
+        >
+          {t('commands.tabCommands')}
+        </button>
+        <button 
+          className={`sf-tab-btn ${activeTab === 'timers' ? 'active' : ''}`}
+          onClick={() => setActiveTab('timers')}
+        >
+          {t('commands.tabTimers')}
+        </button>
       </div>
+
+      {activeTab === 'commands' ? (
+        <>
+          <div className="mb-5">
+            <h2 className="sf-heading flex-row flex-row--gap-md">
+              {t('commands.title')}
+              <button onClick={() => setShowHelp(!showHelp)} className="sf-btn sf-btn-ghost" style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', marginLeft: 'auto' }}>
+                {showHelp ? t('commands.cerrarAyuda') : t('commands.ayuda')}
+              </button>
+            </h2>
+            <p className="text-sm text-muted">
+              {t('commands.subtitle')}
+            </p>
+          </div>
 
       {/* Help section */}
       {showHelp && (
@@ -367,6 +386,10 @@ export function CommandsPanel({ channel }: Props) {
         onConfirm={() => { if (confirmDeleteCmd) deleteCommand(confirmDeleteCmd); setConfirmDeleteCmd(null); }}
         onCancel={() => setConfirmDeleteCmd(null)}
       />
+        </>
+      ) : (
+        <TimersTab channel={channel} />
+      )}
     </div>
   );
 }

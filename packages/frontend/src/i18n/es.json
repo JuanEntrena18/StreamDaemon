@@ -779,7 +779,20 @@
     "habilitar": "Habilitar",
     "eliminar": "Eliminar",
     "confirmDeleteTitle": "¿Eliminar comando?",
-    "confirmDeleteMsg": "¿Estás seguro de eliminar el comando !{{cmd}}? Esta acción no se puede deshacer."
+    "confirmDeleteMsg": "¿Estás seguro de eliminar el comando !{{cmd}}? Esta acción no se puede deshacer.",
+    "tabCommands": "Comandos",
+    "tabTimers": "Temporizadores",
+    "timersTitle": "⏱️ Temporizadores",
+    "timersSubtitle": "Mensajes automáticos que se envían periódicamente al chat",
+    "nuevoTimer": "➕ Nuevo temporizador",
+    "nombreTimerPlaceholder": "Nombre descriptivo",
+    "intervaloMinutos": "Intervalo (min)",
+    "lineasMinimas": "Líneas de chat min.",
+    "crearTimer": "Crear temporizador",
+    "emptyTimers": "No hay temporizadores configurados. Crea el primero arriba.",
+    "timerEdit": "Editar temporizador",
+    "confirmDeleteTimerTitle": "¿Eliminar temporizador?",
+    "confirmDeleteTimerMsg": "¿Estás seguro de eliminar el temporizador {{name}}? Esta acción no se puede deshacer."
   },
   "subathon": {
     "sub": "Suscripción",
