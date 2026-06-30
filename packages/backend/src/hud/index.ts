@@ -77,7 +77,19 @@ export function setupHud(app: FastifyInstance) {
       const data = await fetchHud(channel);
       if (data) {
         getIO().to(`channel:${channel}`).emit('hud:update', data);
-        recordSnapshot(channel, data.viewers, 0);
+        // Fetch active chatters count for KPI audience graph
+        let chattersCount = 0;
+        try {
+          if (authProvider && data.isLive) {
+            const api = new ApiClient({ authProvider });
+            const user = await api.users.getUserByName(channel);
+            if (user) {
+              const chattersResult = await api.chat.getChatters(user.id);
+              chattersCount = chattersResult.data.length;
+            }
+          }
+        } catch { /* ignore chatters fetch errors */ }
+        recordSnapshot(channel.toLowerCase(), data.viewers, chattersCount);
       }
     }, interval * 1000);
     reply.send({ ok: true, interval });

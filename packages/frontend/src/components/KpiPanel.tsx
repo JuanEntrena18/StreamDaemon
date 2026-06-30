@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSocketEvent } from '../hooks/useSocket';
-import { apiGet } from '../utils/api';
+import { apiGet, apiPost } from '../utils/api';
 import { useTranslation } from '../i18n/context';
 import type { KpiOverview, ViewerSnapshot, GamePerformance, BestSlot, ChannelRaidEvent, TwitchTopGame } from '@streamforger/shared';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -121,6 +121,13 @@ function AudienceTab({ channel }: { channel: string }) {
   const { t } = useTranslation();
   const [snapshots, setSnapshots] = useState<ViewerSnapshot[]>([]);
   const [active, setActive] = useState(0);
+
+  // Auto-start HUD polling so viewer snapshots are collected for the graph
+  useEffect(() => {
+    if (!channel) return;
+    apiPost('/hud/start-poll', { channel, interval: 15 }).catch(() => {});
+    // Don't stop the poll on unmount — other panels may depend on it
+  }, [channel]);
 
   useEffect(() => {
     const fetchHistory = async () => {
