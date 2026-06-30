@@ -8,6 +8,7 @@ import { authProvider, currentUser } from '../auth/index.js';
 import { checkCustomCommand } from '../commands/index.js';
 import { checkMessage } from '../security/index.js';
 import type { enterGiveaway, addTickets } from '../giveaways/index.js';
+import { incrementChatCounter } from '../kpi/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.resolve(__dirname, '../../data');
@@ -98,6 +99,7 @@ export async function setupChat() {
 
     const subTier = getSubTier(msg.userInfo.badges);
     handleCommands(channelName, user, text, subTier);
+    incrementChatCounter(channelName, user);
 
     const io = getIO();
     io.to(`channel:${channelName}`).emit('chat:message', {

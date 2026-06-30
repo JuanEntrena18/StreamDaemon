@@ -4,23 +4,89 @@ import { getRawData } from '@twurple/common';
 import { authProvider, currentUser } from '../auth/index.js';
 import { getIO } from '../socket/index.js';
 import { getEvents } from '../activity/index.js';
-import type { ViewerSnapshot, KpiOverview, GamePerformance, BestSlot } from '@streamforger/shared';
+import type { ViewerSnapshot, KpiOverview, GamePerformance, BestSlot, ChatStats, StreamSummary, ChannelRecord } from '@streamforger/shared';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = path.resolve(__dirname, '../../data');
+const SNAPSHOTS_FILE = path.join(DATA_DIR, 'kpi_snapshots.json');
 
 const MAX_SNAPSHOTS = 120;
-const snapshots = new Map<string, ViewerSnapshot[]>();
+let snapshots = new Map<string, ViewerSnapshot[]>();
 
-let chatMessageCount = 0;
+let chatMessageCount = new Map<string, number>();
+let uniqueChattersSet = new Map<string, Set<string>>();
 let chatMessageInterval: ReturnType<typeof setInterval> | null = null;
 
-export function resetChatCounter() { chatMessageCount = 0; }
-export function incrementChatCounter() { chatMessageCount++; }
-export function getChatMessagesPerMinute(): number { return chatMessageCount; }
+export function resetChatCounter(channel: string) {
+  chatMessageCount.set(channel, 0);
+  if (!uniqueChattersSet.has(channel)) {
+    uniqueChattersSet.set(channel, new Set());
+  } else {
+    uniqueChattersSet.get(channel)!.clear();
+  }
+}
+
+export function incrementChatCounter(channel: string, user?: string) {
+  const currentCount = chatMessageCount.get(channel) || 0;
+  chatMessageCount.set(channel, currentCount + 1);
+  if (user) {
+    if (!uniqueChattersSet.has(channel)) {
+      uniqueChattersSet.set(channel, new Set());
+    }
+    uniqueChattersSet.get(channel)!.add(user);
+  }
+}
+
+export function getChatMessagesPerMinute(channel: string): number {
+  return chatMessageCount.get(channel) || 0;
+}
+
+export function getUniqueChattersCount(channel: string): number {
+  return uniqueChattersSet.get(channel)?.size || 0;
+}
+
+function loadSnapshots() {
+  try {
+    if (fs.existsSync(SNAPSHOTS_FILE)) {
+      const data = JSON.parse(fs.readFileSync(SNAPSHOTS_FILE, 'utf-8'));
+      snapshots = new Map(Object.entries(data));
+    }
+  } catch (e) {
+    console.error('Failed to load KPI snapshots:', e);
+  }
+}
+
+function saveSnapshots() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    const data = Object.fromEntries(snapshots.entries());
+    fs.writeFileSync(SNAPSHOTS_FILE, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.error('Failed to save KPI snapshots:', e);
+  }
+}
 
 export function recordSnapshot(channel: string, viewers: number, chattersActive: number) {
-  if (!snapshots.has(channel)) snapshots.set(channel, []);
-  const list = snapshots.get(channel)!;
-  list.push({ timestamp: Date.now(), viewers, chattersActive });
+  const normChannel = channel.toLowerCase();
+  if (!snapshots.has(normChannel)) snapshots.set(normChannel, []);
+  const list = snapshots.get(normChannel)!;
+  
+  const messagesPerMin = getChatMessagesPerMinute(normChannel);
+  const uniqueChatters = getUniqueChattersCount(normChannel);
+
+  list.push({ 
+    timestamp: Date.now(), 
+    viewers, 
+    chattersActive,
+    messagesPerMin,
+    uniqueChatters
+  });
+
   while (list.length > MAX_SNAPSHOTS) list.shift();
+  saveSnapshots();
 }
 
 function getChannelSnapshots(channel: string): ViewerSnapshot[] {
@@ -40,9 +106,25 @@ function getStartDate(period: Period): Date | undefined {
   return new Date(Date.now() - days * 86400000);
 }
 
+function getPreviousPeriodStartDate(period: Period): Date | undefined {
+  if (period === 'all') return undefined;
+  const days = parseInt(period);
+  return new Date(Date.now() - (days * 2) * 86400000);
+}
+
+function calculateDelta(current: number, previous: number): number | undefined {
+  if (previous === 0) return current > 0 ? 100 : 0;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
 export function setupKpi(app: FastifyInstance) {
+  loadSnapshots();
+
   if (!chatMessageInterval) {
-    chatMessageInterval = setInterval(() => { chatMessageCount = 0; }, 60000);
+    chatMessageInterval = setInterval(() => { 
+      chatMessageCount.clear(); 
+      // Do not clear uniqueChattersSet, we want cumulative unique chatters for the session
+    }, 60000);
   }
 
   app.get('/kpi/overview/:channel', async (req, reply) => {
@@ -57,6 +139,7 @@ export function setupKpi(app: FastifyInstance) {
       if (!user) return reply.status(404).send({ error: 'Channel not found' });
 
       const startDate = getStartDate(period);
+      const prevStartDate = getPreviousPeriodStartDate(period);
 
       const [followInfo, subInfo, videos] = await Promise.all([
         apiClient.channels.getChannelFollowers(user.id, user.id).catch(() => ({ total: 0 })),
@@ -64,60 +147,75 @@ export function setupKpi(app: FastifyInstance) {
         apiClient.videos.getVideosByUser(user.id, { type: 'archive', period: 'all', limit: 100 }).catch(() => ({ data: [] })),
       ]);
 
-      const filteredVideos = startDate
-        ? videos.data.filter(v => v.creationDate >= startDate)
-        : videos.data;
-
       const events = getEvents(channel.toLowerCase());
 
-      let totalHoursStreamed = 0;
-      let totalViews = 0;
-      let peakViewers = 0;
-      let totalFollowersGained = 0;
-      let totalSubsGained = 0;
-      let totalBitsDonated = 0;
+      const processVideos = (start?: Date, end?: Date) => {
+        const filtered = videos.data.filter(v => {
+          if (start && v.creationDate < start) return false;
+          if (end && v.creationDate >= end) return false;
+          return true;
+        });
 
-      for (const video of filteredVideos) {
-        const durationH = video.durationInSeconds / 3600;
-        totalHoursStreamed += durationH;
-        totalViews += video.views;
+        let tHours = 0, tViews = 0, pViewers = 0;
+        let fGained = 0, sGained = 0, bDonated = 0;
 
-        const startTime = video.creationDate.getTime();
-        const endTime = startTime + video.durationInSeconds * 1000;
-        const streamEvents = events.filter(e => e.timestamp >= startTime && e.timestamp <= endTime);
+        for (const video of filtered) {
+          tHours += video.durationInSeconds / 3600;
+          tViews += video.views;
+          pViewers = Math.max(pViewers, video.views);
 
-        const followersGained = streamEvents.filter(e => e.type === 'follow').length;
-        totalFollowersGained += followersGained;
-        const subsGained = streamEvents.filter(e => e.type === 'sub' || e.type === 'resub' || e.type === 'gift').length;
-        totalSubsGained += subsGained;
-        const bitsDonated = streamEvents.filter(e => e.type === 'cheer').reduce((sum, e) => sum + (e.amount || 0), 0);
-        totalBitsDonated += bitsDonated;
+          const startTime = video.creationDate.getTime();
+          const endTime = startTime + video.durationInSeconds * 1000;
+          const streamEvents = events.filter(e => e.timestamp >= startTime && e.timestamp <= endTime);
 
-        peakViewers = Math.max(peakViewers, video.views);
-      }
+          fGained += streamEvents.filter(e => e.type === 'follow').length;
+          sGained += streamEvents.filter(e => e.type === 'sub' || e.type === 'resub' || e.type === 'gift').length;
+          bDonated += streamEvents.filter(e => e.type === 'cheer').reduce((sum, e) => sum + (e.amount || 0), 0);
+        }
+
+        const aViewers = filtered.length > 0 ? tViews / filtered.length : 0;
+        const eRevenue = sGained * 2.49 + bDonated * 0.01;
+
+        return {
+          tHours, tViews, pViewers, fGained, sGained, bDonated, aViewers, eRevenue, streams: filtered.length
+        };
+      };
+
+      const curr = processVideos(startDate);
+      const prev = period !== 'all' ? processVideos(prevStartDate, startDate) : curr;
 
       const totalSubs = subInfo.total;
       const totalFollowers = followInfo.total;
       const subToFollowRatio = totalFollowers > 0 ? totalSubs / totalFollowers : 0;
-      const avgViewers = filteredVideos.length > 0 ? totalViews / filteredVideos.length : 0;
-      const estimatedRevenue = totalSubsGained * 2.49 + totalBitsDonated * 0.01;
 
       const overview: KpiOverview = {
         channel,
         followers: totalFollowers,
         subscribers: totalSubs,
         subToFollowRatio: Math.round(subToFollowRatio * 100) / 100,
-        avgViewers: Math.round(avgViewers),
-        peakViewers,
-        totalViews,
-        totalHoursStreamed: Math.round(totalHoursStreamed * 100) / 100,
-        followersGained: totalFollowersGained,
-        subsGained: totalSubsGained,
-        bitsDonated: totalBitsDonated,
-        estimatedRevenue: Math.round(estimatedRevenue * 100) / 100,
-        streamsThisPeriod: filteredVideos.length,
+        avgViewers: Math.round(curr.aViewers),
+        peakViewers: curr.pViewers,
+        totalViews: curr.tViews,
+        totalHoursStreamed: Math.round(curr.tHours * 100) / 100,
+        followersGained: curr.fGained,
+        subsGained: curr.sGained,
+        bitsDonated: curr.bDonated,
+        estimatedRevenue: Math.round(curr.eRevenue * 100) / 100,
+        streamsThisPeriod: curr.streams,
         isLive: false,
       };
+
+      if (period !== 'all') {
+        overview.avgViewersDelta = calculateDelta(Math.round(curr.aViewers), Math.round(prev.aViewers));
+        overview.peakViewersDelta = calculateDelta(curr.pViewers, prev.pViewers);
+        overview.totalViewsDelta = calculateDelta(curr.tViews, prev.tViews);
+        overview.totalHoursStreamedDelta = calculateDelta(curr.tHours, prev.tHours);
+        overview.followersGainedDelta = calculateDelta(curr.fGained, prev.fGained);
+        overview.subsGainedDelta = calculateDelta(curr.sGained, prev.sGained);
+        overview.bitsDonatedDelta = calculateDelta(curr.bDonated, prev.bDonated);
+        overview.estimatedRevenueDelta = calculateDelta(curr.eRevenue, prev.eRevenue);
+        overview.streamsThisPeriodDelta = calculateDelta(curr.streams, prev.streams);
+      }
 
       return overview;
     } catch (err) {
@@ -133,6 +231,152 @@ export function setupKpi(app: FastifyInstance) {
       return { channel, snapshots, activeViewers: snapshots.length > 0 ? snapshots[snapshots.length - 1].viewers : 0 };
     } catch (err) {
       return reply.status(500).send({ error: 'Failed to fetch viewer history' });
+    }
+  });
+
+  app.get('/kpi/chat-stats/:channel', async (req, reply) => {
+    try {
+      const { channel } = req.params as { channel: string };
+      const snapshots = getChannelSnapshots(channel.toLowerCase());
+      
+      const chatStats: ChatStats = {
+        avgMessagesPerMin: 0,
+        peakMessagesPerMin: 0,
+        totalMessages: 0,
+        uniqueChatters: 0,
+        avgEngagementRatio: 0,
+        topChatters: [],
+        timeline: []
+      };
+
+      if (snapshots.length === 0) return chatStats;
+
+      let totalEngagement = 0;
+      let engagementCount = 0;
+
+      for (const snap of snapshots) {
+        const msgs = snap.messagesPerMin || 0;
+        chatStats.totalMessages += msgs; // Approximation since we poll every 15s
+        chatStats.peakMessagesPerMin = Math.max(chatStats.peakMessagesPerMin, msgs);
+        chatStats.uniqueChatters = Math.max(chatStats.uniqueChatters, snap.uniqueChatters || 0);
+        
+        const engagement = snap.viewers > 0 ? ((snap.chattersActive || 0) / snap.viewers) * 100 : 0;
+        if (snap.viewers > 0) {
+          totalEngagement += engagement;
+          engagementCount++;
+        }
+
+        chatStats.timeline.push({
+          timestamp: snap.timestamp,
+          messagesPerMin: msgs,
+          engagement: Math.round(engagement)
+        });
+      }
+
+      chatStats.avgMessagesPerMin = Math.round(chatStats.totalMessages / Math.max(1, snapshots.length / 4)); // 15s intervals
+      chatStats.avgEngagementRatio = engagementCount > 0 ? Math.round(totalEngagement / engagementCount) : 0;
+
+      return chatStats;
+    } catch (err) {
+      return reply.status(500).send({ error: 'Failed to fetch chat stats' });
+    }
+  });
+
+  app.get('/kpi/stream-summary/:channel', async (req, reply) => {
+    try {
+      if (!authProvider) return reply.status(401).send({ error: 'Not authenticated' });
+      const { channel } = req.params as { channel: string };
+
+      const apiClient = new ApiClient({ authProvider });
+      const user = await apiClient.users.getUserByName(channel);
+      if (!user) return reply.status(404).send({ error: 'Channel not found' });
+
+      const videos = await apiClient.videos.getVideosByUser(user.id, { type: 'archive', period: 'all', limit: 10 }).catch(() => ({ data: [] }));
+      
+      if (videos.data.length === 0) return reply.status(404).send({ error: 'No streams found' });
+
+      const lastVideo = videos.data[0];
+      const events = getEvents(channel.toLowerCase());
+      const startTime = lastVideo.creationDate.getTime();
+      const endTime = startTime + lastVideo.durationInSeconds * 1000;
+      const streamEvents = events.filter(e => e.timestamp >= startTime && e.timestamp <= endTime);
+
+      const followersGained = streamEvents.filter(e => e.type === 'follow').length;
+      const subsGained = streamEvents.filter(e => e.type === 'sub' || e.type === 'resub' || e.type === 'gift').length;
+      const bitsDonated = streamEvents.filter(e => e.type === 'cheer').reduce((sum, e) => sum + (e.amount || 0), 0);
+      const estimatedRevenue = subsGained * 2.49 + bitsDonated * 0.01;
+
+      const summary: StreamSummary = {
+        channel,
+        streamTitle: lastVideo.title,
+        gameName: 'Unknown Game', // Would need an extra API call or cached game
+        startedAt: lastVideo.creationDate.toISOString(),
+        duration: lastVideo.durationInSeconds,
+        avgViewers: 0, // Would come from Twitch API or snapshots if we kept them
+        peakViewers: lastVideo.views,
+        minViewers: 0,
+        peakTimestamp: 0,
+        avgChatters: 0,
+        avgEngagement: 0,
+        followersGained,
+        subsGained,
+        bitsDonated,
+        estimatedRevenue,
+        totalChatMessages: 0,
+        uniqueChatters: 0
+      };
+
+      return summary;
+    } catch (err) {
+      return reply.status(500).send({ error: 'Failed to fetch stream summary' });
+    }
+  });
+
+  app.get('/kpi/records/:channel', async (req, reply) => {
+    try {
+      if (!authProvider) return reply.status(401).send({ error: 'Not authenticated' });
+      const { channel } = req.params as { channel: string };
+
+      const apiClient = new ApiClient({ authProvider });
+      const user = await apiClient.users.getUserByName(channel);
+      if (!user) return reply.status(404).send({ error: 'Channel not found' });
+
+      const videos = await apiClient.videos.getVideosByUser(user.id, { type: 'archive', period: 'all', limit: 100 }).catch(() => ({ data: [] }));
+      
+      const records: ChannelRecord[] = [];
+
+      if (videos.data.length > 0) {
+        let maxViewsVideo = videos.data[0];
+        let longestVideo = videos.data[0];
+
+        for (const video of videos.data) {
+          if (video.views > maxViewsVideo.views) maxViewsVideo = video;
+          if (video.durationInSeconds > longestVideo.durationInSeconds) longestVideo = video;
+        }
+
+        records.push({
+          label: 'Mayor pico de viewers',
+          value: maxViewsVideo.views.toLocaleString(),
+          streamTitle: maxViewsVideo.title,
+          date: maxViewsVideo.creationDate.toISOString(),
+          icon: '👥'
+        });
+
+        const hours = Math.floor(longestVideo.durationInSeconds / 3600);
+        const minutes = Math.floor((longestVideo.durationInSeconds % 3600) / 60);
+
+        records.push({
+          label: 'Stream más largo',
+          value: `${hours}h ${minutes}m`,
+          streamTitle: longestVideo.title,
+          date: longestVideo.creationDate.toISOString(),
+          icon: '⏱️'
+        });
+      }
+
+      return { channel, records };
+    } catch (err) {
+      return reply.status(500).send({ error: 'Failed to fetch channel records' });
     }
   });
 
@@ -156,7 +400,6 @@ export function setupKpi(app: FastifyInstance) {
 
       const channelInfo = await apiClient.channels.getChannelInfoById(user.id);
       const fallbackGameName = channelInfo?.gameName || 'General';
-      const fallbackGameId = channelInfo?.gameId || '';
 
       const gameMap = new Map<string, { views: number[]; durations: number[]; count: number; followersGained: number; boxArtUrl?: string }>();
       const events = getEvents(channel.toLowerCase());
@@ -174,12 +417,10 @@ export function setupKpi(app: FastifyInstance) {
         entry.followersGained += events.filter(e => e.timestamp >= startTime && e.timestamp <= endTime && e.type === 'follow').length;
       }
 
-      // Fetch box art URLs for games
       for (const gameName of gameMap.keys()) {
         try {
           const game = await apiClient.games.getGameByName(gameName);
           if (game) {
-            // Replace {width}x{height} with e.g. 144x192
             gameMap.get(gameName)!.boxArtUrl = game.boxArtUrl.replace('{width}', '144').replace('{height}', '192');
           }
         } catch (e) {
@@ -285,9 +526,7 @@ export function setupKpi(app: FastifyInstance) {
         }
       }));
 
-      // Sort just in case, though Twitch already ranks them
       results.sort((a, b) => b.estimatedViewers - a.estimatedViewers);
-
       return { games: results };
     } catch (err) {
       req.log.error(err, 'Failed to fetch top games');

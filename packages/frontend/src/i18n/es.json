@@ -653,7 +653,31 @@
     "noSlotsData": "No hay suficientes datos para determinar los mejores horarios.",
     "slotsSubtitle": "Basado en el promedio de viewers de streams anteriores:",
     "subTopGames": "Top Espectadores",
-    "estimatedGlobalViewers": "Espectadores en vivo (Top 100)"
+    "estimatedGlobalViewers": "Espectadores en vivo (Top 100)",
+    "subChat": "Chat",
+    "subSummary": "Resumen Post-Stream",
+    "subRecords": "Récords",
+    "trend": "Tendencia (1m)",
+    "avgEngagement": "Engagement Prom.",
+    "engagement": "Engagement %",
+    "avgMessages": "Msgs / min (Prom)",
+    "peakMessages": "Msgs / min (Pico)",
+    "uniqueChatters": "Chatters Únicos",
+    "totalMessages": "Mensajes Totales",
+    "messagesPerMin": "Mensajes / min",
+    "noStreamSummary": "No se encontró un stream reciente para generar el reporte.",
+    "streamReport": "Reporte de Stream",
+    "viewChannel": "Ver Canal en Twitch",
+    "noRecords": "No se encontraron récords para este canal.",
+    "days": {
+      "0": "Domingo",
+      "1": "Lunes",
+      "2": "Martes",
+      "3": "Miércoles",
+      "4": "Jueves",
+      "5": "Viernes",
+      "6": "Sábado"
+    }
   },
   "giveaway": {
     "dur30s": "30 seg",

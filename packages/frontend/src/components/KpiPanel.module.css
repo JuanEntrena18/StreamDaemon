@@ -122,6 +122,29 @@
   color: var(--sf-accent);
 }
 
+.kpiDelta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: var(--sf-surface-hover);
+}
+
+.kpiDelta.positive {
+  color: var(--sf-success);
+}
+
+.kpiDelta.negative {
+  color: var(--sf-error, #ef4444);
+}
+
+.kpiDelta.neutral {
+  color: var(--sf-text-3);
+}
+
 /* Raids */
 .raidSection {
   margin-top: 2rem;

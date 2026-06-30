@@ -247,6 +247,8 @@ export interface ViewerSnapshot {
   timestamp: number;
   viewers: number;
   chattersActive: number;
+  messagesPerMin?: number;
+  uniqueChatters?: number;
 }
 
 export interface KpiOverview {
@@ -264,6 +266,16 @@ export interface KpiOverview {
   estimatedRevenue: number;
   streamsThisPeriod: number;
   isLive: boolean;
+  // Trend deltas vs previous period (percentage change)
+  avgViewersDelta?: number;
+  peakViewersDelta?: number;
+  followersGainedDelta?: number;
+  subsGainedDelta?: number;
+  bitsDonatedDelta?: number;
+  estimatedRevenueDelta?: number;
+  totalViewsDelta?: number;
+  totalHoursStreamedDelta?: number;
+  streamsThisPeriodDelta?: number;
 }
 
 export interface GamePerformance {
@@ -297,3 +309,46 @@ export interface TwitchTopGame {
   boxArtUrl: string;
   estimatedViewers: number;
 }
+
+export interface ChatStats {
+  avgMessagesPerMin: number;
+  peakMessagesPerMin: number;
+  totalMessages: number;
+  uniqueChatters: number;
+  avgEngagementRatio: number;
+  topChatters: { user: string; messageCount: number }[];
+  timeline: { timestamp: number; messagesPerMin: number; engagement: number }[];
+}
+
+export interface StreamSummary {
+  channel: string;
+  streamTitle: string;
+  gameName: string;
+  startedAt: string;
+  duration: number;
+  avgViewers: number;
+  peakViewers: number;
+  minViewers: number;
+  peakTimestamp: number;
+  avgChatters: number;
+  avgEngagement: number;
+  followersGained: number;
+  subsGained: number;
+  bitsDonated: number;
+  estimatedRevenue: number;
+  totalChatMessages: number;
+  uniqueChatters: number;
+  // Comparison vs historical average
+  avgViewersVsAvg?: number;
+  followersVsAvg?: number;
+  durationVsAvg?: number;
+}
+
+export interface ChannelRecord {
+  label: string;
+  value: number | string;
+  streamTitle?: string;
+  date?: string;
+  icon: string;
+}
+
