@@ -205,15 +205,15 @@ export function CommandsPanel({ channel }: Props) {
 
   return (
     <div className={styles.container}>
-      <div className="flex-row flex-row--gap-md mb-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+      <div className={styles.tabsWrap}>
         <button 
-          className={`sf-tab-btn ${activeTab === 'commands' ? 'active' : ''}`}
+          className={`${styles.tab} ${activeTab === 'commands' ? styles['tab--active'] : styles['tab--inactive']}`}
           onClick={() => setActiveTab('commands')}
         >
           {t('commands.tabCommands')}
         </button>
         <button 
-          className={`sf-tab-btn ${activeTab === 'timers' ? 'active' : ''}`}
+          className={`${styles.tab} ${activeTab === 'timers' ? styles['tab--active'] : styles['tab--inactive']}`}
           onClick={() => setActiveTab('timers')}
         >
           {t('commands.tabTimers')}

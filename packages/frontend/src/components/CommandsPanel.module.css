@@ -2,6 +2,36 @@
   max-width: 700px;
 }
 
+.tabsWrap {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tab {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tab--active {
+  border: 1px solid var(--sf-primary);
+  background: rgba(124, 58, 237, 0.15);
+  color: var(--sf-primary);
+  font-weight: 600;
+}
+
+.tab--inactive {
+  border: 1px solid var(--sf-border);
+  background: transparent;
+  color: var(--sf-text-2);
+}
+
 .varPicker {
   position: absolute;
   bottom: 100%;
