@@ -4,6 +4,7 @@ import { authProvider, currentUser, prisma } from '../auth/index.js';
 import { getIO } from '../socket/index.js';
 import * as fs from 'fs';
 import * as path from 'path';
+import { SecurityConfigUpdateSchema, SecurityScanSchema, SecurityBanSchema, SecurityUnbanSchema, SecurityWhitelistAddSchema, SecurityWhitelistRemoveSchema } from '@streamforger/shared';
 
 interface SecurityConfig {
   followBotProtection: boolean;
@@ -352,11 +353,14 @@ export function setupSecurity(app: FastifyInstance) {
   // PUT config
   app.put('/security/config', async (req, reply) => {
     if (!currentUser) return reply.status(401).send({ error: 'Not authenticated' });
-    const body = req.body as Partial<SecurityConfig>;
-    if (typeof body.followBotProtection === 'boolean') config.followBotProtection = body.followBotProtection;
-    if (typeof body.spamFilter === 'boolean') config.spamFilter = body.spamFilter;
-    if (typeof body.autoBan === 'boolean') config.autoBan = body.autoBan;
-    if (typeof body.accountAgeFilter === 'number') config.accountAgeFilter = body.accountAgeFilter;
+    const parsed = SecurityConfigUpdateSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() });
+
+    const body = parsed.data;
+    if (body.followBotProtection !== undefined) config.followBotProtection = body.followBotProtection;
+    if (body.spamFilter !== undefined) config.spamFilter = body.spamFilter;
+    if (body.autoBan !== undefined) config.autoBan = body.autoBan;
+    if (body.accountAgeFilter !== undefined) config.accountAgeFilter = body.accountAgeFilter;
     
     await saveConfig();
     return { ok: true };
@@ -374,18 +378,19 @@ export function setupSecurity(app: FastifyInstance) {
 
   // POST scan followers
   app.post('/security/scan', async (req, reply) => {
-    const { channel } = req.body as { channel: string };
-    if (!channel) return reply.status(400).send({ error: 'Missing channel' });
-    const result = await scanFollowers(channel);
+    const parsed = SecurityScanSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() });
+    const result = await scanFollowers(parsed.data.channel);
     return result;
   });
 
   // PUT whitelist add
   app.put('/security/whitelist', async (req, reply) => {
     if (!currentUser) return reply.status(401).send({ error: 'Not authenticated' });
-    const { user, reason } = req.body as { user: string; reason?: string };
-    if (!user) return reply.status(400).send({ error: 'Missing user' });
-    
+    const parsed = SecurityWhitelistAddSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() });
+
+    const { user, reason } = parsed.data;
     if (!whitelist.some((w) => w.username.toLowerCase() === user.toLowerCase())) {
       try {
         const dbWhitelist = await prisma.securityWhitelist.create({
@@ -410,9 +415,10 @@ export function setupSecurity(app: FastifyInstance) {
   // POST whitelist remove
   app.post('/security/whitelist/remove', async (req, reply) => {
     if (!currentUser) return reply.status(401).send({ error: 'Not authenticated' });
-    const { user } = req.body as { user: string };
-    if (!user) return reply.status(400).send({ error: 'Missing user' });
-    
+    const parsed = SecurityWhitelistRemoveSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() });
+
+    const { user } = parsed.data;
     try {
       await prisma.securityWhitelist.deleteMany({
         where: {
@@ -430,9 +436,11 @@ export function setupSecurity(app: FastifyInstance) {
 
   // POST ban user
   app.post('/security/ban', async (req, reply) => {
-    const { user } = req.body as { user: string };
-    if (!user) return reply.status(400).send({ error: 'Missing user' });
     if (!authProvider || !currentUser) return reply.status(401).send({ error: 'Not authenticated' });
+    const parsed = SecurityBanSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() });
+
+    const { user } = parsed.data;
 
     try {
       const api = new ApiClient({ authProvider });
@@ -472,9 +480,11 @@ export function setupSecurity(app: FastifyInstance) {
 
   // POST unban user
   app.post('/security/unban', async (req, reply) => {
-    const { user } = req.body as { user: string };
-    if (!user) return reply.status(400).send({ error: 'Missing user' });
     if (!authProvider || !currentUser) return reply.status(401).send({ error: 'Not authenticated' });
+    const parsed = SecurityUnbanSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() });
+
+    const { user } = parsed.data;
 
     try {
       const api = new ApiClient({ authProvider });

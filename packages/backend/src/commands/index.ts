@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { CommandAddSchema, CommandDeleteSchema, CommandToggleSchema, CommandUpdateSchema, CommandImportSchema } from '@streamforger/shared';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.resolve(__dirname, '../../data');
@@ -104,11 +105,10 @@ export function setupCommands(app: FastifyInstance) {
 
   // Add command
   app.post('/commands/add', async (req, reply) => {
-    const body = req.body as { channel: string; name: string; response: string };
-    if (!body.channel || !body.name || !body.response) {
-      return reply.status(400).send({ error: 'Missing channel, name or response' });
-    }
+    const parsed = CommandAddSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() });
 
+    const body = parsed.data;
     const channel = body.channel.toLowerCase();
     if (!store.has(channel)) store.set(channel, []);
 
@@ -137,7 +137,10 @@ export function setupCommands(app: FastifyInstance) {
 
   // Toggle command enabled/disabled
   app.put('/commands/toggle', async (req, reply) => {
-    const body = req.body as { channel: string; commandId: string; enabled: boolean };
+    const parsed = CommandToggleSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() });
+
+    const body = parsed.data;
     const channel = body.channel.toLowerCase();
     const cmds = store.get(channel);
     if (!cmds) return reply.status(404).send({ error: 'No commands for this channel' });
@@ -152,7 +155,10 @@ export function setupCommands(app: FastifyInstance) {
 
   // Delete command
   app.post('/commands/delete', async (req, reply) => {
-    const body = req.body as { channel: string; commandId: string };
+    const parsed = CommandDeleteSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() });
+
+    const body = parsed.data;
     const channel = body.channel.toLowerCase();
     const cmds = store.get(channel);
     if (!cmds) return reply.status(404).send({ error: 'No commands for this channel' });
@@ -167,10 +173,10 @@ export function setupCommands(app: FastifyInstance) {
 
   // Update command
   app.put('/commands/update', async (req, reply) => {
-    const body = req.body as {
-      channel: string; commandId: string;
-      response?: string; aliases?: string[]; cooldown?: number; modOnly?: boolean;
-    };
+    const parsed = CommandUpdateSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() });
+
+    const body = parsed.data;
     const channel = body.channel.toLowerCase();
     const cmds = store.get(channel);
     if (!cmds) return reply.status(404).send({ error: 'No commands for this channel' });
@@ -197,11 +203,10 @@ export function setupCommands(app: FastifyInstance) {
   // Import commands from JSON
   app.post('/commands/:channel/import', async (req, reply) => {
     const { channel } = req.params as { channel: string };
-    const body = req.body as { commands: Command[] };
-    if (!Array.isArray(body.commands)) {
-      return reply.status(400).send({ error: 'Missing commands array' });
-    }
+    const parsed = CommandImportSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() });
 
+    const body = parsed.data;
     const ch = channel.toLowerCase();
     if (!store.has(ch)) store.set(ch, []);
 

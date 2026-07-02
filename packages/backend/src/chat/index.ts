@@ -9,6 +9,7 @@ import { checkCustomCommand } from '../commands/index.js';
 import { checkMessage } from '../security/index.js';
 import type { enterGiveaway, addTickets } from '../giveaways/index.js';
 import { incrementChatCounter } from '../kpi/index.js';
+import { ChatGreetingConfigSchema } from '@streamforger/shared';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.resolve(__dirname, '../../data');
@@ -163,11 +164,13 @@ export function setupChatGreeting(app: FastifyInstance) {
   });
 
   app.put('/chat/greeting-config', async (req, reply) => {
-    const body = req.body as { channel: string; enabled?: boolean; message?: string } | null;
-    if (!body?.channel) return reply.status(400).send({ error: 'channel required' });
+    const parsed = ChatGreetingConfigSchema.safeParse(req.body);
+    if (!parsed.success) return reply.status(400).send({ error: 'Invalid body', details: parsed.error.flatten() });
+
+    const body = parsed.data;
     const updates: Partial<ChannelGreetingConfig> = {};
-    if (typeof body.enabled === 'boolean') updates.enabled = body.enabled;
-    if (typeof body.message === 'string' && body.message.trim()) updates.message = body.message.trim();
+    if (body.enabled !== undefined) updates.enabled = body.enabled;
+    if (body.message !== undefined) updates.message = body.message;
     setGreetingConfig(body.channel, updates);
     return { ok: true };
   });

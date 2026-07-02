@@ -85,3 +85,80 @@ export const HudConfigSchema = z.object({
   showGame: z.boolean().default(true),
   showTitle: z.boolean().default(false),
 });
+
+// ── Commands ──
+
+export const CommandAddSchema = z.object({
+  channel: z.string().min(1),
+  name: z.string().min(1).max(100),
+  response: z.string().min(1).max(500),
+});
+
+export const CommandDeleteSchema = z.object({
+  channel: z.string().min(1),
+  commandId: z.string().min(1),
+});
+
+export const CommandToggleSchema = z.object({
+  channel: z.string().min(1),
+  commandId: z.string().min(1),
+  enabled: z.boolean(),
+});
+
+export const CommandUpdateSchema = z.object({
+  channel: z.string().min(1),
+  commandId: z.string().min(1),
+  response: z.string().max(500).optional(),
+  aliases: z.array(z.string()).optional(),
+  cooldown: z.number().int().min(0).max(86400).optional(),
+  modOnly: z.boolean().optional(),
+});
+
+export const CommandImportSchema = z.object({
+  commands: z.array(z.object({
+    name: z.string().min(1),
+    response: z.string().min(1),
+    enabled: z.boolean().optional(),
+    aliases: z.array(z.string()).optional(),
+    cooldown: z.number().int().optional(),
+    modOnly: z.boolean().optional(),
+  })),
+});
+
+// ── Security ──
+
+export const SecurityConfigUpdateSchema = z.object({
+  followBotProtection: z.boolean().optional(),
+  spamFilter: z.boolean().optional(),
+  autoBan: z.boolean().optional(),
+  accountAgeFilter: z.number().int().min(0).max(720).optional(),
+});
+
+export const SecurityScanSchema = z.object({
+  channel: z.string().min(1),
+});
+
+export const SecurityBanSchema = z.object({
+  user: z.string().min(1),
+});
+
+export const SecurityUnbanSchema = z.object({
+  user: z.string().min(1),
+});
+
+export const SecurityWhitelistAddSchema = z.object({
+  user: z.string().min(1),
+  reason: z.string().max(200).optional(),
+});
+
+export const SecurityWhitelistRemoveSchema = z.object({
+  user: z.string().min(1),
+});
+
+// ── Chat ──
+
+export const ChatGreetingConfigSchema = z.object({
+  channel: z.string().min(1),
+  enabled: z.boolean().optional(),
+  message: z.string().min(1).max(500).optional(),
+});
