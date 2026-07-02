@@ -8,7 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import { randomBytes } from 'crypto';
-import { encryptToken, decryptToken } from './token-crypto.js';
+import { encryptToken, decryptToken, decryptTokenLegacy } from './token-crypto.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const _require = createRequire(import.meta.url);
@@ -375,7 +375,13 @@ async function restoreSession() {
       accessToken = decryptToken(user.accessToken, encKey);
       refreshToken = decryptToken(user.refreshToken, encKey);
     } catch {
-      // Tokens may be in plaintext from a previous version — use as-is
+      try {
+        // Fallback: tokens may have been encrypted with the old hardcoded salt
+        accessToken = decryptTokenLegacy(user.accessToken, encKey);
+        refreshToken = decryptTokenLegacy(user.refreshToken, encKey);
+      } catch {
+        // Tokens may be in plaintext from a very old version — use as-is
+      }
     }
 
   currentUser = {

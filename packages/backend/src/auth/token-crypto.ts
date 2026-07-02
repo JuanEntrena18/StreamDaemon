@@ -6,6 +6,8 @@ const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
 const TAG_LENGTH = 16;
 
+const LEGACY_SALT = 'streamforger-token-salt-v1';
+
 const DATA_DIR = path.resolve('data');
 const SALT_FILE = path.join(DATA_DIR, 'token-salt.bin');
 
@@ -38,6 +40,15 @@ export function encryptToken(plain: string, secret: string): string {
 
 export function decryptToken(encoded: string, secret: string): string {
   const key = deriveKey(secret);
+  return decryptWithKey(encoded, key);
+}
+
+export function decryptTokenLegacy(encoded: string, secret: string): string {
+  const key = scryptSync(secret, LEGACY_SALT, 32);
+  return decryptWithKey(encoded, key);
+}
+
+function decryptWithKey(encoded: string, key: Buffer): string {
   const parts = encoded.split(':');
   if (parts.length !== 3) throw new Error('Invalid token format');
   const [ivHex, tagHex, encHex] = parts;
