@@ -284,6 +284,10 @@ export async function setupAuth(app: FastifyInstance) {
 
   // ── Status ──
 
+  app.get('/auth/token', async () => {
+    return { token: config.LOCAL_API_TOKEN };
+  });
+
   app.get('/auth/status', async () => {
     let tokenScopes: string[] = [];
     try {

@@ -1,10 +1,17 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { randomBytes } from 'crypto';
 
 // Cargar .env desde el directorio del package (funciona tanto en dev como en producción)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+// Auto-generar LOCAL_API_TOKEN si no está configurado (seguridad por defecto)
+if (!process.env.LOCAL_API_TOKEN) {
+  process.env.LOCAL_API_TOKEN = randomBytes(32).toString('hex');
+  console.log(`[config] LOCAL_API_TOKEN auto-generated: ${process.env.LOCAL_API_TOKEN}`);
+}
 
 export const config = {
   PORT: process.env.PORT ?? '3000',
@@ -14,4 +21,5 @@ export const config = {
   TWITCH_REDIRECT_URI: process.env.TWITCH_REDIRECT_URI ?? 'http://localhost:3000/auth/callback',
   FRONTEND_URL: process.env.FRONTEND_URL ?? 'http://localhost:5173',
   FORTNITE_API_KEY: process.env.FORTNITE_API_KEY ?? '',
+  LOCAL_API_TOKEN: process.env.LOCAL_API_TOKEN,
 };
