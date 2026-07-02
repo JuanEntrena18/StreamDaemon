@@ -352,3 +352,49 @@ export interface ChannelRecord {
   icon: string;
 }
 
+// ── Overlay Builder ──
+
+export type WidgetType = 'chat' | 'hud' | 'timer' | 'scoreboard' | 'alertbox' | 'text' | 'image' | 'shape' | 'webcam' | 'social';
+
+export interface WidgetConfig {
+  backgroundColor?: string;
+  borderRadius?: number;
+  borderColor?: string;
+  borderWidth?: number;
+  fontFamily?: string;
+  fontSize?: number;
+  textColor?: string;
+  animation?: 'none' | 'fadeIn' | 'slideUp' | 'slideLeft' | 'bounceIn' | 'glitch';
+  chatTheme?: string;
+  hudLayout?: string;
+  timerFormat?: string;
+  textContent?: string;
+  imageSrc?: string;
+  shape?: 'rect' | 'circle' | 'rounded';
+  socialLinks?: SocialLink[];
+}
+
+export interface Widget {
+  id: string;
+  type: WidgetType;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  zIndex: number;
+  opacity: number;
+  locked: boolean;
+  visible: boolean;
+  config: WidgetConfig;
+}
+
+export interface Layout {
+  id: string;
+  name: string;
+  widgets: Widget[];
+  resolution: { width: number; height: number };
+  backgroundColor: string;
+  createdAt: number;
+  updatedAt: number;
+}
+

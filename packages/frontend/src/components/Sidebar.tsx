@@ -5,7 +5,7 @@ import { Toggle } from './Toggle';
 import { useColorMode } from '../hooks/useColorMode';
 import styles from './Sidebar.module.css';
 
-export type Tab = 'dashboard' | 'tracker' | 'kpi' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'config' | 'bitrate' | 'vertical' | 'alertsounds' | 'achievements';
+export type Tab = 'dashboard' | 'tracker' | 'kpi' | 'security' | 'chat' | 'mod' | 'commands' | 'subathon' | 'giveaway' | 'prediction' | 'hud' | 'timer' | 'scoreboard' | 'obs' | 'builder' | 'config' | 'bitrate' | 'vertical' | 'alertsounds' | 'achievements';
 
 export type NavItem = { id: Tab; icon: string; label: string; shortcut?: string };
 export type NavSection = { id: string; label: string; items: NavItem[] };

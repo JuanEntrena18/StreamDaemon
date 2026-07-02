@@ -23,6 +23,7 @@ const VerticalStreamingPanel = lazy(() => import('./VerticalStreamingPanel').the
 const AlertSoundsPanel = lazy(() => import('./AlertSoundsPanel').then(m => ({ default: m.AlertSoundsPanel })));
 const AchievementsPanel = lazy(() => import('./AchievementsPanel').then(m => ({ default: m.AchievementsPanel })));
 const KpiPanel = lazy(() => import('./KpiPanel').then(m => ({ default: m.KpiPanel })));
+const BuilderPanel = lazy(() => import('./BuilderPanel').then(m => ({ default: m.BuilderPanel })));
 
 interface Props {
   activeTab: Tab;
@@ -48,6 +49,7 @@ export function MainContent({ activeTab, tabDirection, channel, alwaysOnTop, tog
       case 'timer':     return <TimerPanel channel={channel} />;
       case 'scoreboard': return <ScoreboardPanel channel={channel} />;
       case 'obs':       return <ObsPanel channel={channel} />;
+      case 'builder':   return <BuilderPanel />;
       case 'bitrate':   return <BitrateCalculatorPanel />;
       case 'vertical':  return <VerticalStreamingPanel />;
       case 'alertsounds': return <AlertSoundsPanel channel={channel} />;

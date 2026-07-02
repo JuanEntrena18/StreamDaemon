@@ -27,6 +27,7 @@ import { setupAlertSounds } from './alert-sounds/index.js';
 import { setupAchievements } from './achievements/index.js';
 import { setupKpi } from './kpi/index.js';
 import { setupObs } from './obs/index.js';
+import { setupLayouts } from './layouts/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -114,6 +115,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupAchievements(app);
   setupKpi(app);
   setupObs(app);
+  setupLayouts(app);
 
   app.get('/health', async () => ({ status: 'ok', timestamp: Date.now() }));
 

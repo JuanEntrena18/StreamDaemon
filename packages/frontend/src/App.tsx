@@ -211,7 +211,8 @@ export function App() {
       { id: 'mod-section', label: s('mod'), items: [{ id: 'mod' as Tab, icon: '🛡️', label: s('moderacionTab'), shortcut: 'Ctrl+6' }] },
       { id: 'commands-section', label: s('comandos'), items: [{ id: 'commands' as Tab, icon: '🤖', label: s('comandosTab'), shortcut: 'Ctrl+7' }] },
       { id: 'tools', label: s('herramientas'), items: [
-        { id: 'obs' as Tab,        icon: '🎮', label: s('gameOverlaysTab'), shortcut: 'Ctrl+8' },
+        { id: 'builder' as Tab,   icon: '🎨', label: s('builderTab') },
+        { id: 'obs' as Tab,       icon: '🎮', label: s('gameOverlaysTab'), shortcut: 'Ctrl+8' },
         { id: 'subathon' as Tab,   icon: '🔴', label: s('subathonTab'), shortcut: 'Ctrl+9' },
         { id: 'giveaway' as Tab,   icon: '🎁', label: s('sorteosTab') },
         { id: 'prediction' as Tab, icon: '📊', label: s('prediccionesTab') },

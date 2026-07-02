@@ -162,3 +162,64 @@ export const ChatGreetingConfigSchema = z.object({
   enabled: z.boolean().optional(),
   message: z.string().min(1).max(500).optional(),
 });
+
+// ── Overlay Builder ──
+
+const WidgetTypeSchema = z.enum(['chat', 'hud', 'timer', 'scoreboard', 'alertbox', 'text', 'image', 'shape', 'webcam', 'social']);
+
+const WidgetConfigSchema: z.ZodType<import('./types.js').WidgetConfig> = z.object({
+  backgroundColor: z.string().optional(),
+  borderRadius: z.number().int().min(0).optional(),
+  borderColor: z.string().optional(),
+  borderWidth: z.number().int().min(0).optional(),
+  fontFamily: z.string().optional(),
+  fontSize: z.number().int().min(1).optional(),
+  textColor: z.string().optional(),
+  animation: z.enum(['none', 'fadeIn', 'slideUp', 'slideLeft', 'bounceIn', 'glitch']).optional(),
+  chatTheme: z.string().optional(),
+  hudLayout: z.string().optional(),
+  timerFormat: z.string().optional(),
+  textContent: z.string().optional(),
+  imageSrc: z.string().optional(),
+  shape: z.enum(['rect', 'circle', 'rounded']).optional(),
+  socialLinks: z.array(z.object({
+    platform: z.string(),
+    url: z.string(),
+    label: z.string(),
+    icon: z.string().optional(),
+  })).optional(),
+});
+
+const WidgetSchema = z.object({
+  id: z.string().min(1),
+  type: WidgetTypeSchema,
+  x: z.number().int(),
+  y: z.number().int(),
+  width: z.number().int().min(1),
+  height: z.number().int().min(1),
+  zIndex: z.number().int(),
+  opacity: z.number().min(0).max(1),
+  locked: z.boolean(),
+  visible: z.boolean(),
+  config: WidgetConfigSchema,
+});
+
+export const LayoutSaveSchema = z.object({
+  name: z.string().min(1).max(100),
+  widgets: z.array(WidgetSchema),
+  resolution: z.object({
+    width: z.number().int().positive(),
+    height: z.number().int().positive(),
+  }),
+  backgroundColor: z.string(),
+});
+
+export const LayoutUpdateSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  widgets: z.array(WidgetSchema).optional(),
+  resolution: z.object({
+    width: z.number().int().positive(),
+    height: z.number().int().positive(),
+  }).optional(),
+  backgroundColor: z.string().optional(),
+});
