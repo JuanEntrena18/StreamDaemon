@@ -1,12 +1,30 @@
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto';
+import fs from 'fs';
+import path from 'path';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
 const TAG_LENGTH = 16;
-const SALT = 'streamforger-token-salt-v1';
+
+const DATA_DIR = path.resolve('data');
+const SALT_FILE = path.join(DATA_DIR, 'token-salt.bin');
+
+function loadOrGenerateSalt(): Buffer {
+  try {
+    if (fs.existsSync(SALT_FILE)) {
+      return fs.readFileSync(SALT_FILE);
+    }
+  } catch { /* generará uno nuevo */ }
+  const salt = randomBytes(16);
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.writeFileSync(SALT_FILE, salt);
+  return salt;
+}
+
+const INSTALL_SALT = loadOrGenerateSalt();
 
 function deriveKey(secret: string): Buffer {
-  return scryptSync(secret, SALT, 32);
+  return scryptSync(secret, INSTALL_SALT, 32);
 }
 
 export function encryptToken(plain: string, secret: string): string {
