@@ -457,6 +457,8 @@
     "tacticalVerticalDesc": "Overlay vertical táctico sci-fi optimizado para móvil (1080×1920)",
     "hordeVerticalStart": "Horda Vertical · Inicio",
     "hordeVerticalStartDesc": "Pantalla de inicio vertical Horda con cuenta atrás y ascuas (1080×1920)",
+    "hordeVerticalGameplay": "Horda Vertical · Gameplay",
+    "hordeVerticalGameplayDesc": "Overlay vertical Horda para gameplay con webcam y chat (1080×1920)",
     "hordeVerticalEnd": "Horda Vertical · Final",
     "hordeVerticalEndDesc": "Pantalla de cierre vertical Horda con sello y enlaces sociales (1080×1920)",
     "hordeVerticalBrb": "Horda Vertical · BRB",
