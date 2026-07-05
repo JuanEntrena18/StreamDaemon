@@ -1202,6 +1202,17 @@
     "errorNetwork": "Error de red",
     "errorExpired": "Código expirado, intenta de nuevo",
     "errorDenied": "Acceso denegado"
+  },
+  "overlayPreview": {
+    "previewTitle": "Vista previa del overlay",
+    "horizontal": "Horizontal",
+    "vertical": "Vertical",
+    "background": "Fondo",
+    "bgCheckerboard": "Cuadrícula transparente",
+    "bgBlack": "Negro",
+    "bgWhite": "Blanco",
+    "bgChroma": "Verde croma",
+    "demoData": "Datos de demostración"
   }
 }
 

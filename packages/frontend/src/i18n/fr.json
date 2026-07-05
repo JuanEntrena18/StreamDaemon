@@ -1,4 +1,4 @@
-{
+﻿{
   "nav": {
     "gestorDelStream": "GESTION DU STREAM",
     "estadisticas": "STATISTIQUES",
@@ -1097,6 +1097,16 @@
     "tiktokDesc": "Diffusez simultanément et gérez votre compte TikTok.",
     "start": "Commencer à utiliser StreamForger",
     "connectFirst": "Connectez Twitch d'abord"
+  },
+  "overlayPreview": {
+    "previewTitle": "Aperçu de l'overlay",
+    "horizontal": "Horizontal",
+    "vertical": "Vertical",
+    "background": "Arrière-plan",
+    "bgCheckerboard": "Grille transparente",
+    "bgBlack": "Noir",
+    "bgWhite": "Blanc",
+    "bgChroma": "Vert chroma",
+    "demoData": "Données de démonstration"
   }
 }
-

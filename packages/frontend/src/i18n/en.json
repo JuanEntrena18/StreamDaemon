@@ -1130,6 +1130,17 @@
     "tiktokDesc": "Stream simultaneously and manage your TikTok account.",
     "start": "Start using StreamForger",
     "connectFirst": "Connect Twitch first"
+  },
+  "overlayPreview": {
+    "previewTitle": "Overlay Preview",
+    "horizontal": "Horizontal",
+    "vertical": "Vertical",
+    "background": "Background",
+    "bgCheckerboard": "Transparent Grid",
+    "bgBlack": "Black",
+    "bgWhite": "White",
+    "bgChroma": "Chroma Green",
+    "demoData": "Demo Data"
   }
 }
 
