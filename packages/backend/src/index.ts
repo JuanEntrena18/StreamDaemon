@@ -43,13 +43,12 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   // Security headers
   app.addHook('onSend', async (_req, reply, payload) => {
     reply.header('X-Content-Type-Options', 'nosniff');
-    reply.header('X-Frame-Options', 'SAMEORIGIN');
     reply.header('X-XSS-Protection', '0');
     reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
     reply.header('Content-Security-Policy',
       "default-src 'self'; " +
       "connect-src 'self' https://id.twitch.tv https://api.twitch.tv wss://eventsub.wss.twitch.tv ws://localhost:3000 ws://127.0.0.1:3000; " +
-      "frame-src https://player.twitch.tv; " +
+      "frame-src 'self' https://player.twitch.tv; " +
       "img-src 'self' https://static-cdn.jtvnw.net data:; " +
       "script-src 'self' 'unsafe-inline'; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +

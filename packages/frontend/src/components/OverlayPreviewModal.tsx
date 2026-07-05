@@ -27,7 +27,7 @@ const BACKGROUNDS: { mode: BackgroundMode; labelKey: string; color: string }[] =
 export function OverlayPreviewModal({ open, url, orientation, onClose }: Props) {
   const { t } = useTranslation();
   const [bgMode, setBgMode] = useState<BackgroundMode>('checkerboard');
-  const [demoMode, setDemoMode] = useState(false);
+  const [demoMode, setDemoMode] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
@@ -44,13 +44,16 @@ export function OverlayPreviewModal({ open, url, orientation, onClose }: Props) 
     const maxH = containerRef.current.clientHeight - padding;
     const scaleX = maxW / res.width;
     const scaleY = maxH / res.height;
-    setScale(Math.min(scaleX, scaleY, 1.5));
+    setScale(Math.max(0.1, Math.min(scaleX, scaleY, 1.5)));
   }, [res.width, res.height]);
 
   useEffect(() => {
-    updateScale();
-    window.addEventListener('resize', updateScale);
-    return () => window.removeEventListener('resize', updateScale);
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver(() => {
+      updateScale();
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
   }, [updateScale]);
 
   useEffect(() => {

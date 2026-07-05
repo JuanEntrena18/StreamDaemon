@@ -73,7 +73,7 @@ export function ObsPanel({ channel }: Props) {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(DEFAULT_SOCIAL_LINKS);
   const [endScreenSocials, setEndScreenSocials] = useState<EndScreenSocial[]>(END_SCREEN_SOCIALS_INIT);
   const [endSocialExpanded, setEndSocialExpanded] = useState<string | null>(null);
-  const overlayBaseUrl = import.meta.env.DEV ? 'http://localhost:5173' : (import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000');
+  const overlayBaseUrl = import.meta.env.DEV ? 'http://localhost:5173' : window.location.origin;
 
   const [customGame, setCustomGame] = useState('');
 
