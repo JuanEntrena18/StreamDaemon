@@ -33,7 +33,6 @@ const THEMES = [
   { id: '',       labelKey: 'obs.sinTema' },
   { id: 'dj',     labelKey: 'obs.temaDJ' },
   { id: 'subnautica2', labelKey: 'obs.temaSubnautica' },
-  { id: 'poe2',   labelKey: 'obs.temaPoE2' },
   { id: 'wow',    labelKey: 'obs.temaHorda' },
   { id: 'alliance', labelKey: 'obs.temaAlianza' },
   { id: 'fortnite', labelKey: 'obs.temaFortnite' },
@@ -120,7 +119,7 @@ export function ObsPanel({ channel }: Props) {
       let url = `${overlayBaseUrl}/overlays/${ov.filename}`;
       url += `?channel=${channel}`;
       url += `&backend=${encodeURIComponent(be)}`;
-      if (ov.mode === 'fortnite' && fnEpicUsername) url += `&epic=${encodeURIComponent(fnEpicUsername)}&mode=${fnStatsMode}&layout=${fnLayout}`;
+      if ((ov.mode === 'fortnite' || ov.mode === 'fortnite-hud-api') && fnEpicUsername) url += `&epic=${encodeURIComponent(fnEpicUsername)}&mode=${fnStatsMode}&layout=${fnLayout}`;
       if (ov.mode.endsWith('-end') && socialsParam) url += `&socials=${socialsParam}`;
       return url;
     }
@@ -220,7 +219,7 @@ export function ObsPanel({ channel }: Props) {
     if (standalone) {
       let url = `${overlayBaseUrl}/overlays/${standalone}`;
       if (channel) url += `?channel=${channel}`;
-      if (item.mode === 'fortnite' && fnEpicUsername) url += `&epic=${encodeURIComponent(fnEpicUsername)}&mode=${fnStatsMode}&layout=${fnLayout}`;
+      if ((item.mode === 'fortnite' || item.mode === 'fortnite-hud-api') && fnEpicUsername) url += `&epic=${encodeURIComponent(fnEpicUsername)}&mode=${fnStatsMode}&layout=${fnLayout}`;
       const be = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
       url += `${channel ? '&' : '?'}backend=${encodeURIComponent(be)}`;
       if (item.mode.endsWith('-end')) {
