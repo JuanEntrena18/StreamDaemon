@@ -46,6 +46,7 @@ Most streaming tools lock you into paid subscriptions, closed ecosystems, or clo
 - 12 vertical overlays (1080×1920) for mobile/dual-format streaming
 - Animated alerts for follows, subs, raids, cheers, and redemptions
 - All overlays connect via Socket.IO for real-time data
+- **Interactive in-app preview** with dynamic scaling and simulated Demo Mode data
 
 </td>
 <td width="50%">
@@ -86,7 +87,7 @@ Most streaming tools lock you into paid subscriptions, closed ecosystems, or clo
 </tr>
 </table>
 
-**Plus:** Subathon timer · EventSub notifications · Social media overlay · Configurable countdown timer · Stream title/game editor · Transparent overlay window · Global command palette (`Ctrl+K`) · Keyboard shortcuts · 5 languages (EN, ES, FR, DE, IT) · Lazy-loaded UI for fast startup
+**Plus:** Live Overlay Preview · Subathon timer · EventSub notifications · Social media overlay · Configurable countdown timer · Stream title/game editor · Transparent overlay window · Global command palette (`Ctrl+K`) · Keyboard shortcuts · 5 languages (EN, ES, FR, DE, IT) · Lazy-loaded UI for fast startup
 
 ---
 
