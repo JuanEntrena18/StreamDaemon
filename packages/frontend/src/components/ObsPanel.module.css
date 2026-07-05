@@ -56,6 +56,11 @@
   flex-shrink: 0;
 }
 
+.previewBtn {
+  font-size: 0.78rem;
+  padding: 0.45rem 0.875rem;
+}
+
 .copyBtn {
   min-width: 90px;
   font-size: 0.78rem;

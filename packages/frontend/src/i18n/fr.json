@@ -504,7 +504,15 @@
     "catHorde": "🛡️ WoW - Horde",
     "catCyberpunk": "🌆 CyberPunk",
     "searchPlaceholder": "Rechercher des overlays...",
-    "new": "NOUVEAU"
+    "new": "NOUVEAU",
+    "vistaPrevia": "Aperçu",
+    "cerrarVistaPrevia": "Fermer l'aperçu",
+    "datosDemo": "Données de démonstration",
+    "fondo": "Arrière-plan",
+    "fondoTransparente": "Transparent",
+    "fondoNegro": "Noir",
+    "fondoBlanco": "Blanc",
+    "fondoCroma": "Vert Chroma"
   },
   "security": {
     "loading": "Chargement de la configuration de sécurité...",

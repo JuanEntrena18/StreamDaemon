@@ -4,6 +4,7 @@ import { apiGet, apiPut, apiPost } from '../utils/api';
 import { useTranslation } from '../i18n/context';
 import { useToast } from '../contexts/ToastContext';
 import { OVERLAY_REGISTRY, CATEGORIES, type OverlayEntry, type OverlayCategory } from '../config/overlayRegistry';
+import { OverlayPreviewModal } from './OverlayPreviewModal';
 import styles from './ObsPanel.module.css';
 
 interface Props {
@@ -68,6 +69,7 @@ export function ObsPanel({ channel }: Props) {
   const [orientation, setOrientation] = useState<'all' | 'horizontal' | 'vertical'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
+  const [previewOverlay, setPreviewOverlay] = useState<{ url: string; orientation: 'horizontal' | 'vertical' } | null>(null);
   const [socialExpanded, setSocialExpanded] = useState(false);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(DEFAULT_SOCIAL_LINKS);
   const [endScreenSocials, setEndScreenSocials] = useState<EndScreenSocial[]>(END_SCREEN_SOCIALS_INIT);
@@ -322,6 +324,14 @@ export function ObsPanel({ channel }: Props) {
               className={`sf-btn ${isCopied ? 'sf-btn-ghost' : 'sf-btn-primary'} ${styles.copyBtn}`}
             >
               {isCopied ? t('obs.copiado') : t('obs.copiar')}
+            </button>
+
+            <button
+              id={`preview-${item.id}`}
+              onClick={() => setPreviewOverlay({ url, orientation: item.orientation })}
+              className={`sf-btn sf-btn-ghost ${styles.previewBtn}`}
+            >
+              👁 {t('obs.vistaPrevia')}
             </button>
 
             {obsConnected && !isSocial && item.filename && (
@@ -700,6 +710,15 @@ export function ObsPanel({ channel }: Props) {
       <div className={styles.helpNote}>
         <strong style={{ color: '#22d3ee' }}>{t('obs.tip')}</strong> {t('obs.obsTip')}
       </div>
+
+      {previewOverlay && (
+        <OverlayPreviewModal
+          open={true}
+          url={previewOverlay.url}
+          orientation={previewOverlay.orientation}
+          onClose={() => setPreviewOverlay(null)}
+        />
+      )}
     </div>
   );
 }
