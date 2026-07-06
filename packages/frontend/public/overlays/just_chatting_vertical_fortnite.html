@@ -83,13 +83,10 @@
 
         .chat-user { font-weight: 900; color: #00d2ff; margin-right: 15px; font-size: 30px; text-transform: uppercase; text-shadow: 2px 2px 0 #000; -webkit-text-stroke: 1px #000;}
 
-        #overlay-root { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
-        #overlay-root > * { pointer-events: auto; }
+
     </style>
 </head>
 <body>
-
-    <div id="overlay-root"></div>
 
     <div class="cam-area">
         <div class="live-tag"><span>EN DIRECTO</span></div>
@@ -108,6 +105,9 @@
     </div>
 
     <script>
+        const CHANNEL     = new URLSearchParams(location.search).get('channel') || '';
+        const DEMO_MODE   = new URLSearchParams(location.search).get('demo') === 'true';
+        const BACKEND_URL = new URLSearchParams(location.search).get('backend') || 'http://localhost:3000';
         const chatWrapper = document.getElementById('chatWrapper');
         const MAX_MESSAGES = 7; 
 
@@ -126,13 +126,28 @@
             }
         }
 
-        window.addEventListener('message', (event) => {
-            if (event.data && event.data.type === 'NEW_CHAT_MESSAGE') {
-                appendMessage(event.data.username, event.data.message, event.data.color);
-            }
-        });
+        function initSocket() {
+            const script = document.createElement('script');
+            script.onload = () => {
+                const socket = io(BACKEND_URL, { transports: ['websocket'] });
+                socket.on('connect', () => {
+                    socket.emit('join:channel', CHANNEL);
+                });
+                socket.on('chat:message', ({ user, text }) => {
+                    appendMessage(user.displayName, text, user.color);
+                });
+            };
+            script.src = './js/socket.io.js';
+            document.head.appendChild(script);
+        }
+
+        initSocket();
+
+        if (DEMO_MODE) {
+            setTimeout(() => appendMessage('QuantumSniper99', 'Vamos con todo esta rankeds 🔥', '#FFD700'), 2000);
+            setTimeout(() => appendMessage('NoRecoilKing', 'tira pa\'lante maestro', '#C84BFF'), 6000);
+            setTimeout(() => appendMessage('StormRider', 'oieee que juegazoooo', '#00D4FF'), 10000);
+        }
     </script>
-    
-    <script type="module" src="./src/overlay.tsx"></script>
 </body>
 </html>

@@ -357,13 +357,12 @@
     border: 1px solid rgba(0,212,255,0.25);
     clip-path: polygon(2% 0, 100% 0, 100% 94%, 98% 100%, 0 100%, 0 6%);
     padding: 10px 14px;
-    display: none;
+    display: flex;
     flex-direction: column;
     gap: 4px;
     overflow: hidden;
     z-index: 20;
   }
-  .fn-chat.visible { display: flex; }
   .fn-chat.left  { left: 28px; }
   .fn-chat.right { right: 28px; }
   .fn-chat-header {
@@ -687,12 +686,11 @@ const MAX_CHAT_MSGS = 50;
 function initChatLayout() {
   const el = document.getElementById('fn-chat');
   if (!el) return;
-  if (LAYOUT === 'chat-left') {
-    el.classList.add('visible', 'left');
-    el.classList.remove('right');
-  } else if (LAYOUT === 'chat-right') {
-    el.classList.add('visible', 'right');
-    el.classList.remove('left');
+  el.classList.remove('left', 'right');
+  if (LAYOUT === 'chat-right') {
+    el.classList.add('right');
+  } else {
+    el.classList.add('left');
   }
 }
 
@@ -906,13 +904,10 @@ function startDemo() {
   document.getElementById('fn-winrate').textContent   = demoStats.winRate.toFixed(1) + '%';
   document.getElementById('fn-stats').classList.add('visible');
 
-  // Demo chat messages (only if chat layout)
-  if (LAYOUT === 'chat-left' || LAYOUT === 'chat-right') {
-    setTimeout(() => addChatMessage('QuantumSniper99', 'Vamos con todo esta rankeds 🔥', '#FFD700'), 3000);
-    setTimeout(() => addChatMessage('NoRecoilKing', 'tira pa\'lante maestro', '#C84BFF'), 7000);
-    setTimeout(() => addChatMessage('StormRider', 'oieee que juegazoooo', '#00D4FF'), 12000);
-    setTimeout(() => addChatMessage('LegendGifter', 'saca la escopeta rey', '#FF6B6B'), 18000);
-  }
+  setTimeout(() => addChatMessage('QuantumSniper99', 'Vamos con todo esta rankeds 🔥', '#FFD700'), 3000);
+  setTimeout(() => addChatMessage('NoRecoilKing', 'tira pa\'lante maestro', '#C84BFF'), 7000);
+  setTimeout(() => addChatMessage('StormRider', 'oieee que juegazoooo', '#00D4FF'), 12000);
+  setTimeout(() => addChatMessage('LegendGifter', 'saca la escopeta rey', '#FF6B6B'), 18000);
 
   setTimeout(() => enqueueAlert({ type: 'follow', user: 'QuantumSniper99' }), 2500);
   setTimeout(() => enqueueAlert({ type: 'sub', user: 'NoRecoilKing', detail: 'Tier 1' }), 8000);

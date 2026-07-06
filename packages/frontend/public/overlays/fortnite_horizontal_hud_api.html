@@ -299,10 +299,9 @@
     width: 400px; max-height: 350px;
     background: var(--panel); border: 3px solid var(--stroke);
     transform: skewX(-10deg); box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
-    padding: 15px; display: none; flex-direction: column; gap: 8px;
+    padding: 15px; display: flex; flex-direction: column; gap: 8px;
     overflow: hidden; z-index: 20;
   }
-  .fn-chat.visible { display: flex; }
   .fn-chat.left  { left: 28px; }
   .fn-chat.right { right: 28px; }
   
@@ -531,13 +530,13 @@ const MAX_CHAT_MSGS = 15;
 function initChatLayout() {
   const el = document.getElementById('fn-chat');
   if (!el) return;
-  if (LAYOUT === 'chat-left') {
-    el.classList.add('visible', 'left'); el.classList.remove('right');
-  } else if (LAYOUT === 'chat-right') {
-    el.classList.add('visible', 'right'); el.classList.remove('left');
-  } else if (LAYOUT === 'stats') {
-    document.getElementById('fn-stats').classList.add('visible');
+  el.classList.remove('left', 'right');
+  if (LAYOUT === 'chat-right') {
+    el.classList.add('right');
+  } else {
+    el.classList.add('left');
   }
+  document.getElementById('fn-stats')?.classList.add('visible');
 }
 
 function addChatMessage(displayName, text, color) {
@@ -734,11 +733,9 @@ function startDemo() {
   document.getElementById('fn-winrate').textContent = demoStats.winRate.toFixed(1) + '%';
   document.getElementById('fn-stats').classList.add('visible');
 
-  if (LAYOUT === 'chat-left' || LAYOUT === 'chat-right') {
-    setTimeout(() => addChatMessage('Jonesy_Pro', '¿Dónde caemos?', '#ffea00'), 2000);
-    setTimeout(() => addChatMessage('Peely', 'Tengo minis, ven', '#00d2ff'), 5000);
-    setTimeout(() => addChatMessage('SweatyBuilder', 'Buen edit bro', '#b829ff'), 9000);
-  }
+  setTimeout(() => addChatMessage('Jonesy_Pro', '¿Dónde caemos?', '#ffea00'), 2000);
+  setTimeout(() => addChatMessage('Peely', 'Tengo minis, ven', '#00d2ff'), 5000);
+  setTimeout(() => addChatMessage('SweatyBuilder', 'Buen edit bro', '#b829ff'), 9000);
 
   showLastFollow('Jonesy_Pro');
   setTimeout(() => enqueueAlert({ type: 'follow', user: 'Jonesy_Pro' }), 3000);
