@@ -75,8 +75,8 @@ StreamDaemon implements multiple security layers:
 ### 🔧 Linux Server / Production
 
 ```bash
-git clone https://github.com/JuanEntrena18/StreamForge.git
-cd StreamForge
+git clone https://github.com/JuanEntrena18/StreamDaemon.git
+cd StreamDaemon
 npm install
 cp packages/backend/.env.example packages/backend/.env
 # Edit with TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET
@@ -131,7 +131,7 @@ Add `&theme=subnautica2`, `&theme=poe2`, `&theme=wow`, `&theme=alliance`, `&them
 ## 🏗️ Project Structure
 
 ```
-StreamForge/
+StreamDaemon/
 ├── packages/
 │   ├── backend/src/
 │   │   ├── auth/          # OAuth Twitch

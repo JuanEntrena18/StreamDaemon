@@ -1,8 +1,8 @@
 <div align="center">
 
-# ⚒️ StreamForge
+# ⚒️ StreamDaemon
 
-**Open-source stream tools, forged for creators.**
+**Open-source stream tools, daemonically good.**
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org)
@@ -11,17 +11,17 @@
 
 *A free, self-hosted streaming toolkit with 57+ themed overlays, real-time chat, giveaways, predictions, subathons, anti-bot protection, and analytics — all in one app.*
 
-[**Download for Windows**](https://github.com/JuanEntrena18/StreamForge/releases) · [**Self-Host on Linux**](#-quick-start) · [**Support the Project**](https://buymeacoffee.com/jentrena)
+[**Download for Windows**](https://github.com/JuanEntrena18/StreamDaemon/releases) · [**Self-Host on Linux**](#-quick-start) · [**Support the Project**](https://buymeacoffee.com/jentrena)
 
 </div>
 
 ---
 
-## Why StreamForge?
+## Why StreamDaemon?
 
-Most streaming tools lock you into paid subscriptions, closed ecosystems, or cloud-only services. StreamForge is **free, open-source, and runs locally** — your data never leaves your machine.
+Most streaming tools lock you into paid subscriptions, closed ecosystems, or cloud-only services. StreamDaemon is **free, open-source, and runs locally** — your data never leaves your machine.
 
-| | StreamForge | StreamElements | Streamlabs | Meld Studio |
+| | StreamDaemon | StreamElements | Streamlabs | Meld Studio |
 |---|:---:|:---:|:---:|:---:|
 | **Free & Open Source** | ✅ | ❌ | ❌ | ❌ |
 | **Runs Locally** | ✅ | ❌ | ✅ | ✅ |
@@ -95,13 +95,13 @@ Most streaming tools lock you into paid subscriptions, closed ecosystems, or clo
 
 ### Windows Desktop — Zero Configuration
 
-Download the latest `.exe` from [**Releases**](https://github.com/JuanEntrena18/StreamForge/releases), run it, and you're live.
+Download the latest `.exe` from [**Releases**](https://github.com/JuanEntrena18/StreamDaemon/releases), run it, and you're live.
 
 ### Linux Server — Self-Hosted
 
 ```bash
-git clone https://github.com/JuanEntrena18/StreamForge.git
-cd StreamForge
+git clone https://github.com/JuanEntrena18/StreamDaemon.git
+cd StreamDaemon
 npm install
 cp packages/backend/.env.example packages/backend/.env
 # Add your TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET
@@ -210,11 +210,11 @@ Add a **Browser Source** in OBS pointing to the overlay URL. Replace `yourchanne
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=JuanEntrena18%2FStreamForge&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=JuanEntrena18%2FStreamDaemon&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=JuanEntrena18/StreamForge&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=JuanEntrena18/StreamForge&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=JuanEntrena18/StreamForge&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=JuanEntrena18/StreamDaemon&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=JuanEntrena18/StreamDaemon&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=JuanEntrena18/StreamDaemon&type=date&legend=top-left" />
  </picture>
 </a>
 
