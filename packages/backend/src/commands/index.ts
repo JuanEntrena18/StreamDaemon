@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { CommandAddSchema, CommandDeleteSchema, CommandToggleSchema, CommandUpdateSchema, CommandImportSchema } from '@streamforger/shared';
+import { CommandAddSchema, CommandDeleteSchema, CommandToggleSchema, CommandUpdateSchema, CommandImportSchema } from '@streamdaemon/shared';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.resolve(__dirname, '../../data');

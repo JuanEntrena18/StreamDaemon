@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
-import type { SocialLink } from '@streamforger/shared';
+import type { SocialLink } from '@streamdaemon/shared';
 import styles from './SocialOverlay.module.css';
 
 const DEFAULT_LINKS: SocialLink[] = [

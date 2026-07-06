@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSocketEvent } from '../hooks/useSocket';
 import { apiGet, apiPost } from '../utils/api';
 import { useTranslation } from '../i18n/context';
-import type { KpiOverview, ViewerSnapshot, GamePerformance, BestSlot, ChannelRaidEvent, TwitchTopGame, ChatStats, StreamSummary, ChannelRecord } from '@streamforger/shared';
+import type { KpiOverview, ViewerSnapshot, GamePerformance, BestSlot, ChannelRaidEvent, TwitchTopGame, ChatStats, StreamSummary, ChannelRecord } from '@streamdaemon/shared';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area } from 'recharts';
 import { SkeletonCard, SkeletonChart } from './Skeletons';
 import styles from './KpiPanel.module.css';

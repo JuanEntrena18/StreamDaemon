@@ -76,7 +76,7 @@ export function SplashScreen({ onReady }: Props) {
         </div>
 
         <div className={styles.titleWrap}>
-          <h1 className={styles.title}>StreamForger</h1>
+          <h1 className={styles.title}>StreamDaemon</h1>
           <p className={styles.tagline}>Open-source stream tools, forged for creators.</p>
         </div>
 

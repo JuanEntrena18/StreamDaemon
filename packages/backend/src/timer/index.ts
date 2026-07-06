@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { getIO } from '../socket/index.js';
-import { TimerStartSchema } from '@streamforger/shared';
-import type { TimerState } from '@streamforger/shared';
+import { TimerStartSchema } from '@streamdaemon/shared';
+import type { TimerState } from '@streamdaemon/shared';
 
 interface TimerInstance {
   state: TimerState;

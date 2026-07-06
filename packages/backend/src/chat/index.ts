@@ -9,7 +9,7 @@ import { checkCustomCommand } from '../commands/index.js';
 import { checkMessage } from '../security/index.js';
 import type { enterGiveaway, addTickets } from '../giveaways/index.js';
 import { incrementChatCounter } from '../kpi/index.js';
-import { ChatGreetingConfigSchema } from '@streamforger/shared';
+import { ChatGreetingConfigSchema } from '@streamdaemon/shared';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.resolve(__dirname, '../../data');
@@ -254,7 +254,7 @@ export async function sendMessage(channel: string, message: string) {
       id: `send-${Date.now()}`,
       user: {
         id: currentUser?.id ?? 'self',
-        displayName: currentUser?.displayName ?? 'StreamForger',
+        displayName: currentUser?.displayName ?? 'StreamDaemon',
         color: '#7c3aed',
         badges: ['broadcaster'],
       },

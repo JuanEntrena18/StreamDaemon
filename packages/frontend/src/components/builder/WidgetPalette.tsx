@@ -1,5 +1,5 @@
 import { useBuilder } from './OverlayBuilderContext';
-import type { WidgetType } from '@streamforger/shared';
+import type { WidgetType } from '@streamdaemon/shared';
 
 const WIDGETS: { type: WidgetType; icon: string; label: string }[] = [
   { type: 'chat', icon: '💬', label: 'Chat' },

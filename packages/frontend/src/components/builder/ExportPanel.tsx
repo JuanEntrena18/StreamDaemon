@@ -143,7 +143,7 @@ export function ExportPanel({ onClose }: { onClose: () => void }) {
                 background: 'var(--sf-bg)', color: 'var(--sf-text)', cursor: 'pointer', fontSize: '.85rem',
                 width: '100%',
               }}>
-                🔗 Open in StreamForger Overlay
+                🔗 Open in StreamDaemon Overlay
               </button>
             </div>
           </>

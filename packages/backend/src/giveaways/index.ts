@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { getIO } from '../socket/index.js';
 import { sendMessage } from '../chat/index.js';
-import { GiveawayCreateSchema } from '@streamforger/shared';
+import { GiveawayCreateSchema } from '@streamdaemon/shared';
 
 interface GiveawayEntry {
   user: string;

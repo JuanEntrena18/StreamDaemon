@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
-import type { GiveawayData, GiveawayEntryData } from '@streamforger/shared';
+import type { GiveawayData, GiveawayEntryData } from '@streamdaemon/shared';
 import styles from './GiveawayOverlay.module.css';
 
 interface Props {

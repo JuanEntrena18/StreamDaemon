@@ -122,8 +122,8 @@ export function setupAlertSounds(app: FastifyInstance) {
       return reply.status(400).send({ error: 'Missing type or channel' });
     }
 
-    const testUser = 'StreamForger_Test';
-    const displayName = 'StreamForger Test';
+    const testUser = 'StreamDaemon_Test';
+    const displayName = 'StreamDaemon Test';
 
     switch (type) {
       case 'follow':

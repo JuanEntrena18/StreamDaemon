@@ -49,7 +49,7 @@ export function Sidebar({
           <div className={styles.brandSection}>
             <div className="animate-float"><Logo size={38} /></div>
             <div>
-              <div className={styles.brandName}>StreamForger</div>
+              <div className={styles.brandName}>StreamDaemon</div>
               <div className={styles.brandSub}>by Cyber Haute Couture</div>
             </div>
           </div>

@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiGet } from '../utils/api';
-import type { FighterState } from '@streamforger/shared';
+import type { FighterState } from '@streamdaemon/shared';
 import styles from './ScoreboardOverlay.module.css';
 
 interface Props {

@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { getIO } from '../socket/index.js';
-import type { SubathonState, SubathonAction } from '@streamforger/shared';
+import type { SubathonState, SubathonAction } from '@streamdaemon/shared';
 import crypto from 'crypto';
 
 interface SubathonInstance {

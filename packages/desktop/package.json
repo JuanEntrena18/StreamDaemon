@@ -1,7 +1,7 @@
 {
-  "name": "@streamforger/desktop",
+  "name": "@streamdaemon/desktop",
   "version": "0.4.2",
-  "description": "StreamForger — Open-source stream tools, forged for creators",
+  "description": "StreamDaemon — Open-source stream tools, forged for creators",
   "author": "Cyber Haute Couture",
   "private": true,
   "type": "module",
@@ -14,8 +14,8 @@
     "db:generate": "prisma generate"
   },
   "dependencies": {
-    "@streamforger/backend": "*",
-    "@streamforger/shared": "*",
+    "@streamdaemon/backend": "*",
+    "@streamdaemon/shared": "*",
     "electron-store": "^8.2.0",
     "better-sqlite3": "^11.0.0",
     "@prisma/client": "^5.10.0",
@@ -29,8 +29,8 @@
     "wait-on": "^8.0.0"
   },
   "build": {
-    "appId": "com.streamforger.app",
-    "productName": "StreamForger",
+    "appId": "com.streamdaemon.app",
+    "productName": "StreamDaemon",
     "electronVersion": "33.4.11",
     "directories": {
       "output": "dist-electron",

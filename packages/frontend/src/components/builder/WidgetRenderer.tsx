@@ -1,4 +1,4 @@
-import type { Widget } from '@streamforger/shared';
+import type { Widget } from '@streamdaemon/shared';
 
 function getAnimClass(anim?: string): string {
   if (!anim || anim === 'none') return '';
@@ -65,7 +65,7 @@ export function WidgetRenderer({ widget, selected, onSelect }: { widget: Widget;
           }}>
             <div className={animClass} style={{ flex: 1, overflow: 'auto' }}>
               <div style={{ marginBottom: 6, display: 'flex', gap: 6 }}>
-                <span style={{ fontWeight: 700, color: '#9147ff' }}>StreamForgerBot:</span>
+                <span style={{ fontWeight: 700, color: '#9147ff' }}>StreamDaemonBot:</span>
                 <span>Welcome!</span>
               </div>
               <div style={{ marginBottom: 6, display: 'flex', gap: 6 }}>
@@ -145,7 +145,7 @@ export function WidgetRenderer({ widget, selected, onSelect }: { widget: Widget;
           }}>
             <div className={animClass}><div style={{ fontSize: 28, marginBottom: 4 }}>🎉</div></div>
             <div className={animClass} style={{ fontWeight: 700 }}>New Follower!</div>
-            <div className={animClass} style={{ fontSize: '.85em', opacity: .8 }}>StreamForgerBot</div>
+            <div className={animClass} style={{ fontSize: '.85em', opacity: .8 }}>StreamDaemonBot</div>
           </div>
         );
       case 'image':

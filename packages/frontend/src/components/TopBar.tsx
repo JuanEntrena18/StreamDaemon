@@ -33,7 +33,7 @@ export function TopBar({
       {/* Titlebar (Electron) */}
       {isDesktop && (
         <div className={styles.titlebar} style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
-          <span className={styles.titlebarTitle}>StreamForger</span>
+          <span className={styles.titlebarTitle}>StreamDaemon</span>
           <div className={styles.titlebarActions} style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
             <button
               onClick={() => window.streamforger?.window.minimize()}

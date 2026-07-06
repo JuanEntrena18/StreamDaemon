@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import { apiGet, apiPost } from '../utils/api';
-import type { HudData, HudConfig } from '@streamforger/shared';
+import type { HudData, HudConfig } from '@streamdaemon/shared';
 
 interface Props {
   channel: string;

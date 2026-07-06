@@ -4,7 +4,7 @@ import { authProvider, currentUser, prisma } from '../auth/index.js';
 import { getIO } from '../socket/index.js';
 import * as fs from 'fs';
 import * as path from 'path';
-import { SecurityConfigUpdateSchema, SecurityScanSchema, SecurityBanSchema, SecurityUnbanSchema, SecurityWhitelistAddSchema, SecurityWhitelistRemoveSchema } from '@streamforger/shared';
+import { SecurityConfigUpdateSchema, SecurityScanSchema, SecurityBanSchema, SecurityUnbanSchema, SecurityWhitelistAddSchema, SecurityWhitelistRemoveSchema } from '@streamdaemon/shared';
 
 interface SecurityConfig {
   followBotProtection: boolean;

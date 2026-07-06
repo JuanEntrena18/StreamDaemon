@@ -107,7 +107,7 @@ export function OverlayControls({ mode, bgMode, fontFamily, fontSize, onBgModeCh
           } as React.CSSProperties }}
         >
           <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', userSelect: 'none' }}>
-            ⋮⋮ StreamForger {MODE_LABELS[mode] || mode}
+            ⋮⋮ StreamDaemon {MODE_LABELS[mode] || mode}
           </span>
         </div>
 

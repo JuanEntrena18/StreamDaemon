@@ -46,7 +46,7 @@
     "desactivarSiempreEncima": "Immer im Vordergrund deaktivieren",
     "activarSiempreEncima": "Immer im Vordergrund aktivieren",
     "version": "v0.4.2 · Open Source",
-    "panelControl": "Dashboard · StreamForger",
+    "panelControl": "Dashboard · StreamDaemon",
     "hash": "#",
     "placeholderCanal": "Twitch-Kanal...",
     "conectarTwitch": "Twitch verbinden",
@@ -182,7 +182,7 @@
     "siempreEncima": "Immer im Vordergrund",
     "siempreEncimaDesc": "Hält das Fenster über anderen Anwendungen",
     "acercaDe": "📋 Über",
-    "appName": "StreamForger",
+    "appName": "StreamDaemon",
     "appVersion": "v0.2.4 · by Cyber Haute Couture",
     "appDesc": "Modulare Open-Source-Anwendung für Content-Ersteller. Verwalte deinen Twitch-Kanal mit benutzerdefinierten Overlays, interaktiven Gewinnspielen, Vorhersagen und Echtzeit-Chat.",
     "githubTitle": "GitHub",
@@ -190,7 +190,7 @@
     "irRepo": "Zum Repo ↗",
     "licencia": "AGPLv3-Lizenz · Kommerzielle Nutzung erfordert Dual-Lizenz",
     "apoyoTitle": "☕ Entwicklung unterstützen",
-    "apoyoDesc": "StreamForger ist Open Source und kostenlos. Wenn dir das Projekt gefällt, spendiere mir einen Kaffee.",
+    "apoyoDesc": "StreamDaemon ist Open Source und kostenlos. Wenn dir das Projekt gefällt, spendiere mir einen Kaffee.",
     "invitameCafe": "Kauf mir einen Kaffee",
     "languageTitle": "Sprache / Language",
     "languageDesc": "Wählen Sie die Sprache der Schnittstelle.",
@@ -388,7 +388,7 @@
     "guardarConfig": "Konfiguration speichern",
     "guardadoConfig": "✓ Gespeichert",
     "tip": "💡 Tipp:",
-    "obsTip": "Gehe in OBS zu Quellen → + → Browser und füge die URL ein. Stelle sicher, dass StreamForger läuft.",
+    "obsTip": "Gehe in OBS zu Quellen → + → Browser und füge die URL ein. Stelle sicher, dass StreamDaemon läuft.",
     "obsWsTitle": "OBS WebSocket",
     "obsWsConnected": "Verbunden",
     "obsWsHost": "Host",
@@ -873,7 +873,7 @@
     "emptyChannel": "Gib deinen Twitch-Kanal in der oberen Leiste ein"
   },
   "overlay": {
-    "streamforgerChat": "StreamForger Chat",
+    "streamforgerChat": "StreamDaemon Chat",
     "ajustes": "Einstellungen",
     "clickThroughOn": "Click-Through aktivieren (Klicks gehen zum Spiel)",
     "clickThroughOff": "Click-Through deaktivieren",
@@ -980,7 +980,7 @@
     "esperandoDatos": "Warte auf Daten..."
   },
   "splash": {
-    "apoya": "☕ Unterstütze die StreamForger-Entwicklung hier",
+    "apoya": "☕ Unterstütze die StreamDaemon-Entwicklung hier",
     "cargando": "Verbindung zum Backend…",
     "conectado": "Verbunden!",
     "timeout": "Weiter…"
@@ -1092,7 +1092,7 @@
     "back": "Zurück"
   },
   "setup": {
-    "welcome": "Willkommen bei StreamForger",
+    "welcome": "Willkommen bei StreamDaemon",
     "description": "Richten Sie Ihr Konto in wenigen Schritten ein, um alle Tools zu nutzen.",
     "twitch": "Twitch verbinden",
     "youtube": "YouTube verbinden",
@@ -1103,7 +1103,7 @@
     "loginBrowser": "Browser-Anmeldung",
     "youtubeDesc": "Streamen Sie gleichzeitig und verwalten Sie Ihren YouTube-Kanal.",
     "tiktokDesc": "Streamen Sie gleichzeitig und verwalten Sie Ihr TikTok-Konto.",
-    "start": "StreamForger nutzen",
+    "start": "StreamDaemon nutzen",
     "connectFirst": "Verbinden Sie zuerst Twitch"
   },
   "overlayPreview": {

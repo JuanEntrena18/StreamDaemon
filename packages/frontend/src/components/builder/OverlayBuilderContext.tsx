@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useCallback, type ReactNode } from 'react';
-import type { Widget, WidgetType, Layout } from '@streamforger/shared';
+import type { Widget, WidgetType, Layout } from '@streamdaemon/shared';
 
 export interface BuilderState {
   widgets: Widget[];

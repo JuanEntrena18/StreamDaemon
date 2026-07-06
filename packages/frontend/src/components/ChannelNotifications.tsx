@@ -10,7 +10,7 @@ import type {
   ChannelSubGiftEvent,
   ChannelRedemptionEvent,
   ChannelCheerEvent,
-} from '@streamforger/shared';
+} from '@streamdaemon/shared';
 
 type Notification =
   | { type: 'follow'; data: ChannelFollowEvent }

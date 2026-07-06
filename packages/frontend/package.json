@@ -1,5 +1,5 @@
 {
-  "name": "@streamforger/frontend",
+  "name": "@streamdaemon/frontend",
   "version": "0.4.2",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@streamforger/shared": "*",
+    "@streamdaemon/shared": "*",
     "framer-motion": "^11.0.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",

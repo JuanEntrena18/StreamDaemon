@@ -1,8 +1,8 @@
-# StreamForger
+# StreamDaemon
 
 **Open-source stream tools, forged for creators.**
 
-StreamForger is a modular application for content creators to manage Twitch channels with game-customizable overlays, interactive giveaways, predictions, real-time chat, and a **Subathon** system. Compatible with OBS Studio via Browser Source.
+StreamDaemon is a modular application for content creators to manage Twitch channels with game-customizable overlays, interactive giveaways, predictions, real-time chat, and a **Subathon** system. Compatible with OBS Studio via Browser Source.
 
 Available in two modes:
 - **🖥️ Linux Server** — Multi-user, SQLite, production-ready
@@ -38,7 +38,7 @@ Available in two modes:
 
 ## 🔒 Security
 
-StreamForger implements multiple security layers:
+StreamDaemon implements multiple security layers:
 
 | ID | Measure | Status |
 |---|---|---|
@@ -180,7 +180,7 @@ StreamForge/
 | Feature | Description |
 |---|---|
 | **🌍 Multi-language translation** | Frontend translated to English, French, German, and Italian with automatic browser language detection |
-| **🎮 Stream Deck integration** | Native Elgato Stream Deck plugin to control StreamForger from physical buttons: start/stop Subathon, launch giveaways, ban user, change stream title, and more |
+| **🎮 Stream Deck integration** | Native Elgato Stream Deck plugin to control StreamDaemon from physical buttons: start/stop Subathon, launch giveaways, ban user, change stream title, and more |
 | **🎬 Clip management & TikTok export** | Create, edit, and auto-export stream clips to TikTok with vertical format, auto-captions, and scheduled posting |
 
 ---

@@ -1,5 +1,5 @@
 import { useBuilder } from './OverlayBuilderContext';
-import type { Widget } from '@streamforger/shared';
+import type { Widget } from '@streamdaemon/shared';
 
 function PropRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (

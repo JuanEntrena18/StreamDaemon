@@ -65,7 +65,7 @@ export function setupObs(app: FastifyInstance) {
         inputSettings: { url: sc.url, width: sc.width, height: sc.height },
       });
     } else {
-      const sourceName = `${sc.name} - StreamForger`;
+      const sourceName = `${sc.name} - StreamDaemon`;
       await obs.call('CreateInput', {
         sceneName: sc.name,
         inputName: sourceName,

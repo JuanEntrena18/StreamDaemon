@@ -114,7 +114,7 @@ let backendReady = false;
 // ── Backend ───────────────────────────────────────────────
 async function startBackend() {
   try {
-    const { startServer } = await import('@streamforger/backend/dist/index.js');
+    const { startServer } = await import('@streamdaemon/backend/dist/index.js');
     await startServer({ port: 3000, frontendDir: getFrontendDistDir() });
     backendReady = true;
     console.log('✅ Backend started — serving frontend at http://localhost:3000');
@@ -322,7 +322,7 @@ function openOverlaySettingsWindow() {
     resizable: false,
     skipTaskbar: true,
     alwaysOnTop: true,
-    title: 'StreamForger - Overlay Settings',
+    title: 'StreamDaemon - Overlay Settings',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,

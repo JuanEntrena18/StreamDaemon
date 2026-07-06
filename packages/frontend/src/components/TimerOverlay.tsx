@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import { apiGet } from '../utils/api';
-import type { TimerState } from '@streamforger/shared';
+import type { TimerState } from '@streamdaemon/shared';
 import styles from './TimerOverlay.module.css';
 
 interface Props {

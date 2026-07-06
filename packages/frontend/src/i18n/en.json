@@ -46,7 +46,7 @@
     "desactivarSiempreEncima": "Disable always on top",
     "activarSiempreEncima": "Enable always on top",
     "version": "v0.4.2 · Open Source",
-    "panelControl": "Dashboard · StreamForger",
+    "panelControl": "Dashboard · StreamDaemon",
     "hash": "#",
     "placeholderCanal": "twitch channel...",
     "conectarTwitch": "Connect Twitch",
@@ -186,7 +186,7 @@
     "siempreEncima": "Always on top",
     "siempreEncimaDesc": "Keeps window above other applications",
     "acercaDe": "📋 About",
-    "appName": "StreamForger",
+    "appName": "StreamDaemon",
     "appVersion": "v0.2.4 · by Cyber Haute Couture",
     "appDesc": "Modular open-source application for content creators. Manage your Twitch channel with custom overlays, interactive giveaways, predictions, and real-time chat.",
     "githubTitle": "GitHub",
@@ -194,7 +194,7 @@
     "irRepo": "Go to repo ↗",
     "licencia": "AGPLv3 License · Commercial use requires dual license",
     "apoyoTitle": "☕ Support development",
-    "apoyoDesc": "StreamForger is open-source and free. If you like the project, you can buy me a coffee.",
+    "apoyoDesc": "StreamDaemon is open-source and free. If you like the project, you can buy me a coffee.",
     "invitameCafe": "Buy me a coffee",
     "languageTitle": "Language / Idioma",
     "languageDesc": "Select the interface language.",
@@ -392,7 +392,7 @@
     "guardarConfig": "Save Configuration",
     "guardadoConfig": "✓ Saved",
     "tip": "💡 Tip:",
-    "obsTip": "In OBS, go to Sources → + → Browser and paste the URL. Make sure StreamForger is running so the overlay receives data in real time.",
+    "obsTip": "In OBS, go to Sources → + → Browser and paste the URL. Make sure StreamDaemon is running so the overlay receives data in real time.",
     "obsWsTitle": "OBS WebSocket",
     "obsWsConnected": "Connected",
     "obsWsHost": "Host",
@@ -906,7 +906,7 @@
     "emptyChannel": "Enter your Twitch channel in the top bar to start"
   },
   "overlay": {
-    "streamforgerChat": "StreamForger Chat",
+    "streamforgerChat": "StreamDaemon Chat",
     "ajustes": "Settings",
     "clickThroughOn": "Enable click-through (clicks pass to the game)",
     "clickThroughOff": "Disable click-through",
@@ -1013,7 +1013,7 @@
     "esperandoDatos": "Waiting for data..."
   },
   "splash": {
-    "apoya": "☕ Support StreamForger development here",
+    "apoya": "☕ Support StreamDaemon development here",
     "cargando": "Connecting to backend…",
     "conectado": "Connected!",
     "timeout": "Continuing…"
@@ -1125,7 +1125,7 @@
     "back": "Back"
   },
   "setup": {
-    "welcome": "Welcome to StreamForger",
+    "welcome": "Welcome to StreamDaemon",
     "description": "Set up your account in a few steps to start using all the tools.",
     "twitch": "Connect Twitch",
     "youtube": "Connect YouTube",
@@ -1136,7 +1136,7 @@
     "loginBrowser": "Browser login",
     "youtubeDesc": "Stream simultaneously and manage your YouTube channel.",
     "tiktokDesc": "Stream simultaneously and manage your TikTok account.",
-    "start": "Start using StreamForger",
+    "start": "Start using StreamDaemon",
     "connectFirst": "Connect Twitch first"
   },
   "overlayPreview": {

@@ -4,7 +4,7 @@ import { getRawData } from '@twurple/common';
 import { authProvider, currentUser } from '../auth/index.js';
 import { getIO } from '../socket/index.js';
 import { getEvents } from '../activity/index.js';
-import type { ViewerSnapshot, KpiOverview, GamePerformance, BestSlot, ChatStats, StreamSummary, ChannelRecord } from '@streamforger/shared';
+import type { ViewerSnapshot, KpiOverview, GamePerformance, BestSlot, ChatStats, StreamSummary, ChannelRecord } from '@streamdaemon/shared';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';

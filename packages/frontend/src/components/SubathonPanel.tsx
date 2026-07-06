@@ -5,7 +5,7 @@ import { apiGet, apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import { ConfirmModal } from './ConfirmModal';
 import { Toggle } from './Toggle';
 import { EmptyState } from './EmptyState';
-import type { SubathonState, SubathonAction } from '@streamforger/shared';
+import type { SubathonState, SubathonAction } from '@streamdaemon/shared';
 import styles from './SubathonPanel.module.css';
 
 interface Props {

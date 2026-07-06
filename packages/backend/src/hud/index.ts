@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { ApiClient } from '@twurple/api';
 import { authProvider } from '../auth/index.js';
 import { getIO } from '../socket/index.js';
-import type { HudData } from '@streamforger/shared';
+import type { HudData } from '@streamdaemon/shared';
 import { recordSnapshot } from '../kpi/index.js';
 
 let pollInterval: ReturnType<typeof setInterval> | null = null;

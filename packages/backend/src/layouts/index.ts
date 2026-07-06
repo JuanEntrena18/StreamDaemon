@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import fs from 'fs';
 import path from 'path';
-import { LayoutSaveSchema, LayoutUpdateSchema } from '@streamforger/shared';
-import type { Layout } from '@streamforger/shared';
+import { LayoutSaveSchema, LayoutUpdateSchema } from '@streamdaemon/shared';
+import type { Layout } from '@streamdaemon/shared';
 
 const DATA_DIR = path.resolve('data/layouts');
 
@@ -68,7 +68,7 @@ function generateWidgetHtml(widget: Layout['widgets'][0]): string {
           : `background:${bg};border:${border}`;
       return `<div class="widget ${animClass}" style="${baseStyle};${shapeStyle}"></div>`;
     case 'chat':
-      return `<div class="widget ${animClass}" style="${baseStyle};background:${bg};border:${border};border-radius:${radius};${font}${size}${color}overflow:hidden;display:flex;flex-direction:column;padding:8px"><div style="flex:1;overflow-y:auto;padding:4px"><div style="margin-bottom:6px;display:flex;align-items:center;gap:6px"><span style="font-weight:bold;color:#9147ff">StreamForgerBot</span><span style="color:#aaa">:</span><span>Welcome to the stream!</span></div><div style="margin-bottom:6px;display:flex;align-items:center;gap:6px"><span style="font-weight:bold;color:#00ff00">Viewer1</span><span style="color:#aaa">:</span><span>Hey! Great stream</span></div></div></div>`;
+      return `<div class="widget ${animClass}" style="${baseStyle};background:${bg};border:${border};border-radius:${radius};${font}${size}${color}overflow:hidden;display:flex;flex-direction:column;padding:8px"><div style="flex:1;overflow-y:auto;padding:4px"><div style="margin-bottom:6px;display:flex;align-items:center;gap:6px"><span style="font-weight:bold;color:#9147ff">StreamDaemonBot</span><span style="color:#aaa">:</span><span>Welcome to the stream!</span></div><div style="margin-bottom:6px;display:flex;align-items:center;gap:6px"><span style="font-weight:bold;color:#00ff00">Viewer1</span><span style="color:#aaa">:</span><span>Hey! Great stream</span></div></div></div>`;
     case 'hud':
       return `<div class="widget ${animClass}" style="${baseStyle};background:${bg};border:${border};border-radius:${radius};${font}${color}display:flex;align-items:center;justify-content:center;gap:16px;padding:8px"><div style="text-align:center"><div style="font-size:24px;font-weight:bold">1,234</div><div style="font-size:11px;opacity:.7">VIEWERS</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:bold">567</div><div style="font-size:11px;opacity:.7">FOLLOWERS</div></div></div>`;
     case 'timer':
@@ -76,7 +76,7 @@ function generateWidgetHtml(widget: Layout['widgets'][0]): string {
     case 'scoreboard':
       return `<div class="widget ${animClass}" style="${baseStyle};background:${bg};border:${border};border-radius:${radius};${font}${color}display:flex;flex-direction:column;padding:8px"><div style="display:flex;justify-content:space-between;padding:4px 0"><span>Team A</span><span>3</span></div><div style="display:flex;justify-content:space-between;padding:4px 0"><span>Team B</span><span>1</span></div></div>`;
     case 'alertbox':
-      return `<div class="widget ${animClass}" style="${baseStyle};background:${bg};border:${border};border-radius:${radius};${font}${size}${color}display:flex;align-items:center;justify-content:center;flex-direction:column;padding:12px;text-align:center"><div style="font-size:1.5em;margin-bottom:4px">🎉</div><div style="font-weight:bold">New Follower!</div><div style="font-size:.85em;opacity:.8">StreamForgerBot</div></div>`;
+      return `<div class="widget ${animClass}" style="${baseStyle};background:${bg};border:${border};border-radius:${radius};${font}${size}${color}display:flex;align-items:center;justify-content:center;flex-direction:column;padding:12px;text-align:center"><div style="font-size:1.5em;margin-bottom:4px">🎉</div><div style="font-weight:bold">New Follower!</div><div style="font-size:.85em;opacity:.8">StreamDaemonBot</div></div>`;
     case 'webcam':
       return `<div class="widget ${animClass}" style="${baseStyle};background:#1a1a2e;border:${border};border-radius:${radius};display:flex;align-items:center;justify-content:center;overflow:hidden"><svg viewBox="0 0 100 100" style="width:50%;height:50%;opacity:.3"><circle cx="50" cy="35" r="20" fill="none" stroke="#666" stroke-width="3"/><ellipse cx="50" cy="80" rx="35" ry="25" fill="none" stroke="#666" stroke-width="3"/></svg></div>`;
     case 'social':

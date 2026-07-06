@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiPost, apiGet, OVERLAY_BASE_URL } from '../utils/api';
 import { useTranslation } from '../i18n/context';
-import type { FighterState } from '@streamforger/shared';
+import type { FighterState } from '@streamdaemon/shared';
 import styles from './ScoreboardPanel.module.css';
 
 interface Props {

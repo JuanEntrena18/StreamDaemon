@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { getIO } from '../socket/index.js';
-import { ScoreboardPlayerSchema, ScoreboardScoreSchema, ScoreboardIncrementSchema, FighterConfigSchema, FighterDamageSchema, FighterRoundSchema, FighterHealSchema } from '@streamforger/shared';
-import type { ScoreboardState, ScoreboardPlayer, FighterState, FighterPlayer } from '@streamforger/shared';
+import { ScoreboardPlayerSchema, ScoreboardScoreSchema, ScoreboardIncrementSchema, FighterConfigSchema, FighterDamageSchema, FighterRoundSchema, FighterHealSchema } from '@streamdaemon/shared';
+import type { ScoreboardState, ScoreboardPlayer, FighterState, FighterPlayer } from '@streamdaemon/shared';
 
 const boards = new Map<string, ScoreboardState>();
 const fighterBoards = new Map<string, FighterState>();

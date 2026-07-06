@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { apiGet, apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import { useTranslation } from '../i18n/context';
-import type { HudData, HudConfig } from '@streamforger/shared';
+import type { HudData, HudConfig } from '@streamdaemon/shared';
 import { Toggle } from './Toggle';
 import styles from './HudPanel.module.css';
 

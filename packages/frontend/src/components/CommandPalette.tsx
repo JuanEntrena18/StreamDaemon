@@ -51,7 +51,7 @@ export function CommandPalette({ isOpen, onClose, onNavigate, onToggleAlwaysOnTo
       { id: 'alertsounds', title: s('alertsoundsTab'), description: 'Sonidos de alerta', icon: '🔊', keywords: ['sonidos', 'alertas', 'audio'], action: () => onNavigate('alertsounds') },
       { id: 'bitrate', title: s('bitrateTab'), description: 'Calculadora de bitrate', icon: '🧮', keywords: ['bitrate', 'calculadora', 'internet', 'obs'], action: () => onNavigate('bitrate') },
       { id: 'vertical', title: s('verticalTab'), description: 'Streaming en formato vertical', icon: '📱', keywords: ['vertical', 'tiktok', 'reels', 'shorts'], action: () => onNavigate('vertical') },
-      { id: 'config', title: s('configTab'), description: 'Ajustes de StreamForger', icon: '⚙️', keywords: ['configuracion', 'ajustes', 'settings', 'idioma', 'tema'], action: () => onNavigate('config') },
+      { id: 'config', title: s('configTab'), description: 'Ajustes de StreamDaemon', icon: '⚙️', keywords: ['configuracion', 'ajustes', 'settings', 'idioma', 'tema'], action: () => onNavigate('config') },
     ];
 
     const actions: CommandItem[] = [
