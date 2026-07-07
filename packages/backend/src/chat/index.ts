@@ -29,8 +29,10 @@ const joinedChannels = new Set<string>();
 // Greeting state
 let greetingConfigs: Record<string, ChannelGreetingConfig> = {};
 const pendingGreetings = new Map<string, NodeJS.Timeout>();
+const greetingRateLimiter = new Map<string, number>(); // channel -> last send timestamp
 
 const DEFAULT_GREETING_MESSAGE = '¡Bienvenido {user} al canal!';
+const GREETING_INTERVAL_MS = 2000; // min 2s between greetings per channel
 
 function loadGreetingConfigs() {
   try {
@@ -59,6 +61,29 @@ function setGreetingConfig(channel: string, config: Partial<ChannelGreetingConfi
   const current = getGreetingConfig(channel);
   greetingConfigs[channel] = { ...current, ...config };
   saveGreetingConfigs();
+}
+
+function sendGreeting(channelName: string, user: string, key: string, message: string) {
+  const now = Date.now();
+  const last = greetingRateLimiter.get(channelName) ?? 0;
+  const elapsed = now - last;
+
+  if (elapsed >= GREETING_INTERVAL_MS) {
+    greetingRateLimiter.set(channelName, now);
+    pendingGreetings.delete(key);
+    const msg = message.replace(/\{user\}/g, `@${user}`);
+    sendMessage(channelName, msg);
+  } else {
+    const waitMs = GREETING_INTERVAL_MS - elapsed;
+    const newTimer = setTimeout(() => {
+      greetingRateLimiter.set(channelName, Date.now());
+      pendingGreetings.delete(key);
+      const msg = message.replace(/\{user\}/g, `@${user}`);
+      sendMessage(channelName, msg);
+    }, waitMs);
+    // Track the new timer so onPart can cancel it
+    pendingGreetings.set(key, newTimer);
+  }
 }
 
 export async function setupChat() {
@@ -129,9 +154,7 @@ export async function setupChat() {
     if (pendingGreetings.has(key)) return;
 
     const timer = setTimeout(() => {
-      pendingGreetings.delete(key);
-      const msg = config.message.replace(/\{user\}/g, `@${user}`);
-      sendMessage(channelName, msg);
+      sendGreeting(channelName, user, key, config.message);
     }, 30000);
     pendingGreetings.set(key, timer);
   });
