@@ -1,7 +1,8 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
+import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { AvatarEngine } from '../avatars/AvatarEngine';
 import { useAvatarConfig } from '../avatars/avatarStore';
-import type { AvatarEventPayload } from '../avatars/types';
+
 
 interface Props {
   channel: string;
@@ -24,45 +25,8 @@ export function AvatarOverlay({ channel }: Props) {
     engineRef.current = engine;
 
     engine.init().then(() => {
-      // Connect to WebSocket for Twitch events
-      const backendUrl = new URLSearchParams(window.location.search).get('backend')
-        || import.meta.env.VITE_BACKEND_URL
-        || 'http://localhost:3000';
-
-      import('socket.io-client').then(({ io }) => {
-        const socket = io(backendUrl, { transports: ['websocket', 'polling'] });
-
-        socket.on('connect', () => {
-          if (channel) socket.emit('join:channel', channel);
-        });
-
-        // Chat messages → command detection + avatar spawn
-        socket.on('chat:message', (data: { userId: string; username: string; displayName: string; message: string }) => {
-          engine.handleChatMessage(data.userId, data.username, data.displayName, data.message);
-        });
-
-        // Twitch events → avatar actions
-        const eventTypes = ['follow', 'subscription', 'bits', 'raid'];
-        for (const eventType of eventTypes) {
-          socket.on(`twitch:${eventType}`, (data: any) => {
-            const payload: AvatarEventPayload = {
-              userId: data.userId || data.user_id || `${eventType}-${Date.now()}`,
-              username: data.username || data.user_name || data.login || 'viewer',
-              displayName: data.displayName || data.display_name || data.username || 'Viewer',
-              type: eventType,
-              message: data.message,
-              amount: data.amount || data.bits,
-              tier: data.tier,
-            };
-            engine.handleEvent(payload);
-          });
-        }
-
-        // Clean up socket on unmount
-        return () => {
-          socket.disconnect();
-        };
-      });
+      // We'll use the component hooks to attach socket events
+      // to the existing socket, instead of creating a new raw one.
     });
 
     return () => {
@@ -72,6 +36,77 @@ export function AvatarOverlay({ channel }: Props) {
       }
     };
   }, [config.enabled, channel]);
+
+  // Hook into the global socket
+  const { socket, connected } = useSocket();
+
+  useEffect(() => {
+    if (channel && connected) {
+      socket.emit('join:channel', channel);
+    }
+  }, [channel, connected, socket]);
+
+  // Chat messages
+  useSocketEvent('chat:message', useCallback((msg: any) => {
+    if (engineRef.current) {
+      engineRef.current.handleChatMessage(
+        msg.user?.id || 'viewer',
+        msg.user?.displayName || 'viewer',
+        msg.user?.displayName || 'Viewer',
+        msg.text || ''
+      );
+    }
+  }, []));
+
+  // Follow
+  useSocketEvent('channel:follow', useCallback((data: any) => {
+    if (engineRef.current) {
+      engineRef.current.handleEvent({
+        userId: data.userId || `follow-${Date.now()}`,
+        username: data.userLogin || 'viewer',
+        displayName: data.userName || 'Viewer',
+        type: 'follow'
+      });
+    }
+  }, []));
+
+  // Cheer / Bits
+  useSocketEvent('channel:cheer', useCallback((data: any) => {
+    if (engineRef.current) {
+      engineRef.current.handleEvent({
+        userId: data.userId || `cheer-${Date.now()}`,
+        username: data.userLogin || 'viewer',
+        displayName: data.userName || 'Viewer',
+        type: 'bits',
+        amount: data.bits
+      });
+    }
+  }, []));
+
+  // Subscribe
+  useSocketEvent('channel:subscribe', useCallback((data: any) => {
+    if (engineRef.current) {
+      engineRef.current.handleEvent({
+        userId: data.userId || `sub-${Date.now()}`,
+        username: data.userLogin || 'viewer',
+        displayName: data.userName || 'Viewer',
+        type: 'subscription',
+        tier: data.tier
+      });
+    }
+  }, []));
+
+  // Raid
+  useSocketEvent('channel:raid', useCallback((data: any) => {
+    if (engineRef.current) {
+      engineRef.current.handleEvent({
+        userId: data.raidingBroadcasterId || `raid-${Date.now()}`,
+        username: data.raidingBroadcasterLogin || 'viewer',
+        displayName: data.raidingBroadcasterName || 'Viewer',
+        type: 'raid'
+      });
+    }
+  }, []));
 
   // Update config when it changes (without re-creating the engine)
   useEffect(() => {
