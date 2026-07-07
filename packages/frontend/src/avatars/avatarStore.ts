@@ -1,33 +1,33 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { AvatarConfig } from './types';
 import { DEFAULT_AVATAR_CONFIG } from './types';
+import { apiGet, apiPut } from '../utils/api';
+import { useSocketEvent } from '../hooks/useSocket';
 
-const LS_KEY = 'sf-avatars-config';
-
-function loadConfig(): AvatarConfig {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      // Merge with defaults to handle new keys added in future versions
-      return { ...DEFAULT_AVATAR_CONFIG, ...parsed };
-    }
-  } catch {}
-  return { ...DEFAULT_AVATAR_CONFIG };
-}
-
-function saveConfig(config: AvatarConfig) {
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify(config));
-  } catch {}
-}
-
-/**
- * Lightweight avatar config hook using React state + localStorage.
- * No external store library needed — keeps the avatar system fully isolated.
- */
 export function useAvatarConfig() {
-  const [config, setConfigState] = useState<AvatarConfig>(loadConfig);
+  const [config, setConfigState] = useState<AvatarConfig>(DEFAULT_AVATAR_CONFIG);
+
+  useEffect(() => {
+    apiGet('/avatars/config')
+      .then((data) => {
+        if (data) {
+          setConfigState((prev) => ({ ...prev, ...data }));
+        }
+      })
+      .catch((e) => console.error('Failed to load avatar config', e));
+  }, []);
+
+  useSocketEvent('avatars:config_updated', useCallback((newConfig: any) => {
+    setConfigState((prev) => ({ ...prev, ...newConfig }));
+  }, []));
+
+  const saveConfig = async (nextConfig: AvatarConfig) => {
+    try {
+      await apiPut('/avatars/config', nextConfig);
+    } catch (e) {
+      console.error('Failed to save avatar config', e);
+    }
+  };
 
   const setConfig = useCallback((updater: Partial<AvatarConfig> | ((prev: AvatarConfig) => AvatarConfig)) => {
     setConfigState((prev) => {
@@ -49,8 +49,8 @@ export function useAvatarConfig() {
 
   const resetConfig = useCallback(() => {
     const fresh = { ...DEFAULT_AVATAR_CONFIG };
-    saveConfig(fresh);
     setConfigState(fresh);
+    saveConfig(fresh);
   }, []);
 
   return { config, setConfig, updateField, resetConfig };
