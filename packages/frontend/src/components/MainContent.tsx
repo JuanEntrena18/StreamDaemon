@@ -24,6 +24,7 @@ const AlertSoundsPanel = lazy(() => import('./AlertSoundsPanel').then(m => ({ de
 const AchievementsPanel = lazy(() => import('./AchievementsPanel').then(m => ({ default: m.AchievementsPanel })));
 const KpiPanel = lazy(() => import('./KpiPanel').then(m => ({ default: m.KpiPanel })));
 const BuilderPanel = lazy(() => import('./BuilderPanel').then(m => ({ default: m.BuilderPanel })));
+const AvatarsPanel = lazy(() => import('./AvatarsPanel').then(m => ({ default: m.AvatarsPanel })));
 
 interface Props {
   activeTab: Tab;
@@ -55,6 +56,7 @@ export function MainContent({ activeTab, tabDirection, channel, alwaysOnTop, tog
       case 'alertsounds': return <AlertSoundsPanel channel={channel} />;
       case 'achievements': return <AchievementsPanel channel={channel} />;
       case 'kpi':       return <KpiPanel channel={channel} />;
+      case 'avatars':   return <AvatarsPanel channel={channel} />;
       case 'config':    return <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />;
       default:          return null;
     }

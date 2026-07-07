@@ -220,6 +220,7 @@ export function App() {
         { id: 'timer' as Tab,      icon: '⏱️', label: s('temporizadorTab') },
         { id: 'scoreboard' as Tab, icon: '🏆', label: s('scoreboardTab') },
         { id: 'alertsounds' as Tab, icon: '🔊', label: s('alertsoundsTab') },
+        { id: 'avatars' as Tab, icon: '👾', label: s('avatarsTab') },
       ]},
       { id: 'utilidades-section', label: s('utilidades'), items: [
         { id: 'bitrate' as Tab,  icon: '🧮', label: s('bitrateTab') },

@@ -36,7 +36,8 @@
     "alertsoundsTab": "Sonidos de Alertas",
     "achievementsTab": "Logros",
     "kpiTab": "KPIs Analíticas",
-    "configTab": "Configuración"
+    "configTab": "Configuración",
+    "avatarsTab": "Avatares"
   },
   "app": {
     "minimizar": "Minimizar",
@@ -1215,12 +1216,44 @@
     "previewTitle": "Vista previa del overlay",
     "horizontal": "Horizontal",
     "vertical": "Vertical",
+
     "background": "Fondo",
     "bgCheckerboard": "Cuadrícula transparente",
     "bgBlack": "Negro",
     "bgWhite": "Blanco",
     "bgChroma": "Verde croma",
     "demoData": "Datos de demostración"
+  },
+  "avatars": {
+    "title": "Avatares del Chat",
+    "subtitle": "Pequeños avatares interactivos que reaccionan al chat y eventos. Tus espectadores podrán hacer que sus avatares bailen, salten o interactúen con el entorno.",
+    "enableLabel": "Activar avatares",
+    "enableDesc": "Habilita el sistema de avatares interactivos en el overlay. Los avatares de tus espectadores aparecerán y reaccionarán.",
+    "themeTitle": "Tema Visual",
+    "themeDesc": "El estilo de los avatares que se mostrarán en el stream.",
+    "themeDefault": "Robot Amigable",
+    "themeDefaultDesc": "Pequeños robots amigables, divertidos y coloridos.",
+    "themeCyberpunk": "Cyberpunk Neon",
+    "themeCyberpunkDesc": "Avatares con estética neón oscura, visores y aumentos cibernéticos.",
+    "theme8bits": "Retro 8-bits",
+    "theme8bitsDesc": "Personajes clásicos estilo NES/Game Boy con píxeles cuadrados.",
+    "limitsTitle": "Límites y Rendimiento",
+    "limitsDesc": "Ajusta la cantidad de avatares y físicas para optimizar el rendimiento de tu overlay.",
+    "maxAvatars": "Máximo de avatares simultáneos:",
+    "physics": "Físicas completas (gravedad, colisiones y rebotes)",
+    "nametags": "Mostrar nombres de usuario sobre los avatares",
+    "commandsTitle": "Comandos del Chat",
+    "commandsDesc": "Permite a los espectadores controlar a sus avatares escribiendo comandos en el chat de Twitch.",
+    "eventsTitle": "Reacciones Automáticas",
+    "eventsDesc": "Selecciona a qué eventos deben reaccionar los avatares automáticamente.",
+    "eventChat": "Hablar en el chat (bailan temporalmente)",
+    "eventBits": "Donación de Bits (reciben un empujón/golpe)",
+    "eventSub": "Nueva Suscripción (dan un gran salto de alegría)",
+    "eventRaid": "Raid entrante (todos los avatares saludan)",
+    "eventFollow": "Nuevo Seguidor (saluda a la cámara)",
+    "overlayTitle": "URL del Overlay",
+    "overlayDesc": "Copia esta URL y añádela como Fuente de Navegador en OBS (se recomienda tamaño completo, ej. 1920x1080).",
+    "betaInfoTitle": "Característica en BETA",
+    "betaInfoText": "El sistema de avatares está en fase experimental. Actualmente, muestra formas básicas que reaccionan a los eventos y físicas completas, preparando el terreno para los sprites completos. No afecta ni rompe ninguna otra funcionalidad de StreamDaemon. Si encuentras problemas, puedes desactivarlo desde el interruptor principal."
   }
 }
-

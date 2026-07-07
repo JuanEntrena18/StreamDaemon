@@ -36,7 +36,8 @@
     "alertsoundsTab": "Alert Sounds",
     "achievementsTab": "Achievements",
     "kpiTab": "KPI Analytics",
-    "configTab": "Settings"
+    "configTab": "Settings",
+    "avatarsTab": "Avatars"
   },
   "app": {
     "minimizar": "Minimize",
@@ -1143,12 +1144,44 @@
     "previewTitle": "Overlay Preview",
     "horizontal": "Horizontal",
     "vertical": "Vertical",
+
     "background": "Background",
     "bgCheckerboard": "Transparent Grid",
     "bgBlack": "Black",
     "bgWhite": "White",
     "bgChroma": "Chroma Green",
     "demoData": "Demo Data"
+  },
+  "avatars": {
+    "title": "Chat Avatars",
+    "subtitle": "Small interactive avatars that react to chat and events. Your viewers can make their avatars dance, jump, or interact with the environment.",
+    "enableLabel": "Enable avatars",
+    "enableDesc": "Enables the interactive avatar system on the overlay. Your viewers' avatars will appear and react.",
+    "themeTitle": "Visual Theme",
+    "themeDesc": "The style of the avatars that will be shown on stream.",
+    "themeDefault": "Friendly Robot",
+    "themeDefaultDesc": "Small friendly, fun, and colorful robots.",
+    "themeCyberpunk": "Cyberpunk Neon",
+    "themeCyberpunkDesc": "Avatars with dark neon aesthetics, visors, and cybernetic augmentations.",
+    "theme8bits": "Retro 8-bits",
+    "theme8bitsDesc": "Classic NES/Game Boy style characters with square pixels.",
+    "limitsTitle": "Limits & Performance",
+    "limitsDesc": "Adjust the amount of avatars and physics to optimize your overlay's performance.",
+    "maxAvatars": "Maximum simultaneous avatars:",
+    "physics": "Full physics (gravity, collisions, and bounces)",
+    "nametags": "Show usernames above avatars",
+    "commandsTitle": "Chat Commands",
+    "commandsDesc": "Allow viewers to control their avatars by typing commands in the Twitch chat.",
+    "eventsTitle": "Automatic Reactions",
+    "eventsDesc": "Select which events the avatars should react to automatically.",
+    "eventChat": "Speak in chat (they dance temporarily)",
+    "eventBits": "Bits Donation (they get pushed/hit)",
+    "eventSub": "New Subscription (they do a big joy jump)",
+    "eventRaid": "Incoming Raid (all avatars wave)",
+    "eventFollow": "New Follower (waves at the camera)",
+    "overlayTitle": "Overlay URL",
+    "overlayDesc": "Copy this URL and add it as a Browser Source in OBS (full size recommended, e.g. 1920x1080).",
+    "betaInfoTitle": "BETA Feature",
+    "betaInfoText": "The avatar system is in an experimental phase. Currently, it shows basic shapes that react to events with full physics, preparing the ground for the full sprites. It does not affect or break any other StreamDaemon functionality. If you encounter issues, you can disable it from the main switch."
   }
 }
-
