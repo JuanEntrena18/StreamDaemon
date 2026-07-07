@@ -9,8 +9,9 @@ export function useAvatarConfig() {
 
   useEffect(() => {
     apiGet('/avatars/config')
-      .then((data) => {
-        if (data) {
+      .then(async (res) => {
+        if (res.ok) {
+          const data = await res.json();
           setConfigState((prev) => ({ ...prev, ...data }));
         }
       })
