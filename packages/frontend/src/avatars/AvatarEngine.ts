@@ -46,6 +46,7 @@ export class AvatarEngine {
       antialias: true,
       resolution: Math.min(window.devicePixelRatio, 2),
       autoDensity: true,
+      preference: 'webgl',
     });
 
     // Start physics

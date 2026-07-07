@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { AvatarEngine } from '../avatars/AvatarEngine';
 import { useAvatarConfig } from '../avatars/avatarStore';
@@ -16,6 +16,7 @@ export function AvatarOverlay({ channel }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<AvatarEngine | null>(null);
   const { config } = useAvatarConfig();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -24,9 +25,9 @@ export function AvatarOverlay({ channel }: Props) {
     const engine = new AvatarEngine(canvas, config);
     engineRef.current = engine;
 
-    engine.init().then(() => {
-      // We'll use the component hooks to attach socket events
-      // to the existing socket, instead of creating a new raw one.
+    engine.init().catch((err) => {
+      console.error('Failed to init PixiJS', err);
+      setError(`WebGL Error: Asegúrate de tener activada la Aceleración por Hardware en la fuente de navegador de OBS.\nDetalle: ${err?.message || err}`);
     });
 
     return () => {
@@ -120,16 +121,28 @@ export function AvatarOverlay({ channel }: Props) {
   }
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-      }}
-    />
+    <>
+      {error && (
+        <div style={{
+          position: 'absolute', top: 20, left: 20, right: 20,
+          background: 'rgba(255,0,0,0.8)', color: 'white',
+          padding: '20px', borderRadius: '8px', fontSize: '24px',
+          fontFamily: 'sans-serif', zIndex: 9999
+        }}>
+          {error}
+        </div>
+      )}
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+        }}
+      />
+    </>
   );
 }

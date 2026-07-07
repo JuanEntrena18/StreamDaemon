@@ -6,7 +6,7 @@ import type { SpriteThemeConfig } from './types';
  */
 const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
   default: {
-    sheetPath: '/sprites/default/spritesheet.png',
+    sheetPath: './sprites/default/spritesheet.png',
     frameWidth: 64,
     frameHeight: 64,
     frames: {
@@ -21,7 +21,7 @@ const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
     tint: null,
   },
   cyberpunk: {
-    sheetPath: '/sprites/cyberpunk/spritesheet.png',
+    sheetPath: './sprites/cyberpunk/spritesheet.png',
     frameWidth: 64,
     frameHeight: 64,
     frames: {
@@ -36,7 +36,7 @@ const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
     tint: null,
   },
   '8bits': {
-    sheetPath: '/sprites/8bits/spritesheet.png',
+    sheetPath: './sprites/8bits/spritesheet.png',
     frameWidth: 32,
     frameHeight: 32,
     frames: {
