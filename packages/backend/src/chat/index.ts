@@ -122,6 +122,7 @@ export async function setupChat() {
 
   chatClient.onMessage((channel, user, text, msg) => {
     const channelName = channel.replace('#', '');
+    console.log(`[Twitch Chat] Received msg from ${user} in ${channelName}: ${text}`);
 
     const subTier = getSubTier(msg.userInfo.badges);
     handleCommands(channelName, user, text, subTier);

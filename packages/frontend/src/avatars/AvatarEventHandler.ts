@@ -49,10 +49,11 @@ const cooldowns = new Map<string, Map<string, number>>();
  */
 export function getActionForEvent(
   event: AvatarEventPayload,
-  enabledEvents: Record<string, boolean>,
+  enabledEvents: Record<string, boolean> | undefined,
 ): AvatarActionHandler | null {
   // Check if the event type is enabled
-  if (!enabledEvents[event.type]) return null;
+  if (enabledEvents && enabledEvents[event.type] === false) return null;
+  if (!enabledEvents && !EVENT_ACTION_MAP[event.type]) return null;
 
   const handler = EVENT_ACTION_MAP[event.type];
   if (!handler) return null;
@@ -79,7 +80,7 @@ export function getActionForEvent(
 export function getActionForCommand(
   userId: string,
   message: string,
-  commandCooldowns: Record<string, number>,
+  commandCooldowns: Record<string, number> | undefined,
 ): AvatarAction | null {
   const cmd = message.trim().split(' ')[0]?.toLowerCase();
   if (!cmd) return null;
@@ -88,7 +89,7 @@ export function getActionForCommand(
   if (!action) return null;
 
   // Check cooldown
-  const cooldownSeconds = commandCooldowns[cmd] ?? 0;
+  const cooldownSeconds = commandCooldowns?.[cmd] ?? 0;
   if (cooldownSeconds > 0) {
     const userCooldowns = cooldowns.get(userId);
     const lastTrigger = userCooldowns?.get(cmd) ?? 0;

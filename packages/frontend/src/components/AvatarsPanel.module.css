@@ -215,6 +215,7 @@
 
 /* Overlay URL */
 .urlBox {
+  display: block;
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-size: 0.72rem;
   color: var(--sf-text-2);

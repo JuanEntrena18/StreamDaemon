@@ -61,8 +61,8 @@ export function AvatarsPanel({ channel }: Props) {
 
   const toggleEvent = (key: string) => {
     updateField('eventActions', {
-      ...config.eventActions,
-      [key]: !config.eventActions[key],
+      ...(config.eventActions || {}),
+      [key]: !(config.eventActions?.[key] ?? true),
     });
   };
 
@@ -171,7 +171,7 @@ export function AvatarsPanel({ channel }: Props) {
             <p className={styles.sectionDesc} style={{ marginBottom: 0 }}>{t('avatars.commandsDesc')}</p>
           </div>
           <Toggle
-            checked={config.commandsEnabled}
+            checked={config.commandsEnabled ?? true}
             onChange={() => updateField('commandsEnabled', !config.commandsEnabled)}
             size="sm"
           />
@@ -182,7 +182,7 @@ export function AvatarsPanel({ channel }: Props) {
             <div key={cmd} className={styles.commandRow}>
               <span className={styles.commandName}>{cmd}</span>
               <span className={styles.commandCooldown}>
-                {config.commandCooldowns[cmd] ?? defaultCooldown}s cooldown
+                {config.commandCooldowns?.[cmd] ?? defaultCooldown}s cooldown
               </span>
             </div>
           ))}
@@ -201,7 +201,7 @@ export function AvatarsPanel({ channel }: Props) {
                 {t(labelKey)}
               </span>
               <Toggle
-                checked={config.eventActions[key] ?? true}
+                checked={config.eventActions?.[key] ?? true}
                 onChange={() => toggleEvent(key)}
                 size="sm"
               />

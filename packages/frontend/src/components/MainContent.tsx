@@ -34,6 +34,29 @@ interface Props {
   toggleAlwaysOnTop: () => void;
 }
 
+import React from 'react';
+
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: any}> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '2rem', color: '#ff4d4d', background: '#220000', borderRadius: '8px' }}>
+          <h3>Error en la Interfaz (Frontend Crash)</h3>
+          <p>{this.state.error?.message}</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export function MainContent({ activeTab, tabDirection, channel, alwaysOnTop, toggleAlwaysOnTop }: Props) {
   const panel = (() => {
     switch (activeTab) {
@@ -78,9 +101,11 @@ export function MainContent({ activeTab, tabDirection, channel, alwaysOnTop, tog
         exit="exit"
         transition={{ duration: 0.25, ease: 'easeOut' }}
       >
-        <Suspense fallback={<TabSkeleton />}>
-          {panel}
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<TabSkeleton />}>
+            {panel}
+          </Suspense>
+        </ErrorBoundary>
       </motion.div>
     </AnimatePresence>
   );
