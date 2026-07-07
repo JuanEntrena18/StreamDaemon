@@ -21,4 +21,4 @@ packages/desktop/extra/
 packages/desktop/electron-builder.env
 graphify-out/
 implementation_plan.md
-streamforge_avatars.md
+daemon_avatars.md
