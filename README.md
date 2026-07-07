@@ -1,6 +1,8 @@
 <div align="center">
 
-# ⚒️ StreamDaemon
+<img src="packages/frontend/public/logo.svg" width="80" height="80" alt="StreamDaemon logo">
+
+# StreamDaemon
 
 **Open-source stream tools, daemonically good.**
 
