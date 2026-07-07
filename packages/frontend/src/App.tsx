@@ -17,7 +17,7 @@ import { TtsManager } from './components/TtsManager';
 import styles from './App.module.css';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-const APP_VERSION = '0.4.2';
+const APP_VERSION = '0.4.5';
 
 // Clear stale localStorage keys when version changes
 try {

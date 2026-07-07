@@ -1,4 +1,4 @@
-﻿{
+{
   "nav": {
     "gestorDelStream": "GESTION DU STREAM",
     "estadisticas": "STATISTIQUES",
@@ -45,7 +45,7 @@
     "siempreEncima": "🎮 Toujours au premier plan",
     "desactivarSiempreEncima": "Désactiver toujours au premier plan",
     "activarSiempreEncima": "Activer toujours au premier plan",
-    "version": "v0.4.2 · Open Source",
+    "version": "v0.4.5 · Open Source",
     "panelControl": "Tableau de bord · StreamDaemon",
     "hash": "#",
     "placeholderCanal": "chaîne twitch...",
