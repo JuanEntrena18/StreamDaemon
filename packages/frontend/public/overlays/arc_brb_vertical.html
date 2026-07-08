@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arc Raiders Vertical - Be Right Back</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@600;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px;
+            background-color: #0b0c0e; overflow: hidden;
+            font-family: 'Share Tech Mono', monospace; color: #ffffff;
+            position: relative;
+        }
+
+        body::before {
+            content: " "; display: block; position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.45) 50%), 
+                        linear-gradient(90deg, rgba(255, 107, 0, 0.04), rgba(0, 242, 254, 0.03));
+            background-size: 100% 6px, 8px 100%; z-index: 10; pointer-events: none;
+        }
+
+        .tactical-grid {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(rgba(0, 242, 254, 0.08) 1.5px, transparent 1.5px);
+            background-size: 50px 50px; z-index: 1;
+        }
+
+        .terminal-container {
+            position: absolute; top: 80px; left: 50px; right: 50px; bottom: 80px;
+            border: 3px solid #00f2fe; background: rgba(13, 14, 16, 0.92);
+            clip-path: polygon(40px 0, calc(100% - 40px) 0, 100% 40px, 100% calc(100% - 40px), calc(100% - 40px) 100%, 40px 100%, 0 calc(100% - 40px), 0 40px);
+            z-index: 5; display: flex; flex-direction: column; justify-content: space-between;
+            padding: 60px 40px; box-shadow: 0 0 50px rgba(0, 242, 254, 0.2);
+        }
+
+        .status-header { border-bottom: 2px solid rgba(0,242,254,0.3); padding-bottom: 30px; text-align: center; }
+        .status-light { width: 18px; height: 18px; background: #ff6b00; border-radius: 50%; display: inline-block; box-shadow: 0 0 12px #ff6b00; animation: blink 1s steps(2, start) infinite; margin-right: 15px;}
+        @keyframes blink { to { visibility: hidden; } }
+        .status-title { font-family: 'Teko', sans-serif; font-size: 45px; color: #fff; letter-spacing: 4px; display: inline-block; vertical-align: middle; }
+
+        .middle-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+        .warning-stripe {
+            width: 400px; height: 15px;
+            background: repeating-linear-gradient(45deg, #ff6b00, #ff6b00 15px, #000 15px, #000 30px);
+            margin-bottom: 40px;
+        }
+
+        .brb-title { font-family: 'Teko', sans-serif; font-size: 110px; color: #ff6b00; letter-spacing: 5px; text-align: center; line-height: 1; margin-bottom: 10px; }
+        .brb-sub { font-size: 26px; color: #00f2fe; text-transform: uppercase; letter-spacing: 5px; text-align: center; margin-bottom: 5px; }
+
+        /* Chat en la parte inferior para dispositivos móviles */
+        .chat-section { border-top: 2px solid rgba(0,242,254,0.3); padding-top: 30px; width: 100%; }
+        .chat-title { font-family: 'Teko', sans-serif; font-size: 30px; color: #00f2fe; letter-spacing: 3px; margin-bottom: 15px; text-align: center; }
+        .chat-box { display: flex; flex-direction: column; gap: 12px; height: 350px; overflow: hidden; justify-content: flex-end; }
+        .chat-msg { background: rgba(0, 242, 254, 0.03); border-left: 4px solid #00f2fe; padding: 15px; font-size: 16px; border-radius: 0 8px 8px 0; }
+        .chat-user { font-weight: bold; color: #ff6b00; margin-right: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="tactical-grid"></div>
+
+    <div class="terminal-container">
+        <div class="status-header">
+            <div class="status-light"></div>
+            <div class="status-title">SEÑAL DETENIDA TEMPORALMENTE</div>
+        </div>
+
+        <div class="middle-panel">
+            <div class="warning-stripe"></div>
+            <div class="brb-title">REORGANIZANDO<br>EL EQUIPO</div>
+            <div class="brb-sub">Volvemos en breves instantes</div>
+            <div style="font-size: 16px; color: #888; letter-spacing: 3px; margin-top: 15px;">EXTRACCIÓN EN PROCESO...</div>
+        </div>
+
+        <div class="chat-section">
+            <div class="chat-title">COMUNICACIÓN RECEPTOR</div>
+            <div class="chat-box" id="chatWrapper">
+                <!-- Se inyecta dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MESSAGES = 4;
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#ff6b00';
+
+            msgNode.innerHTML = `<span class="chat-user" style="color: ${finalColor}">[${safeUsername}]</span><span>${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MESSAGES) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            const payload = event.data;
+            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
+                appendMessage(payload.username, payload.message, payload.color);
+            }
+        });
+    
+        const BACKEND_URL = window.location.protocol + '//' + window.location.host;
+        const CHANNEL = new URLSearchParams(window.location.search).get('channel') || 'default';
+        let socket;
+
+        function initSocket() {
+            try {
+                socket = io(BACKEND_URL, { transports: ['websocket'] });
+                socket.on('connect', () => {
+                    socket.emit('join:channel', CHANNEL);
+                });
+
+                socket.on('channel:follow', ({ userDisplayName }) => {
+                    addLogMessage(`NUEVO RECLUTA: ${userDisplayName}`);
+                });
+
+                socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+                    if (isGift) return;
+                    addLogMessage(`SUSCRIPCIÓN CONFIRMADA: ${userDisplayName}`);
+                });
+
+                socket.on('channel:subscription-message', ({ userDisplayName, cumulativeMonths }) => {
+                    addLogMessage(`RE-SUSCRIPCIÓN (${cumulativeMonths} meses): ${userDisplayName}`);
+                });
+
+                socket.on('channel:subgift', ({ gifterDisplayName, amount }) => {
+                    addLogMessage(`ALERTA DE SUMINISTROS: ${gifterDisplayName} regaló ${amount} subs`);
+                });
+
+                socket.on('channel:cheer', ({ userDisplayName, bits }) => {
+                    addLogMessage(`RECURSOS RECIBIDOS (${bits} bits): ${userDisplayName}`);
+                });
+
+                socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+                    addLogMessage(`PROTOCOLO ACTIVADO: ${rewardTitle} por ${userDisplayName}`);
+                });
+            } catch(e) {
+                console.error("Socket fallback", e);
+            }
+        }
+
+        function addLogMessage(msg) {
+            if (!logBox) return;
+            const logNode = document.createElement('div');
+            logNode.className = 'log-msg';
+            logNode.textContent = `[SYS] ${msg}`;
+            logBox.appendChild(logNode);
+            if (logBox.children.length > 8) {
+                logBox.removeChild(logBox.firstChild);
+            }
+        }
+
+        setTimeout(initSocket, 1000);
+    </script>
+    <script src="./js/socket.io.js"></script>
+</body>
+</html>

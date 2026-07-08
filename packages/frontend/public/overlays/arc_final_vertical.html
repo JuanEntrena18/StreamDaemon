@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arc Raiders Vertical - Stream Ending</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@600;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px;
+            background-color: #0b0c0e; overflow: hidden;
+            font-family: 'Share Tech Mono', monospace; color: #ffffff;
+            position: relative;
+        }
+
+        body::before {
+            content: " "; display: block; position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.45) 50%), 
+                        linear-gradient(90deg, rgba(255, 107, 0, 0.04), rgba(0, 242, 254, 0.03));
+            background-size: 100% 6px, 8px 100%; z-index: 10; pointer-events: none;
+        }
+
+        .tactical-grid {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(rgba(255, 107, 0, 0.08) 1.5px, transparent 1.5px);
+            background-size: 50px 50px; z-index: 1;
+        }
+
+        .terminal-container {
+            position: absolute; top: 80px; left: 50px; right: 50px; bottom: 80px;
+            border: 3px solid #ff6b00; background: rgba(13, 14, 16, 0.92);
+            clip-path: polygon(40px 0, calc(100% - 40px) 0, 100% 40px, 100% calc(100% - 40px), calc(100% - 40px) 100%, 40px 100%, 0 calc(100% - 40px), 0 40px);
+            z-index: 5; display: flex; flex-direction: column; justify-content: space-between;
+            padding: 60px 40px; box-shadow: 0 0 50px rgba(255, 107, 0, 0.2);
+        }
+
+        /* Encabezado */
+        .system-header { text-align: center; border-bottom: 2px solid rgba(255,107,0,0.3); padding-bottom: 30px; }
+        .ending-title { font-family: 'Teko', sans-serif; font-size: 85px; color: #ff6b00; letter-spacing: 5px; line-height: 0.9; }
+        .ending-sub { font-size: 22px; color: #00f2fe; text-transform: uppercase; letter-spacing: 5px; margin-top: 10px; }
+
+        /* Lista de Créditos (Desplazamiento Vertical) */
+        .credits-container {
+            flex: 1; margin: 40px 0; overflow: hidden; position: relative;
+            border-bottom: 1px solid rgba(255,107,0,0.1); border-top: 1px solid rgba(255,107,0,0.1);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+        }
+
+        .credits-scroll {
+            display: flex; flex-direction: column; gap: 40px;
+            animation: scrollCredits 25s linear infinite;
+        }
+
+        @keyframes scrollCredits {
+            0% { transform: translateY(100%); }
+            100% { transform: translateY(-100%); }
+        }
+
+        .credit-group { text-align: center; }
+        .credit-label { font-size: 16px; color: #00f2fe; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 10px; }
+        .credit-names { font-family: 'Teko', sans-serif; font-size: 38px; color: #ffffff; letter-spacing: 1px; }
+
+        /* Caja de Redes Sociales en vertical (Footer) */
+        .socials-footer { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+        .social-tag {
+            background: rgba(255, 107, 0, 0.03); border: 1.5px solid rgba(255, 107, 0, 0.3);
+            padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
+            clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
+        }
+        .platform-name { color: #00f2fe; font-size: 15px; letter-spacing: 2px; }
+        .username { font-size: 26px; font-family: 'Teko', sans-serif; color: #fff; letter-spacing: 1px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="tactical-grid"></div>
+
+    <div class="terminal-container">
+        <div class="system-header">
+            <div class="ending-title">INCURSIÓN<br>FINALIZADA</div>
+            <div class="ending-sub">Registro de extracción seguro // OFF</div>
+        </div>
+
+        <div class="credits-container">
+            <div class="credits-scroll">
+                <div class="credit-group">
+                    <div class="credit-label">NUEVOS RECLUTAS (FOLLOWS)</div>
+                    <div class="credit-names">Alex_Sniper // Raider88 // CyberKnight // GigaRaider</div>
+                </div>
+                <div class="credit-group">
+                    <div class="credit-label">MEJORAS DE ESCUADRÓN (SUBS)</div>
+                    <div class="credit-names">ZeroCool // AcidBurn // CrashOverride // CerealKiller</div>
+                </div>
+                <div class="credit-group">
+                    <div class="credit-label">SUMINISTROS ENVIADOS (DONACIONES)</div>
+                    <div class="credit-names">Lord_Vader (50$) // Neo_Arc (25$)</div>
+                </div>
+                <div class="credit-group">
+                    <div class="credit-label">CÉLULAS DE ENERGÍA (BITS)</div>
+                    <div class="credit-names">Trinity_7 (5000 Bits) // Morpheus (1200 Bits)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="socials-footer">
+            <div class="social-tag">
+                <span class="platform-name">TWITCH</span>
+                <span class="username">@tu_usuario</span>
+            </div>
+            <div class="social-tag">
+                <span class="platform-name">YOUTUBE</span>
+                <span class="username">@tu_canal</span>
+            </div>
+            <div class="social-tag">
+                <span class="platform-name">TIKTOK</span>
+                <span class="username">@tu_usuario</span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

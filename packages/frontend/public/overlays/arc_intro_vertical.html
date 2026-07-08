@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arc Raiders Vertical - Starting Soon</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@600;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px;
+            background-color: #0b0c0e; overflow: hidden;
+            font-family: 'Share Tech Mono', monospace; color: #ffffff;
+            position: relative;
+        }
+
+        body::before {
+            content: " "; display: block; position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.45) 50%), 
+                        linear-gradient(90deg, rgba(255, 107, 0, 0.04), rgba(0, 242, 254, 0.03));
+            background-size: 100% 6px, 8px 100%; z-index: 10; pointer-events: none;
+        }
+
+        .tactical-grid {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(rgba(255, 107, 0, 0.08) 1.5px, transparent 1.5px);
+            background-size: 50px 50px; z-index: 1;
+        }
+
+        .terminal-container {
+            position: absolute; top: 80px; left: 50px; right: 50px; bottom: 80px;
+            border: 3px solid #ff6b00; background: rgba(13, 14, 16, 0.92);
+            clip-path: polygon(40px 0, calc(100% - 40px) 0, 100% 40px, 100% calc(100% - 40px), calc(100% - 40px) 100%, 40px 100%, 0 calc(100% - 40px), 0 40px);
+            z-index: 5; display: flex; flex-direction: column; justify-content: space-between;
+            padding: 60px 40px; box-shadow: 0 0 50px rgba(255, 107, 0, 0.2);
+        }
+
+        /* Encabezado */
+        .system-header { border-bottom: 2px solid rgba(255,107,0,0.3); padding-bottom: 30px; text-align: center; }
+        .system-title { font-family: 'Teko', sans-serif; font-size: 45px; color: #00f2fe; letter-spacing: 4px; }
+
+        /* Centro: Radar Circular Grande y Timer */
+        .middle-section { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+
+        .radar-scanner {
+            width: 320px; height: 320px; border-radius: 50%; border: 3px solid #ff6b00;
+            position: relative; background: radial-gradient(circle, rgba(255,107,0,0.1) 0%, transparent 80%);
+            box-shadow: 0 0 40px rgba(255,107,0,0.2); overflow: hidden; margin-bottom: 60px;
+        }
+        .radar-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: conic-gradient(from 0deg, #ff6b00, transparent 120deg);
+            border-radius: 50%; animation: spinRadar 3s linear infinite;
+        }
+        @keyframes spinRadar { 100% { transform: rotate(360deg); } }
+
+        .timer-unit { text-align: center; }
+        .timer-label { font-family: 'Teko', sans-serif; font-size: 55px; color: #ff6b00; letter-spacing: 5px; }
+        .timer { font-size: 160px; font-weight: 900; letter-spacing: 5px; line-height: 1; margin-bottom: 30px;}
+
+        /* Barra de carga */
+        .extraction-progress { width: 450px; height: 16px; background: #111; border: 1.5px solid #ff6b00; position: relative; }
+        .progress-bar { height: 100%; width: 100%; background: #ff6b00; box-shadow: 0 0 15px #ff6b00; transition: width 1s linear; }
+
+        /* Pie de Página con Logs del Sistema */
+        .logs-footer { border-top: 2px solid rgba(255,107,0,0.3); padding-top: 30px; width: 100%; }
+        .logs-title { font-size: 18px; color: #00f2fe; margin-bottom: 15px; letter-spacing: 2px; }
+        .log-box { display: flex; flex-direction: column; gap: 8px; font-size: 15px; color: #888; text-align: left; height: 120px; overflow: hidden; }
+        .log-msg { border-left: 3px solid #00f2fe; padding-left: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="tactical-grid"></div>
+
+    <div class="terminal-container">
+        <div class="system-header">
+            <div class="system-title">ARC_TÁCTICO // MÓVIL DISPOSITIVO</div>
+            <div style="font-size: 14px; color: #ff6b00; letter-spacing: 3px; margin-top: 5px;">SISTEMA EN ESPERA</div>
+        </div>
+
+        <div class="middle-section">
+            <div class="radar-scanner">
+                <div class="radar-line"></div>
+            </div>
+            <div class="timer-unit">
+                <div class="timer-label">CONEXIÓN DEL TRANSMISOR</div>
+                <div class="timer" id="timerDisplay">05:00</div>
+                <center>
+                    <div class="extraction-progress">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                </center>
+            </div>
+        </div>
+
+        <div class="logs-footer">
+            <div class="logs-title">> SEÑALES_CONSOLA</div>
+            <div class="log-box" id="logBox">
+                <div class="log-msg">[SYS] Buscando red de transmisión...</div>
+                <div class="log-msg">[SYS] Enlazando baliza en formato 1080x1920...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let totalSeconds = 5 * 60;
+        const initialSeconds = totalSeconds;
+
+        const timerEl = document.getElementById('timerDisplay');
+        const progressEl = document.getElementById('progressBar');
+        const logBox = document.getElementById('logBox');
+
+        const sysLogs = [
+            "Optimizando ancho de banda móvil...",
+            "Comprobando canal alfa para overlays...",
+            "Conexión con OBS WebSocket verificada",
+            "Extracción remota preparada para el stream"
+        ];
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function tick() {
+            timerEl.textContent = formatTime(totalSeconds);
+            const percent = (totalSeconds / initialSeconds) * 100;
+            progressEl.style.width = percent + '%';
+
+            // Dynamic logs now handled by WebSockets`;
+                logBox.appendChild(node);
+                if (logBox.children.length > 3) logBox.removeChild(logBox.firstChild);
+            }
+
+            if (totalSeconds > 0) {
+                totalSeconds--;
+                setTimeout(tick, 1000);
+            } else {
+                timerEl.textContent = "LISTO";
+            }
+        }
+        tick();
+    
+        const BACKEND_URL = window.location.protocol + '//' + window.location.host;
+        const CHANNEL = new URLSearchParams(window.location.search).get('channel') || 'default';
+        let socket;
+
+        function initSocket() {
+            try {
+                socket = io(BACKEND_URL, { transports: ['websocket'] });
+                socket.on('connect', () => {
+                    socket.emit('join:channel', CHANNEL);
+                });
+
+                socket.on('channel:follow', ({ userDisplayName }) => {
+                    addLogMessage(`NUEVO RECLUTA: ${userDisplayName}`);
+                });
+
+                socket.on('channel:subscribe', ({ userDisplayName, tier, isGift }) => {
+                    if (isGift) return;
+                    addLogMessage(`SUSCRIPCIÓN CONFIRMADA: ${userDisplayName}`);
+                });
+
+                socket.on('channel:subscription-message', ({ userDisplayName, cumulativeMonths }) => {
+                    addLogMessage(`RE-SUSCRIPCIÓN (${cumulativeMonths} meses): ${userDisplayName}`);
+                });
+
+                socket.on('channel:subgift', ({ gifterDisplayName, amount }) => {
+                    addLogMessage(`ALERTA DE SUMINISTROS: ${gifterDisplayName} regaló ${amount} subs`);
+                });
+
+                socket.on('channel:cheer', ({ userDisplayName, bits }) => {
+                    addLogMessage(`RECURSOS RECIBIDOS (${bits} bits): ${userDisplayName}`);
+                });
+
+                socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
+                    addLogMessage(`PROTOCOLO ACTIVADO: ${rewardTitle} por ${userDisplayName}`);
+                });
+            } catch(e) {
+                console.error("Socket fallback", e);
+            }
+        }
+
+        function addLogMessage(msg) {
+            if (!logBox) return;
+            const logNode = document.createElement('div');
+            logNode.className = 'log-msg';
+            logNode.textContent = `[SYS] ${msg}`;
+            logBox.appendChild(logNode);
+            if (logBox.children.length > 8) {
+                logBox.removeChild(logBox.firstChild);
+            }
+        }
+
+        setTimeout(initSocket, 1000);
+    </script>
+    <script src="./js/socket.io.js"></script>
+</body>
+</html>

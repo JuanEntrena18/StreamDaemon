@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arc Raiders Vertical - Gameplay</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@600;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1080px; height: 1920px;
+            background-color: transparent; overflow: hidden;
+            font-family: 'Share Tech Mono', monospace; color: #ffffff;
+            position: relative;
+        }
+
+        /* ─── ZONA DE CAPTURA DEL JUEGO (75% superior - Transparente) ─── */
+        .game-area {
+            width: 1080px; height: 1450px;
+            background-color: transparent; position: relative;
+            border-top: 8px solid #ff6b00; border-left: 8px solid #ff6b00; border-right: 8px solid #ff6b00;
+            box-shadow: inset 0 0 60px rgba(255,107,0,0.15);
+        }
+
+        /* ─── PANEL INFERIOR DE CHAT E INTERFAZ (25%) ─── */
+        .bottom-panel {
+            width: 1080px; height: 470px;
+            background: linear-gradient(to bottom, #111215, #08090a);
+            border-top: 6px solid #00f2fe; position: relative;
+            display: flex; flex-direction: column;
+            box-shadow: 0 -15px 35px rgba(0,0,0,0.9);
+        }
+
+        /* Remaches en las esquinas inferiores */
+        .rivet {
+            position: absolute; width: 14px; height: 14px; background: #555;
+            border-radius: 50%; border: 1.5px solid #111; box-shadow: inset -2px -2px 3px #000; z-index: 10;
+        }
+        .r-bl { bottom: 20px; left: 20px; } .r-br { bottom: 20px; right: 20px; }
+
+        /* Cabecera del Panel Inferior */
+        .panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 45px; background: rgba(0,0,0,0.4);
+            border-bottom: 2px solid rgba(0,242,254,0.2);
+        }
+        .panel-title { font-family: 'Teko', sans-serif; font-size: 32px; color: #00f2fe; letter-spacing: 3px; }
+        .system-metric { font-size: 15px; color: #ff6b00; letter-spacing: 1px; }
+
+        /* Contenedor del Chat Vertical */
+        .chat-container {
+            flex: 1; padding: 25px 45px; display: flex; flex-direction: column;
+            justify-content: flex-end; overflow: hidden; z-index: 1;
+        }
+
+        .chat-msg {
+            background: rgba(0, 242, 254, 0.03); border-left: 5px solid #00f2fe;
+            padding: 16px 20px; margin-top: 14px; border-radius: 0 10px 10px 0;
+            font-size: 24px; color: #e4e4e4; line-height: 1.4;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
+        .chat-user { font-weight: bold; color: #ff6b00; margin-right: 12px; }
+
+        /* Ancla global React */
+        #overlay-root {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1000;
+        }
+        #overlay-root > * { pointer-events: auto; }
+
+    </style>
+</head>
+<body>
+
+    <div id="overlay-root"></div>
+
+    <!-- Área superior reservada para el juego -->
+    <div class="game-area"></div>
+
+    <!-- Panel de chat e interfaz inferior -->
+    <div class="bottom-panel">
+        <div class="rivet r-bl"></div><div class="rivet r-br"></div>
+        <div class="panel-header">
+            <span class="panel-title">CENTRAL_DE_DATOS // CHAT</span>
+            <span class="system-metric">BANDWIDTH_SECURE // OK</span>
+        </div>
+        <div class="chat-container" id="chatWrapper">
+            <!-- Los mensajes se inyectan dinámicamente -->
+        </div>
+    </div>
+
+    <script>
+        const chatWrapper = document.getElementById('chatWrapper');
+        const MAX_MESSAGES = 4; // Menos mensajes pero de tamaño mayor para máxima legibilidad móvil
+
+        function appendMessage(username, text, color) {
+            const msgNode = document.createElement('div');
+            msgNode.className = 'chat-msg';
+            const safeUsername = username.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const finalColor = color || '#ff6b00';
+
+            msgNode.innerHTML = `<span class="chat-user" style="color: ${finalColor}">${safeUsername}:</span><span class="chat-text">${safeText}</span>`;
+            chatWrapper.appendChild(msgNode);
+
+            if (chatWrapper.children.length > MAX_MESSAGES) {
+                chatWrapper.removeChild(chatWrapper.firstChild);
+            }
+        }
+
+        // Chat is now handled by WebSockets directly
+    
+        const BACKEND_URL = window.location.protocol + '//' + window.location.host;
+        const CHANNEL = new URLSearchParams(window.location.search).get('channel') || 'default';
+        let socket;
+
+        function initSocket() {
+            try {
+                socket = io(BACKEND_URL, { transports: ['websocket'] });
+                socket.on('connect', () => {
+                    socket.emit('join:channel', CHANNEL);
+                });
+
+                socket.on('chat:message', ({ user, text }) => {
+                    appendMessage(user.displayName || user.username, text, user.color);
+                });
+
+                socket.on('hud:update', (data) => {
+                    const viewersEl = document.getElementById('val-viewers');
+                    const followersEl = document.getElementById('val-followers');
+                    if(viewersEl && data.viewers !== undefined) viewersEl.textContent = data.viewers;
+                    if(followersEl && data.followers !== undefined) followersEl.textContent = data.followers;
+                });
+            } catch(e) {}
+        }
+        setTimeout(initSocket, 1000);
+    </script>
+    <script src="./js/socket.io.js"></script>
+</body>
+</html>

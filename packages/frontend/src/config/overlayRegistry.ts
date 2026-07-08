@@ -1,4 +1,4 @@
-export type OverlayCategory = 'general' | 'dj' | '8bits' | 'win95' | 'retrowave' | 'tactical' | 'wow-alliance' | 'wow-horde' | 'cyberpunk';
+export type OverlayCategory = 'general' | 'dj' | '8bits' | 'win95' | 'retrowave' | 'tactical' | 'wow-alliance' | 'wow-horde' | 'cyberpunk' | 'extraction';
 
 export interface OverlayEntry {
   id: string;
@@ -32,6 +32,7 @@ export const CATEGORIES: CategoryInfo[] = [
   { id: 'wow-alliance', labelKey: 'obs.catAlliance',    icon: '🔵', color: '#4a8cff', themeId: 'alliance' },
   { id: 'wow-horde',    labelKey: 'obs.catHorde',       icon: '🔴', color: '#ff2222', themeId: 'wow' },
   { id: 'cyberpunk',    labelKey: 'obs.catCyberpunk',   icon: '🌆', color: '#ff003c', themeId: 'cyberpunk' },
+  { id: 'extraction',   labelKey: 'obs.catExtraction',  icon: '🎯', color: '#ff6b00', themeId: 'extraction' },
 ];
 
 export const OVERLAY_REGISTRY: OverlayEntry[] = [
@@ -166,4 +167,14 @@ export const OVERLAY_REGISTRY: OverlayEntry[] = [
   { id: 'cyberpunk-vertical-brb',      icon: '⏳', labelKey: 'obs.cyberpunkVerticalBrb',        descKey: 'obs.cyberpunkVerticalBrbDesc',       mode: 'cyberpunk-vertical-brb',      supportsTheme: false, color: '#ff003c', filename: 'brb_vertical_cyberpunk.html',                    category: 'cyberpunk', orientation: 'vertical' },
   { id: 'cyberpunk-vertical-gameplay',      icon: '🎮', labelKey: 'obs.cyberpunkVerticalGameplay',     descKey: 'obs.cyberpunkVerticalGameplayDesc',     mode: 'cyberpunk-vertical-gameplay', supportsTheme: false, color: '#ff003c', filename: 'gameplay_vertical_cyberpunk.html',                 category: 'cyberpunk', orientation: 'vertical' },
   { id: 'cyberpunk-vertical-just-chatting', icon: '💬', labelKey: 'obs.cyberpunkVerticalJustChatting', descKey: 'obs.cyberpunkVerticalJustChattingDesc', mode: 'cyberpunk-vertical-just-chatting', supportsTheme: false, color: '#00f0ff', filename: 'just_chatting_vertical_cyberpunk.html',             category: 'cyberpunk', orientation: 'vertical' },
+
+  // ── Extraction ──
+  { id: 'extraction-start',       icon: '🚀', labelKey: 'obs.extractionStart',       descKey: 'obs.extractionStartDesc',       mode: 'extraction-start',       supportsTheme: false, color: '#ff6b00', filename: 'arc_intro_horizontal.html',     category: 'extraction', orientation: 'horizontal' },
+  { id: 'extraction-gameplay',    icon: '🎮', labelKey: 'obs.extractionGameplay',    descKey: 'obs.extractionGameplayDesc',    mode: 'extraction-gameplay',    supportsTheme: false, color: '#ff6b00', filename: 'arc_gameplay_horizontal.html',  category: 'extraction', orientation: 'horizontal' },
+  { id: 'extraction-brb',         icon: '⏳', labelKey: 'obs.extractionBrb',         descKey: 'obs.extractionBrbDesc',         mode: 'extraction-brb',         supportsTheme: false, color: '#ff6b00', filename: 'arc_brb_horizontal.html',       category: 'extraction', orientation: 'horizontal' },
+  { id: 'extraction-end',         icon: '🏁', labelKey: 'obs.extractionEnd',         descKey: 'obs.extractionEndDesc',         mode: 'extraction-end',         supportsTheme: false, color: '#ff6b00', filename: 'arc_final_horizontal.html',     category: 'extraction', orientation: 'horizontal' },
+  { id: 'extraction-start-v',     icon: '📱', labelKey: 'obs.extractionStartV',      descKey: 'obs.extractionStartVDesc',      mode: 'extraction-start-v',     supportsTheme: false, color: '#ff6b00', filename: 'arc_intro_vertical.html',       category: 'extraction', orientation: 'vertical' },
+  { id: 'extraction-gameplay-v',  icon: '📱', labelKey: 'obs.extractionGameplayV',   descKey: 'obs.extractionGameplayVDesc',   mode: 'extraction-gameplay-v',  supportsTheme: false, color: '#ff6b00', filename: 'arc_gameplay_vertical.html',    category: 'extraction', orientation: 'vertical' },
+  { id: 'extraction-brb-v',       icon: '📱', labelKey: 'obs.extractionBrbV',        descKey: 'obs.extractionBrbVDesc',        mode: 'extraction-brb-v',       supportsTheme: false, color: '#ff6b00', filename: 'arc_brb_vertical.html',         category: 'extraction', orientation: 'vertical' },
+  { id: 'extraction-end-v',       icon: '📱', labelKey: 'obs.extractionEndV',        descKey: 'obs.extractionEndVDesc',        mode: 'extraction-end-v',       supportsTheme: false, color: '#ff6b00', filename: 'arc_final_vertical.html',       category: 'extraction', orientation: 'vertical' },
 ];

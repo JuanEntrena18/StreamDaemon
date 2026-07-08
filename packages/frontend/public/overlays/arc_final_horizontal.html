@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arc Raiders - Stream Ending</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@600;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 1920px; height: 1080px;
+            background-color: #0b0c0e; overflow: hidden;
+            font-family: 'Share Tech Mono', monospace; color: #ffffff;
+            position: relative;
+        }
+
+        body::before {
+            content: " "; display: block; position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.45) 50%), 
+                        linear-gradient(90deg, rgba(255, 107, 0, 0.03), rgba(0, 242, 254, 0.02));
+            background-size: 100% 4px, 6px 100%; z-index: 10; pointer-events: none;
+        }
+
+        .tactical-grid {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(rgba(255, 107, 0, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px; z-index: 1;
+        }
+
+        .split-container {
+            display: grid; grid-template-columns: 1fr 1fr;
+            position: absolute; top: 50px; left: 50px; right: 50px; bottom: 50px;
+            z-index: 5; gap: 40px;
+        }
+
+        /* LADO IZQUIERDO: MARCA Y REDES SOCIALES */
+        .left-panel {
+            background: rgba(13, 14, 16, 0.9); border: 2px solid #ff6b00;
+            clip-path: polygon(30px 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%, 0 30px);
+            padding: 40px; display: flex; flex-direction: column; justify-content: center;
+        }
+
+        .title-unit { margin-bottom: 50px; }
+        .ending-title { font-family: 'Teko', sans-serif; font-size: 85px; color: #ff6b00; letter-spacing: 5px; line-height: 0.9; }
+        .ending-sub { font-size: 22px; color: #00f2fe; text-transform: uppercase; letter-spacing: 8px; }
+
+        .socials-grid { display: flex; flex-direction: column; gap: 20px; }
+        .social-tag {
+            background: rgba(255, 107, 0, 0.03); border: 1px solid rgba(255, 107, 0, 0.3);
+            padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;
+            clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
+        }
+        .platform-name { color: #00f2fe; font-size: 16px; letter-spacing: 3px; }
+        .username { font-size: 24px; font-family: 'Teko', sans-serif; color: #fff; letter-spacing: 1px; }
+
+        /* LADO DERECHO: CRÉDITOS Y RESUMEN */
+        .right-panel {
+            background: rgba(13, 14, 16, 0.9); border: 2px solid #00f2fe;
+            clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px));
+            padding: 40px; display: flex; flex-direction: column; overflow: hidden;
+            position: relative;
+        }
+
+        .panel-header-title {
+            font-family: 'Teko', sans-serif; font-size: 40px; color: #00f2fe; letter-spacing: 4px;
+            border-bottom: 2px solid rgba(0, 242, 254, 0.3); padding-bottom: 15px; margin-bottom: 30px;
+        }
+
+        /* Máscaras de degradado para los créditos que suben */
+        .credits-container {
+            flex: 1; overflow: hidden; position: relative;
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+        }
+
+        .credits-scroll {
+            display: flex; flex-direction: column; gap: 25px;
+            animation: scrollCredits 20s linear infinite;
+        }
+
+        @keyframes scrollCredits {
+            0% { transform: translateY(100%); }
+            100% { transform: translateY(-100%); }
+        }
+
+        .credit-group { text-align: center; }
+        .credit-label { font-size: 14px; color: #ff6b00; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 5px; }
+        .credit-names { font-family: 'Teko', sans-serif; font-size: 30px; color: #ffffff; letter-spacing: 1px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="tactical-grid"></div>
+
+    <div class="split-container">
+        <!-- Izquierda -->
+        <div class="left-panel">
+            <div class="title-unit">
+                <div class="ending-title">INCURSIÓN<br>COMPLETADA</div>
+                <div class="ending-sub">Protocolo de descompresión iniciado</div>
+            </div>
+
+            <div class="socials-grid">
+                <div class="social-tag">
+                    <span class="platform-name">LINK_TWITCH</span>
+                    <span class="username">@tu_usuario</span>
+                </div>
+                <div class="social-tag">
+                    <span class="platform-name">LINK_YOUTUBE</span>
+                    <span class="username">@tu_canal</span>
+                </div>
+                <div class="social-tag">
+                    <span class="platform-name">LINK_TIKTOK</span>
+                    <span class="username">@tu_usuario</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Derecha -->
+        <div class="right-panel">
+            <div class="panel-header-title">REGISTRO DE COMBATE DEL STREAM</div>
+            <div class="credits-container">
+                <div class="credits-scroll">
+                    <div class="credit-group">
+                        <div class="credit-label">NUEVOS RECLUTAS (FOLLOWS)</div>
+                        <div class="credit-names">Alex_Sniper // Raider88 // CyberKnight // GigaRaider</div>
+                    </div>
+                    <div class="credit-group">
+                        <div class="credit-label">MEJORAS DE ESCUADRÓN (SUBS)</div>
+                        <div class="credit-names">ZeroCool // AcidBurn // CrashOverride // CerealKiller</div>
+                    </div>
+                    <div class="credit-group">
+                        <div class="credit-label">SUMINISTROS ENVIADOS (DONACIONES)</div>
+                        <div class="credit-names">Lord_Vader (50$) // Neo_Arc (25$)</div>
+                    </div>
+                    <div class="credit-group">
+                        <div class="credit-label">CÉLULAS DE ENERGÍA (BITS)</div>
+                        <div class="credit-names">Trinity_7 (5000 Bits) // Morpheus (1200 Bits)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
