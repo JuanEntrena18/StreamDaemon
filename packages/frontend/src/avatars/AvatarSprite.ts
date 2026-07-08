@@ -87,7 +87,7 @@ export class AvatarSprite {
     this.nametag = new PIXI.Text({ text: config.displayName, style: NAMETAG_STYLE });
     this.nametag.anchor.set(0.5, 1);
     this.nametag.x = 0;
-    this.nametag.y = -28;
+    this.nametag.y = -52;
     this.container.addChild(this.nametag);
 
     // Randomize initial wander decision interval (2-6 seconds at 60fps)
@@ -185,30 +185,30 @@ export class AvatarSprite {
   private drawBody() {
     this.mainGraphic.clear();
     // Body — rounded rectangle
-    this.mainGraphic.roundRect(-16, -32, 32, 32, 8);
+    this.mainGraphic.roundRect(-24, -48, 48, 48, 10);
     this.mainGraphic.fill({ color: this.tint });
-    this.mainGraphic.roundRect(-16, -32, 32, 32, 8);
+    this.mainGraphic.roundRect(-24, -48, 48, 48, 10);
     this.mainGraphic.stroke({ color: 0xffffff, width: 2, alpha: 0.3 });
   }
 
   private drawEyes() {
     // Left eye
     this.eyeL.clear();
-    this.eyeL.circle(0, 0, 3);
+    this.eyeL.circle(0, 0, 4);
     this.eyeL.fill({ color: 0xffffff });
-    this.eyeL.circle(0.5, 0.5, 1.5);
+    this.eyeL.circle(0.5, 0.5, 2);
     this.eyeL.fill({ color: 0x111111 });
-    this.eyeL.x = -6;
-    this.eyeL.y = -22;
+    this.eyeL.x = -9;
+    this.eyeL.y = -34;
 
     // Right eye
     this.eyeR.clear();
-    this.eyeR.circle(0, 0, 3);
+    this.eyeR.circle(0, 0, 4);
     this.eyeR.fill({ color: 0xffffff });
-    this.eyeR.circle(0.5, 0.5, 1.5);
+    this.eyeR.circle(0.5, 0.5, 2);
     this.eyeR.fill({ color: 0x111111 });
-    this.eyeR.x = 6;
-    this.eyeR.y = -22;
+    this.eyeR.x = 9;
+    this.eyeR.y = -34;
   }
 
   // ─── Direction & Flip ──────────────────────────────────────────────

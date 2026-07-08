@@ -17,7 +17,7 @@ const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
       hit:   { index: 4, count: 3 },
       wave:  { index: 5, count: 4 },
     },
-    scale: 0.6,
+    scale: 1.0,
     tint: null,
   },
   cyberpunk: {
@@ -32,7 +32,7 @@ const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
       hit:   { index: 4, count: 3 },
       wave:  { index: 5, count: 4 },
     },
-    scale: 0.6,
+    scale: 1.0,
     tint: null,
   },
   '8bits': {
@@ -47,7 +47,7 @@ const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
       hit:   { index: 4, count: 3 },
       wave:  { index: 5, count: 4 },
     },
-    scale: 1.2,
+    scale: 2.0,
     tint: null,
   },
 };
