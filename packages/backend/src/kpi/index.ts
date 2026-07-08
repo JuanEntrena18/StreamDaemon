@@ -8,9 +8,11 @@ import type { ViewerSnapshot, KpiOverview, GamePerformance, BestSlot, ChatStats,
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { updateSessionViewers } from './session.js';
+import { prisma } from '../auth/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.resolve(__dirname, '../../data');
+const DATA_DIR = process.env.DATA_DIR || path.resolve(__dirname, '../../data');
 const SNAPSHOTS_FILE = path.join(DATA_DIR, 'kpi_snapshots.json');
 
 const MAX_SNAPSHOTS = 120;
@@ -87,6 +89,10 @@ export function recordSnapshot(channel: string, viewers: number, chattersActive:
 
   while (list.length > MAX_SNAPSHOTS) list.shift();
   saveSnapshots();
+
+  if (currentUser && currentUser.login.toLowerCase() === normChannel) {
+    updateSessionViewers(currentUser.id, viewers).catch(() => {});
+  }
 }
 
 function getChannelSnapshots(channel: string): ViewerSnapshot[] {
@@ -392,29 +398,47 @@ export function setupKpi(app: FastifyInstance) {
       if (!user) return reply.status(404).send({ error: 'Channel not found' });
 
       const startDate = getStartDate(period);
-      const videos = await apiClient.videos.getVideosByUser(user.id, { type: 'archive', period: 'all', limit: 100 }).catch(() => ({ data: [] }));
-
-      const filteredVideos = startDate
-        ? videos.data.filter(v => v.creationDate >= startDate)
-        : videos.data;
-
-      const channelInfo = await apiClient.channels.getChannelInfoById(user.id);
-      const fallbackGameName = channelInfo?.gameName || 'General';
+      
+      const sessions = await prisma.streamSession.findMany({
+        where: {
+          userId: user.id,
+          startedAt: startDate ? { gte: startDate } : undefined,
+        }
+      });
 
       const gameMap = new Map<string, { views: number[]; durations: number[]; count: number; followersGained: number; boxArtUrl?: string }>();
-      const events = getEvents(channel.toLowerCase());
 
-      for (const video of filteredVideos) {
-        const raw = getRawData(video) as Record<string, any>;
-        const gameName = (raw.game_name && raw.game_name !== 'Unknown') ? raw.game_name : fallbackGameName;
+      // Merge local DB sessions
+      for (const session of sessions) {
+        const gameName = session.gameName || 'General';
         if (!gameMap.has(gameName)) gameMap.set(gameName, { views: [], durations: [], count: 0, followersGained: 0 });
         const entry = gameMap.get(gameName)!;
-        entry.views.push(video.views);
-        entry.durations.push(video.durationInSeconds);
+        entry.views.push(session.viewersMax);
+        entry.durations.push(session.durationSeconds);
         entry.count++;
-        const startTime = video.creationDate.getTime();
-        const endTime = startTime + video.durationInSeconds * 1000;
-        entry.followersGained += events.filter(e => e.timestamp >= startTime && e.timestamp <= endTime && e.type === 'follow').length;
+        entry.followersGained += session.followersGained;
+      }
+
+      // If no local sessions exist, fallback to Twitch VODs (legacy mode)
+      if (sessions.length === 0) {
+        const videos = await apiClient.videos.getVideosByUser(user.id, { type: 'archive', period: 'all', limit: 100 }).catch(() => ({ data: [] }));
+        const filteredVideos = startDate ? videos.data.filter(v => v.creationDate >= startDate) : videos.data;
+        const channelInfo = await apiClient.channels.getChannelInfoById(user.id);
+        const fallbackGameName = channelInfo?.gameName || 'General';
+        const events = getEvents(channel.toLowerCase());
+
+        for (const video of filteredVideos) {
+          const raw = getRawData(video) as Record<string, any>;
+          const gameName = (raw.game_name && raw.game_name !== 'Unknown') ? raw.game_name : fallbackGameName;
+          if (!gameMap.has(gameName)) gameMap.set(gameName, { views: [], durations: [], count: 0, followersGained: 0 });
+          const entry = gameMap.get(gameName)!;
+          entry.views.push(video.views);
+          entry.durations.push(video.durationInSeconds);
+          entry.count++;
+          const startTime = video.creationDate.getTime();
+          const endTime = startTime + video.durationInSeconds * 1000;
+          entry.followersGained += events.filter(e => e.timestamp >= startTime && e.timestamp <= endTime && e.type === 'follow').length;
+        }
       }
 
       for (const gameName of gameMap.keys()) {

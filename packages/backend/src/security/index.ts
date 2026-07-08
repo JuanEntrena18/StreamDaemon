@@ -36,7 +36,7 @@ interface SecurityStats {
   lastResetDate: string;
 }
 
-const DATA_DIR = path.resolve('data');
+const DATA_DIR = process.env.DATA_DIR || path.resolve('data');
 const CONFIG_PATH = path.join(DATA_DIR, 'security-config.json');
 const BOT_LIST_PATH = path.join(DATA_DIR, 'known-bots.json');
 

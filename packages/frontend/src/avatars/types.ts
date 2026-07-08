@@ -62,7 +62,7 @@ export interface AvatarConfig {
 
 export const DEFAULT_AVATAR_CONFIG: AvatarConfig = {
   enabled: false,
-  theme: 'default',
+  theme: 'random',
   maxAvatars: 20,
   commandsEnabled: true,
   commandCooldowns: {

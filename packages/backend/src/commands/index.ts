@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { CommandAddSchema, CommandDeleteSchema, CommandToggleSchema, CommandUpdateSchema, CommandImportSchema } from '@streamdaemon/shared';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.resolve(__dirname, '../../data');
+const DATA_DIR = process.env.DATA_DIR || path.resolve(__dirname, '../../data');
 const COMMANDS_FILE = path.join(DATA_DIR, 'commands.json');
 
 interface Command {

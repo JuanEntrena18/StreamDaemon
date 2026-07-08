@@ -26,18 +26,18 @@ export class AvatarPhysics {
     this.ground = Matter.Bodies.rectangle(
       stageWidth / 2,
       stageHeight + 20,
-      stageWidth + 200,
+      10000,
       50,
       { isStatic: true, friction: 0.8, label: 'ground' },
     );
 
     // Side walls
     this.walls = [
-      Matter.Bodies.rectangle(-20, stageHeight / 2, 50, stageHeight * 2, {
+      Matter.Bodies.rectangle(-20, stageHeight / 2, 50, 10000, {
         isStatic: true,
         label: 'wall-left',
       }),
-      Matter.Bodies.rectangle(stageWidth + 20, stageHeight / 2, 50, stageHeight * 2, {
+      Matter.Bodies.rectangle(stageWidth + 20, stageHeight / 2, 50, 10000, {
         isStatic: true,
         label: 'wall-right',
       }),
@@ -101,13 +101,31 @@ export class AvatarPhysics {
     Matter.Body.applyForce(body, body.position, { x: 0, y: -strength });
   }
 
+  /**
+   * Apply a gentle horizontal walk force for wandering.
+   * Caps velocity to prevent runaway speed.
+   */
+  walkForce(userId: string, direction: number, strength = 0.0008) {
+    const body = this.bodies.get(userId);
+    if (!body) return;
+
+    const maxSpeed = 1.8;
+    if (Math.abs(body.velocity.x) < maxSpeed) {
+      Matter.Body.applyForce(body, body.position, { x: direction * strength, y: 0 });
+    }
+  }
+
+  /** Check if a body is approximately on the ground (low vertical velocity, near bottom). */
+  isOnGround(userId: string): boolean {
+    const body = this.bodies.get(userId);
+    if (!body) return false;
+    return Math.abs(body.velocity.y) < 0.5;
+  }
+
   /** Resize the world bounds (e.g. on window resize). */
   resize(width: number, height: number) {
-
-
     // Reposition ground and walls
     Matter.Body.setPosition(this.ground, { x: width / 2, y: height + 20 });
-    Matter.Body.setVertices(this.ground, Matter.Bodies.rectangle(width / 2, height + 20, width + 200, 50).vertices);
 
     if (this.walls[0]) {
       Matter.Body.setPosition(this.walls[0], { x: -20, y: height / 2 });

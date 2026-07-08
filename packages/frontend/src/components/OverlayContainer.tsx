@@ -25,6 +25,7 @@ function getParams() {
     mode: params.get('mode') ?? 'chat',
     theme: params.get('theme'),
     channel: params.get('channel') ?? '',
+    demo: params.get('demo') === 'true',
   };
 }
 
@@ -42,8 +43,8 @@ function saveSettings(settings: Record<string, unknown>) {
   } catch {}
 }
 
-function OverlayContent({ mode, theme, channel, fontFamily, fontSize, bgMode }: {
-  mode: string; theme: string | null; channel: string;
+function OverlayContent({ mode, theme, channel, demo, fontFamily, fontSize, bgMode }: {
+  mode: string; theme: string | null; channel: string; demo: boolean;
   fontFamily: string; fontSize: number; bgMode: 'transparent' | 'black';
 }) {
   const chatProps = { channel, fontFamily, fontSize, bgMode };
@@ -66,7 +67,7 @@ function OverlayContent({ mode, theme, channel, fontFamily, fontSize, bgMode }: 
     case 'cyanchat':
       return <CyanChatOverlay channel={channel} />;
     case 'avatars':
-      return <AvatarOverlay channel={channel} />;
+      return <AvatarOverlay channel={channel} demo={demo} />;
     case 'chat':
     default:
       if (theme === 'subnautica2') return <Subnautica2ChatOverlay channel={channel} />;
@@ -77,7 +78,7 @@ function OverlayContent({ mode, theme, channel, fontFamily, fontSize, bgMode }: 
 }
 
 export function OverlayContainer() {
-  const { mode, theme, channel } = getParams();
+  const { mode, theme, channel, demo } = getParams();
   const [settings, setSettings] = useState<{ fontFamily: string; fontSize: number; bgMode: 'transparent' | 'black' }>(() => ({
     fontFamily: "'Inter', sans-serif",
     fontSize: 14,
@@ -113,6 +114,7 @@ export function OverlayContainer() {
         mode={mode}
         theme={theme}
         channel={channel}
+        demo={demo}
         fontFamily={settings.fontFamily}
         fontSize={settings.fontSize}
         bgMode={settings.bgMode}

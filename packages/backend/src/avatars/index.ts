@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { getIO } from '../socket/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.resolve(__dirname, '../../data');
+const DATA_DIR = process.env.DATA_DIR || path.resolve(__dirname, '../../data');
 const CONFIG_FILE = path.join(DATA_DIR, 'avatar-config.json');
 
 // Mirror of AvatarConfig from frontend

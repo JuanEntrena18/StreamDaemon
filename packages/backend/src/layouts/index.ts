@@ -4,7 +4,7 @@ import path from 'path';
 import { LayoutSaveSchema, LayoutUpdateSchema } from '@streamdaemon/shared';
 import type { Layout } from '@streamdaemon/shared';
 
-const DATA_DIR = path.resolve('data/layouts');
+const DATA_DIR = path.join(process.env.DATA_DIR || path.resolve('data'), 'layouts');
 
 function ensureDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });

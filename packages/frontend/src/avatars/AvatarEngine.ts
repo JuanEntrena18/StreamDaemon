@@ -2,8 +2,8 @@ import 'pixi.js/unsafe-eval';
 import * as PIXI from 'pixi.js';
 import { AvatarPhysics } from './AvatarPhysics';
 import { AvatarSprite } from './AvatarSprite';
-import { getThemeConfig } from './AvatarThemeMapper';
 import { getActionForEvent, getActionForCommand, getBitsForce, clearCooldowns } from './AvatarEventHandler';
+import { getThemeConfig, getAvailableThemes } from './AvatarThemeMapper';
 import type { AvatarAction, AvatarConfig, AvatarEventPayload } from './types';
 
 /**
@@ -76,10 +76,19 @@ export class AvatarEngine {
     this.initialized = true;
   }
 
-  /** Main tick — sync physics positions to sprites. */
+  /** Main tick — sync physics positions to sprites and handle wander. */
   private onTick = () => {
-    for (const sprite of this.sprites.values()) {
+    for (const [userId, sprite] of this.sprites.entries()) {
+      // 1) Sync position from physics body
       sprite.syncWithPhysics();
+
+      // 2) Wander AI — only if physics is enabled and avatar is on ground
+      if (this.config.physicsEnabled && this.physics.isOnGround(userId)) {
+        const moveDir = sprite.tickWander();
+        if (moveDir !== 0) {
+          this.physics.walkForce(userId, moveDir);
+        }
+      }
     }
   };
 
@@ -117,9 +126,15 @@ export class AvatarEngine {
     const x = Math.random() * (width - 100) + 50;
     const y = -50; // Spawn above screen, will fall
 
-    const themeConfig = getThemeConfig(this.config.theme);
+    let activeTheme = this.config.theme;
+    if (activeTheme === 'random') {
+      const available = getAvailableThemes();
+      activeTheme = available[Math.floor(Math.random() * available.length)];
+    }
+
+    const themeConfig = getThemeConfig(activeTheme);
     const sprite = new AvatarSprite(
-      { userId, username, displayName, theme: this.config.theme, x, y },
+      { userId, username, displayName, theme: activeTheme, x, y },
       themeConfig,
     );
 

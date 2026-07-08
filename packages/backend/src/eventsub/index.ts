@@ -7,6 +7,7 @@ import { getActiveGiveaway } from '../giveaways/index.js';
 import { getAddTicketsFn } from '../chat/index.js';
 import { checkFollow } from '../security/index.js';
 import { addSubathonTime } from '../subathon/index.js';
+import { startStreamSession, endStreamSession, updateStreamGame, incrementSessionFollowers } from '../kpi/session.js';
 import crypto from 'crypto';
 
 let listener: EventSubWsListener | null = null;
@@ -54,6 +55,7 @@ export async function setupEventSub() {
       });
       recordEvent(channelName, 'follow', e.userDisplayName, 'siguió el canal');
       checkFollow(e.userId, e.userName).catch(() => {});
+      incrementSessionFollowers(userId);
       addSubathonTime(channelName, {
         id: crypto.randomUUID(), type: 'follow',
         user: e.userDisplayName, amount: 1, timeAdded: 0,
@@ -194,6 +196,27 @@ export async function setupEventSub() {
         timestamp: Date.now(),
       });
       recordEvent(channelName, 'raid', e.raidingBroadcasterDisplayName, `hizo raid con ${e.viewers} espectadores`, e.viewers);
+    });
+  });
+
+  trySubscribe('stream.online', () => {
+    listener!.onStreamOnline(userId, async (e) => {
+      console.log(`[Stream] ${channelName} is live!`);
+      const stream = await e.getStream();
+      startStreamSession(userId, e.id, stream?.gameName || 'General');
+    });
+  });
+
+  trySubscribe('stream.offline', () => {
+    listener!.onStreamOffline(userId, (e) => {
+      console.log(`[Stream] ${channelName} is offline.`);
+      endStreamSession(userId);
+    });
+  });
+
+  trySubscribe('channel.update', () => {
+    listener!.onChannelUpdate(userId, (e) => {
+      updateStreamGame(userId, e.categoryName || 'General');
     });
   });
 

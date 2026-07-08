@@ -12,7 +12,7 @@ import { incrementChatCounter } from '../kpi/index.js';
 import { ChatGreetingConfigSchema } from '@streamdaemon/shared';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.resolve(__dirname, '../../data');
+const DATA_DIR = process.env.DATA_DIR || path.resolve(__dirname, '../../data');
 const GREETING_CONFIG_FILE = path.join(DATA_DIR, 'chat-greeting.json');
 
 interface ChannelGreetingConfig {

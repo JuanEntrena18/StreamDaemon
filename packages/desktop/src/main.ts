@@ -61,6 +61,13 @@ mkdirSync(path.dirname(dbPath), { recursive: true });
 
 process.env.DATABASE_URL = `file:${dbPath}`;
 
+const dataDir = isDev
+  ? path.resolve(__dirname, '../../backend/data')
+  : path.join(app.getPath('userData'), 'data');
+
+mkdirSync(dataDir, { recursive: true });
+process.env.DATA_DIR = dataDir;
+
 // ── Version migration: clear old data on version change ────
 const APP_VERSION = '0.2.4';
 const versionMarkerPath = path.join(app.getPath('userData'), '.streamforger-version');
@@ -72,11 +79,8 @@ function runVersionMigration() {
   if (oldVersion !== APP_VERSION) {
     console.log(`🔄 Version migration: ${oldVersion || '(none)'} → ${APP_VERSION}`);
 
-    // Delete old configs to prevent stale data issues
-    try { rmSync(dbPath, { force: true }); console.log('  ✓ Database deleted'); } catch {}
-    const soundsDir = path.join(path.dirname(dbPath), 'data');
-    try { rmSync(path.join(soundsDir, 'alert-sounds.json'), { force: true }); console.log('  ✓ Alert sounds config deleted'); } catch {}
-    try { rmSync(path.join(soundsDir, 'alert-sounds'), { recursive: true, force: true }); console.log('  ✓ Alert sounds files deleted'); } catch {}
+    // Note: We no longer delete the database or configs here.
+    // Prisma db push will handle schema changes safely without losing the Twitch session.
 
     // Write current version marker
     writeFileSync(versionMarkerPath, APP_VERSION, 'utf8');

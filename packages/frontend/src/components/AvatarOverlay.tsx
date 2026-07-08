@@ -6,13 +6,14 @@ import { useAvatarConfig } from '../avatars/avatarStore';
 
 interface Props {
   channel: string;
+  demo?: boolean;
 }
 
 /**
  * Overlay component that mounts the PixiJS canvas for avatars.
  * Used as a Browser Source in OBS (mode=avatars).
  */
-export function AvatarOverlay({ channel }: Props) {
+export function AvatarOverlay({ channel, demo }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<AvatarEngine | null>(null);
   const { config } = useAvatarConfig();
@@ -63,9 +64,9 @@ export function AvatarOverlay({ channel }: Props) {
   useSocketEvent('channel:follow', useCallback((data: any) => {
     if (engineRef.current) {
       engineRef.current.handleEvent({
-        userId: data.userId || `follow-${Date.now()}`,
-        username: data.userLogin || 'viewer',
-        displayName: data.userName || 'Viewer',
+        userId: data.userId || data.userName || `follow-${Date.now()}`,
+        username: data.userName || 'viewer',
+        displayName: data.userDisplayName || 'Viewer',
         type: 'follow'
       });
     }
@@ -75,9 +76,9 @@ export function AvatarOverlay({ channel }: Props) {
   useSocketEvent('channel:cheer', useCallback((data: any) => {
     if (engineRef.current) {
       engineRef.current.handleEvent({
-        userId: data.userId || `cheer-${Date.now()}`,
-        username: data.userLogin || 'viewer',
-        displayName: data.userName || 'Viewer',
+        userId: data.userName || `cheer-${Date.now()}`,
+        username: data.userName || 'viewer',
+        displayName: data.userDisplayName || 'Viewer',
         type: 'bits',
         amount: data.bits
       });
@@ -88,9 +89,9 @@ export function AvatarOverlay({ channel }: Props) {
   useSocketEvent('channel:subscribe', useCallback((data: any) => {
     if (engineRef.current) {
       engineRef.current.handleEvent({
-        userId: data.userId || `sub-${Date.now()}`,
-        username: data.userLogin || 'viewer',
-        displayName: data.userName || 'Viewer',
+        userId: data.userName || `sub-${Date.now()}`,
+        username: data.userName || 'viewer',
+        displayName: data.userDisplayName || 'Viewer',
         type: 'subscription',
         tier: data.tier
       });
@@ -101,9 +102,9 @@ export function AvatarOverlay({ channel }: Props) {
   useSocketEvent('channel:raid', useCallback((data: any) => {
     if (engineRef.current) {
       engineRef.current.handleEvent({
-        userId: data.raidingBroadcasterId || `raid-${Date.now()}`,
-        username: data.raidingBroadcasterLogin || 'viewer',
-        displayName: data.raidingBroadcasterName || 'Viewer',
+        userId: data.fromChannel || `raid-${Date.now()}`,
+        username: data.fromChannel || 'viewer',
+        displayName: data.fromDisplayName || 'Viewer',
         type: 'raid'
       });
     }
@@ -115,6 +116,47 @@ export function AvatarOverlay({ channel }: Props) {
       engineRef.current.updateConfig(config);
     }
   }, [config]);
+
+  // Demo mode
+  useEffect(() => {
+    if (!demo) return;
+    
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let counter = 0;
+    const mockNames = ['Alex', 'Sam', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Quinn'];
+
+    const tick = () => {
+      const engine = engineRef.current;
+      if (engine && config.enabled) {
+        counter++;
+        const name = mockNames[counter % mockNames.length];
+        const userId = `demo-${name}`;
+
+        const rand = Math.random();
+        if (rand < 0.2) {
+          engine.handleChatMessage(userId, name.toLowerCase(), name, '!jump');
+        } else if (rand < 0.4) {
+          engine.handleChatMessage(userId, name.toLowerCase(), name, '!dance');
+        } else if (rand < 0.6) {
+          engine.handleEvent({
+            userId, username: name.toLowerCase(), displayName: name, type: 'bits', amount: Math.floor(Math.random() * 500) + 10
+          });
+        } else if (rand < 0.7) {
+          engine.handleEvent({
+            userId, username: name.toLowerCase(), displayName: name, type: 'follow'
+          });
+        } else {
+          engine.handleChatMessage(userId, name.toLowerCase(), name, 'Hello everyone! LURK');
+        }
+      }
+      timeoutId = setTimeout(tick, Math.random() * 2000 + 1000);
+    };
+
+    // Delay start slightly
+    timeoutId = setTimeout(tick, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [demo, config.enabled]);
 
   if (!config.enabled) {
     return null;

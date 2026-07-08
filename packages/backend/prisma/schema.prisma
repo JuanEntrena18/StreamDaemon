@@ -24,6 +24,7 @@ model User {
   predictions       Prediction[]
   securityConfig    SecurityConfig?
   securityWhitelist SecurityWhitelist[]
+  streamSessions    StreamSession[]
 }
 
 model ChannelConfig {
@@ -79,4 +80,17 @@ model SecurityWhitelist {
   createdAt DateTime @default(now())
 
   @@unique([userId, username])
+}
+
+model StreamSession {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  streamId        String?
+  gameName        String
+  startedAt       DateTime  @default(now())
+  endedAt         DateTime?
+  viewersMax      Int       @default(0)
+  followersGained Int       @default(0)
+  durationSeconds Int       @default(0)
 }

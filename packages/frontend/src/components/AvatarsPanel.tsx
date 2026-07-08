@@ -3,6 +3,7 @@ import { useTranslation } from '../i18n/context';
 import { useAvatarConfig } from '../avatars/avatarStore';
 import { getAvailableThemes } from '../avatars/AvatarThemeMapper';
 import { Toggle } from './Toggle';
+import { OverlayPreviewModal } from './OverlayPreviewModal';
 import styles from './AvatarsPanel.module.css';
 
 interface Props {
@@ -35,6 +36,7 @@ export function AvatarsPanel({ channel }: Props) {
   const { t } = useTranslation();
   const { config, updateField } = useAvatarConfig();
   const [copied, setCopied] = useState(false);
+  const [previewOrientation, setPreviewOrientation] = useState<'vertical' | 'horizontal' | null>(null);
 
   const overlayBaseUrl = import.meta.env.DEV ? 'http://localhost:5173' : window.location.origin;
   const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
@@ -215,12 +217,26 @@ export function AvatarsPanel({ channel }: Props) {
         <p className={styles.sectionTitle}>🔌 {t('avatars.overlayTitle')}</p>
         <p className={styles.sectionDesc}>{t('avatars.overlayDesc')}</p>
         <code className={styles.urlBox}>{overlayUrl}</code>
-        <button
-          onClick={copyUrl}
-          className={`sf-btn ${copied ? 'sf-btn-ghost' : 'sf-btn-primary'} ${styles.copyBtn}`}
-        >
-          {copied ? t('obs.copiado') : t('obs.copiar')}
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+          <button
+            onClick={copyUrl}
+            className={`sf-btn ${copied ? 'sf-btn-ghost' : 'sf-btn-primary'} ${styles.copyBtn}`}
+          >
+            {copied ? t('obs.copiado') : t('obs.copiar')}
+          </button>
+          <button
+            onClick={() => setPreviewOrientation('vertical')}
+            className={`sf-btn sf-btn-outline ${styles.copyBtn}`}
+          >
+            👁️ {t('obs.previsualizar') || 'Previsualizar'} (Vertical)
+          </button>
+          <button
+            onClick={() => setPreviewOrientation('horizontal')}
+            className={`sf-btn sf-btn-outline ${styles.copyBtn}`}
+          >
+            👁️ {t('obs.previsualizar') || 'Previsualizar'} (Horizontal)
+          </button>
+        </div>
       </div>
 
       {/* Beta info */}
@@ -228,6 +244,15 @@ export function AvatarsPanel({ channel }: Props) {
         <div className={styles.betaInfoTitle}>🧪 {t('avatars.betaInfoTitle')}</div>
         {t('avatars.betaInfoText')}
       </div>
+
+      {previewOrientation && (
+        <OverlayPreviewModal
+          open={true}
+          url={overlayUrl}
+          orientation={previewOrientation}
+          onClose={() => setPreviewOrientation(null)}
+        />
+      )}
     </div>
   );
 }

@@ -8,7 +8,7 @@ const TAG_LENGTH = 16;
 
 const LEGACY_SALT = 'streamforger-token-salt-v1';
 
-const DATA_DIR = path.resolve('data');
+const DATA_DIR = process.env.DATA_DIR || path.resolve('data');
 const SALT_FILE = path.join(DATA_DIR, 'token-salt.bin');
 
 function loadOrGenerateSalt(): Buffer {
