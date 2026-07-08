@@ -106,12 +106,9 @@
             }
         }
 
-        window.addEventListener('message', (event) => {
-            const payload = event.data;
-            if (payload && payload.type === 'NEW_CHAT_MESSAGE') {
-                appendMessage(payload.username, payload.message, payload.color);
-            }
-        });
+        // Demostración
+        setTimeout(() => appendMessage("Raider_Alpha", "Apuntando a las coordenadas de extracción"), 1500);
+        setTimeout(() => appendMessage("Dron_Tech", "Cobertura aérea asegurada."), 3000);
     
         const BACKEND_URL = window.location.protocol + '//' + window.location.host;
         const CHANNEL = new URLSearchParams(window.location.search).get('channel') || 'default';
@@ -146,7 +143,11 @@
                 });
 
                 socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
-                    addLogMessage(`PROTOCOLO ACTIVADO: ${rewardTitle} por ${userDisplayName}`);
+                    appendMessage(rewardTitle, `por ${userDisplayName}`, '#ff6b00');
+                });
+
+                socket.on('chat:message', ({ username, message, color }) => {
+                    appendMessage(username, message, color);
                 });
             } catch(e) {
                 console.error("Socket fallback", e);
@@ -154,14 +155,7 @@
         }
 
         function addLogMessage(msg) {
-            if (!logBox) return;
-            const logNode = document.createElement('div');
-            logNode.className = 'log-msg';
-            logNode.textContent = `[SYS] ${msg}`;
-            logBox.appendChild(logNode);
-            if (logBox.children.length > 8) {
-                logBox.removeChild(logBox.firstChild);
-            }
+            appendMessage('SYS', msg, '#888');
         }
 
         setTimeout(initSocket, 1000);

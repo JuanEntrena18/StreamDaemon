@@ -231,6 +231,10 @@
                 socket.on('channel:redemption', ({ userDisplayName, rewardTitle }) => {
                     addLogMessage(`PROTOCOLO ACTIVADO: ${rewardTitle} por ${userDisplayName}`);
                 });
+
+                socket.on('chat:message', ({ username, message, color }) => {
+                    addLogMessage(`${username}: ${message}`);
+                });
             } catch(e) {
                 console.error("Socket fallback", e);
             }
