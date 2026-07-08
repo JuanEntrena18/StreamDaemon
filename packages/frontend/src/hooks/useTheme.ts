@@ -47,6 +47,15 @@ const themes: Record<string, ThemeVars> = {
     '--theme-border': '2px solid #d4af37',
     '--theme-glow': '0 0 15px rgba(212, 175, 55, 0.25)',
   },
+  extraction: {
+    '--theme-primary': '#ff6b00',
+    '--theme-secondary': '#331500',
+    '--theme-bg': 'linear-gradient(180deg, #0f0a05 0%, #1a1005 100%)',
+    '--theme-accent': '#00f2fe',
+    '--theme-font': "'Courier New', monospace",
+    '--theme-border': '2px solid #ff6b00',
+    '--theme-glow': '0 0 15px rgba(255, 107, 0, 0.3)',
+  },
 };
 
 export function useTheme(themeId?: string | null) {

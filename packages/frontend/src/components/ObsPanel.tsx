@@ -41,6 +41,7 @@ const THEMES = [
   { id: 'retrowave', labelKey: 'obs.temaRetrowave' },
   { id: 'tactical', labelKey: 'obs.temaTactical' },
   { id: 'cyberpunk', labelKey: 'obs.temaCyberpunk' },
+  { id: 'extraction', labelKey: 'obs.temaExtraction' },
 ];
 
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
