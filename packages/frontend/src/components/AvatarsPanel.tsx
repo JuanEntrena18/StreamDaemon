@@ -163,6 +163,17 @@ export function AvatarsPanel({ channel }: Props) {
             size="sm"
           />
         </div>
+
+        <div className={styles.toggleRow} style={{ marginTop: '0.75rem' }}>
+          <div>
+            <span style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)' }}>{t('avatars.chatBubbles')}</span>
+          </div>
+          <Toggle
+            checked={config.chatBubbles ?? true}
+            onChange={() => updateField('chatBubbles', !(config.chatBubbles ?? true))}
+            size="sm"
+          />
+        </div>
       </div>
 
       {/* Chat commands */}

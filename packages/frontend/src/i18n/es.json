@@ -1260,6 +1260,7 @@
     "maxAvatars": "Máximo de avatares simultáneos:",
     "physics": "Físicas completas (gravedad, colisiones y rebotes)",
     "nametags": "Mostrar nombres de usuario sobre los avatares",
+    "chatBubbles": "Mostrar mensajes del chat como bocadillos sobre los avatares",
     "commandsTitle": "Comandos del Chat",
     "commandsDesc": "Permite a los espectadores controlar a sus avatares escribiendo comandos en el chat de Twitch.",
     "eventsTitle": "Reacciones Automáticas",

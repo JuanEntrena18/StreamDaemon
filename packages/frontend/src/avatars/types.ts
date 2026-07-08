@@ -58,6 +58,7 @@ export interface AvatarConfig {
   eventActions: Record<string, boolean>;
   physicsEnabled: boolean;
   nametagsVisible: boolean;
+  chatBubbles: boolean;
   animSpeedMultiplier: number;
 }
 
@@ -82,6 +83,7 @@ export const DEFAULT_AVATAR_CONFIG: AvatarConfig = {
   },
   physicsEnabled: true,
   nametagsVisible: true,
+  chatBubbles: true,
   animSpeedMultiplier: 1.0,
 };
 

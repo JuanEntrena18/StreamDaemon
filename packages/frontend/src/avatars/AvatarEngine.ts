@@ -208,6 +208,14 @@ export class AvatarEngine {
     // Spawn if needed
     this.spawnAvatar(userId, username, displayName);
 
+    // Show speech bubble if enabled
+    if (this.config.chatBubbles) {
+      const sprite = this.sprites.get(userId);
+      if (sprite) {
+        sprite.showSpeechBubble(message);
+      }
+    }
+
     // Check for commands
     const action = getActionForCommand(userId, message, this.config.commandCooldowns);
     if (action) {

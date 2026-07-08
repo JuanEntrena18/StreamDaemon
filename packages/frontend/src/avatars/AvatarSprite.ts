@@ -45,6 +45,8 @@ export class AvatarSprite {
   private animTimeline: gsap.core.Timeline | null = null;
   private destroyed = false;
   private durationMultiplier: number = 1.0;
+  private bubbleContainer: PIXI.Container | null = null;
+  private bubbleTimeline: gsap.core.Timeline | null = null;
 
   /** Direction the sprite is facing: 1 = right, -1 = left */
   private facingDir: 1 | -1 = 1;
@@ -501,12 +503,91 @@ export class AvatarSprite {
     }
   }
 
+  // ─── Speech Bubble ────────────────────────────────────────────────
+
+  showSpeechBubble(text: string) {
+    if (this.destroyed) return;
+
+    // Kill previous bubble
+    if (this.bubbleTimeline) {
+      this.bubbleTimeline.kill();
+      this.bubbleTimeline = null;
+    }
+    if (this.bubbleContainer) {
+      this.container.removeChild(this.bubbleContainer);
+      this.bubbleContainer.destroy({ children: true });
+      this.bubbleContainer = null;
+    }
+
+    // Truncate long messages
+    const displayText = text.length > 60 ? text.slice(0, 57) + '…' : text;
+
+    const bubble = new PIXI.Container();
+    const padding = 8;
+    const maxWidth = 160;
+    const textEl = new PIXI.Text({
+      text: displayText,
+      style: new PIXI.TextStyle({
+        fontFamily: 'Inter, system-ui, sans-serif',
+        fontSize: 11,
+        fill: 0x111111,
+        wordWrap: true,
+        wordWrapWidth: maxWidth - padding * 2,
+      }),
+    });
+    textEl.x = padding;
+    textEl.y = padding;
+
+    const bubbleW = Math.min(textEl.width + padding * 2, maxWidth);
+    const bubbleH = textEl.height + padding * 2;
+
+    const bg = new PIXI.Graphics();
+    bg.roundRect(0, 0, bubbleW, bubbleH, 6);
+    bg.fill({ color: 0xffffff });
+    bg.stroke({ color: 0xcccccc, width: 1 });
+
+    // Tail (small triangle pointing down)
+    bg.moveTo(bubbleW / 2 - 5, bubbleH);
+    bg.lineTo(bubbleW / 2, bubbleH + 6);
+    bg.lineTo(bubbleW / 2 + 5, bubbleH);
+    bg.fill({ color: 0xffffff });
+
+    bubble.addChild(bg);
+    bubble.addChild(textEl);
+    bubble.x = -bubbleW / 2;
+    bubble.y = -(bubbleH + 50); // Above nametag
+
+    bubble.alpha = 0;
+    this.container.addChild(bubble);
+    this.bubbleContainer = bubble;
+
+    // Animate: fade in, hold, fade out
+    this.bubbleTimeline = gsap.timeline({
+      onComplete: () => {
+        if (this.bubbleContainer) {
+          this.container.removeChild(this.bubbleContainer);
+          this.bubbleContainer.destroy({ children: true });
+          this.bubbleContainer = null;
+        }
+        this.bubbleTimeline = null;
+      },
+    });
+    this.bubbleTimeline
+      .to(bubble, { alpha: 1, duration: 0.2, ease: 'power2.out' })
+      .to(bubble, { alpha: 1, duration: 3.5 })
+      .to(bubble, { alpha: 0, duration: 0.4, ease: 'power2.in' });
+  }
+
   /** Remove from stage and clean up */
   destroy() {
     this.destroyed = true;
     if (this.animTimeline) {
       this.animTimeline.kill();
       this.animTimeline = null;
+    }
+    if (this.bubbleTimeline) {
+      this.bubbleTimeline.kill();
+      this.bubbleTimeline = null;
     }
     if (this.animatedSprite) {
       this.animatedSprite.onComplete = undefined;

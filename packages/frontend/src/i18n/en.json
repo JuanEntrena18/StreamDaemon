@@ -1191,6 +1191,7 @@
     "maxAvatars": "Maximum simultaneous avatars:",
     "physics": "Full physics (gravity, collisions, and bounces)",
     "nametags": "Show usernames above avatars",
+    "chatBubbles": "Show chat messages as speech bubbles above avatars",
     "commandsTitle": "Chat Commands",
     "commandsDesc": "Allow viewers to control their avatars by typing commands in the Twitch chat.",
     "eventsTitle": "Automatic Reactions",

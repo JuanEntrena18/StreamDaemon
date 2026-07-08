@@ -30,6 +30,7 @@ const DEFAULT_CONFIG = {
   },
   physicsEnabled: true,
   nametagsVisible: true,
+  chatBubbles: true,
   animSpeedMultiplier: 1.0,
 };
 
