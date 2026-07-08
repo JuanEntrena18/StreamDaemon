@@ -7,8 +7,8 @@ import type { SpriteThemeConfig } from './types';
 const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
   default: {
     sheetPath: '/sprites/default/spritesheet.png',
-    frameWidth: 128,
-    frameHeight: 128,
+    frameWidth: 64,
+    frameHeight: 80,
     frames: {
       idle:  { index: 0, count: 4 },
       run:   { index: 1, count: 6 },
@@ -17,28 +17,28 @@ const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
       hit:   { index: 4, count: 3 },
       wave:  { index: 5, count: 4 },
     },
-    scale: 1.0,
+    scale: 1.6,
     tint: null,
   },
   cyberpunk: {
     sheetPath: '/sprites/cyberpunk/spritesheet.png',
-    frameWidth: 128,
-    frameHeight: 128,
+    frameWidth: 80,
+    frameHeight: 88,
     frames: {
       idle:  { index: 0, count: 4 },
       run:   { index: 1, count: 6 },
       jump:  { index: 2, count: 3 },
-      dance: { index: 3, count: 8 },
+      dance: { index: 3, count: 6 },
       hit:   { index: 4, count: 3 },
       wave:  { index: 5, count: 4 },
     },
-    scale: 1.0,
+    scale: 1.5,
     tint: null,
   },
   '8bits': {
     sheetPath: '/sprites/8bits/spritesheet.png',
     frameWidth: 64,
-    frameHeight: 64,
+    frameHeight: 72,
     frames: {
       idle:  { index: 0, count: 4 },
       run:   { index: 1, count: 6 },
@@ -47,7 +47,7 @@ const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
       hit:   { index: 4, count: 3 },
       wave:  { index: 5, count: 4 },
     },
-    scale: 2.0,
+    scale: 1.8,
     tint: null,
   },
 };
