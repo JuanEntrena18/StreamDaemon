@@ -18,6 +18,7 @@
   "devDependencies": {
     "concurrently": "^9.0.0",
     "eslint": "^9.0.0",
+    "jimp": "^0.22.10",
     "prettier": "^3.2.0",
     "puppeteer": "^25.1.0",
     "typescript": "^5.4.0",
