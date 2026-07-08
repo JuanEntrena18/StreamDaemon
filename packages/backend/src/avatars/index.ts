@@ -30,6 +30,7 @@ const DEFAULT_CONFIG = {
   },
   physicsEnabled: true,
   nametagsVisible: true,
+  animSpeedMultiplier: 1.0,
 };
 
 let currentConfig = { ...DEFAULT_CONFIG };

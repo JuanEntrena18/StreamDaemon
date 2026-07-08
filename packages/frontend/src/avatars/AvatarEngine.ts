@@ -96,9 +96,10 @@ export class AvatarEngine {
   updateConfig(config: AvatarConfig) {
     this.config = config;
 
-    // Update nametag visibility
+    // Update nametag visibility and animation multiplier
     for (const sprite of this.sprites.values()) {
       sprite.setNametagVisible(config.nametagsVisible);
+      sprite.setDurationMultiplier(config.animSpeedMultiplier);
     }
 
     // Enforce max avatars
@@ -139,6 +140,7 @@ export class AvatarEngine {
     );
 
     sprite.setNametagVisible(this.config.nametagsVisible);
+    sprite.setDurationMultiplier(this.config.animSpeedMultiplier);
 
     // Add physics body
     if (this.config.physicsEnabled) {

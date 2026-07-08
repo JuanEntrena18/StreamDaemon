@@ -58,6 +58,7 @@ export interface AvatarConfig {
   eventActions: Record<string, boolean>;
   physicsEnabled: boolean;
   nametagsVisible: boolean;
+  animSpeedMultiplier: number;
 }
 
 export const DEFAULT_AVATAR_CONFIG: AvatarConfig = {
@@ -81,6 +82,7 @@ export const DEFAULT_AVATAR_CONFIG: AvatarConfig = {
   },
   physicsEnabled: true,
   nametagsVisible: true,
+  animSpeedMultiplier: 1.0,
 };
 
 // ─── Event Handler Types ───────────────────────────────────────────

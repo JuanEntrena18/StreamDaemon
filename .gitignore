@@ -22,3 +22,4 @@ packages/desktop/electron-builder.env
 graphify-out/
 implementation_plan.md
 daemon_avatars.md
+chess.md

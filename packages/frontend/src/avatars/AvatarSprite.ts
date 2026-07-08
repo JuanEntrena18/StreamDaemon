@@ -44,6 +44,7 @@ export class AvatarSprite {
   private tint: number;
   private animTimeline: gsap.core.Timeline | null = null;
   private destroyed = false;
+  private durationMultiplier: number = 1.0;
 
   /** Direction the sprite is facing: 1 = right, -1 = left */
   private facingDir: 1 | -1 = 1;
@@ -283,6 +284,11 @@ export class AvatarSprite {
     this.body = body;
   }
 
+  /** Set animation duration multiplier */
+  setDurationMultiplier(mult: number) {
+    this.durationMultiplier = Math.max(0.1, mult);
+  }
+
   /** Show or hide nametag */
   setNametagVisible(visible: boolean) {
     this.nametag.visible = visible;
@@ -388,8 +394,9 @@ export class AvatarSprite {
   }
 
   private animDance() {
+    const m = this.durationMultiplier;
     this.animTimeline = gsap.timeline({
-      repeat: 5, yoyo: true,
+      repeat: 8, yoyo: true,
       onComplete: () => {
         this._wanderState = 'idle';
         this.playAnimation('idle');
@@ -397,13 +404,14 @@ export class AvatarSprite {
     });
     const flipX = this.facingDir;
     this.animTimeline
-      .to(this.bodyContainer, { rotation: 0.2, duration: 0.15, ease: 'power2.inOut' })
-      .to(this.bodyContainer, { rotation: -0.2, duration: 0.15, ease: 'power2.inOut' })
-      .to(this.bodyContainer.scale, { y: 0.85, x: 1.15 * flipX, duration: 0.1, ease: 'power2.out' })
-      .to(this.bodyContainer.scale, { y: 1, x: 1 * flipX, duration: 0.1, ease: 'power2.in' });
+      .to(this.bodyContainer, { rotation: 0.25, duration: 0.25 * m, ease: 'power2.inOut' })
+      .to(this.bodyContainer, { rotation: -0.25, duration: 0.25 * m, ease: 'power2.inOut' })
+      .to(this.bodyContainer.scale, { y: 0.85, x: 1.15 * flipX, duration: 0.15 * m, ease: 'power2.out' })
+      .to(this.bodyContainer.scale, { y: 1, x: 1 * flipX, duration: 0.15 * m, ease: 'power2.in' });
   }
 
   private animJump() {
+    const m = this.durationMultiplier;
     this.animTimeline = gsap.timeline({
       onComplete: () => {
         this._wanderState = 'idle';
@@ -412,28 +420,30 @@ export class AvatarSprite {
     });
     const flipX = this.facingDir;
     this.animTimeline
-      .to(this.bodyContainer.scale, { y: 0.7, x: 1.3 * flipX, duration: 0.1, ease: 'power2.out' })
-      .to(this.bodyContainer.scale, { y: 1.2, x: 0.85 * flipX, duration: 0.2, ease: 'power2.out' })
-      .to(this.bodyContainer, { y: -20, duration: 0.2, ease: 'power2.out' }, "<")
-      .to(this.bodyContainer.scale, { y: 1, x: 1 * flipX, duration: 0.3, ease: 'bounce.out' })
-      .to(this.bodyContainer, { y: 0, duration: 0.3, ease: 'bounce.out' }, "<");
+      .to(this.bodyContainer.scale, { y: 0.7, x: 1.3 * flipX, duration: 0.15 * m, ease: 'power2.out' })
+      .to(this.bodyContainer.scale, { y: 1.2, x: 0.85 * flipX, duration: 0.25 * m, ease: 'power2.out' })
+      .to(this.bodyContainer, { y: -20, duration: 0.25 * m, ease: 'power2.out' }, "<")
+      .to(this.bodyContainer.scale, { y: 1, x: 1 * flipX, duration: 0.35 * m, ease: 'bounce.out' })
+      .to(this.bodyContainer, { y: 0, duration: 0.35 * m, ease: 'bounce.out' }, "<");
   }
 
   private animWave() {
+    const m = this.durationMultiplier;
     this.animTimeline = gsap.timeline({
-      repeat: 3,
+      repeat: 5,
       onComplete: () => {
         this._wanderState = 'idle';
         this.playAnimation('idle');
       },
     });
     this.animTimeline
-      .to(this.bodyContainer, { rotation: 0.15, duration: 0.2, ease: 'sine.inOut' })
-      .to(this.bodyContainer, { rotation: -0.15, duration: 0.2, ease: 'sine.inOut' })
-      .to(this.bodyContainer, { rotation: 0, duration: 0.2, ease: 'sine.inOut' });
+      .to(this.bodyContainer, { rotation: 0.15, duration: 0.3 * m, ease: 'sine.inOut' })
+      .to(this.bodyContainer, { rotation: -0.15, duration: 0.3 * m, ease: 'sine.inOut' })
+      .to(this.bodyContainer, { rotation: 0, duration: 0.3 * m, ease: 'sine.inOut' });
   }
 
   private animHit() {
+    const m = this.durationMultiplier;
     this.animTimeline = gsap.timeline({
       onComplete: () => {
         this._wanderState = 'idle';
@@ -441,10 +451,10 @@ export class AvatarSprite {
       },
     });
     this.animTimeline
-      .to(this.bodyContainer, { x: -5, duration: 0.05 })
-      .to(this.bodyContainer, { x: 5, duration: 0.05 })
-      .to(this.bodyContainer, { x: -3, duration: 0.05 })
-      .to(this.bodyContainer, { x: 0, duration: 0.05 });
+      .to(this.bodyContainer, { x: -5, duration: 0.07 * m })
+      .to(this.bodyContainer, { x: 5, duration: 0.07 * m })
+      .to(this.bodyContainer, { x: -3, duration: 0.07 * m })
+      .to(this.bodyContainer, { x: 0, duration: 0.07 * m });
     this.flash(0xff0000, 0.2);
   }
 
@@ -457,6 +467,7 @@ export class AvatarSprite {
   }
 
   private animExplode() {
+    const m = this.durationMultiplier;
     this.animTimeline = gsap.timeline({
       onComplete: () => {
         this._wanderState = 'idle';
@@ -465,11 +476,11 @@ export class AvatarSprite {
     });
     const flipX = this.facingDir;
     this.animTimeline
-      .to(this.bodyContainer.scale, { x: 1.5 * flipX, y: 1.5, duration: 0.2, ease: 'power2.out' })
-      .to(this.bodyContainer, { alpha: 0.5, duration: 0.2, ease: 'power2.out' }, "<")
-      .to(this.bodyContainer.scale, { x: 0.8 * flipX, y: 0.8, duration: 0.15 })
-      .to(this.bodyContainer, { alpha: 1, duration: 0.15 }, "<")
-      .to(this.bodyContainer.scale, { x: 1 * flipX, y: 1, duration: 0.3, ease: 'elastic.out(1, 0.5)' });
+      .to(this.bodyContainer.scale, { x: 1.5 * flipX, y: 1.5, duration: 0.3 * m, ease: 'power2.out' })
+      .to(this.bodyContainer, { alpha: 0.5, duration: 0.3 * m, ease: 'power2.out' }, "<")
+      .to(this.bodyContainer.scale, { x: 0.8 * flipX, y: 0.8, duration: 0.25 * m })
+      .to(this.bodyContainer, { alpha: 1, duration: 0.25 * m }, "<")
+      .to(this.bodyContainer.scale, { x: 1 * flipX, y: 1, duration: 0.5 * m, ease: 'elastic.out(1, 0.5)' });
   }
 
   private animSleep() {
