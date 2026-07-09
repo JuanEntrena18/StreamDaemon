@@ -221,6 +221,17 @@ export async function setupEventSub() {
   });
 
   console.log(`✅ EventSub listener started for ${currentUser.displayName}`);
+
+  // Check if they are already live when starting
+  try {
+    const stream = await apiClient.streams.getStreamByUserId(userId);
+    if (stream) {
+      console.log(`[Stream] Initial status: ${channelName} is live playing ${stream.gameName}`);
+      updateStreamGame(userId, stream.gameName || 'General', stream.id);
+    }
+  } catch (err) {
+    console.error(`[Stream] Failed to check initial stream status:`, err);
+  }
 }
 
 export async function stopEventSub() {

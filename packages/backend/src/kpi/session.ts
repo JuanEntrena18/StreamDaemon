@@ -2,6 +2,19 @@ import { prisma } from '../auth/index.js';
 
 let activeSessions = new Map<string, string>(); // userId -> sessionId
 
+export async function restoreActiveSessions() {
+  try {
+    const active = await prisma.streamSession.findMany({ where: { endedAt: null } });
+    for (const session of active) {
+      activeSessions.set(session.userId, session.id);
+      console.log(`[KPI] Restored active session for user ${session.userId}, game: ${session.gameName}`);
+    }
+  } catch (err) {
+    console.error(`[KPI] Failed to restore active sessions:`, err);
+  }
+}
+
+
 export async function startStreamSession(userId: string, streamId: string | undefined, gameName: string) {
   try {
     // End any existing session just in case

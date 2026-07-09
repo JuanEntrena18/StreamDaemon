@@ -8,7 +8,7 @@ import type { ViewerSnapshot, KpiOverview, GamePerformance, BestSlot, ChatStats,
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { updateSessionViewers } from './session.js';
+import { updateSessionViewers, restoreActiveSessions } from './session.js';
 import { prisma } from '../auth/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -125,6 +125,7 @@ function calculateDelta(current: number, previous: number): number | undefined {
 
 export function setupKpi(app: FastifyInstance) {
   loadSnapshots();
+  restoreActiveSessions();
 
   if (!chatMessageInterval) {
     chatMessageInterval = setInterval(() => { 
@@ -414,7 +415,13 @@ export function setupKpi(app: FastifyInstance) {
         if (!gameMap.has(gameName)) gameMap.set(gameName, { views: [], durations: [], count: 0, followersGained: 0 });
         const entry = gameMap.get(gameName)!;
         entry.views.push(session.viewersMax);
-        entry.durations.push(session.durationSeconds);
+        
+        let duration = session.durationSeconds;
+        if (!session.endedAt) {
+          duration = Math.floor((Date.now() - session.startedAt.getTime()) / 1000);
+        }
+        entry.durations.push(duration);
+        
         entry.count++;
         entry.followersGained += session.followersGained;
       }
