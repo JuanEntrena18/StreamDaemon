@@ -1255,6 +1255,8 @@
     "themeCyberpunkDesc": "Avatares con estética neón oscura, visores y aumentos cibernéticos.",
     "theme8bits": "Retro 8-bits",
     "theme8bitsDesc": "Personajes clásicos estilo NES/Game Boy con píxeles cuadrados.",
+    "themeHorde": "Orco de la Horda",
+    "themeHordeDesc": "Guerreros orcos de la Horda con armadura roja y pintura de guerra.",
     "limitsTitle": "Límites y Rendimiento",
     "limitsDesc": "Ajusta la cantidad de avatares y físicas para optimizar el rendimiento de tu overlay.",
     "maxAvatars": "Máximo de avatares simultáneos:",

@@ -1186,6 +1186,8 @@
     "themeCyberpunkDesc": "Avatars with dark neon aesthetics, visors, and cybernetic augmentations.",
     "theme8bits": "Retro 8-bits",
     "theme8bitsDesc": "Classic NES/Game Boy style characters with square pixels.",
+    "themeHorde": "Horde Orc",
+    "themeHordeDesc": "Fierce Horde orc warriors with red war armor and tribal war paint.",
     "limitsTitle": "Limits & Performance",
     "limitsDesc": "Adjust the amount of avatars and physics to optimize your overlay's performance.",
     "maxAvatars": "Maximum simultaneous avatars:",

@@ -50,6 +50,21 @@ const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
     scale: 1.8,
     tint: null,
   },
+  horde: {
+    sheetPath: '/sprites/horde/spritesheet.png',
+    frameWidth: 80,
+    frameHeight: 88,
+    frames: {
+      idle:  { index: 0, count: 4 },
+      run:   { index: 1, count: 6 },
+      jump:  { index: 2, count: 3 },
+      dance: { index: 3, count: 8 },
+      hit:   { index: 4, count: 3 },
+      wave:  { index: 5, count: 4 },
+    },
+    scale: 1.5,
+    tint: null,
+  },
 };
 
 /**

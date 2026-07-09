@@ -14,6 +14,7 @@ const THEME_META: Record<string, { icon: string; nameKey: string; descKey: strin
   default:   { icon: '🤖', nameKey: 'avatars.themeDefault',   descKey: 'avatars.themeDefaultDesc' },
   cyberpunk: { icon: '🌆', nameKey: 'avatars.themeCyberpunk', descKey: 'avatars.themeCyberpunkDesc' },
   '8bits':   { icon: '🕹️', nameKey: 'avatars.theme8bits',    descKey: 'avatars.theme8bitsDesc' },
+  horde:     { icon: '⚔️', nameKey: 'avatars.themeHorde',    descKey: 'avatars.themeHordeDesc' },
 };
 
 const EVENTS = [
