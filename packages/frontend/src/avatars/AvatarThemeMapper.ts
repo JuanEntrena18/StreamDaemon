@@ -7,8 +7,8 @@ import type { SpriteThemeConfig } from './types';
 const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
   default: {
     sheetPath: '/sprites/default/spritesheet.png',
-    frameWidth: 64,
-    frameHeight: 80,
+    frameWidth: 128,
+    frameHeight: 128,
     frames: {
       idle:  { index: 0, count: 4 },
       run:   { index: 1, count: 6 },
@@ -17,13 +17,13 @@ const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
       hit:   { index: 4, count: 3 },
       wave:  { index: 5, count: 4 },
     },
-    scale: 1.6,
+    scale: 0.8,
     tint: null,
   },
   cyberpunk: {
     sheetPath: '/sprites/cyberpunk/spritesheet.png',
-    frameWidth: 80,
-    frameHeight: 88,
+    frameWidth: 128,
+    frameHeight: 128,
     frames: {
       idle:  { index: 0, count: 4 },
       run:   { index: 1, count: 6 },
@@ -32,13 +32,13 @@ const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
       hit:   { index: 4, count: 3 },
       wave:  { index: 5, count: 4 },
     },
-    scale: 1.5,
+    scale: 0.8,
     tint: null,
   },
   '8bits': {
     sheetPath: '/sprites/8bits/spritesheet.png',
-    frameWidth: 64,
-    frameHeight: 72,
+    frameWidth: 128,
+    frameHeight: 128,
     frames: {
       idle:  { index: 0, count: 4 },
       run:   { index: 1, count: 6 },
@@ -47,13 +47,13 @@ const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
       hit:   { index: 4, count: 3 },
       wave:  { index: 5, count: 4 },
     },
-    scale: 1.8,
+    scale: 0.9,
     tint: null,
   },
   horde: {
     sheetPath: '/sprites/horde/spritesheet.png',
-    frameWidth: 80,
-    frameHeight: 88,
+    frameWidth: 128,
+    frameHeight: 128,
     frames: {
       idle:  { index: 0, count: 4 },
       run:   { index: 1, count: 6 },
@@ -62,7 +62,7 @@ const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
       hit:   { index: 4, count: 3 },
       wave:  { index: 5, count: 4 },
     },
-    scale: 1.5,
+    scale: 0.8,
     tint: null,
   },
 };
