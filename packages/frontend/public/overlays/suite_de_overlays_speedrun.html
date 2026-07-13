@@ -1,647 +1,837 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamDaemon - Speedrun Overlay Suite</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: transparent;
-        }
-        .font-tech {
-            font-family: 'Orbitron', sans-serif;
-        }
-        .font-mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-        /* Efecto de Scanlines Retro */
-        .scanlines::after {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(0, 240, 255, 0.03), rgba(255, 0, 128, 0.02));
-            background-size: 100% 4px, 6px 100%;
-            z-index: 99;
-            pointer-events: none;
-        }
-        /* Rejilla retro futurista */
-        .grid-bg {
-            background-size: 40px 40px;
-            background-image: linear-gradient(to right, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
-        }
-        .glow-green { text-shadow: 0 0 10px rgba(34, 197, 94, 0.6); }
-        .glow-red { text-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
-        .glow-gold { text-shadow: 0 0 15px rgba(234, 179, 8, 0.8); }
-        .glow-cyan { text-shadow: 0 0 10px rgba(6, 182, 212, 0.6); }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StreamDaemon - Speedrun Overlay Suite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── Design Tokens ── */
+    :root {
+      --bg: #0a0a1a;
+      --surface: rgba(255,255,255,0.04);
+      --surface-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08);
+      --border-accent: rgba(124,58,237,0.5);
+      --primary: #7c3aed;
+      --primary-light: #a855f7;
+      --primary-glow: rgba(124,58,237,0.35);
+      --accent: #6366f1;
+      --teal: #06b6d4;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text: #f8fafc;
+      --text-2: #94a3b8;
+      --text-3: #64748b;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+      --font: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+      --font-tech: 'Orbitron', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font);
+      background: transparent;
+      color: var(--text);
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      user-select: none;
+      position: relative;
+    }
+
+    /* ── Glass Card ── */
+    .glass {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .glass-sm {
+      border-radius: var(--radius-sm);
+    }
+
+    .glass-accent {
+      border-color: var(--border-accent);
+    }
+
+    /* ── Scanlines ── */
+    .scanlines::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.15) 2px,
+        rgba(0,0,0,0.15) 4px
+      );
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    /* ── Grid Background ── */
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* ── Glows ── */
+    .glow-green  { text-shadow: 0 0 10px rgba(16,185,129,0.5); }
+    .glow-red    { text-shadow: 0 0 10px rgba(239,68,68,0.5); }
+    .glow-gold   { text-shadow: 0 0 15px rgba(245,158,11,0.7); }
+    .glow-teal   { text-shadow: 0 0 12px rgba(6,182,212,0.5); }
+    .glow-violet { text-shadow: 0 0 12px rgba(124,58,237,0.5); }
+
+    /* ── Scene Transitions ── */
+    .scene {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      opacity: 1;
+      transform: scale(1);
+    }
+    .scene.hidden {
+      display: none;
+    }
+
+    /* ── Scene Backgrounds ── */
+    .bg-dark {
+      background: var(--bg);
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: var(--font);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      outline: none;
+      white-space: nowrap;
+      color: var(--text-2);
+      background: var(--surface);
+    }
+    .btn:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      border: none;
+      box-shadow: 0 2px 12px var(--primary-glow);
+    }
+    .btn-primary:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 4px 20px var(--primary-glow);
+      transform: translateY(-1px);
+    }
+    .btn-success {
+      background: rgba(16,185,129,0.15);
+      color: #34d399;
+      border: 1px solid rgba(16,185,129,0.3);
+    }
+    .btn-success:hover {
+      background: rgba(16,185,129,0.25);
+    }
+    .btn-danger {
+      background: rgba(239,68,68,0.15);
+      color: #f87171;
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+    .btn-danger:hover {
+      background: rgba(239,68,68,0.25);
+    }
+    .btn-sm {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.72rem;
+    }
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      font-size: 1rem;
+    }
+
+    /* ── Animations ── */
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(0.8); }
+    }
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes bg-shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+    .animate-slide-up  { animation: slide-up 0.35s ease-out both; }
+    .animate-fade-in   { animation: fade-in 0.3s ease-out both; }
+    .animate-shimmer   {
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+      background-size: 200% 100%;
+      animation: bg-shimmer 3s ease-in-out infinite;
+    }
+
+    /* ── Split Row ── */
+    .split-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s ease;
+    }
+    .split-row.active {
+      background: rgba(6,182,212,0.08);
+      border-left: 3px solid var(--teal);
+    }
+    .split-row:not(:last-child) {
+      border-bottom: 1px solid var(--border);
+    }
+    .split-name {
+      font-size: 0.85rem;
+      color: var(--text-2);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .split-row.active .split-name {
+      color: var(--teal);
+      font-weight: 600;
+    }
+    .split-time {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .split-delta {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      min-width: 5rem;
+      text-align: right;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    /* ── Utility ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 99px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .badge-violet { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+    .badge-teal   { background: rgba(6,182,212,0.15);  color: #22d3ee; border: 1px solid rgba(6,182,212,0.25); }
+    .badge-green  { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+    .badge-gold   { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.35); }
+  </style>
 </head>
-<body class="text-white overflow-hidden w-[1920px] h-[1080px] relative select-none">
+<body>
 
-    <!-- ─── PANEL DE CONTROL DEL STREAMER (OCULTO EN OBS AUTOMÁTICAMENTE) ─── -->
-    <div id="controlPanel" class="absolute top-4 left-4 right-4 bg-slate-950/95 border-2 border-cyan-500/80 p-4 rounded-xl z-[999] shadow-2xl flex flex-wrap gap-4 items-center justify-between text-sm">
-        <div class="flex items-center gap-3">
-            <span class="font-tech text-cyan-400 font-bold text-lg">⚡ STREAMDAEMON SPEEDRUN CONTROL</span>
-            <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">No capturar esta barra en OBS</span>
-        </div>
-        <div class="flex gap-2">
-            <button onclick="changeScene('intro')" class="bg-cyan-950 border border-cyan-500 px-3 py-1.5 rounded hover:bg-cyan-900 font-semibold transition">1. Inicio</button>
-            <button onclick="changeScene('gameplay')" class="bg-emerald-950 border border-emerald-500 px-3 py-1.5 rounded hover:bg-emerald-900 font-semibold transition">2. Juego (Splits)</button>
-            <button onclick="changeScene('brb')" class="bg-purple-950 border border-purple-500 px-3 py-1.5 rounded hover:bg-purple-900 font-semibold transition">3. Pausa (BRB)</button>
-            <button onclick="changeScene('ending')" class="bg-rose-950 border border-rose-500 px-3 py-1.5 rounded hover:bg-rose-900 font-semibold transition">4. Final</button>
-        </div>
-        <div class="flex gap-2 items-center">
-            <span class="text-slate-400 font-bold">CONTROLES:</span>
-            <button onclick="triggerTimer()" id="btnStart" class="bg-emerald-600 px-3 py-1 rounded font-bold hover:bg-emerald-500">EMPEZAR / SPLIT</button>
-            <button onclick="undoSplit()" class="bg-amber-600 px-3 py-1 rounded font-bold hover:bg-amber-500">DESHACER</button>
-            <button onclick="resetTimer()" class="bg-rose-600 px-3 py-1 rounded font-bold hover:bg-rose-500">REINICIAR</button>
-        </div>
-        <div class="flex items-center gap-3 border-l border-slate-700 pl-4">
-            <span class="text-slate-400">Próximo Reto:</span>
-            <input type="text" id="inputNextGame" value="Metroid Dread" oninput="updateNextGame()" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white w-32 focus:outline-none focus:border-cyan-500">
-        </div>
-        <button onclick="toggleControls()" class="text-slate-500 hover:text-white font-bold">❌ Ocultar</button>
+  <!-- ─── CONTROL PANEL (streamer only) ─── -->
+  <div id="controlPanel" class="glass" style="position:absolute;top:12px;left:12px;right:12px;padding:12px 20px;z-index:999;display:flex;align-items:center;gap:16px;justify-content:space-between;font-size:0.82rem;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-family:var(--font-tech);font-size:0.9rem;font-weight:700;color:var(--teal);white-space:nowrap;">⬡ SPEEDRUN SUITE</span>
+      <span class="badge badge-violet">No capturar</span>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <button onclick="changeScene('intro')"    class="btn btn-sm">Inicio</button>
+      <button onclick="changeScene('gameplay')" class="btn btn-sm btn-success">Splits</button>
+      <button onclick="changeScene('brb')"      class="btn btn-sm">BRB</button>
+      <button onclick="changeScene('ending')"   class="btn btn-sm">Final</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="color:var(--text-3);font-weight:600;font-size:0.75rem;">CONTROL:</span>
+      <button onclick="triggerTimer()" id="btnStart" class="btn btn-sm btn-success">▶ EMPEZAR</button>
+      <button onclick="undoSplit()"    class="btn btn-sm">↩ Deshacer</button>
+      <button onclick="resetTimer()"   class="btn btn-sm btn-danger">⏹ Reiniciar</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="color:var(--text-3);font-size:0.75rem;">Próximo:</span>
+      <input type="text" id="inputNextGame" value="Metroid Dread" oninput="updateNextGame()" style="background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;padding:0.25rem 0.6rem;color:var(--text);font-size:0.8rem;width:130px;outline:none;font-family:var(--font);">
+    </div>
+    <button onclick="toggleControls()" class="btn btn-sm" style="color:var(--text-3);">✕ Ocultar</button>
+  </div>
+
+  <button id="btnRestoreControls" onclick="toggleControls()" class="btn btn-sm glass" style="position:absolute;bottom:16px;left:16px;z-index:998;display:none;font-family:var(--font-tech);color:var(--teal);">
+    ⬡ PANEL
+  </button>
+
+  <!-- ─── SCENE 1: INTRO (Starting Soon) ─── -->
+  <div id="scene-intro" class="scene bg-dark grid-bg flex flex-col justify-between p-16 z-10 hidden">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <span style="font-family:var(--font-tech);font-size:1.1rem;letter-spacing:4px;color:var(--teal);">ESTABLECIENDO ENLACE</span>
+        <h1 style="font-family:var(--font-tech);font-size:3.5rem;font-weight:900;letter-spacing:2px;margin-top:8px;">TRANSMISIÓN INICIANDO</h1>
+      </div>
+      <div style="text-align:right;">
+        <span style="color:var(--text-3);font-size:0.85rem;">CATEGORÍA RUN</span>
+        <p id="runCategory" style="font-family:var(--font-tech);font-size:1.6rem;color:var(--warning);margin-top:4px;">Elden Ring - Any% Glitchless</p>
+      </div>
     </div>
 
-    <!-- Botón flotante de restauración -->
-    <button id="btnRestoreControls" onclick="toggleControls()" class="absolute bottom-4 left-4 bg-slate-900 border border-cyan-500 px-3 py-2 rounded-lg font-tech text-cyan-400 z-[998] hover:bg-slate-800 shadow-lg text-xs hidden">
-        🔧 PANEL CONTROL
-    </button>
-
-
-    <!-- ─── ESCENA 1: INICIO (STARTING SOON) ─── -->
-    <div id="scene-intro" class="scene absolute inset-0 w-full h-full bg-[#07080c] grid-bg flex flex-col justify-between p-16 z-10 hidden">
-        <div class="flex justify-between items-start">
-            <div>
-                <span class="text-cyan-400 font-tech text-2xl tracking-[4px]">ESTABLECIENDO ENLACE</span>
-                <h1 class="text-6xl font-tech font-black tracking-wider text-white mt-2">TRANSMISIÓN INICIANDO</h1>
-            </div>
-            <div class="text-right">
-                <span class="text-slate-500 text-sm">CATEGORÍA RUN</span>
-                <p id="runCategory" class="text-3xl font-tech text-yellow-400 mt-1">Elden Ring - Any% Glitchless</p>
-            </div>
-        </div>
-
-        <div class="flex flex-col items-center justify-center my-auto">
-            <span class="text-2xl text-slate-400 tracking-[8px] animate-pulse">EMPEZAMOS EN</span>
-            <div id="introCountdown" class="text-[160px] font-tech font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-cyan-500 tracking-widest drop-shadow-[0_10px_20px_rgba(6,182,212,0.3)]">
-                05:00
-            </div>
-            <div class="flex gap-16 mt-8 text-center text-sm border-t border-b border-cyan-500/20 py-4 px-16">
-                <div>
-                    <span class="text-slate-500 block">PERSONAL BEST (PB)</span>
-                    <span id="introPB" class="font-mono text-xl font-bold">54:12.33</span>
-                </div>
-                <div>
-                    <span class="text-slate-500 block">WORLD RECORD (WR)</span>
-                    <span id="introWR" class="font-mono text-xl font-bold text-yellow-500">48:02.10</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="flex justify-between items-center text-slate-500 text-xs">
-            <span>DAEMON TRANSMISSION SYSTEM // SEGURA</span>
-            <span>WAITING FOR RUNNER START...</span>
-        </div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;">
+      <span style="font-size:1.2rem;color:var(--text-3);letter-spacing:6px;animation:pulse-dot 2s ease-in-out infinite;">EMPEZAMOS EN</span>
+      <div id="introCountdown" style="font-family:var(--font-tech);font-size:8rem;font-weight:900;background:linear-gradient(180deg,#fff,var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:6px;filter:drop-shadow(0 8px 24px rgba(6,182,212,0.3));">05:00</div>
+      <div style="display:flex;gap:4rem;margin-top:2rem;text-align:center;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:1rem 3rem;">
+        <div><span style="color:var(--text-3);display:block;font-size:0.8rem;">PERSONAL BEST (PB)</span><span id="introPB" style="font-family:var(--font-mono);font-size:1.3rem;font-weight:700;color:var(--success);">54:12.33</span></div>
+        <div><span style="color:var(--text-3);display:block;font-size:0.8rem;">WORLD RECORD (WR)</span><span id="introWR" style="font-family:var(--font-mono);font-size:1.3rem;font-weight:700;color:var(--warning);">48:02.10</span></div>
+      </div>
     </div>
 
+    <div style="display:flex;justify-content:space-between;color:var(--text-3);font-size:0.72rem;">
+      <span>DAEMON TRANSMISSION SYSTEM // SEGURA</span>
+      <span>WAITING FOR RUNNER START...</span>
+    </div>
+  </div>
 
-    <!-- ─── ESCENA 2: GAMEPLAY (CON splits ESTILO LIVESPLIT) ─── -->
-    <div id="scene-gameplay" class="scene absolute inset-0 w-full h-full bg-transparent z-10">
-        <!-- Espacio transparente del juego -->
-        <div class="absolute top-[20px] left-[420px] w-[1480px] h-[830px] border border-slate-800/20 pointer-events-none rounded-xl"></div>
+  <!-- ─── SCENE 2: GAMEPLAY (Livesplit-style) ─── -->
+  <div id="scene-gameplay" class="scene z-10">
+    <!-- transparent gameplay area (just a visual hint) -->
+    <div style="position:absolute;top:20px;left:420px;width:1480px;height:830px;border:1px solid rgba(255,255,255,0.03);border-radius:var(--radius);pointer-events:none;"></div>
 
-        <!-- WIDGET INTEGRADO LIVESPLIT -->
-        <div class="absolute top-[20px] left-[20px] w-[380px] h-[1040px] bg-slate-950/95 border-2 border-cyan-500/30 rounded-xl p-4 flex flex-col justify-between shadow-2xl">
-            <div>
-                <!-- Info del Juego actual -->
-                <div class="border-b border-slate-800 pb-3 mb-4">
-                    <h2 id="liveSplitGame" class="font-tech text-lg font-black text-cyan-400 tracking-wider truncate">ELDEN RING</h2>
-                    <span id="liveSplitCategory" class="text-xs text-slate-400 tracking-wider">Any% Glitchless</span>
-                </div>
-
-                <!-- Tramos del Speedrun -->
-                <div id="splitsContainer" class="flex flex-col gap-1 overflow-y-auto max-h-[640px] font-mono text-sm">
-                    <!-- Inyectado por JS -->
-                </div>
-            </div>
-
-            <!-- Cronómetros y Estadísticas -->
-            <div>
-                <div class="text-right border-t border-slate-800 pt-3">
-                    <div id="mainTimer" class="font-tech text-5xl font-black text-white leading-none tracking-widest">
-                        00:00.00
-                    </div>
-                </div>
-
-                <div class="mt-4 pt-3 border-t border-slate-800 text-xs flex flex-col gap-2">
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">Personal Best:</span>
-                        <span id="statPB" class="font-mono font-bold">54:12.33</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">Suma de Mejores Tramos:</span>
-                        <span id="statSOB" class="font-mono font-bold text-cyan-400">51:04.20</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">Ritmo Estimado:</span>
-                        <span id="statPace" class="font-mono font-bold text-yellow-500">—</span>
-                    </div>
-                </div>
-            </div>
+    <!-- Livesplit widget -->
+    <div class="glass glass-accent" style="position:absolute;top:20px;left:20px;width:380px;height:1040px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;">
+      <div>
+        <div style="border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:16px;">
+          <h2 id="liveSplitGame" style="font-family:var(--font-tech);font-size:1.1rem;font-weight:900;color:var(--teal);letter-spacing:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">ELDEN RING</h2>
+          <span id="liveSplitCategory" style="font-size:0.72rem;color:var(--text-3);letter-spacing:1px;">Any% Glitchless</span>
         </div>
 
-        <!-- Chat del Directo Integrado -->
-        <div class="absolute bottom-[250px] right-[40px] w-[350px] h-[300px] bg-slate-950/80 border border-slate-800/50 rounded-xl p-3 flex flex-col justify-end overflow-hidden">
-            <span class="text-[10px] text-cyan-400 tracking-widest font-tech border-b border-slate-800 pb-1 mb-2">LIVE CHAT</span>
-            <div id="chatWrapper" class="flex flex-col gap-2 overflow-y-auto max-h-[240px] text-xs">
-                <!-- Inyectado por JS -->
-            </div>
+        <div id="splitsContainer" style="display:flex;flex-direction:column;gap:2px;overflow-y:auto;max-height:620px;font-size:0.85rem;">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <div>
+        <div style="text-align:right;border-top:1px solid var(--border);padding-top:12px;">
+          <div id="mainTimer" style="font-family:var(--font-tech);font-size:2.8rem;font-weight:900;letter-spacing:3px;line-height:1;">00:00.00</div>
         </div>
 
-        <!-- Estadísticas en vivo del StreamDaemon -->
-        <div class="absolute bottom-[20px] left-[420px] right-[20px] h-[150px] bg-slate-950/90 border border-slate-800 rounded-xl p-4 flex justify-between items-center shadow-lg">
-            <div class="flex items-center gap-6">
-                <div class="border-r border-slate-800 pr-6">
-                    <span class="text-xs text-rose-500 font-tech tracking-widest block mb-1">● ONLINE</span>
-                    <span class="font-mono text-xl font-bold" id="uptimeCounter">00:00:00</span>
-                </div>
-                <div>
-                    <span class="text-xs text-slate-500 block mb-1">ESPECTADORES</span>
-                    <span class="font-mono text-xl font-bold" id="viewerCount">0</span>
-                </div>
-                <div>
-                    <span class="text-xs text-slate-500 block mb-1">SEGUIDORES</span>
-                    <span class="font-mono text-xl font-bold" id="followerCount">0</span>
-                </div>
-            </div>
-            <div class="flex flex-col items-end">
-                <span class="text-xs text-slate-500 block mb-1">INTENTOS (ATTEMPTS)</span>
-                <span class="font-tech text-3xl font-black text-cyan-400" id="attemptCount">#1</span>
-            </div>
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:0.75rem;display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-3);">Personal Best:</span>
+            <span id="statPB" style="font-family:var(--font-mono);font-weight:700;">54:12.33</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-3);">Sum of Best:</span>
+            <span id="statSOB" style="font-family:var(--font-mono);font-weight:700;color:var(--teal);">51:04.20</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-3);">Ritmo Est.:</span>
+            <span id="statPace" style="font-family:var(--font-mono);font-weight:700;color:var(--warning);">—</span>
+          </div>
         </div>
+      </div>
     </div>
 
-
-    <!-- ─── ESCENA 3: BRB (PAUSA DEL STREAM) ─── -->
-    <div id="scene-brb" class="scene absolute inset-0 w-full h-full bg-[#07080c] grid-bg flex justify-between p-16 z-10 hidden">
-        <div class="w-1/2 flex flex-col justify-between">
-            <div>
-                <span class="text-rose-500 font-tech text-2xl tracking-[4px] animate-pulse">● TRANSMISIÓN EN PAUSA</span>
-                <h1 class="text-8xl font-tech font-black tracking-wider mt-4">VOLVEMOS<br>EN ENSEGUIDA</h1>
-            </div>
-            <div class="flex items-center gap-4 text-slate-400">
-                <div class="w-12 h-12 rounded-full border border-cyan-500/30 flex items-center justify-center animate-spin">
-                    🌀
-                </div>
-                <span>SISTEMAS CALIBRANDO NUEVAS CATEGORÍAS...</span>
-            </div>
-        </div>
-
-        <div class="w-1/3 flex flex-col justify-center">
-            <div class="bg-slate-900/90 border-2 border-cyan-500 p-8 rounded-xl shadow-2xl relative overflow-hidden">
-                <span class="text-xs text-cyan-400 font-tech tracking-widest block mb-2">PRÓXIMO OBJETIVO</span>
-                <h3 id="brbNextGame" class="font-tech text-4xl font-black tracking-wide text-white">METROID DREAD</h3>
-                <p id="brbNextCategory" class="text-sm text-slate-400 mt-1 font-mono">100% No Major Glitches</p>
-                <div class="border-t border-slate-800 mt-6 pt-4 flex justify-between text-xs text-slate-500">
-                    <span>Est. Target: 1h 45m</span>
-                    <span>WR: 1h 22m</span>
-                </div>
-            </div>
-        </div>
+    <!-- Live Chat -->
+    <div style="position:absolute;bottom:260px;right:32px;width:340px;height:280px;" class="glass glass-sm">
+      <div style="padding:12px 14px;display:flex;flex-direction:column;height:100%;">
+        <span style="font-size:0.6rem;color:var(--teal);letter-spacing:2px;font-family:var(--font-tech);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:8px;">LIVE CHAT</span>
+        <div id="chatWrapper" style="flex:1;display:flex;flex-direction:column;gap:4px;overflow-y:auto;font-size:0.75rem;"></div>
+      </div>
     </div>
 
-
-    <!-- ─── ESCENA 4: FINAL (ENDING SCREEN) ─── -->
-    <div id="scene-ending" class="scene absolute inset-0 w-full h-full bg-[#07080c] grid-bg flex flex-col justify-between p-16 z-10 hidden">
-        <div class="text-center">
-            <span class="text-yellow-500 font-tech text-3xl tracking-[8px] block mb-2">RUN FINALIZADA</span>
-            <h1 id="endTitle" class="text-7xl font-tech font-black tracking-widest">STREAM FINALIZADO</h1>
+    <!-- Stats bar -->
+    <div class="glass" style="position:absolute;bottom:20px;left:420px;right:20px;height:auto;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:24px;">
+        <div style="border-right:1px solid var(--border);padding-right:20px;">
+          <span style="font-size:0.65rem;color:var(--danger);font-family:var(--font-tech);letter-spacing:2px;display:block;margin-bottom:4px;">● ONLINE</span>
+          <span id="uptimeCounter" style="font-family:var(--font-mono);font-size:1.3rem;font-weight:700;">00:00:00</span>
         </div>
+        <div><span style="font-size:0.72rem;color:var(--text-3);display:block;margin-bottom:2px;">ESPECTADORES</span><span id="viewerCount" style="font-family:var(--font-mono);font-size:1.2rem;font-weight:700;">0</span></div>
+        <div><span style="font-size:0.72rem;color:var(--text-3);display:block;margin-bottom:2px;">SEGUIDORES</span><span id="followerCount" style="font-family:var(--font-mono);font-size:1.2rem;font-weight:700;">0</span></div>
+      </div>
+      <div style="text-align:right;">
+        <span style="font-size:0.7rem;color:var(--text-3);display:block;margin-bottom:2px;">INTENTOS</span>
+        <span id="attemptCount" style="font-family:var(--font-tech);font-size:2rem;font-weight:900;color:var(--teal);">#1</span>
+      </div>
+    </div>
+  </div>
 
-        <div class="flex gap-8 justify-center my-auto">
-            <div class="bg-slate-900/80 border border-slate-800 p-8 rounded-xl w-[500px]">
-                <h3 class="font-tech text-cyan-400 text-xl font-bold border-b border-slate-800 pb-3 mb-4">REGISTRO DE TIEMPOS</h3>
-                <div class="flex flex-col gap-3 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">Tiempo Final de Run:</span>
-                        <span id="endFinalTime" class="font-mono font-bold text-xl text-emerald-400">—</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">Suma de Mejores Tramos:</span>
-                        <span id="endSOB" class="font-mono font-bold text-xl text-cyan-400">—</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">Intentos Realizados:</span>
-                        <span id="endAttempts" class="font-mono font-bold text-xl">—</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-slate-900/80 border border-slate-800 p-8 rounded-xl w-[500px] flex flex-col gap-4">
-                <h3 class="font-tech text-yellow-500 text-xl font-bold border-b border-slate-800 pb-3 mb-2">COMUNIDAD Y REDES</h3>
-                <div class="flex items-center gap-3">
-                    <span class="bg-slate-800 px-2.5 py-1 rounded text-xs font-bold text-purple-400">TWITCH</span>
-                    <span class="font-mono text-sm" id="socialTwitch">twitch.tv/tu_canal</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="bg-slate-800 px-2.5 py-1 rounded text-xs font-bold text-blue-400">X / TWITTER</span>
-                    <span class="font-mono text-sm" id="socialTwitter">@tu_usuario</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="bg-slate-800 px-2.5 py-1 rounded text-xs font-bold text-red-500">YOUTUBE</span>
-                    <span class="font-mono text-sm" id="socialYoutube">youtube.com/c/tu_canal</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="text-center text-xs text-slate-600">
-            STREAMDAEMON SPEEDRUN v2.1 // GRACIAS POR EL APOYO
-        </div>
+  <!-- ─── SCENE 3: BRB ─── -->
+  <div id="scene-brb" class="scene bg-dark grid-bg flex p-16 z-10 hidden" style="display:flex;justify-content:space-between;">
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+      <div>
+        <span style="color:var(--danger);font-family:var(--font-tech);font-size:1.2rem;letter-spacing:4px;animation:pulse-dot 2s ease-in-out infinite;">● TRANSMISIÓN EN PAUSA</span>
+        <h1 style="font-family:var(--font-tech);font-size:5rem;font-weight:900;letter-spacing:3px;margin-top:16px;">VOLVEMOS<br>EN ENSEGUIDA</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;color:var(--text-3);font-size:0.85rem;">
+        <div style="width:36px;height:36px;border-radius:50%;border:2px solid rgba(6,182,212,0.3);display:flex;align-items:center;justify-content:center;animation:spin 3s linear infinite;">↻</div>
+        <span>SISTEMAS CALIBRANDO NUEVAS CATEGORÍAS...</span>
+      </div>
     </div>
 
+    <div style="width:380px;display:flex;flex-direction:column;justify-content:center;">
+      <div class="glass glass-accent" style="padding:32px;position:relative;overflow:hidden;">
+        <span style="font-size:0.65rem;color:var(--teal);font-family:var(--font-tech);letter-spacing:3px;display:block;margin-bottom:8px;">PRÓXIMO OBJETIVO</span>
+        <h3 id="brbNextGame" style="font-family:var(--font-tech);font-size:2rem;font-weight:900;letter-spacing:1px;">METROID DREAD</h3>
+        <p id="brbNextCategory" style="font-size:0.82rem;color:var(--text-3);margin-top:4px;font-family:var(--font-mono);">100% No Major Glitches</p>
+        <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:14px;display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text-3);">
+          <span>Est. Target: 1h 45m</span>
+          <span>WR: 1h 22m</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <!-- ─── ENGINE CORE (INTEGRACIÓN SOCKET.IO Y SEÑALES) ─── -->
-    <script>
-        // Configuración de Servidor y Canal
-        const CHANNEL     = new URLSearchParams(location.search).get('channel') || '';
-        const DEMO_MODE   = new URLSearchParams(location.search).get('demo') === 'true';
-        const BACKEND_URL = new URLSearchParams(location.search).get('backend') || 'http://localhost:3000';
+  <!-- ─── SCENE 4: ENDING ─── -->
+  <div id="scene-ending" class="scene bg-dark grid-bg flex flex-col justify-between p-16 z-10 hidden">
+    <div style="text-align:center;">
+      <span style="font-family:var(--font-tech);font-size:1.6rem;letter-spacing:6px;color:var(--warning);display:block;margin-bottom:8px;">RUN FINALIZADA</span>
+      <h1 id="endTitle" style="font-family:var(--font-tech);font-size:4.5rem;font-weight:900;letter-spacing:4px;">STREAM FINALIZADO</h1>
+    </div>
 
-        let currentScene = 'gameplay';
-        let timerRunning = false;
-        let startTime = 0;
-        let elapsedTime = 0;
-        let timerInterval = null;
-        let currentSplitIndex = 0;
-        let socketConnection = null;
+    <div style="display:flex;gap:32px;justify-content:center;align-items:center;flex:1;">
+      <div class="glass" style="padding:32px;width:440px;">
+        <h3 style="font-family:var(--font-tech);color:var(--teal);font-size:1.2rem;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:16px;">REGISTRO DE TIEMPOS</h3>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:0.88rem;">
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-3);">Tiempo Final:</span>
+            <span id="endFinalTime" style="font-family:var(--font-mono);font-weight:700;font-size:1.2rem;color:var(--success);">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-3);">Sum of Best:</span>
+            <span id="endSOB" style="font-family:var(--font-mono);font-weight:700;font-size:1.2rem;color:var(--teal);">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-3);">Intentos:</span>
+            <span id="endAttempts" style="font-family:var(--font-mono);font-weight:700;font-size:1.2rem;">—</span>
+          </div>
+        </div>
+      </div>
 
-        // Splits por defecto (se sobreescriben al conectarse a StreamDaemon)
-        let splits = [
-            { name: "Limgrave Skip", pb: 180000, current: null, gold: 165000 },
-            { name: "Margit", pb: 420000, current: null, gold: 395000 },
-            { name: "Godrick", pb: 780000, current: null, gold: 740000 },
-            { name: "Rennala", pb: 1240000, current: null, gold: 1190000 },
-            { name: "Morgott", pb: 1890000, current: null, gold: 1800000 },
-            { name: "Fire Giant", pb: 2540000, current: null, gold: 2450000 },
-            { name: "Maliketh", pb: 3000000, current: null, gold: 2900000 },
-            { name: "Radagon/Beast", pb: 3252330, current: null, gold: 3120000 }
-        ];
+      <div class="glass" style="padding:32px;width:440px;">
+        <h3 style="font-family:var(--font-tech);color:var(--warning);font-size:1.2rem;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:16px;">COMUNIDAD Y REDES</h3>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="badge badge-violet">TWITCH</span>
+            <span id="socialTwitch" style="font-family:var(--font-mono);font-size:0.85rem;">twitch.tv/tu_canal</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="badge badge-teal">X / TWITTER</span>
+            <span id="socialTwitter" style="font-family:var(--font-mono);font-size:0.85rem;">@tu_usuario</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="badge badge-gold">YOUTUBE</span>
+            <span id="socialYoutube" style="font-family:var(--font-mono);font-size:0.85rem;">youtube.com/c/tu_canal</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        function formatTime(ms) {
-            if (ms === null || isNaN(ms)) return "—";
-            let totalSeconds = Math.floor(ms / 1000);
-            let h = Math.floor(totalSeconds / 3600);
-            let m = Math.floor((totalSeconds % 3600) / 60);
-            let s = totalSeconds % 60;
-            let cs = Math.floor((ms % 1000) / 10);
+    <div style="text-align:center;font-size:0.7rem;color:var(--text-3);letter-spacing:1px;">
+      STREAMDAEMON SPEEDRUN SUITE // GRACIAS POR EL APOYO
+    </div>
+  </div>
 
-            let res = "";
-            if (h > 0) {
-                res += h + ":" + m.toString().padStart(2, '0') + ":";
-            } else {
-                res += m.toString().padStart(2, '0') + ":";
-            }
-            res += s.toString().padStart(2, '0') + "." + cs.toString().padStart(2, '0');
-            return res;
+  <!-- ─── ENGINE ─── -->
+  <script>
+    const CHANNEL     = new URLSearchParams(location.search).get('channel') || '';
+    const DEMO_MODE   = new URLSearchParams(location.search).get('demo') === 'true';
+    const BACKEND_URL = new URLSearchParams(location.search).get('backend') || 'http://localhost:3000';
+
+    let currentScene = 'gameplay';
+    let timerRunning = false;
+    let startTime = 0;
+    let elapsedTime = 0;
+    let timerInterval = null;
+    let currentSplitIndex = 0;
+    let socketConnection = null;
+
+    let splits = [
+      { name: 'Limgrave Skip', pb: 180000, current: null, gold: 165000 },
+      { name: 'Margit', pb: 420000, current: null, gold: 395000 },
+      { name: 'Godrick', pb: 780000, current: null, gold: 740000 },
+      { name: 'Rennala', pb: 1240000, current: null, gold: 1190000 },
+      { name: 'Morgott', pb: 1890000, current: null, gold: 1800000 },
+      { name: 'Fire Giant', pb: 2540000, current: null, gold: 2450000 },
+      { name: 'Maliketh', pb: 3000000, current: null, gold: 2900000 },
+      { name: 'Radagon/Beast', pb: 3252330, current: null, gold: 3120000 }
+    ];
+
+    function formatTime(ms) {
+      if (ms === null || isNaN(ms)) return '\u2014';
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      const cs = Math.floor((ms % 1000) / 10);
+      if (h > 0) return h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '.' + String(cs).padStart(2,'0');
+      return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '.' + String(cs).padStart(2,'0');
+    }
+
+    function formatDelta(diff) {
+      if (diff === null || isNaN(diff)) return '';
+      const sign = diff >= 0 ? '+' : '\u2212';
+      const absDiff = Math.abs(diff);
+      const totalSec = Math.floor(absDiff / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      const cs = Math.floor((absDiff % 1000) / 10);
+      let res = sign;
+      if (m > 0) res += m + ':';
+      res += String(s).padStart(2,'0') + '.' + String(cs).padStart(2,'0');
+      return res;
+    }
+
+    function renderSplits() {
+      const container = document.getElementById('splitsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      splits.forEach((split, index) => {
+        const isActive = index === currentSplitIndex && timerRunning;
+        const row = document.createElement('div');
+        row.className = 'split-row' + (isActive ? ' active' : '');
+        row.style.animationDelay = (index * 0.04) + 's';
+        if (isActive) row.classList.add('animate-slide-up');
+
+        let deltaHtml = '';
+        let timeHtml = formatTime(split.pb);
+
+        if (split.current !== null) {
+          const diff = split.current - split.pb;
+          let cls = diff <= 0 ? 'glow-green' : 'glow-red';
+          if (split.current <= split.gold) {
+            cls = 'glow-gold';
+            deltaHtml = '<span class="split-delta" style="color:var(--warning);font-weight:700;">\u2605 ' + formatDelta(diff) + '</span>';
+          } else {
+            deltaHtml = '<span class="split-delta ' + cls + '" style="color:' + (diff <= 0 ? 'var(--success)' : 'var(--danger)') + ';">' + formatDelta(diff) + '</span>';
+          }
+          timeHtml = formatTime(split.current);
         }
 
-        function formatDelta(diff) {
-            if (diff === null || isNaN(diff)) return "";
-            let sign = diff >= 0 ? "+" : "-";
-            let absDiff = Math.abs(diff);
-            let totalSeconds = Math.floor(absDiff / 1000);
-            let m = Math.floor(totalSeconds / 60);
-            let s = totalSeconds % 60;
-            let cs = Math.floor((absDiff % 1000) / 10);
+        row.innerHTML = '<span class="split-name">' + split.name + '</span>' +
+          '<div style="display:flex;gap:10px;align-items:center;">' +
+            deltaHtml +
+            '<span class="split-time">' + timeHtml + '</span>' +
+          '</div>';
+        container.appendChild(row);
+      });
+    }
 
-            let res = sign;
-            if (m > 0) res += m + ":";
-            res += s.toString().padStart(2, '0') + "." + cs.toString().padStart(2, '0');
-            return res;
+    function updateTimer() {
+      elapsedTime = Date.now() - startTime;
+      document.getElementById('mainTimer').textContent = formatTime(elapsedTime);
+    }
+
+    function calculatePace() {
+      if (currentSplitIndex === 0) {
+        document.getElementById('statPace').textContent = '\u2014';
+        return;
+      }
+      let totalExpected = 0;
+      for (let i = 0; i < splits.length; i++) {
+        if (i < currentSplitIndex) {
+          totalExpected += splits[i].current;
+        } else {
+          totalExpected += i === 0 ? splits[i].pb : (splits[i].pb - splits[i-1].pb);
         }
+      }
+      document.getElementById('statPace').textContent = formatTime(totalExpected);
+      const overallDiff = totalExpected - splits[splits.length-1].pb;
+      const el = document.getElementById('statPace');
+      if (overallDiff < 0) {
+        el.style.color = 'var(--success)';
+        el.className = 'glow-green';
+      } else {
+        el.style.color = 'var(--danger)';
+        el.className = 'glow-red';
+      }
+    }
 
-        function renderSplits() {
-            const container = document.getElementById('splitsContainer');
-            if(!container) return;
-            container.innerHTML = '';
-
-            splits.forEach((split, index) => {
-                const isActive = index === currentSplitIndex && timerRunning;
-                const row = document.createElement('div');
-                row.className = `flex justify-between items-center py-2 px-3 rounded transition-colors ${isActive ? 'bg-cyan-950/40 border-l-2 border-cyan-400' : 'border-b border-slate-900/60'}`;
-
-                let deltaHtml = "";
-                let timeHtml = formatTime(split.pb);
-
-                if (split.current !== null) {
-                    let diff = split.current - split.pb;
-                    let colorClass = diff <= 0 ? 'text-emerald-500 glow-green' : 'text-rose-500 glow-red';
-                    
-                    if (split.current <= split.gold) {
-                        colorClass = 'text-yellow-500 glow-gold font-bold';
-                        deltaHtml = `<span class="${colorClass}">★ ${formatDelta(diff)}</span>`;
-                    } else {
-                        deltaHtml = `<span class="${colorClass}">${formatDelta(diff)}</span>`;
-                    }
-                    timeHtml = formatTime(split.current);
-                }
-
-                row.innerHTML = `
-                    <span class="${isActive ? 'text-cyan-300 font-bold' : 'text-slate-300'} truncate w-1/2">${split.name}</span>
-                    <div class="flex gap-4 items-center justify-end w-1/2">
-                        ${deltaHtml}
-                        <span class="font-bold text-slate-100">${timeHtml}</span>
-                    </div>
-                `;
-                container.appendChild(row);
-            });
-        }
-
-        // Lógica de control (Locales o propagados al Socket de StreamDaemon)
-        function triggerTimer() {
-            if (socketConnection && socketConnection.connected) {
-                socketConnection.emit('speedrun:control', { action: 'split', channel: CHANNEL });
-                return;
-            }
-            // Fallback simulación local
-            if (!timerRunning) {
-                timerRunning = true;
-                startTime = Date.now() - elapsedTime;
-                timerInterval = setInterval(updateTimer, 10);
-                document.getElementById('btnStart').textContent = "SPLIT";
-            } else {
-                if (currentSplitIndex < splits.length) {
-                    splits[currentSplitIndex].current = elapsedTime;
-                    currentSplitIndex++;
-                    renderSplits();
-                    calculatePace();
-
-                    if (currentSplitIndex >= splits.length) {
-                        timerRunning = false;
-                        clearInterval(timerInterval);
-                        document.getElementById('btnStart').textContent = "FIN DE RUN";
-                        document.getElementById('btnStart').disabled = true;
-                        document.getElementById('endFinalTime').textContent = formatTime(elapsedTime);
-                        document.getElementById('endSOB').textContent = document.getElementById('statSOB').textContent;
-                        document.getElementById('endAttempts').textContent = document.getElementById('attemptCount').textContent;
-                    }
-                }
-            }
-        }
-
-        function undoSplit() {
-            if (socketConnection && socketConnection.connected) {
-                socketConnection.emit('speedrun:control', { action: 'undo', channel: CHANNEL });
-                return;
-            }
-            if (currentSplitIndex > 0) {
-                currentSplitIndex--;
-                splits[currentSplitIndex].current = null;
-                renderSplits();
-                calculatePace();
-                if (!timerRunning) {
-                    timerRunning = true;
-                    startTime = Date.now() - elapsedTime;
-                    timerInterval = setInterval(updateTimer, 10);
-                    document.getElementById('btnStart').textContent = "SPLIT";
-                    document.getElementById('btnStart').disabled = false;
-                }
-            }
-        }
-
-        function resetTimer() {
-            if (socketConnection && socketConnection.connected) {
-                socketConnection.emit('speedrun:control', { action: 'reset', channel: CHANNEL });
-                return;
-            }
+    function triggerTimer() {
+      if (socketConnection && socketConnection.connected) {
+        socketConnection.emit('speedrun:control', { action: 'split', channel: CHANNEL });
+        return;
+      }
+      if (!timerRunning) {
+        timerRunning = true;
+        startTime = Date.now() - elapsedTime;
+        timerInterval = setInterval(updateTimer, 10);
+        document.getElementById('btnStart').textContent = '⏱ SPLIT';
+      } else {
+        if (currentSplitIndex < splits.length) {
+          splits[currentSplitIndex].current = elapsedTime;
+          currentSplitIndex++;
+          renderSplits();
+          calculatePace();
+          if (currentSplitIndex >= splits.length) {
             timerRunning = false;
             clearInterval(timerInterval);
-            elapsedTime = 0;
-            currentSplitIndex = 0;
-            splits.forEach(s => s.current = null);
-            document.getElementById('mainTimer').textContent = "00:00.00";
-            document.getElementById('btnStart').textContent = "EMPEZAR RUN";
-            document.getElementById('btnStart').disabled = false;
-            document.getElementById('statPace').textContent = "—";
-            document.getElementById('statPace').className = "font-mono font-bold text-yellow-500";
+            document.getElementById('btnStart').textContent = 'FIN DE RUN';
+            document.getElementById('btnStart').disabled = true;
+            document.getElementById('endFinalTime').textContent = formatTime(elapsedTime);
+            document.getElementById('endSOB').textContent = document.getElementById('statSOB').textContent;
+            document.getElementById('endAttempts').textContent = document.getElementById('attemptCount').textContent;
+          }
+        }
+      }
+    }
+
+    function undoSplit() {
+      if (socketConnection && socketConnection.connected) {
+        socketConnection.emit('speedrun:control', { action: 'undo', channel: CHANNEL });
+        return;
+      }
+      if (currentSplitIndex > 0) {
+        currentSplitIndex--;
+        splits[currentSplitIndex].current = null;
+        renderSplits();
+        calculatePace();
+        if (!timerRunning) {
+          timerRunning = true;
+          startTime = Date.now() - elapsedTime;
+          timerInterval = setInterval(updateTimer, 10);
+          document.getElementById('btnStart').textContent = '⏱ SPLIT';
+          document.getElementById('btnStart').disabled = false;
+        }
+      }
+    }
+
+    function resetTimer() {
+      if (socketConnection && socketConnection.connected) {
+        socketConnection.emit('speedrun:control', { action: 'reset', channel: CHANNEL });
+        return;
+      }
+      timerRunning = false;
+      clearInterval(timerInterval);
+      elapsedTime = 0;
+      currentSplitIndex = 0;
+      splits.forEach(s => s.current = null);
+      document.getElementById('mainTimer').textContent = '00:00.00';
+      document.getElementById('btnStart').textContent = '▶ EMPEZAR';
+      document.getElementById('btnStart').disabled = false;
+      document.getElementById('statPace').textContent = '\u2014';
+      const paceEl = document.getElementById('statPace');
+      paceEl.style.color = 'var(--warning)';
+      paceEl.className = '';
+      renderSplits();
+    }
+
+    function changeScene(sceneId) {
+      currentScene = sceneId;
+      document.querySelectorAll('.scene').forEach(s => s.classList.add('hidden'));
+      const target = document.getElementById('scene-' + sceneId);
+      if (target) target.classList.remove('hidden');
+    }
+
+    function updateNextGame() {
+      const val = document.getElementById('inputNextGame').value;
+      document.getElementById('brbNextGame').textContent = val.toUpperCase();
+    }
+
+    function toggleControls() {
+      const panel = document.getElementById('controlPanel');
+      const restore = document.getElementById('btnRestoreControls');
+      if (panel.style.display === 'none') {
+        panel.style.display = 'flex';
+        restore.style.display = 'none';
+      } else {
+        panel.style.display = 'none';
+        restore.style.display = 'flex';
+      }
+    }
+
+    function addChatMessage(displayName, text, color) {
+      const wrapper = document.getElementById('chatWrapper');
+      if (!wrapper) return;
+      const row = document.createElement('div');
+      row.style.animation = 'slide-up 0.25s ease-out';
+      row.innerHTML = '<span style="font-weight:600;color:' + (color || '#22d3ee') + ';">' + displayName + ':</span> <span style="color:var(--text-2);">' + text + '</span>';
+      wrapper.appendChild(row);
+      if (wrapper.children.length > 8) wrapper.removeChild(wrapper.firstChild);
+      wrapper.scrollTop = wrapper.scrollHeight;
+    }
+
+    function initSocket() {
+      try {
+        socketConnection = io(BACKEND_URL, { transports: ['websocket'] });
+      } catch (e) {
+        console.warn('Socket.IO unavailable. Standalone mode.');
+        return;
+      }
+
+      socketConnection.on('connect', () => {
+        console.log('Connected to StreamDaemon backend');
+        socketConnection.emit('join:channel', CHANNEL);
+        socketConnection.emit('speedrun:get-state', { channel: CHANNEL });
+      });
+
+      socketConnection.on('speedrun:update', (data) => {
+        if (!data) return;
+        document.getElementById('liveSplitGame').textContent = (data.game || 'SPEEDRUN').toUpperCase();
+        document.getElementById('liveSplitCategory').textContent = data.category || 'Any%';
+        document.getElementById('runCategory').textContent = (data.game || '') + ' - ' + (data.category || '');
+        document.getElementById('attemptCount').textContent = '#' + (data.attempts || 1);
+        if (data.pb) {
+          document.getElementById('statPB').textContent = formatTime(data.pb);
+          document.getElementById('introPB').textContent = formatTime(data.pb);
+        }
+        if (data.wr) {
+          document.getElementById('introWR').textContent = formatTime(data.wr);
+        }
+        if (data.splits) splits = data.splits;
+        currentSplitIndex = data.currentSplitIndex ?? 0;
+        timerRunning = data.timerRunning ?? false;
+        elapsedTime = data.elapsedTime ?? 0;
+        renderSplits();
+        calculatePace();
+        clearInterval(timerInterval);
+        if (timerRunning) {
+          startTime = Date.now() - elapsedTime;
+          timerInterval = setInterval(updateTimer, 10);
+          document.getElementById('btnStart').textContent = '⏱ SPLIT';
+        } else {
+          document.getElementById('mainTimer').textContent = formatTime(elapsedTime);
+          document.getElementById('btnStart').textContent = '▶ EMPEZAR';
+        }
+      });
+
+      socketConnection.on('chat:message', ({ user, text }) => {
+        addChatMessage(user.displayName, text, user.color);
+      });
+
+      socketConnection.on('hud:update', (data) => {
+        if (!data) return;
+        if (data.viewers !== undefined) document.getElementById('viewerCount').textContent = Number(data.viewers).toLocaleString();
+        if (data.followers !== undefined) document.getElementById('followerCount').textContent = Number(data.followers).toLocaleString();
+        if (data.uptimeSeconds !== undefined) {
+          const s = Number(data.uptimeSeconds);
+          const h = String(Math.floor(s / 3600)).padStart(2,'0');
+          const m = String(Math.floor((s % 3600) / 60)).padStart(2,'0');
+          const sec = String(Math.floor(s % 60)).padStart(2,'0');
+          document.getElementById('uptimeCounter').textContent = h + ':' + m + ':' + sec;
+        }
+      });
+    }
+
+    function loadSocketIO(cb) {
+      const script = document.createElement('script');
+      script.onload = () => cb();
+      script.onerror = () => cb(new Error('Socket.IO script not found'));
+      script.src = './js/socket.io.js';
+      document.head.appendChild(script);
+    }
+
+    function startDemoMode() {
+      document.getElementById('viewerCount').textContent = '1,425';
+      document.getElementById('followerCount').textContent = '12,893';
+      document.getElementById('attemptCount').textContent = '#142';
+
+      const names = ['RunnerX', 'SpeedyG', 'DeltasB', 'Gamer99', 'PixelZ'];
+      const msgs = [
+        '\u00a1Vas a un ritmo brutal!',
+        '\u00a1Nuevo split de oro! \u2605',
+        'GG WP!',
+        'Ese glitch en el puente...',
+        '\u00a1Vamos!'
+      ];
+      setInterval(() => {
+        addChatMessage(
+          names[Math.floor(Math.random() * names.length)],
+          msgs[Math.floor(Math.random() * msgs.length)],
+          '#22d3ee'
+        );
+      }, 6000);
+
+      let uptSeconds = 3600;
+      setInterval(() => {
+        uptSeconds++;
+        const h = String(Math.floor(uptSeconds / 3600)).padStart(2,'0');
+        const m = String(Math.floor((uptSeconds % 3600) / 60)).padStart(2,'0');
+        const s = String(Math.floor(uptSeconds % 60)).padStart(2,'0');
+        document.getElementById('uptimeCounter').textContent = h + ':' + m + ':' + s;
+      }, 1000);
+
+      // simulate split progression
+      let demoIdx = 0;
+      const demoTimer = setInterval(() => {
+        if (demoIdx < splits.length && !timerRunning) {
+          if (!timerRunning) {
+            timerRunning = true;
+            startTime = Date.now() - elapsedTime;
+            timerInterval = setInterval(updateTimer, 10);
+          }
+          setTimeout(() => {
+            splits[demoIdx].current = elapsedTime;
+            currentSplitIndex = ++demoIdx;
             renderSplits();
-        }
-
-        function updateTimer() {
-            elapsedTime = Date.now() - startTime;
-            document.getElementById('mainTimer').textContent = formatTime(elapsedTime);
-        }
-
-        function calculatePace() {
-            if (currentSplitIndex === 0) {
-                document.getElementById('statPace').textContent = "—";
-                return;
+            if (demoIdx >= splits.length) {
+              clearInterval(demoTimer);
+              timerRunning = false;
+              clearInterval(timerInterval);
             }
-            let totalExpected = 0;
-            for (let i = 0; i < splits.length; i++) {
-                if (i < currentSplitIndex) {
-                    totalExpected += splits[i].current;
-                } else {
-                    let pbSegment = i === 0 ? splits[i].pb : (splits[i].pb - splits[i-1].pb);
-                    totalExpected += pbSegment;
-                }
-            }
-            document.getElementById('statPace').textContent = formatTime(totalExpected);
-            let overallDiff = totalExpected - splits[splits.length-1].pb;
-            if (overallDiff < 0) {
-                document.getElementById('statPace').className = "font-mono font-bold text-emerald-400 glow-green";
-            } else {
-                document.getElementById('statPace').className = "font-mono font-bold text-rose-500 glow-red";
-            }
+          }, 2000);
         }
+      }, 5000);
+    }
 
-        function changeScene(sceneId) {
-            currentScene = sceneId;
-            document.querySelectorAll('.scene').forEach(s => s.classList.add('hidden'));
-            const target = document.getElementById(`scene-${sceneId}`);
-            if (target) target.classList.remove('hidden');
+    window.onload = function() {
+      const params = new URLSearchParams(window.location.search);
+      const obsScene = params.get('scene');
+
+      if (obsScene) {
+        changeScene(obsScene);
+        document.getElementById('controlPanel').style.display = 'none';
+        document.getElementById('btnRestoreControls').style.display = 'none';
+      } else {
+        changeScene('gameplay');
+      }
+
+      renderSplits();
+
+      loadSocketIO(function(err) {
+        if (!err) {
+          initSocket();
+        } else {
+          console.log('No local Socket.IO server. Starting simulation...');
+          if (DEMO_MODE || !obsScene) {
+            startDemoMode();
+          }
         }
-
-        function updateNextGame() {
-            const nextGame = document.getElementById('inputNextGame').value;
-            document.getElementById('brbNextGame').textContent = nextGame.toUpperCase();
-        }
-
-        function toggleControls() {
-            const panel = document.getElementById('controlPanel');
-            const restore = document.getElementById('btnRestoreControls');
-            if (panel.classList.contains('hidden')) {
-                panel.classList.remove('hidden');
-                restore.classList.add('hidden');
-            } else {
-                panel.classList.add('hidden');
-                restore.classList.remove('hidden');
-            }
-        }
-
-        // --- INYECCIÓN DE CHAT DE TRANSMISIÓN ---
-        function addChatMessage(displayName, text, color) {
-            const wrapper = document.getElementById('chatWrapper');
-            if (!wrapper) return;
-            const row = document.createElement('div');
-            row.className = 'chat-msg transition-all duration-300';
-            row.innerHTML = `<span class="chat-user font-bold" style="color: ${color || '#00D4FF'}">${displayName}:</span> <span class="text-slate-300">${text}</span>`;
-            wrapper.appendChild(row);
-            if (wrapper.children.length > 6) wrapper.removeChild(wrapper.firstChild);
-            wrapper.scrollTop = wrapper.scrollHeight;
-        }
-
-        // --- SISTEMA CONEXIÓN SOCKET.IO (STREAMDAEMON PROTOCOL) ---
-        function initSocket() {
-            try {
-                // transport obligatorio websocket para evadir la interceptación de Fastify v5
-                socketConnection = io(BACKEND_URL, { transports: ['websocket'] });
-            } catch (e) {
-                console.warn("No se pudo cargar el cliente de Socket.IO local. Iniciando modo Standalone.");
-                return;
-            }
-
-            socketConnection.on('connect', () => {
-                console.log("Conectado con StreamDaemon Backend en " + BACKEND_URL);
-                socketConnection.emit('join:channel', CHANNEL);
-
-                // Solicitar sincronización inicial
-                socketConnection.emit('speedrun:get-state', { channel: CHANNEL });
-            });
-
-            // Sincronizar estado completo de la carrera desde StreamDaemon
-            socketConnection.on('speedrun:update', (data) => {
-                if (!data) return;
-                
-                // Actualizar metadatos
-                document.getElementById('liveSplitGame').textContent = data.game ? data.game.toUpperCase() : "SPEEDRUN";
-                document.getElementById('liveSplitCategory').textContent = data.category || "Any%";
-                document.getElementById('runCategory').textContent = (data.game || "") + " - " + (data.category || "");
-                document.getElementById('attemptCount').textContent = "#" + (data.attempts || 1);
-                
-                if (data.pb) {
-                    document.getElementById('statPB').textContent = formatTime(data.pb);
-                    document.getElementById('introPB').textContent = formatTime(data.pb);
-                }
-                if (data.wr) {
-                    document.getElementById('introWR').textContent = formatTime(data.wr);
-                }
-
-                // Sincronizar splits
-                if (data.splits) {
-                    splits = data.splits;
-                }
-
-                currentSplitIndex = data.currentSplitIndex ?? 0;
-                timerRunning = data.timerRunning ?? false;
-                elapsedTime = data.elapsedTime ?? 0;
-
-                renderSplits();
-                calculatePace();
-
-                // Controlar interval de renderizado del timer
-                clearInterval(timerInterval);
-                if (timerRunning) {
-                    startTime = Date.now() - elapsedTime;
-                    timerInterval = setInterval(updateTimer, 10);
-                    document.getElementById('btnStart').textContent = "SPLIT";
-                } else {
-                    document.getElementById('mainTimer').textContent = formatTime(elapsedTime);
-                    document.getElementById('btnStart').textContent = "EMPEZAR RUN";
-                }
-            });
-
-            // Escuchar chat global del stream
-            socketConnection.on('chat:message', ({ user, text }) => {
-                addChatMessage(user.displayName, text, user.color);
-            });
-
-            // Escuchar telemetría general (espectadores, uptime, followers)
-            socketConnection.on('hud:update', (data) => {
-                if (!data) return;
-                if (data.viewers !== undefined) {
-                    document.getElementById('viewerCount').textContent = data.viewers.toLocaleString();
-                }
-                if (data.followers !== undefined) {
-                    document.getElementById('followerCount').textContent = data.followers.toLocaleString();
-                }
-                if (data.uptimeSeconds !== undefined) {
-                    let uptSeconds = data.uptimeSeconds;
-                    let h = Math.floor(uptSeconds / 3600).toString().padStart(2, '0');
-                    let m = Math.floor((uptSeconds % 3600) / 60).toString().padStart(2, '0');
-                    let s = (uptSeconds % 60).toString().padStart(2, '0');
-                    document.getElementById('uptimeCounter').textContent = `${h}:${m}:${s}`;
-                }
-            });
-        }
-
-        // --- CARGAR SOCKET DE MANERA CORRECTA ---
-        function loadSocketIO(cb) {
-            const script = document.createElement('script');
-            script.onload = () => cb();
-            script.onerror = () => cb(new Error('Local Socket.io fallido'));
-            script.src = './js/socket.io.js'; // Ruta de estáticos local en StreamDaemon
-            document.head.appendChild(script);
-        }
-
-        window.onload = function() {
-            const params = new URLSearchParams(window.location.search);
-            const obsScene = params.get('scene');
-
-            if (obsScene) {
-                changeScene(obsScene);
-                // Ocultar controles si se detecta escena forzada por URL (OBS)
-                document.getElementById('controlPanel').classList.add('hidden');
-                document.getElementById('btnRestoreControls').classList.add('hidden');
-            } else {
-                changeScene('gameplay');
-            }
-
-            // Inicializar renderizado inicial de splits
-            renderSplits();
-
-            // Cargar socket local y acoplar
-            loadSocketIO(function(err) {
-                if (!err) {
-                    initSocket();
-                } else {
-                    console.log("Servidor Socket.IO no detectado en local. Iniciando simulación...");
-                    if (DEMO_MODE || !obsScene) {
-                        startDemoMode();
-                    }
-                }
-            });
-        }
-
-        // --- SIMULADOR SUTIL PARA MODO DE PRUEBAS / DEMO ---
-        function startDemoMode() {
-            document.getElementById('viewerCount').textContent = "1,425";
-            document.getElementById('followerCount').textContent = "12,893";
-            document.getElementById('attemptCount').textContent = "#142";
-            
-            setInterval(() => {
-                const names = ["RunnerX", "SpeedyG", "DeltasB", "Gamer99"];
-                const msgs = ["¡Vas a un ritmo brutal!", "Eso es un split de oro 🌟", "GG WP!", "Sálvate el glitch en el puente"];
-                const rName = names[Math.floor(Math.random() * names.length)];
-                const rMsg = msgs[Math.floor(Math.random() * msgs.length)];
-                addChatMessage(rName, rMsg, '#00ffff');
-            }, 7000);
-
-            let uptSeconds = 3600;
-            setInterval(() => {
-                uptSeconds++;
-                let h = Math.floor(uptSeconds / 3600).toString().padStart(2, '0');
-                let m = Math.floor((uptSeconds % 3600) / 60).toString().padStart(2, '0');
-                let s = (uptSeconds % 60).toString().padStart(2, '0');
-                document.getElementById('uptimeCounter').textContent = `${h}:${m}:${s}`;
-            }, 1000);
-        }
-    </script>
+      });
+    };
+  </script>
 </body>
 </html>
