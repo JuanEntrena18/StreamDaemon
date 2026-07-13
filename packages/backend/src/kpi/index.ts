@@ -528,6 +528,28 @@ export function setupKpi(app: FastifyInstance) {
         entry.followersGained += events.filter(e => e.timestamp >= startTime && e.timestamp <= endTime && e.type === 'follow').length;
       }
 
+      // Supplement with StreamSession data for streams whose VOD is not yet available
+      const recentSessions = await prisma.streamSession.findMany({
+        where: {
+          userId: user.id,
+          endedAt: { not: null },
+          startedAt: { gte: new Date(Date.now() - 48 * 60 * 60 * 1000) },
+        },
+      });
+      for (const session of recentSessions) {
+        const hasVodMatch = videos.data.some(v =>
+          Math.abs(v.creationDate.getTime() - session.startedAt.getTime()) < 3600000
+        );
+        if (hasVodMatch) continue;
+        const gameName = session.gameName || 'General';
+        if (!gameMap.has(gameName)) gameMap.set(gameName, { views: [], durations: [], count: 0, followersGained: 0 });
+        const entry = gameMap.get(gameName)!;
+        entry.views.push(session.viewersMax);
+        entry.durations.push(session.durationSeconds);
+        entry.count++;
+        entry.followersGained += session.followersGained;
+      }
+
       for (const gameName of gameMap.keys()) {
         try {
           const game = await apiClient.games.getGameByName(gameName);
