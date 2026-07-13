@@ -241,3 +241,94 @@
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-size: 0.75rem;
 }
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--sf-radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--sf-border);
+}
+
+.stepNum {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(124, 58, 237, 0.15);
+  color: #a78bfa;
+  font-size: 0.75rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.stepBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.stepTitle {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--sf-text);
+  margin-bottom: 0.25rem;
+}
+
+.stepDesc {
+  font-size: 0.75rem;
+  color: var(--sf-text-3);
+  line-height: 1.5;
+}
+
+.sceneUrlRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--sf-radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--sf-border);
+}
+
+.sceneUrlName {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--sf-text-2);
+  min-width: 7rem;
+  flex-shrink: 0;
+}
+
+.sceneUrlCode {
+  flex: 1;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: var(--sf-text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sceneCopyBtn {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
+  min-width: 50px;
+  flex-shrink: 0;
+}
+
+.previewBtnRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
