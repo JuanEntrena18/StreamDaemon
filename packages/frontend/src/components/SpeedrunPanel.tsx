@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useSocket } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import { OVERLAY_REGISTRY } from '../config/overlayRegistry';
-import styles from './ObsPanel.module.css';
+import styles from './SpeedrunPanel.module.css';
 
 interface Props {
   channel: string;
@@ -58,121 +58,124 @@ export function SpeedrunPanel({ channel }: Props) {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${cs.toString().padStart(2, '0')}`;
   };
 
+  const scenes = [
+    { name: 'Inicio (Starting Soon)', param: 'intro' },
+    { name: 'Gameplay (Splits)', param: 'gameplay' },
+    { name: 'Pausa (BRB)', param: 'brb' },
+    { name: 'Final (Ending)', param: 'ending' },
+  ];
+
   return (
-    <motion.div className={styles.panel} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <div className={styles.panelHeader}>
-        <h2 className={styles.panelTitle}>🏃 {t('obs.speedrunSuite')}</h2>
-        <span className={styles.badge}>
-          <span style={{ color: '#ff6b00' }}>⚠️</span> BETA
-        </span>
-      </div>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <div className={styles.heading}>
+            <h2 className="sf-heading">{t('obs.speedrunSuite')}</h2>
+            <span className={styles.betaBadge}>⚠️ BETA</span>
+          </div>
+          <p className={styles.subtitle}>{t('obs.speedrunSuiteDesc')}</p>
+        </div>
 
-      <div className={styles.panelContent}>
-        <p className="text-slate-400 mb-6 text-sm">{t('obs.speedrunSuiteDesc')}</p>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* OBS URL */}
-          <div className={`${styles.card} col-span-2`}>
-            <h3 className="font-bold text-cyan-400 text-lg mb-3">📡 URL para OBS</h3>
-            <div className="flex gap-3 items-start">
-              <input
-                readOnly
-                value={overlayUrl}
-                className="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm font-mono text-slate-300 focus:outline-none"
-                onClick={(e) => (e.target as HTMLInputElement).select()}
-              />
+        {/* OBS URL */}
+        <div className="glass-card" style={{ marginBottom: '1rem' }}>
+          <div className={styles.card}>
+            <p className={styles.sectionTitle}>📡 URL para OBS</p>
+            <code className={styles.urlBox}>{overlayUrl}</code>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 onClick={() => navigator.clipboard.writeText(overlayUrl)}
-                className="bg-cyan-700 hover:bg-cyan-600 px-4 py-2 rounded font-bold text-sm transition"
+                className={`sf-btn sf-btn-primary ${styles.copyBtn}`}
               >
                 📋 Copiar
               </button>
             </div>
-            <p className="text-xs text-slate-500 mt-2">
+            <p className={styles.sectionDesc} style={{ marginBottom: 0, marginTop: '0.75rem' }}>
               Añade esta URL como fuente <strong>Navegador</strong> en OBS (1920×1080).
               El panel de control del streamer se oculta automáticamente en OBS.
             </p>
           </div>
+        </div>
 
-          {/* Escenas URL params */}
-          <div className={styles.card}>
-            <h3 className="font-bold text-emerald-400 text-lg mb-3">🎬 Escenas por URL</h3>
-            <div className="flex flex-col gap-2 text-sm">
-              {[
-                { name: 'Inicio (Starting Soon)', param: 'intro' },
-                { name: 'Gameplay (Splits)', param: 'gameplay' },
-                { name: 'Pausa (BRB)', param: 'brb' },
-                { name: 'Final (Ending)', param: 'ending' },
-              ].map(scene => (
-                <div key={scene.param} className="flex justify-between items-center bg-slate-900/50 rounded px-3 py-2 border border-slate-800">
-                  <span className="text-slate-300">{scene.name}</span>
-                  <code className="text-xs bg-slate-800 px-2 py-1 rounded text-cyan-400">
-                    &scene={scene.param}
-                  </code>
-                </div>
-              ))}
-              <p className="text-xs text-slate-500 mt-2">
-                Añade <code className="text-cyan-400">&scene=...</code> al final de la URL para forzar una escena.
+        <div className={styles.twoColGrid}>
+          {/* Escenas */}
+          <div className="glass-card">
+            <div className={styles.card}>
+              <p className={styles.sectionTitle}>🎬 Escenas por URL</p>
+              <div className={styles.sceneList}>
+                {scenes.map(scene => (
+                  <div key={scene.param} className={styles.sceneRow}>
+                    <span className={styles.sceneName}>{scene.name}</span>
+                    <code className={styles.sceneCode}>&scene={scene.param}</code>
+                  </div>
+                ))}
+              </div>
+              <p className={styles.sectionDesc} style={{ marginBottom: 0, marginTop: '0.75rem' }}>
+                Añade <code className={styles.sceneCode} style={{ padding: '0.1rem 0.35rem' }}>&scene=...</code> al final de la URL para forzar una escena.
               </p>
             </div>
           </div>
 
           {/* Control Rápido */}
-          <div className={styles.card}>
-            <h3 className="font-bold text-yellow-400 text-lg mb-3">🎮 Control Rápido</h3>
-            <div className="flex flex-col gap-3">
-              <div className="bg-slate-900 rounded-xl p-4 text-center border border-slate-800">
-                <div className="font-tech text-5xl font-black font-mono tracking-widest text-white">
-                  {formatTime(elapsed)}
-                </div>
-                <div className="text-xs text-slate-500 mt-1">CRONÓMETRO LOCAL</div>
+          <div className="glass-card">
+            <div className={styles.card}>
+              <p className={styles.sectionTitle}>🎮 Control Rápido</p>
+              <div className={styles.timerBox}>
+                <div className={styles.timerValue}>{formatTime(elapsed)}</div>
+                <div className={styles.timerLabel}>CRONÓMETRO</div>
               </div>
-              <div className="flex gap-2 justify-center">
+              <div className={styles.controlsRow}>
                 <button
                   onClick={() => emitControl('split')}
-                  className="bg-emerald-700 hover:bg-emerald-600 px-6 py-3 rounded-xl font-bold text-lg transition flex-1"
+                  className={styles.controlBtnPrimary}
+                  style={{ flex: 1 }}
                 >
                   {timerRunning ? 'SPLIT' : 'EMPEZAR'}
                 </button>
                 <button
                   onClick={() => emitControl('reset')}
-                  className="bg-rose-700 hover:bg-rose-600 px-4 py-3 rounded-xl font-bold text-lg transition"
+                  className={styles.controlBtnDanger}
                 >
                   REINICIAR
                 </button>
               </div>
-              <div className="flex justify-between text-xs text-slate-500">
-                <span>Intentos: <strong className="text-white">#{attempts}</strong></span>
-                <span>Estado: {timerRunning
-                  ? <span className="text-emerald-400 font-bold">Corriendo</span>
-                  : <span className="text-slate-400">Detenido</span>}
+              <div className={styles.statsRow}>
+                <span>Intentos: <strong className={styles.statValue}>#{attempts}</strong></span>
+                <span>
+                  Estado:{' '}
+                  <strong className={styles.statValue}>
+                    {timerRunning ? 'Corriendo' : 'Detenido'}
+                  </strong>
                 </span>
               </div>
-              <p className="text-xs text-slate-600 mt-2 border-t border-slate-800 pt-2">
-                Estos controles son locales. Cuando la suite Speedrun esté conectada al backend, los splits se sincronizarán en tiempo real.
+              <p className={styles.sectionDesc} style={{ marginBottom: 0, marginTop: '0.75rem' }}>
+                Controles locales. Cuando la suite esté conectada al backend, los splits se sincronizarán en tiempo real.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Estado de conexión */}
-        <div className={`${styles.card} border ${connected ? 'border-emerald-700' : 'border-slate-700'}`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${connected ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]' : 'bg-slate-600'}`} />
-            <span className="font-bold">{connected ? 'Backend conectado' : 'Backend no conectado'}</span>
-            <span className="text-xs text-slate-500 ml-auto">
-              {connected
-                ? 'La suite Speedrun puede conectarse en tiempo real'
-                : 'La suite funcionará en modo autónomo (demo)'}
-            </span>
+        {/* Conexión */}
+        <div className="glass-card" style={{ marginBottom: '1rem' }}>
+          <div className={styles.card}>
+            <div className={styles.connectionRow}>
+              <div className={connected ? styles.statusDotConnected : styles.statusDotDisconnected} />
+              <span className="sf-label" style={{ margin: 0 }}>
+                {connected ? 'Backend conectado' : 'Backend no conectado'}
+              </span>
+              <span className="text-xs text-dim" style={{ marginLeft: 'auto' }}>
+                {connected
+                  ? 'La suite Speedrun puede conectarse en tiempo real'
+                  : 'La suite funcionará en modo autónomo (demo)'}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Nota beta */}
-        <div className="mt-6 bg-amber-950/40 border border-amber-700/50 rounded-xl p-4 text-sm">
-          <h4 className="font-bold text-amber-400 mb-1">⚠️ Versión Beta</h4>
-          <p className="text-amber-300/80">
-            Esta funcionalidad está en desarrollo activo. Los eventos <code className="text-cyan-400">speedrun:*</code> en el backend
+        {/* Beta note */}
+        <div className={styles.betaInfo}>
+          <div className={styles.betaInfoTitle}>⚠️ Versión Beta</div>
+          <p>
+            Esta funcionalidad está en desarrollo activo. Los eventos <code>speedrun:*</code> en el backend
             están pendientes de implementación completa. La suite funciona actualmente en modo local/demo.
             Datos como PB, WR, splits y categorías se configuran manualmente en el overlay o se sincronizarán
             cuando los sockets estén operativos.
