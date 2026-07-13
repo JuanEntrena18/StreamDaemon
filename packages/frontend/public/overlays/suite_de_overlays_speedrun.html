@@ -4,40 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StreamDaemon - Speedrun Overlay Suite</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    /* ── Design Tokens ── */
+    /* ── Design Tokens (exact copy from app index.css) ── */
     :root {
-      --bg: #0a0a1a;
-      --surface: rgba(255,255,255,0.04);
-      --surface-hover: rgba(255,255,255,0.07);
-      --border: rgba(255,255,255,0.08);
-      --border-accent: rgba(124,58,237,0.5);
-      --primary: #7c3aed;
-      --primary-light: #a855f7;
-      --primary-glow: rgba(124,58,237,0.35);
-      --accent: #6366f1;
-      --teal: #06b6d4;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --text: #f8fafc;
-      --text-2: #94a3b8;
-      --text-3: #64748b;
-      --radius: 14px;
-      --radius-sm: 8px;
-      --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
-      --font: 'Inter', sans-serif;
-      --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
-      --font-tech: 'Orbitron', sans-serif;
+      --sf-bg: #0a0a1a;
+      --sf-bg-2: #0f0f23;
+      --sf-bg-3: #13132e;
+      --sf-surface: rgba(255,255,255,0.04);
+      --sf-surface-hover: rgba(255,255,255,0.07);
+      --sf-border: rgba(255,255,255,0.08);
+      --sf-border-accent: rgba(124,58,237,0.5);
+      --sf-primary: #7c3aed;
+      --sf-primary-light: #a855f7;
+      --sf-primary-glow: rgba(124,58,237,0.35);
+      --sf-accent: #6366f1;
+      --sf-accent-2: #8b5cf6;
+      --sf-teal: #06b6d4;
+      --sf-success: #10b981;
+      --sf-danger: #ef4444;
+      --sf-warning: #f59e0b;
+      --sf-text: #f8fafc;
+      --sf-text-2: #94a3b8;
+      --sf-text-3: #64748b;
+      --sf-text-4: #475569;
+      --sf-radius: 14px;
+      --sf-radius-sm: 8px;
+      --sf-shadow-glow: 0 0 30px rgba(124,58,237,0.2);
+      --sf-shadow-card: 0 4px 24px rgba(0,0,0,0.4);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    button, input { font-family: inherit; color: inherit; }
+    button { background: transparent; border: none; cursor: pointer; }
 
     body {
-      font-family: var(--font);
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
       background: transparent;
-      color: var(--text);
+      color: var(--sf-text);
+      -webkit-font-smoothing: antialiased;
       width: 1920px;
       height: 1080px;
       overflow: hidden;
@@ -45,368 +50,422 @@
       position: relative;
     }
 
-    /* ── Glass Card ── */
-    .glass {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: var(--shadow-card);
-    }
+    /* ── Overlay-specific extras ── */
+    .font-tech { font-family: 'Orbitron', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', 'SF Mono', monospace; }
 
-    .glass-sm {
-      border-radius: var(--radius-sm);
-    }
-
-    .glass-accent {
-      border-color: var(--border-accent);
-    }
-
-    /* ── Scanlines ── */
     .scanlines::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.15) 2px,
-        rgba(0,0,0,0.15) 4px
-      );
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
       pointer-events: none;
       z-index: 99;
     }
-
-    /* ── Grid Background ── */
     .grid-bg {
-      background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
       background-size: 40px 40px;
     }
+    .bg-dark { background: var(--sf-bg); }
 
-    /* ── Glows ── */
     .glow-green  { text-shadow: 0 0 10px rgba(16,185,129,0.5); }
     .glow-red    { text-shadow: 0 0 10px rgba(239,68,68,0.5); }
     .glow-gold   { text-shadow: 0 0 15px rgba(245,158,11,0.7); }
     .glow-teal   { text-shadow: 0 0 12px rgba(6,182,212,0.5); }
     .glow-violet { text-shadow: 0 0 12px rgba(124,58,237,0.5); }
 
-    /* ── Scene Transitions ── */
     .scene {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
+      position: absolute; inset: 0; width: 100%; height: 100%;
       transition: opacity 0.4s ease, transform 0.4s ease;
       opacity: 1;
-      transform: scale(1);
     }
-    .scene.hidden {
-      display: none;
-    }
+    .scene.hidden { display: none; }
 
-    /* ── Scene Backgrounds ── */
-    .bg-dark {
-      background: var(--bg);
-    }
-
-    /* ── Buttons ── */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.8rem;
-      font-weight: 600;
-      font-family: var(--font);
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: all 0.15s ease;
-      outline: none;
-      white-space: nowrap;
-      color: var(--text-2);
-      background: var(--surface);
-    }
-    .btn:hover {
-      background: var(--surface-hover);
-      color: var(--text);
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      color: #fff;
-      border: none;
-      box-shadow: 0 2px 12px var(--primary-glow);
-    }
-    .btn-primary:hover {
-      filter: brightness(1.1);
-      box-shadow: 0 4px 20px var(--primary-glow);
-      transform: translateY(-1px);
-    }
-    .btn-success {
-      background: rgba(16,185,129,0.15);
-      color: #34d399;
-      border: 1px solid rgba(16,185,129,0.3);
-    }
-    .btn-success:hover {
-      background: rgba(16,185,129,0.25);
-    }
-    .btn-danger {
-      background: rgba(239,68,68,0.15);
-      color: #f87171;
-      border: 1px solid rgba(239,68,68,0.3);
-    }
-    .btn-danger:hover {
-      background: rgba(239,68,68,0.25);
-    }
-    .btn-sm {
-      padding: 0.35rem 0.75rem;
-      font-size: 0.72rem;
-    }
-    .btn-icon {
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      font-size: 1rem;
-    }
-
-    /* ── Animations ── */
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%      { opacity: 0.5; transform: scale(0.8); }
-    }
-    @keyframes slide-up {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fade-in {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    @keyframes bg-shimmer {
-      0%   { background-position: -200% center; }
-      100% { background-position: 200% center; }
-    }
-
-    .animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
-    .animate-slide-up  { animation: slide-up 0.35s ease-out both; }
-    .animate-fade-in   { animation: fade-in 0.3s ease-out both; }
-    .animate-shimmer   {
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-      background-size: 200% 100%;
-      animation: bg-shimmer 3s ease-in-out infinite;
-    }
-
-    /* ── Split Row ── */
+    /* ── Split row ── */
     .split-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: flex; justify-content: space-between; align-items: center;
       padding: 0.5rem 0.75rem;
-      border-radius: var(--radius-sm);
+      border-radius: var(--sf-radius-sm);
       transition: all 0.15s ease;
     }
     .split-row.active {
       background: rgba(6,182,212,0.08);
-      border-left: 3px solid var(--teal);
+      border-left: 3px solid var(--sf-teal);
     }
-    .split-row:not(:last-child) {
-      border-bottom: 1px solid var(--border);
-    }
+    .split-row:not(:last-child) { border-bottom: 1px solid var(--sf-border); }
     .split-name {
-      font-size: 0.85rem;
-      color: var(--text-2);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-size: 0.85rem; color: var(--sf-text-2);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .split-row.active .split-name {
-      color: var(--teal);
-      font-weight: 600;
-    }
+    .split-row.active .split-name { color: var(--sf-teal); font-weight: 600; }
     .split-time {
-      font-family: var(--font-mono);
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: var(--text);
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.9rem; font-weight: 700; color: var(--sf-text);
     }
     .split-delta {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      min-width: 5rem;
-      text-align: right;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 0.75rem; min-width: 5rem; text-align: right;
     }
+
+    /* ── Chat message ── */
+    .chat-msg {
+      animation: slide-up 0.25s ease-out;
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+    .chat-user { font-weight: 600; }
 
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb { background: var(--sf-border); border-radius: 99px; }
 
-    /* ── Utility ── */
-    .badge {
+    /* ── App CSS (exact copy from index.css) ── */
+
+    /* Glass card */
+    .glass-card {
+      background: var(--sf-surface);
+      border: 1px solid var(--sf-border);
+      border-radius: var(--sf-radius);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: var(--sf-shadow-card);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .glass-card:hover { border-color: rgba(255,255,255,0.12); }
+    .glass-card--accent {
+      border-color: var(--sf-border-accent);
+      box-shadow: var(--sf-shadow-card), 0 0 0 1px rgba(124,58,237,0.1);
+    }
+
+    /* Input */
+    .sf-input {
+      width: 100%;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--sf-border);
+      border-radius: var(--sf-radius-sm);
+      padding: 0.6rem 0.875rem;
+      font-size: 0.875rem;
+      color: var(--sf-text);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      font-family: inherit;
+    }
+    .sf-input::placeholder { color: var(--sf-text-3); }
+    .sf-input:focus {
+      border-color: var(--sf-primary);
+      box-shadow: 0 0 0 3px var(--sf-primary-glow);
+    }
+
+    /* Buttons */
+    .sf-btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.3rem;
-      padding: 0.2rem 0.6rem;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.25rem;
+      border-radius: var(--sf-radius-sm);
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      outline: none;
+      white-space: nowrap;
+    }
+    .sf-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+    .sf-btn-primary {
+      background: linear-gradient(135deg, var(--sf-primary) 0%, var(--sf-accent) 100%);
+      color: #fff;
+      box-shadow: 0 2px 12px var(--sf-primary-glow);
+    }
+    .sf-btn-primary:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 4px 20px var(--sf-primary-glow);
+      transform: translateY(-1px);
+    }
+
+    .sf-btn-danger {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(239,68,68,0.3);
+    }
+    .sf-btn-danger:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .sf-btn-ghost {
+      background: var(--sf-surface-hover);
+      color: var(--sf-text-2);
+      border: 1px solid var(--sf-border);
+    }
+    .sf-btn-ghost:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--sf-text);
+    }
+
+    .sf-btn-sm {
+      padding: 0.4rem 0.875rem;
+      font-size: 0.78rem;
+    }
+
+    /* Badge */
+    .sf-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.625rem;
       border-radius: 99px;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
       text-transform: uppercase;
     }
-    .badge-violet { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
-    .badge-teal   { background: rgba(6,182,212,0.15);  color: #22d3ee; border: 1px solid rgba(6,182,212,0.25); }
-    .badge-green  { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
-    .badge-gold   { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.35); }
+    .sf-badge-success { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+    .sf-badge-danger  { background: rgba(239,68,68,0.15);  color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+    .sf-badge-violet  { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+    .sf-badge-teal    { background: rgba(6,182,212,0.15);  color: #22d3ee; border: 1px solid rgba(6,182,212,0.25); }
+    .sf-badge-new     { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.35); }
+
+    /* Divider */
+    .sf-divider {
+      border: none;
+      border-top: 1px solid var(--sf-border);
+      margin: 1rem 0;
+    }
+
+    /* Section */
+    .sf-section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sf-text-3);
+      margin-bottom: 0.75rem;
+    }
+    .sf-heading {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--sf-text);
+    }
+    .sf-label {
+      font-size: 0.78rem;
+      color: var(--sf-text-2);
+      display: block;
+    }
+    .sf-caption {
+      font-size: 0.65rem;
+      color: var(--sf-text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Animations */
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(0.8); }
+    }
+    @keyframes glow-pulse {
+      0%, 100% { box-shadow: 0 0 8px var(--sf-primary-glow); }
+      50%      { box-shadow: 0 0 20px var(--sf-primary-glow), 0 0 40px rgba(124,58,237,0.2); }
+    }
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-4px); }
+    }
+
+    .animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+    .animate-glow      { animation: glow-pulse 3s ease-in-out infinite; }
+    .animate-slide-up  { animation: slide-up 0.3s ease-out both; }
+    .animate-float     { animation: float 3s ease-in-out infinite; }
+
+    /* Utility */
+    .flex-row    { display: flex; align-items: center; }
+    .flex-row--gap-sm { gap: 0.5rem; }
+    .flex-row--gap-md { gap: 0.75rem; }
+    .flex-row--gap-lg { gap: 1rem; }
+    .flex-col    { display: flex; flex-direction: column; }
+    .flex-col--gap-sm { gap: 0.5rem; }
+    .flex-col--gap-md { gap: 0.75rem; }
+    .flex-col--gap-lg { gap: 1rem; }
+    .flex-wrap   { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .flex-center { display: flex; align-items: center; justify-content: center; }
+    .flex-between { display: flex; align-items: center; justify-content: space-between; }
+    .flex-1      { flex: 1; }
+    .text-xs    { font-size: 0.78rem; }
+    .text-sm    { font-size: 0.875rem; }
+    .text-muted { color: var(--sf-text-2); }
+    .text-dim   { color: var(--sf-text-3); }
+    .text-center { text-align: center; }
+    .text-uppercase { text-transform: uppercase; letter-spacing: 0.04em; }
+    .w-full { width: 100%; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 0.75rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 0.75rem; }
+
+    /* Stat card */
+    .sf-stat-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 1.25rem;
+      background: var(--sf-surface);
+      border: 1px solid var(--sf-border);
+      border-radius: var(--sf-radius-sm);
+    }
+    .sf-stat-card__label { font-size: 0.78rem; color: var(--sf-text-2); }
+    .sf-stat-card__value { font-size: 1.5rem; font-weight: 700; color: var(--sf-text); }
+
+    /* Card */
+    .sf-card { padding: 1.5rem; }
   </style>
 </head>
 <body>
 
   <!-- ─── CONTROL PANEL (streamer only) ─── -->
-  <div id="controlPanel" class="glass" style="position:absolute;top:12px;left:12px;right:12px;padding:12px 20px;z-index:999;display:flex;align-items:center;gap:16px;justify-content:space-between;font-size:0.82rem;">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <span style="font-family:var(--font-tech);font-size:0.9rem;font-weight:700;color:var(--teal);white-space:nowrap;">⬡ SPEEDRUN SUITE</span>
-      <span class="badge badge-violet">No capturar</span>
+  <div id="controlPanel" class="glass-card" style="position:absolute;top:12px;left:12px;right:12px;z-index:999;">
+    <div class="sf-card" style="display:flex;align-items:center;gap:16px;justify-content:space-between;padding:10px 18px;">
+      <div class="flex-row flex-row--gap-md">
+        <span class="font-tech" style="font-size:0.88rem;font-weight:700;color:var(--sf-teal);white-space:nowrap;">&#x2B21; SPEEDRUN SUITE</span>
+        <span class="sf-badge sf-badge-violet">No capturar</span>
+      </div>
+      <div class="flex-row flex-row--gap-sm">
+        <button onclick="changeScene('intro')"    class="sf-btn sf-btn-ghost sf-btn-sm">Inicio</button>
+        <button onclick="changeScene('gameplay')" class="sf-btn sf-btn-primary sf-btn-sm">Splits</button>
+        <button onclick="changeScene('brb')"      class="sf-btn sf-btn-ghost sf-btn-sm">BRB</button>
+        <button onclick="changeScene('ending')"   class="sf-btn sf-btn-ghost sf-btn-sm">Final</button>
+      </div>
+      <div class="flex-row flex-row--gap-sm">
+        <span class="sf-caption">CONTROL:</span>
+        <button onclick="triggerTimer()" id="btnStart" class="sf-btn sf-btn-sm" style="background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.3);border-radius:var(--sf-radius-sm);font-weight:600;">&#x25B6; EMPEZAR</button>
+        <button onclick="undoSplit()" class="sf-btn sf-btn-ghost sf-btn-sm">&#x21A9; Deshacer</button>
+        <button onclick="resetTimer()" class="sf-btn sf-btn-danger sf-btn-sm">&#x23F9; Reiniciar</button>
+      </div>
+      <div class="flex-row flex-row--gap-sm">
+        <span class="text-dim text-xs">Pr&#xF3;ximo:</span>
+        <input type="text" id="inputNextGame" value="Metroid Dread" oninput="updateNextGame()" class="sf-input" style="width:120px;padding:0.25rem 0.6rem;font-size:0.78rem;">
+      </div>
+      <button onclick="toggleControls()" class="sf-btn sf-btn-ghost sf-btn-sm" style="color:var(--sf-text-3);">&#x2715; Ocultar</button>
     </div>
-    <div style="display:flex;gap:6px;">
-      <button onclick="changeScene('intro')"    class="btn btn-sm">Inicio</button>
-      <button onclick="changeScene('gameplay')" class="btn btn-sm btn-success">Splits</button>
-      <button onclick="changeScene('brb')"      class="btn btn-sm">BRB</button>
-      <button onclick="changeScene('ending')"   class="btn btn-sm">Final</button>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px;">
-      <span style="color:var(--text-3);font-weight:600;font-size:0.75rem;">CONTROL:</span>
-      <button onclick="triggerTimer()" id="btnStart" class="btn btn-sm btn-success">▶ EMPEZAR</button>
-      <button onclick="undoSplit()"    class="btn btn-sm">↩ Deshacer</button>
-      <button onclick="resetTimer()"   class="btn btn-sm btn-danger">⏹ Reiniciar</button>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span style="color:var(--text-3);font-size:0.75rem;">Próximo:</span>
-      <input type="text" id="inputNextGame" value="Metroid Dread" oninput="updateNextGame()" style="background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;padding:0.25rem 0.6rem;color:var(--text);font-size:0.8rem;width:130px;outline:none;font-family:var(--font);">
-    </div>
-    <button onclick="toggleControls()" class="btn btn-sm" style="color:var(--text-3);">✕ Ocultar</button>
   </div>
 
-  <button id="btnRestoreControls" onclick="toggleControls()" class="btn btn-sm glass" style="position:absolute;bottom:16px;left:16px;z-index:998;display:none;font-family:var(--font-tech);color:var(--teal);">
-    ⬡ PANEL
+  <button id="btnRestoreControls" onclick="toggleControls()" class="sf-btn sf-btn-ghost glass-card" style="position:absolute;bottom:16px;left:16px;z-index:998;display:none;font-family:'Orbitron',sans-serif;color:var(--sf-teal);padding:0.5rem 1rem;">
+    &#x2B21; PANEL
   </button>
 
-  <!-- ─── SCENE 1: INTRO (Starting Soon) ─── -->
-  <div id="scene-intro" class="scene bg-dark grid-bg flex flex-col justify-between p-16 z-10 hidden">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+  <!-- ─── SCENE 1: INTRO ─── -->
+  <div id="scene-intro" class="scene bg-dark grid-bg flex-col hidden" style="display:none;justify-content:space-between;padding:4rem;">
+    <div class="flex-between">
       <div>
-        <span style="font-family:var(--font-tech);font-size:1.1rem;letter-spacing:4px;color:var(--teal);">ESTABLECIENDO ENLACE</span>
-        <h1 style="font-family:var(--font-tech);font-size:3.5rem;font-weight:900;letter-spacing:2px;margin-top:8px;">TRANSMISIÓN INICIANDO</h1>
+        <div class="sf-caption font-tech" style="font-size:0.9rem;letter-spacing:4px;color:var(--sf-teal);margin-bottom:0;">ESTABLECIENDO ENLACE</div>
+        <h1 class="font-tech" style="font-size:3.5rem;font-weight:900;letter-spacing:2px;margin-top:8px;">TRANSMISI&#xD3;N INICIANDO</h1>
       </div>
       <div style="text-align:right;">
-        <span style="color:var(--text-3);font-size:0.85rem;">CATEGORÍA RUN</span>
-        <p id="runCategory" style="font-family:var(--font-tech);font-size:1.6rem;color:var(--warning);margin-top:4px;">Elden Ring - Any% Glitchless</p>
+        <div class="text-dim text-xs">CATEGOR&#xCD;A RUN</div>
+        <p id="runCategory" class="font-tech" style="font-size:1.6rem;color:var(--sf-warning);margin-top:4px;">Elden Ring - Any% Glitchless</p>
       </div>
     </div>
 
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;">
-      <span style="font-size:1.2rem;color:var(--text-3);letter-spacing:6px;animation:pulse-dot 2s ease-in-out infinite;">EMPEZAMOS EN</span>
-      <div id="introCountdown" style="font-family:var(--font-tech);font-size:8rem;font-weight:900;background:linear-gradient(180deg,#fff,var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:6px;filter:drop-shadow(0 8px 24px rgba(6,182,212,0.3));">05:00</div>
-      <div style="display:flex;gap:4rem;margin-top:2rem;text-align:center;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:1rem 3rem;">
-        <div><span style="color:var(--text-3);display:block;font-size:0.8rem;">PERSONAL BEST (PB)</span><span id="introPB" style="font-family:var(--font-mono);font-size:1.3rem;font-weight:700;color:var(--success);">54:12.33</span></div>
-        <div><span style="color:var(--text-3);display:block;font-size:0.8rem;">WORLD RECORD (WR)</span><span id="introWR" style="font-family:var(--font-mono);font-size:1.3rem;font-weight:700;color:var(--warning);">48:02.10</span></div>
+    <div class="flex-col flex-center" style="flex:1;gap:0;">
+      <span class="text-xs text-dim animate-pulse-dot" style="font-size:1.2rem;letter-spacing:6px;color:var(--sf-text-3);">EMPEZAMOS EN</span>
+      <div id="introCountdown" class="font-tech" style="font-size:8rem;font-weight:900;background:linear-gradient(180deg,#fff,var(--sf-teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:6px;filter:drop-shadow(0 8px 24px rgba(6,182,212,0.3));">05:00</div>
+      <div class="flex-row flex-row--gap-lg" style="gap:4rem;margin-top:2rem;text-align:center;border-top:1px solid var(--sf-border);border-bottom:1px solid var(--sf-border);padding:1rem 3rem;">
+        <div><span class="text-dim text-xs">PERSONAL BEST (PB)</span><span id="introPB" class="font-mono" style="font-size:1.3rem;font-weight:700;color:var(--sf-success);">54:12.33</span></div>
+        <div><span class="text-dim text-xs">WORLD RECORD (WR)</span><span id="introWR" class="font-mono" style="font-size:1.3rem;font-weight:700;color:var(--sf-warning);">48:02.10</span></div>
       </div>
     </div>
 
-    <div style="display:flex;justify-content:space-between;color:var(--text-3);font-size:0.72rem;">
+    <div class="flex-between text-dim text-xs">
       <span>DAEMON TRANSMISSION SYSTEM // SEGURA</span>
       <span>WAITING FOR RUNNER START...</span>
     </div>
   </div>
 
-  <!-- ─── SCENE 2: GAMEPLAY (Livesplit-style) ─── -->
-  <div id="scene-gameplay" class="scene z-10">
-    <!-- transparent gameplay area (just a visual hint) -->
-    <div style="position:absolute;top:20px;left:420px;width:1480px;height:830px;border:1px solid rgba(255,255,255,0.03);border-radius:var(--radius);pointer-events:none;"></div>
+  <!-- ─── SCENE 2: GAMEPLAY ─── -->
+  <div id="scene-gameplay" class="scene" style="z-index:10;">
+    <!-- transparent gameplay area hint -->
+    <div style="position:absolute;top:20px;left:420px;width:1480px;height:830px;border:1px solid rgba(255,255,255,0.03);border-radius:var(--sf-radius);pointer-events:none;"></div>
 
     <!-- Livesplit widget -->
-    <div class="glass glass-accent" style="position:absolute;top:20px;left:20px;width:380px;height:1040px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;">
-      <div>
-        <div style="border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:16px;">
-          <h2 id="liveSplitGame" style="font-family:var(--font-tech);font-size:1.1rem;font-weight:900;color:var(--teal);letter-spacing:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">ELDEN RING</h2>
-          <span id="liveSplitCategory" style="font-size:0.72rem;color:var(--text-3);letter-spacing:1px;">Any% Glitchless</span>
-        </div>
-
-        <div id="splitsContainer" style="display:flex;flex-direction:column;gap:2px;overflow-y:auto;max-height:620px;font-size:0.85rem;">
-          <!-- rendered by JS -->
-        </div>
-      </div>
-
-      <div>
-        <div style="text-align:right;border-top:1px solid var(--border);padding-top:12px;">
-          <div id="mainTimer" style="font-family:var(--font-tech);font-size:2.8rem;font-weight:900;letter-spacing:3px;line-height:1;">00:00.00</div>
-        </div>
-
-        <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:0.75rem;display:flex;flex-direction:column;gap:6px;">
-          <div style="display:flex;justify-content:space-between;">
-            <span style="color:var(--text-3);">Personal Best:</span>
-            <span id="statPB" style="font-family:var(--font-mono);font-weight:700;">54:12.33</span>
+    <div class="glass-card glass-card--accent" style="position:absolute;top:20px;left:20px;width:380px;height:1040px;">
+      <div class="flex-col" style="height:100%;padding:20px;justify-content:space-between;">
+        <div>
+          <div style="border-bottom:1px solid var(--sf-border);padding-bottom:12px;margin-bottom:16px;">
+            <h2 id="liveSplitGame" class="font-tech" style="font-size:1.1rem;font-weight:900;color:var(--sf-teal);letter-spacing:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">ELDEN RING</h2>
+            <span id="liveSplitCategory" class="text-dim text-xs" style="letter-spacing:1px;">Any% Glitchless</span>
           </div>
-          <div style="display:flex;justify-content:space-between;">
-            <span style="color:var(--text-3);">Sum of Best:</span>
-            <span id="statSOB" style="font-family:var(--font-mono);font-weight:700;color:var(--teal);">51:04.20</span>
+          <div id="splitsContainer" class="flex-col flex-col--gap-sm" style="overflow-y:auto;max-height:620px;font-size:0.85rem;"></div>
+        </div>
+
+        <div>
+          <div style="text-align:right;border-top:1px solid var(--sf-border);padding-top:12px;">
+            <div id="mainTimer" class="font-tech" style="font-size:2.8rem;font-weight:900;letter-spacing:3px;line-height:1;">00:00.00</div>
           </div>
-          <div style="display:flex;justify-content:space-between;">
-            <span style="color:var(--text-3);">Ritmo Est.:</span>
-            <span id="statPace" style="font-family:var(--font-mono);font-weight:700;color:var(--warning);">—</span>
+          <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--sf-border);font-size:0.75rem;" class="flex-col flex-col--gap-sm">
+            <div class="flex-between"><span class="text-dim">Personal Best:</span><span id="statPB" class="font-mono" style="font-weight:700;">54:12.33</span></div>
+            <div class="flex-between"><span class="text-dim">Sum of Best:</span><span id="statSOB" class="font-mono" style="font-weight:700;color:var(--sf-teal);">51:04.20</span></div>
+            <div class="flex-between"><span class="text-dim">Ritmo Est.:</span><span id="statPace" class="font-mono" style="font-weight:700;color:var(--sf-warning);">&#x2014;</span></div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Live Chat -->
-    <div style="position:absolute;bottom:260px;right:32px;width:340px;height:280px;" class="glass glass-sm">
+    <div class="glass-card" style="position:absolute;bottom:260px;right:32px;width:340px;height:280px;">
       <div style="padding:12px 14px;display:flex;flex-direction:column;height:100%;">
-        <span style="font-size:0.6rem;color:var(--teal);letter-spacing:2px;font-family:var(--font-tech);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:8px;">LIVE CHAT</span>
-        <div id="chatWrapper" style="flex:1;display:flex;flex-direction:column;gap:4px;overflow-y:auto;font-size:0.75rem;"></div>
+        <span class="sf-caption font-tech" style="color:var(--sf-teal);border-bottom:1px solid var(--sf-border);padding-bottom:6px;margin-bottom:8px;">LIVE CHAT</span>
+        <div id="chatWrapper" class="flex-col flex-col--gap-sm" style="flex:1;overflow-y:auto;font-size:0.75rem;"></div>
       </div>
     </div>
 
     <!-- Stats bar -->
-    <div class="glass" style="position:absolute;bottom:20px;left:420px;right:20px;height:auto;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;">
-      <div style="display:flex;align-items:center;gap:24px;">
-        <div style="border-right:1px solid var(--border);padding-right:20px;">
-          <span style="font-size:0.65rem;color:var(--danger);font-family:var(--font-tech);letter-spacing:2px;display:block;margin-bottom:4px;">● ONLINE</span>
-          <span id="uptimeCounter" style="font-family:var(--font-mono);font-size:1.3rem;font-weight:700;">00:00:00</span>
+    <div class="glass-card" style="position:absolute;bottom:20px;left:420px;right:20px;">
+      <div class="flex-between" style="padding:16px 24px;">
+        <div class="flex-row flex-row--gap-lg">
+          <div style="border-right:1px solid var(--sf-border);padding-right:20px;">
+            <span class="sf-caption" style="color:var(--sf-danger);">&#x25CF; ONLINE</span>
+            <span id="uptimeCounter" class="font-mono" style="font-size:1.3rem;font-weight:700;">00:00:00</span>
+          </div>
+          <div><span class="sf-label">ESPECTADORES</span><span id="viewerCount" class="font-mono" style="font-size:1.2rem;font-weight:700;">0</span></div>
+          <div><span class="sf-label">SEGUIDORES</span><span id="followerCount" class="font-mono" style="font-size:1.2rem;font-weight:700;">0</span></div>
         </div>
-        <div><span style="font-size:0.72rem;color:var(--text-3);display:block;margin-bottom:2px;">ESPECTADORES</span><span id="viewerCount" style="font-family:var(--font-mono);font-size:1.2rem;font-weight:700;">0</span></div>
-        <div><span style="font-size:0.72rem;color:var(--text-3);display:block;margin-bottom:2px;">SEGUIDORES</span><span id="followerCount" style="font-family:var(--font-mono);font-size:1.2rem;font-weight:700;">0</span></div>
-      </div>
-      <div style="text-align:right;">
-        <span style="font-size:0.7rem;color:var(--text-3);display:block;margin-bottom:2px;">INTENTOS</span>
-        <span id="attemptCount" style="font-family:var(--font-tech);font-size:2rem;font-weight:900;color:var(--teal);">#1</span>
+        <div style="text-align:right;">
+          <span class="sf-caption">INTENTOS</span>
+          <span id="attemptCount" class="font-tech" style="font-size:2rem;font-weight:900;color:var(--sf-teal);">#1</span>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ─── SCENE 3: BRB ─── -->
-  <div id="scene-brb" class="scene bg-dark grid-bg flex p-16 z-10 hidden" style="display:flex;justify-content:space-between;">
-    <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+  <div id="scene-brb" class="scene bg-dark grid-bg hidden" style="display:none;justify-content:space-between;padding:4rem;">
+    <div class="flex-col" style="flex:1;justify-content:space-between;">
       <div>
-        <span style="color:var(--danger);font-family:var(--font-tech);font-size:1.2rem;letter-spacing:4px;animation:pulse-dot 2s ease-in-out infinite;">● TRANSMISIÓN EN PAUSA</span>
-        <h1 style="font-family:var(--font-tech);font-size:5rem;font-weight:900;letter-spacing:3px;margin-top:16px;">VOLVEMOS<br>EN ENSEGUIDA</h1>
+        <span class="font-tech" style="color:var(--sf-danger);font-size:1.2rem;letter-spacing:4px;" class="animate-pulse-dot">&#x25CF; TRANSMISI&#xD3;N EN PAUSA</span>
+        <h1 class="font-tech" style="font-size:5rem;font-weight:900;letter-spacing:3px;margin-top:16px;">VOLVEMOS<br>EN ENSEGUIDA</h1>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;color:var(--text-3);font-size:0.85rem;">
-        <div style="width:36px;height:36px;border-radius:50%;border:2px solid rgba(6,182,212,0.3);display:flex;align-items:center;justify-content:center;animation:spin 3s linear infinite;">↻</div>
-        <span>SISTEMAS CALIBRANDO NUEVAS CATEGORÍAS...</span>
+      <div class="flex-row flex-row--gap-md" style="color:var(--sf-text-3);font-size:0.85rem;">
+        <div style="width:36px;height:36px;border-radius:50%;border:2px solid rgba(6,182,212,0.3);display:flex;align-items:center;justify-content:center;animation:spin 3s linear infinite;">&#x21BB;</div>
+        <span>SISTEMAS CALIBRANDO NUEVAS CATEGOR&#xCD;AS...</span>
       </div>
     </div>
 
     <div style="width:380px;display:flex;flex-direction:column;justify-content:center;">
-      <div class="glass glass-accent" style="padding:32px;position:relative;overflow:hidden;">
-        <span style="font-size:0.65rem;color:var(--teal);font-family:var(--font-tech);letter-spacing:3px;display:block;margin-bottom:8px;">PRÓXIMO OBJETIVO</span>
-        <h3 id="brbNextGame" style="font-family:var(--font-tech);font-size:2rem;font-weight:900;letter-spacing:1px;">METROID DREAD</h3>
-        <p id="brbNextCategory" style="font-size:0.82rem;color:var(--text-3);margin-top:4px;font-family:var(--font-mono);">100% No Major Glitches</p>
-        <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:14px;display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text-3);">
+      <div class="glass-card glass-card--accent" style="padding:2rem;position:relative;overflow:hidden;">
+        <span class="sf-caption" style="color:var(--sf-teal);margin-bottom:8px;">PR&#xD3;XIMO OBJETIVO</span>
+        <h3 id="brbNextGame" class="font-tech" style="font-size:2rem;font-weight:900;letter-spacing:1px;">METROID DREAD</h3>
+        <p id="brbNextCategory" class="text-dim text-xs font-mono" style="margin-top:4px;">100% No Major Glitches</p>
+        <hr class="sf-divider">
+        <div class="flex-between text-dim text-xs">
           <span>Est. Target: 1h 45m</span>
           <span>WR: 1h 22m</span>
         </div>
@@ -415,70 +474,52 @@
   </div>
 
   <!-- ─── SCENE 4: ENDING ─── -->
-  <div id="scene-ending" class="scene bg-dark grid-bg flex flex-col justify-between p-16 z-10 hidden">
-    <div style="text-align:center;">
-      <span style="font-family:var(--font-tech);font-size:1.6rem;letter-spacing:6px;color:var(--warning);display:block;margin-bottom:8px;">RUN FINALIZADA</span>
-      <h1 id="endTitle" style="font-family:var(--font-tech);font-size:4.5rem;font-weight:900;letter-spacing:4px;">STREAM FINALIZADO</h1>
+  <div id="scene-ending" class="scene bg-dark grid-bg hidden" style="display:none;justify-content:space-between;padding:4rem;">
+    <div class="text-center">
+      <span class="font-tech" style="font-size:1.6rem;letter-spacing:6px;color:var(--sf-warning);display:block;margin-bottom:8px;">RUN FINALIZADA</span>
+      <h1 class="font-tech" style="font-size:4.5rem;font-weight:900;letter-spacing:4px;">STREAM FINALIZADO</h1>
     </div>
 
-    <div style="display:flex;gap:32px;justify-content:center;align-items:center;flex:1;">
-      <div class="glass" style="padding:32px;width:440px;">
-        <h3 style="font-family:var(--font-tech);color:var(--teal);font-size:1.2rem;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:16px;">REGISTRO DE TIEMPOS</h3>
-        <div style="display:flex;flex-direction:column;gap:10px;font-size:0.88rem;">
-          <div style="display:flex;justify-content:space-between;">
-            <span style="color:var(--text-3);">Tiempo Final:</span>
-            <span id="endFinalTime" style="font-family:var(--font-mono);font-weight:700;font-size:1.2rem;color:var(--success);">—</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;">
-            <span style="color:var(--text-3);">Sum of Best:</span>
-            <span id="endSOB" style="font-family:var(--font-mono);font-weight:700;font-size:1.2rem;color:var(--teal);">—</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;">
-            <span style="color:var(--text-3);">Intentos:</span>
-            <span id="endAttempts" style="font-family:var(--font-mono);font-weight:700;font-size:1.2rem;">—</span>
-          </div>
+    <div class="flex-row flex-row--gap-lg" style="justify-content:center;flex:1;">
+      <div class="glass-card" style="padding:2rem;width:440px;">
+        <h3 class="font-tech" style="color:var(--sf-teal);font-size:1.2rem;font-weight:700;border-bottom:1px solid var(--sf-border);padding-bottom:12px;margin-bottom:16px;">REGISTRO DE TIEMPOS</h3>
+        <div class="flex-col flex-col--gap-md" style="font-size:0.88rem;">
+          <div class="flex-between"><span class="text-dim">Tiempo Final:</span><span id="endFinalTime" class="font-mono" style="font-weight:700;font-size:1.2rem;color:var(--sf-success);">&#x2014;</span></div>
+          <div class="flex-between"><span class="text-dim">Sum of Best:</span><span id="endSOB" class="font-mono" style="font-weight:700;font-size:1.2rem;color:var(--sf-teal);">&#x2014;</span></div>
+          <div class="flex-between"><span class="text-dim">Intentos:</span><span id="endAttempts" class="font-mono" style="font-weight:700;font-size:1.2rem;">&#x2014;</span></div>
         </div>
       </div>
 
-      <div class="glass" style="padding:32px;width:440px;">
-        <h3 style="font-family:var(--font-tech);color:var(--warning);font-size:1.2rem;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:16px;">COMUNIDAD Y REDES</h3>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span class="badge badge-violet">TWITCH</span>
-            <span id="socialTwitch" style="font-family:var(--font-mono);font-size:0.85rem;">twitch.tv/tu_canal</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span class="badge badge-teal">X / TWITTER</span>
-            <span id="socialTwitter" style="font-family:var(--font-mono);font-size:0.85rem;">@tu_usuario</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span class="badge badge-gold">YOUTUBE</span>
-            <span id="socialYoutube" style="font-family:var(--font-mono);font-size:0.85rem;">youtube.com/c/tu_canal</span>
-          </div>
+      <div class="glass-card" style="padding:2rem;width:440px;">
+        <h3 class="font-tech" style="color:var(--sf-warning);font-size:1.2rem;font-weight:700;border-bottom:1px solid var(--sf-border);padding-bottom:12px;margin-bottom:16px;">COMUNIDAD Y REDES</h3>
+        <div class="flex-col flex-col--gap-md">
+          <div class="flex-row flex-row--gap-sm"><span class="sf-badge sf-badge-violet">TWITCH</span><span id="socialTwitch" class="font-mono text-sm">twitch.tv/tu_canal</span></div>
+          <div class="flex-row flex-row--gap-sm"><span class="sf-badge sf-badge-teal">X / TWITTER</span><span id="socialTwitter" class="font-mono text-sm">@tu_usuario</span></div>
+          <div class="flex-row flex-row--gap-sm"><span class="sf-badge sf-badge-new">YOUTUBE</span><span id="socialYoutube" class="font-mono text-sm">youtube.com/c/tu_canal</span></div>
         </div>
       </div>
     </div>
 
-    <div style="text-align:center;font-size:0.7rem;color:var(--text-3);letter-spacing:1px;">
+    <div class="text-center text-dim text-xs" style="letter-spacing:1px;">
       STREAMDAEMON SPEEDRUN SUITE // GRACIAS POR EL APOYO
     </div>
   </div>
 
   <!-- ─── ENGINE ─── -->
   <script>
-    const CHANNEL     = new URLSearchParams(location.search).get('channel') || '';
-    const DEMO_MODE   = new URLSearchParams(location.search).get('demo') === 'true';
-    const BACKEND_URL = new URLSearchParams(location.search).get('backend') || 'http://localhost:3000';
+    var CHANNEL     = new URLSearchParams(location.search).get('channel') || '';
+    var DEMO_MODE   = new URLSearchParams(location.search).get('demo') === 'true';
+    var BACKEND_URL = new URLSearchParams(location.search).get('backend') || 'http://localhost:3000';
 
-    let currentScene = 'gameplay';
-    let timerRunning = false;
-    let startTime = 0;
-    let elapsedTime = 0;
-    let timerInterval = null;
-    let currentSplitIndex = 0;
-    let socketConnection = null;
+    var currentScene = 'gameplay';
+    var timerRunning = false;
+    var startTime = 0;
+    var elapsedTime = 0;
+    var timerInterval = null;
+    var currentSplitIndex = 0;
+    var socketConnection = null;
 
-    let splits = [
+    var splits = [
       { name: 'Limgrave Skip', pb: 180000, current: null, gold: 165000 },
       { name: 'Margit', pb: 420000, current: null, gold: 395000 },
       { name: 'Godrick', pb: 780000, current: null, gold: 740000 },
@@ -491,52 +532,51 @@
 
     function formatTime(ms) {
       if (ms === null || isNaN(ms)) return '\u2014';
-      const totalSec = Math.floor(ms / 1000);
-      const h = Math.floor(totalSec / 3600);
-      const m = Math.floor((totalSec % 3600) / 60);
-      const s = totalSec % 60;
-      const cs = Math.floor((ms % 1000) / 10);
+      var totalSec = Math.floor(ms / 1000);
+      var h = Math.floor(totalSec / 3600);
+      var m = Math.floor((totalSec % 3600) / 60);
+      var s = totalSec % 60;
+      var cs = Math.floor((ms % 1000) / 10);
       if (h > 0) return h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '.' + String(cs).padStart(2,'0');
       return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '.' + String(cs).padStart(2,'0');
     }
 
     function formatDelta(diff) {
       if (diff === null || isNaN(diff)) return '';
-      const sign = diff >= 0 ? '+' : '\u2212';
-      const absDiff = Math.abs(diff);
-      const totalSec = Math.floor(absDiff / 1000);
-      const m = Math.floor(totalSec / 60);
-      const s = totalSec % 60;
-      const cs = Math.floor((absDiff % 1000) / 10);
-      let res = sign;
+      var sign = diff >= 0 ? '+' : '\u2212';
+      var absDiff = Math.abs(diff);
+      var totalSec = Math.floor(absDiff / 1000);
+      var m = Math.floor(totalSec / 60);
+      var s = totalSec % 60;
+      var cs = Math.floor((absDiff % 1000) / 10);
+      var res = sign;
       if (m > 0) res += m + ':';
       res += String(s).padStart(2,'0') + '.' + String(cs).padStart(2,'0');
       return res;
     }
 
     function renderSplits() {
-      const container = document.getElementById('splitsContainer');
+      var container = document.getElementById('splitsContainer');
       if (!container) return;
       container.innerHTML = '';
 
-      splits.forEach((split, index) => {
-        const isActive = index === currentSplitIndex && timerRunning;
-        const row = document.createElement('div');
+      splits.forEach(function(split, index) {
+        var isActive = index === currentSplitIndex && timerRunning;
+        var row = document.createElement('div');
         row.className = 'split-row' + (isActive ? ' active' : '');
-        row.style.animationDelay = (index * 0.04) + 's';
         if (isActive) row.classList.add('animate-slide-up');
 
-        let deltaHtml = '';
-        let timeHtml = formatTime(split.pb);
+        var deltaHtml = '';
+        var timeHtml = formatTime(split.pb);
 
         if (split.current !== null) {
-          const diff = split.current - split.pb;
-          let cls = diff <= 0 ? 'glow-green' : 'glow-red';
+          var diff = split.current - split.pb;
           if (split.current <= split.gold) {
-            cls = 'glow-gold';
-            deltaHtml = '<span class="split-delta" style="color:var(--warning);font-weight:700;">\u2605 ' + formatDelta(diff) + '</span>';
+            deltaHtml = '<span class="split-delta glow-gold" style="color:var(--sf-warning);font-weight:700;">\u2605 ' + formatDelta(diff) + '</span>';
           } else {
-            deltaHtml = '<span class="split-delta ' + cls + '" style="color:' + (diff <= 0 ? 'var(--success)' : 'var(--danger)') + ';">' + formatDelta(diff) + '</span>';
+            var color = diff <= 0 ? 'var(--sf-success)' : 'var(--sf-danger)';
+            var glow = diff <= 0 ? 'glow-green' : 'glow-red';
+            deltaHtml = '<span class="split-delta ' + glow + '" style="color:' + color + ';">' + formatDelta(diff) + '</span>';
           }
           timeHtml = formatTime(split.current);
         }
@@ -560,8 +600,8 @@
         document.getElementById('statPace').textContent = '\u2014';
         return;
       }
-      let totalExpected = 0;
-      for (let i = 0; i < splits.length; i++) {
+      var totalExpected = 0;
+      for (var i = 0; i < splits.length; i++) {
         if (i < currentSplitIndex) {
           totalExpected += splits[i].current;
         } else {
@@ -569,14 +609,14 @@
         }
       }
       document.getElementById('statPace').textContent = formatTime(totalExpected);
-      const overallDiff = totalExpected - splits[splits.length-1].pb;
-      const el = document.getElementById('statPace');
+      var overallDiff = totalExpected - splits[splits.length-1].pb;
+      var el = document.getElementById('statPace');
       if (overallDiff < 0) {
-        el.style.color = 'var(--success)';
-        el.className = 'glow-green';
+        el.style.color = 'var(--sf-success)';
+        el.className = 'font-mono glow-green';
       } else {
-        el.style.color = 'var(--danger)';
-        el.className = 'glow-red';
+        el.style.color = 'var(--sf-danger)';
+        el.className = 'font-mono glow-red';
       }
     }
 
@@ -589,7 +629,7 @@
         timerRunning = true;
         startTime = Date.now() - elapsedTime;
         timerInterval = setInterval(updateTimer, 10);
-        document.getElementById('btnStart').textContent = '⏱ SPLIT';
+        document.getElementById('btnStart').textContent = '\u23F1 SPLIT';
       } else {
         if (currentSplitIndex < splits.length) {
           splits[currentSplitIndex].current = elapsedTime;
@@ -623,7 +663,7 @@
           timerRunning = true;
           startTime = Date.now() - elapsedTime;
           timerInterval = setInterval(updateTimer, 10);
-          document.getElementById('btnStart').textContent = '⏱ SPLIT';
+          document.getElementById('btnStart').textContent = '\u23F1 SPLIT';
           document.getElementById('btnStart').disabled = false;
         }
       }
@@ -638,47 +678,47 @@
       clearInterval(timerInterval);
       elapsedTime = 0;
       currentSplitIndex = 0;
-      splits.forEach(s => s.current = null);
+      splits.forEach(function(s) { s.current = null; });
       document.getElementById('mainTimer').textContent = '00:00.00';
-      document.getElementById('btnStart').textContent = '▶ EMPEZAR';
+      document.getElementById('btnStart').textContent = '\u25B6 EMPEZAR';
       document.getElementById('btnStart').disabled = false;
-      document.getElementById('statPace').textContent = '\u2014';
-      const paceEl = document.getElementById('statPace');
-      paceEl.style.color = 'var(--warning)';
-      paceEl.className = '';
+      var paceEl = document.getElementById('statPace');
+      paceEl.textContent = '\u2014';
+      paceEl.style.color = 'var(--sf-warning)';
+      paceEl.className = 'font-mono';
       renderSplits();
     }
 
     function changeScene(sceneId) {
       currentScene = sceneId;
-      document.querySelectorAll('.scene').forEach(s => s.classList.add('hidden'));
-      const target = document.getElementById('scene-' + sceneId);
+      document.querySelectorAll('.scene').forEach(function(s) { s.classList.add('hidden'); });
+      var target = document.getElementById('scene-' + sceneId);
       if (target) target.classList.remove('hidden');
     }
 
     function updateNextGame() {
-      const val = document.getElementById('inputNextGame').value;
+      var val = document.getElementById('inputNextGame').value;
       document.getElementById('brbNextGame').textContent = val.toUpperCase();
     }
 
     function toggleControls() {
-      const panel = document.getElementById('controlPanel');
-      const restore = document.getElementById('btnRestoreControls');
+      var panel = document.getElementById('controlPanel');
+      var restore = document.getElementById('btnRestoreControls');
       if (panel.style.display === 'none') {
-        panel.style.display = 'flex';
+        panel.style.display = 'block';
         restore.style.display = 'none';
       } else {
         panel.style.display = 'none';
-        restore.style.display = 'flex';
+        restore.style.display = 'block';
       }
     }
 
     function addChatMessage(displayName, text, color) {
-      const wrapper = document.getElementById('chatWrapper');
+      var wrapper = document.getElementById('chatWrapper');
       if (!wrapper) return;
-      const row = document.createElement('div');
-      row.style.animation = 'slide-up 0.25s ease-out';
-      row.innerHTML = '<span style="font-weight:600;color:' + (color || '#22d3ee') + ';">' + displayName + ':</span> <span style="color:var(--text-2);">' + text + '</span>';
+      var row = document.createElement('div');
+      row.className = 'chat-msg';
+      row.innerHTML = '<span class="chat-user" style="color:' + (color || '#22d3ee') + ';">' + displayName + ':</span> <span style="color:var(--sf-text-2);">' + text + '</span>';
       wrapper.appendChild(row);
       if (wrapper.children.length > 8) wrapper.removeChild(wrapper.firstChild);
       wrapper.scrollTop = wrapper.scrollHeight;
@@ -692,13 +732,13 @@
         return;
       }
 
-      socketConnection.on('connect', () => {
+      socketConnection.on('connect', function() {
         console.log('Connected to StreamDaemon backend');
         socketConnection.emit('join:channel', CHANNEL);
         socketConnection.emit('speedrun:get-state', { channel: CHANNEL });
       });
 
-      socketConnection.on('speedrun:update', (data) => {
+      socketConnection.on('speedrun:update', function(data) {
         if (!data) return;
         document.getElementById('liveSplitGame').textContent = (data.game || 'SPEEDRUN').toUpperCase();
         document.getElementById('liveSplitCategory').textContent = data.category || 'Any%';
@@ -708,48 +748,46 @@
           document.getElementById('statPB').textContent = formatTime(data.pb);
           document.getElementById('introPB').textContent = formatTime(data.pb);
         }
-        if (data.wr) {
-          document.getElementById('introWR').textContent = formatTime(data.wr);
-        }
+        if (data.wr) document.getElementById('introWR').textContent = formatTime(data.wr);
         if (data.splits) splits = data.splits;
-        currentSplitIndex = data.currentSplitIndex ?? 0;
-        timerRunning = data.timerRunning ?? false;
-        elapsedTime = data.elapsedTime ?? 0;
+        currentSplitIndex = data.currentSplitIndex || 0;
+        timerRunning = data.timerRunning || false;
+        elapsedTime = data.elapsedTime || 0;
         renderSplits();
         calculatePace();
         clearInterval(timerInterval);
         if (timerRunning) {
           startTime = Date.now() - elapsedTime;
           timerInterval = setInterval(updateTimer, 10);
-          document.getElementById('btnStart').textContent = '⏱ SPLIT';
+          document.getElementById('btnStart').textContent = '\u23F1 SPLIT';
         } else {
           document.getElementById('mainTimer').textContent = formatTime(elapsedTime);
-          document.getElementById('btnStart').textContent = '▶ EMPEZAR';
+          document.getElementById('btnStart').textContent = '\u25B6 EMPEZAR';
         }
       });
 
-      socketConnection.on('chat:message', ({ user, text }) => {
-        addChatMessage(user.displayName, text, user.color);
+      socketConnection.on('chat:message', function(msg) {
+        if (msg && msg.user) addChatMessage(msg.user.displayName, msg.text, msg.user.color);
       });
 
-      socketConnection.on('hud:update', (data) => {
+      socketConnection.on('hud:update', function(data) {
         if (!data) return;
         if (data.viewers !== undefined) document.getElementById('viewerCount').textContent = Number(data.viewers).toLocaleString();
         if (data.followers !== undefined) document.getElementById('followerCount').textContent = Number(data.followers).toLocaleString();
         if (data.uptimeSeconds !== undefined) {
-          const s = Number(data.uptimeSeconds);
-          const h = String(Math.floor(s / 3600)).padStart(2,'0');
-          const m = String(Math.floor((s % 3600) / 60)).padStart(2,'0');
-          const sec = String(Math.floor(s % 60)).padStart(2,'0');
+          var s = Number(data.uptimeSeconds);
+          var h = String(Math.floor(s / 3600)).padStart(2,'0');
+          var m = String(Math.floor((s % 3600) / 60)).padStart(2,'0');
+          var sec = String(Math.floor(s % 60)).padStart(2,'0');
           document.getElementById('uptimeCounter').textContent = h + ':' + m + ':' + sec;
         }
       });
     }
 
     function loadSocketIO(cb) {
-      const script = document.createElement('script');
-      script.onload = () => cb();
-      script.onerror = () => cb(new Error('Socket.IO script not found'));
+      var script = document.createElement('script');
+      script.onload = function() { cb(); };
+      script.onerror = function() { cb(new Error('Socket.IO script not found')); };
       script.src = './js/socket.io.js';
       document.head.appendChild(script);
     }
@@ -759,41 +797,30 @@
       document.getElementById('followerCount').textContent = '12,893';
       document.getElementById('attemptCount').textContent = '#142';
 
-      const names = ['RunnerX', 'SpeedyG', 'DeltasB', 'Gamer99', 'PixelZ'];
-      const msgs = [
-        '\u00a1Vas a un ritmo brutal!',
-        '\u00a1Nuevo split de oro! \u2605',
-        'GG WP!',
-        'Ese glitch en el puente...',
-        '\u00a1Vamos!'
-      ];
-      setInterval(() => {
-        addChatMessage(
-          names[Math.floor(Math.random() * names.length)],
-          msgs[Math.floor(Math.random() * msgs.length)],
-          '#22d3ee'
-        );
+      var names = ['RunnerX', 'SpeedyG', 'DeltasB', 'Gamer99', 'PixelZ'];
+      var msgs = ['\u00a1Vas a un ritmo brutal!', '\u00a1Nuevo split de oro! \u2605', 'GG WP!', 'Ese glitch en el puente...', '\u00a1Vamos!'];
+      setInterval(function() {
+        addChatMessage(names[Math.floor(Math.random() * names.length)], msgs[Math.floor(Math.random() * msgs.length)], '#22d3ee');
       }, 6000);
 
-      let uptSeconds = 3600;
-      setInterval(() => {
+      var uptSeconds = 3600;
+      setInterval(function() {
         uptSeconds++;
-        const h = String(Math.floor(uptSeconds / 3600)).padStart(2,'0');
-        const m = String(Math.floor((uptSeconds % 3600) / 60)).padStart(2,'0');
-        const s = String(Math.floor(uptSeconds % 60)).padStart(2,'0');
+        var h = String(Math.floor(uptSeconds / 3600)).padStart(2,'0');
+        var m = String(Math.floor((uptSeconds % 3600) / 60)).padStart(2,'0');
+        var s = String(Math.floor(uptSeconds % 60)).padStart(2,'0');
         document.getElementById('uptimeCounter').textContent = h + ':' + m + ':' + s;
       }, 1000);
 
-      // simulate split progression
-      let demoIdx = 0;
-      const demoTimer = setInterval(() => {
-        if (demoIdx < splits.length && !timerRunning) {
+      var demoIdx = 0;
+      var demoTimer = setInterval(function() {
+        if (demoIdx < splits.length) {
           if (!timerRunning) {
             timerRunning = true;
             startTime = Date.now() - elapsedTime;
             timerInterval = setInterval(updateTimer, 10);
           }
-          setTimeout(() => {
+          setTimeout(function() {
             splits[demoIdx].current = elapsedTime;
             currentSplitIndex = ++demoIdx;
             renderSplits();
@@ -808,8 +835,8 @@
     }
 
     window.onload = function() {
-      const params = new URLSearchParams(window.location.search);
-      const obsScene = params.get('scene');
+      var params = new URLSearchParams(window.location.search);
+      var obsScene = params.get('scene');
 
       if (obsScene) {
         changeScene(obsScene);
@@ -825,10 +852,8 @@
         if (!err) {
           initSocket();
         } else {
-          console.log('No local Socket.IO server. Starting simulation...');
-          if (DEMO_MODE || !obsScene) {
-            startDemoMode();
-          }
+          console.log('No local Socket.IO. Starting simulation...');
+          if (DEMO_MODE || !obsScene) startDemoMode();
         }
       });
     };
