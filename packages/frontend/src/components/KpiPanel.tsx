@@ -430,14 +430,33 @@ function GamesTab({ channel }: { channel: string }) {
   const { t } = useTranslation();
   const [games, setGames] = useState<GamePerformance[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    apiGet(`/kpi/game-performance/${encodeURIComponent(channel)}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d) setGames(d.games); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+  const fetchGames = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    try {
+      const res = await apiGet(`/kpi/game-performance/${encodeURIComponent(channel)}`);
+      if (res.ok) {
+        const d = await res.json();
+        setGames(d.games || []);
+      }
+    } catch {}
+    setLoading(false);
   }, [channel]);
+
+  useEffect(() => { fetchGames(); }, [fetchGames]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const res = await apiPost(`/kpi/game-performance/${encodeURIComponent(channel)}/refresh`, {});
+      if (res.ok) {
+        const d = await res.json();
+        setGames(d.games || []);
+      }
+    } catch {}
+    setRefreshing(false);
+  };
 
   if (loading) {
     return (
@@ -451,43 +470,53 @@ function GamesTab({ channel }: { channel: string }) {
     );
   }
 
-  if (games.length === 0) {
-    return <div className={styles.loading}>{t('kpi.noGamesData') || 'No hay datos de juegos para mostrar en este período.'}</div>;
-  }
-
   return (
     <div className={styles.tabContent}>
-      <div className={styles.gamesGrid}>
-        {games.map(g => (
-          <div key={g.gameName} className={styles.gameCard}>
-            <div className={styles.gameHeader}>
-              {g.boxArtUrl && <img src={g.boxArtUrl} alt={g.gameName} className={styles.gameBoxArt} />}
-              <div className={styles.gameTitleWrapper}>
-                <h4 className={styles.gameTitle}>{g.gameName}</h4>
-                <span className={styles.gameStreamCount}>{g.streamCount} {t('kpi.streamsCount') || 'streams'}</span>
-              </div>
-            </div>
-            <div className={styles.gameStatsGrid}>
-              <div className={styles.gameStat}>
-                <span className={styles.gameStatLabel}>{t('kpi.avgViewers') || 'Prom. Viewers'}</span>
-                <span className={styles.gameStatValue}>{formatNumber(g.avgViewers)}</span>
-              </div>
-              <div className={styles.gameStat}>
-                <span className={styles.gameStatLabel}>{t('kpi.maxViewers') || 'Max Viewers'}</span>
-                <span className={styles.gameStatValue}>{formatNumber(g.maxViewers)}</span>
-              </div>
-              <div className={styles.gameStat}>
-                <span className={styles.gameStatLabel}>{t('kpi.followersGained') || 'Nuevos Seguidores'}</span>
-                <span className={styles.gameStatValue} style={{ color: 'var(--sf-success)' }}>+{formatNumber(g.followersGained)}</span>
-              </div>
-              <div className={styles.gameStat}>
-                <span className={styles.gameStatLabel}>{t('kpi.avgDuration') || 'Duración Promedio'}</span>
-                <span className={styles.gameStatValue}>{formatDuration(g.avgDuration)}</span>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="sf-btn sf-btn-ghost"
+          style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }}
+        >
+          {refreshing ? '⟳ Actualizando...' : '⟳ Actualizar desde VODs'}
+        </button>
       </div>
+      {games.length === 0 ? (
+        <div className={styles.loading}>{t('kpi.noGamesData') || 'No hay datos de juegos para mostrar en este período.'}</div>
+      ) : (
+        <div className={styles.gamesGrid}>
+          {games.map(g => (
+            <div key={g.gameName} className={styles.gameCard}>
+              <div className={styles.gameHeader}>
+                {g.boxArtUrl && <img src={g.boxArtUrl} alt={g.gameName} className={styles.gameBoxArt} />}
+                <div className={styles.gameTitleWrapper}>
+                  <h4 className={styles.gameTitle}>{g.gameName}</h4>
+                  <span className={styles.gameStreamCount}>{g.streamCount} {t('kpi.streamsCount') || 'streams'}</span>
+                </div>
+              </div>
+              <div className={styles.gameStatsGrid}>
+                <div className={styles.gameStat}>
+                  <span className={styles.gameStatLabel}>{t('kpi.avgViewers') || 'Prom. Viewers'}</span>
+                  <span className={styles.gameStatValue}>{formatNumber(g.avgViewers)}</span>
+                </div>
+                <div className={styles.gameStat}>
+                  <span className={styles.gameStatLabel}>{t('kpi.maxViewers') || 'Max Viewers'}</span>
+                  <span className={styles.gameStatValue}>{formatNumber(g.maxViewers)}</span>
+                </div>
+                <div className={styles.gameStat}>
+                  <span className={styles.gameStatLabel}>{t('kpi.followersGained') || 'Nuevos Seguidores'}</span>
+                  <span className={styles.gameStatValue} style={{ color: 'var(--sf-success)' }}>+{formatNumber(g.followersGained)}</span>
+                </div>
+                <div className={styles.gameStat}>
+                  <span className={styles.gameStatLabel}>{t('kpi.avgDuration') || 'Duración Promedio'}</span>
+                  <span className={styles.gameStatValue}>{formatDuration(g.avgDuration)}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

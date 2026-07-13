@@ -387,92 +387,194 @@ export function setupKpi(app: FastifyInstance) {
     }
   });
 
+  async function fetchGamePerformance(apiClient: ApiClient, userId: string, channelLogin: string, startDate?: Date): Promise<GamePerformance[]> {
+    // 1) Try persisted GameStat first
+    const cached = await prisma.gameStat.findMany({
+      where: { userId, updatedAt: startDate ? { gte: startDate } : undefined },
+    });
+    if (cached.length > 0) {
+      return cached.map(g => ({
+        gameName: g.gameName,
+        boxArtUrl: g.boxArtUrl ?? undefined,
+        streamCount: g.streamCount,
+        totalViews: g.totalViews,
+        avgViewers: g.avgViewers,
+        maxViewers: g.maxViewers,
+        followersGained: g.followersGained,
+        avgDuration: g.avgDuration,
+      })).sort((a, b) => b.totalViews - a.totalViews);
+    }
+
+    // 2) Try StreamSession from EventSub
+    const sessions = await prisma.streamSession.findMany({
+      where: {
+        userId,
+        startedAt: startDate ? { gte: startDate } : undefined,
+      }
+    });
+
+    const gameMap = new Map<string, { views: number[]; durations: number[]; count: number; followersGained: number; boxArtUrl?: string }>();
+
+    for (const session of sessions) {
+      const gameName = session.gameName || 'General';
+      if (!gameMap.has(gameName)) gameMap.set(gameName, { views: [], durations: [], count: 0, followersGained: 0 });
+      const entry = gameMap.get(gameName)!;
+      entry.views.push(session.viewersMax);
+      const duration = session.endedAt
+        ? session.durationSeconds
+        : Math.floor((Date.now() - session.startedAt.getTime()) / 1000);
+      entry.durations.push(duration);
+      entry.count++;
+      entry.followersGained += session.followersGained;
+    }
+
+    // 3) Fallback: fetch from Twitch VODs
+    if (sessions.length === 0) {
+      const videos = await apiClient.videos.getVideosByUser(userId, { type: 'archive', period: 'all', limit: 100 }).catch(() => ({ data: [] }));
+      const filteredVideos = startDate ? videos.data.filter(v => v.creationDate >= startDate) : videos.data;
+      const events = getEvents(channelLogin);
+
+      for (const video of filteredVideos) {
+        const raw = getRawData(video) as Record<string, any>;
+        let gameName = raw.game_name || '';
+        if (!gameName || gameName === 'Unknown' || gameName === '') {
+          if (raw.game_id) {
+            try {
+              const g = await apiClient.games.getGameById(raw.game_id);
+              if (g) gameName = g.name;
+            } catch {}
+          }
+          if (!gameName) gameName = 'General';
+        }
+        if (!gameMap.has(gameName)) gameMap.set(gameName, { views: [], durations: [], count: 0, followersGained: 0 });
+        const entry = gameMap.get(gameName)!;
+        entry.views.push(video.views);
+        entry.durations.push(video.durationInSeconds);
+        entry.count++;
+        const startTime = video.creationDate.getTime();
+        const endTime = startTime + video.durationInSeconds * 1000;
+        entry.followersGained += events.filter(e => e.timestamp >= startTime && e.timestamp <= endTime && e.type === 'follow').length;
+      }
+    }
+
+    for (const gameName of gameMap.keys()) {
+      try {
+        const game = await apiClient.games.getGameByName(gameName);
+        if (game) gameMap.get(gameName)!.boxArtUrl = game.boxArtUrl.replace('{width}', '144').replace('{height}', '192');
+      } catch {}
+    }
+
+    return Array.from(gameMap.entries()).map(([gameName, data]) => ({
+      gameName,
+      boxArtUrl: data.boxArtUrl,
+      streamCount: data.count,
+      totalViews: data.views.reduce((a, b) => a + b, 0),
+      avgViewers: Math.round(data.views.reduce((a, b) => a + b, 0) / data.count),
+      maxViewers: Math.max(...data.views),
+      followersGained: data.followersGained,
+      avgDuration: Math.round(data.durations.reduce((a, b) => a + b, 0) / data.count),
+    })).sort((a, b) => b.totalViews - a.totalViews);
+  }
+
   app.get('/kpi/game-performance/:channel', async (req, reply) => {
     try {
       if (!authProvider) return reply.status(401).send({ error: 'Not authenticated' });
       const { channel } = req.params as { channel: string };
       const { period: periodStr } = req.query as { period?: string };
       const period = parsePeriod(periodStr || '30d');
+      const apiClient = new ApiClient({ authProvider });
+      const user = await apiClient.users.getUserByName(channel);
+      if (!user) return reply.status(404).send({ error: 'Channel not found' });
+      const games = await fetchGamePerformance(apiClient, user.id, channel.toLowerCase(), getStartDate(period));
+      return { channel, games };
+    } catch (err) {
+      req.log.error(err, 'Game performance failed');
+      return reply.status(500).send({ error: 'Failed to fetch game performance' });
+    }
+  });
 
+  app.post('/kpi/game-performance/:channel/refresh', async (req, reply) => {
+    try {
+      if (!authProvider) return reply.status(401).send({ error: 'Not authenticated' });
+      const { channel } = req.params as { channel: string };
       const apiClient = new ApiClient({ authProvider });
       const user = await apiClient.users.getUserByName(channel);
       if (!user) return reply.status(404).send({ error: 'Channel not found' });
 
-      const startDate = getStartDate(period);
-      
-      const sessions = await prisma.streamSession.findMany({
-        where: {
-          userId: user.id,
-          startedAt: startDate ? { gte: startDate } : undefined,
-        }
-      });
-
+      // Fetch VODs and compute game stats
+      const videos = await apiClient.videos.getVideosByUser(user.id, { type: 'archive', period: 'all', limit: 100 }).catch(() => ({ data: [] }));
+      const events = getEvents(channel.toLowerCase());
       const gameMap = new Map<string, { views: number[]; durations: number[]; count: number; followersGained: number; boxArtUrl?: string }>();
 
-      // Merge local DB sessions
-      for (const session of sessions) {
-        const gameName = session.gameName || 'General';
+      for (const video of videos.data) {
+        const raw = getRawData(video) as Record<string, any>;
+        let gameName = raw.game_name || '';
+        if (!gameName || gameName === 'Unknown' || gameName === '') {
+          if (raw.game_id) {
+            try {
+              const g = await apiClient.games.getGameById(raw.game_id);
+              if (g) gameName = g.name;
+            } catch {}
+          }
+          if (!gameName) gameName = 'General';
+        }
         if (!gameMap.has(gameName)) gameMap.set(gameName, { views: [], durations: [], count: 0, followersGained: 0 });
         const entry = gameMap.get(gameName)!;
-        entry.views.push(session.viewersMax);
-        
-        let duration = session.durationSeconds;
-        if (!session.endedAt) {
-          duration = Math.floor((Date.now() - session.startedAt.getTime()) / 1000);
-        }
-        entry.durations.push(duration);
-        
+        entry.views.push(video.views);
+        entry.durations.push(video.durationInSeconds);
         entry.count++;
-        entry.followersGained += session.followersGained;
-      }
-
-      // If no local sessions exist, fallback to Twitch VODs (legacy mode)
-      if (sessions.length === 0) {
-        const videos = await apiClient.videos.getVideosByUser(user.id, { type: 'archive', period: 'all', limit: 100 }).catch(() => ({ data: [] }));
-        const filteredVideos = startDate ? videos.data.filter(v => v.creationDate >= startDate) : videos.data;
-        const channelInfo = await apiClient.channels.getChannelInfoById(user.id);
-        const fallbackGameName = channelInfo?.gameName || 'General';
-        const events = getEvents(channel.toLowerCase());
-
-        for (const video of filteredVideos) {
-          const raw = getRawData(video) as Record<string, any>;
-          const gameName = (raw.game_name && raw.game_name !== 'Unknown') ? raw.game_name : fallbackGameName;
-          if (!gameMap.has(gameName)) gameMap.set(gameName, { views: [], durations: [], count: 0, followersGained: 0 });
-          const entry = gameMap.get(gameName)!;
-          entry.views.push(video.views);
-          entry.durations.push(video.durationInSeconds);
-          entry.count++;
-          const startTime = video.creationDate.getTime();
-          const endTime = startTime + video.durationInSeconds * 1000;
-          entry.followersGained += events.filter(e => e.timestamp >= startTime && e.timestamp <= endTime && e.type === 'follow').length;
-        }
+        const startTime = video.creationDate.getTime();
+        const endTime = startTime + video.durationInSeconds * 1000;
+        entry.followersGained += events.filter(e => e.timestamp >= startTime && e.timestamp <= endTime && e.type === 'follow').length;
       }
 
       for (const gameName of gameMap.keys()) {
         try {
           const game = await apiClient.games.getGameByName(gameName);
-          if (game) {
-            gameMap.get(gameName)!.boxArtUrl = game.boxArtUrl.replace('{width}', '144').replace('{height}', '192');
-          }
-        } catch (e) {
-          // ignore
-        }
+          if (game) gameMap.get(gameName)!.boxArtUrl = game.boxArtUrl.replace('{width}', '144').replace('{height}', '192');
+        } catch {}
       }
 
-      const games: GamePerformance[] = Array.from(gameMap.entries()).map(([gameName, data]) => ({
-        gameName,
-        boxArtUrl: data.boxArtUrl,
-        streamCount: data.count,
-        totalViews: data.views.reduce((a, b) => a + b, 0),
-        avgViewers: Math.round(data.views.reduce((a, b) => a + b, 0) / data.count),
-        maxViewers: Math.max(...data.views),
-        followersGained: data.followersGained,
-        avgDuration: Math.round(data.durations.reduce((a, b) => a + b, 0) / data.count),
-      })).sort((a, b) => b.totalViews - a.totalViews);
+      // Persist to GameStat table
+      const games: GamePerformance[] = [];
+      for (const [gameName, data] of gameMap.entries()) {
+        const totalViews = data.views.reduce((a, b) => a + b, 0);
+        const avgViewers = Math.round(data.count > 0 ? totalViews / data.count : 0);
+        const maxViewers = data.views.length > 0 ? Math.max(...data.views) : 0;
+        const avgDuration = Math.round(data.durations.reduce((a, b) => a + b, 0) / (data.count || 1));
 
+        await prisma.gameStat.upsert({
+          where: { userId_gameName: { userId: user.id, gameName } },
+          create: {
+            userId: user.id,
+            gameName,
+            boxArtUrl: data.boxArtUrl,
+            streamCount: data.count,
+            totalViews,
+            avgViewers,
+            maxViewers,
+            followersGained: data.followersGained,
+            avgDuration,
+          },
+          update: {
+            boxArtUrl: data.boxArtUrl,
+            streamCount: data.count,
+            totalViews,
+            avgViewers,
+            maxViewers,
+            followersGained: data.followersGained,
+            avgDuration,
+          },
+        });
+
+        games.push({ gameName, boxArtUrl: data.boxArtUrl, streamCount: data.count, totalViews, avgViewers, maxViewers, followersGained: data.followersGained, avgDuration });
+      }
+
+      games.sort((a, b) => b.totalViews - a.totalViews);
       return { channel, games };
     } catch (err) {
-      return reply.status(500).send({ error: 'Failed to fetch game performance' });
+      req.log.error(err, 'Game performance refresh failed');
+      return reply.status(500).send({ error: 'Failed to refresh game performance' });
     }
   });
 
