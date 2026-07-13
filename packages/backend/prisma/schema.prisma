@@ -24,8 +24,6 @@ model User {
   predictions       Prediction[]
   securityConfig    SecurityConfig?
   securityWhitelist SecurityWhitelist[]
-  streamSessions    StreamSession[]
-  gameStats         GameStat[]
 }
 
 model ChannelConfig {
@@ -86,7 +84,6 @@ model SecurityWhitelist {
 model StreamSession {
   id              String    @id @default(cuid())
   userId          String
-  user            User      @relation(fields: [userId], references: [id])
   streamId        String?
   gameName        String
   startedAt       DateTime  @default(now())
@@ -99,7 +96,6 @@ model StreamSession {
 model GameStat {
   id              String   @id @default(cuid())
   userId          String
-  user            User     @relation(fields: [userId], references: [id])
   gameName        String
   boxArtUrl       String?
   streamCount     Int      @default(0)

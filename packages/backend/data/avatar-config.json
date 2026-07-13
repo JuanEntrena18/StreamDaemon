@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "theme": "8bits",
+  "maxAvatars": 20,
+  "commandsEnabled": true,
+  "commandCooldowns": {
+    "!dance": 5,
+    "!wave": 3,
+    "!jump": 2,
+    "!explode": 10,
+    "!sleep": 0
+  },
+  "eventActions": {
+    "chat": true,
+    "bits": true,
+    "subscription": true,
+    "raid": true,
+    "follow": true
+  },
+  "physicsEnabled": true,
+  "nametagsVisible": true,
+  "chatBubbles": true,
+  "animSpeedMultiplier": 1
+}
