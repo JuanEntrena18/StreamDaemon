@@ -37,7 +37,8 @@
     "achievementsTab": "Achievements",
     "kpiTab": "KPI Analytics",
     "configTab": "Settings",
-    "avatarsTab": "Avatars"
+    "avatarsTab": "Avatars",
+    "speedrunTab": "Speedruns (beta)"
   },
   "app": {
     "minimizar": "Minimize",
@@ -529,7 +530,9 @@
     "fondoTransparente": "Transparent",
     "fondoNegro": "Black",
     "fondoBlanco": "White",
-    "fondoCroma": "Green Chroma"
+    "fondoCroma": "Green Chroma",
+    "speedrunSuite": "🏃 Speedrun Suite",
+    "speedrunSuiteDesc": "Complete speedrun suite with splits, LiveSplit timer, chat, and 4 scenes (intro, gameplay, BRB, ending). Real-time connection via Socket.IO. ⚠️ BETA"
   },
   "security": {
     "loading": "Loading security configuration...",
