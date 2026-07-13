@@ -31,6 +31,9 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
   const [obsConnecting, setObsConnecting] = useState(false);
   const [obsError, setObsError] = useState('');
 
+  const [updateStatus, setUpdateStatus] = useState<'idle' | 'checking' | 'uptodate' | 'available' | 'error'>('idle');
+  const [updateVersion, setUpdateVersion] = useState('');
+
   useEffect(() => {
     apiGet('/obs/status').then(async (r) => {
       if (!r.ok) return;
@@ -72,6 +75,26 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
     document.documentElement.setAttribute('data-zoom', val);
   };
 
+  const checkUpdate = useCallback(async () => {
+    setUpdateStatus('checking');
+    setUpdateVersion('');
+    try {
+      const r = await fetch('https://api.github.com/repos/JuanEntrena18/StreamForge/releases/latest');
+      if (!r.ok) throw new Error('fetch failed');
+      const data = await r.json();
+      const latest = (data.tag_name || '').replace(/^v/i, '');
+      const current = t('config.appVersion').replace(/^v/i, '').split(' ·')[0];
+      if (latest && latest !== current) {
+        setUpdateVersion(data.tag_name);
+        setUpdateStatus('available');
+      } else {
+        setUpdateStatus('uptodate');
+      }
+    } catch {
+      setUpdateStatus('error');
+    }
+  }, [t]);
+
   return (
     <div className={styles.container}>
       <div className="mb-5">
@@ -108,6 +131,21 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
             </a>
             <div className={styles.bmcLink}>buymeacoffee.com/jentrena</div>
           </div>
+        </div>
+
+        <div className="flex-row flex-wrap" style={{ gap: '1.25rem', marginTop: '0.75rem' }}>
+          <a
+            href="https://paypal.me/jentrena"
+            target="_blank"
+            rel="noreferrer"
+            className={styles.paypalBtn}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/>
+            </svg>
+            {t('config.donarPaypal')}
+          </a>
+          <div className={styles.bmcLink}>paypal.me/jentrena</div>
         </div>
       </div>
 
@@ -396,6 +434,23 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
         <p className="text-sm text-muted" style={{ lineHeight: 1.7, marginBottom: '1.25rem' }}>
           {t('config.appDesc')}
         </p>
+
+        <div className="flex-row flex-wrap" style={{ gap: '0.75rem', marginBottom: '1rem', alignItems: 'center' }}>
+          <button className={styles.updateBtn} onClick={checkUpdate} disabled={updateStatus === 'checking'}>
+            {updateStatus === 'checking' ? t('config.updateChecking') : t('config.checkUpdate')}
+          </button>
+          {updateStatus === 'uptodate' && (
+            <span className="text-xs" style={{ color: '#4ade80' }}>{t('config.updateUpToDate')}</span>
+          )}
+          {updateStatus === 'available' && (
+            <span className="text-xs" style={{ color: '#fbbf24' }}>
+              {t('config.updateAvailable', { version: updateVersion })}
+            </span>
+          )}
+          {updateStatus === 'error' && (
+            <span className="text-xs" style={{ color: '#f87171' }}>{t('config.updateError')}</span>
+          )}
+        </div>
 
         <div className={styles.githubBox}>
           <span style={{ fontSize: '1.25rem' }}>🐙</span>

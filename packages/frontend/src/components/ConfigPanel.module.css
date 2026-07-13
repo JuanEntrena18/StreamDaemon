@@ -23,6 +23,21 @@
   color: var(--sf-text-3);
 }
 
+.paypalBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--sf-radius-sm);
+  background: linear-gradient(135deg, #0070BA, #003087);
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: all 0.15s;
+  box-shadow: 0 2px 12px rgba(0,112,186,0.3);
+}
+
 .qrImg {
   width: 120px;
   height: 120px;
@@ -93,6 +108,26 @@
   font-weight: 600;
   transition: all 0.15s;
   flex-shrink: 0;
+}
+
+.updateBtn {
+  padding: 0.4rem 0.875rem;
+  border-radius: var(--sf-radius-sm);
+  background: rgba(124,58,237,0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(124,58,237,0.3);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.updateBtn:hover:not(:disabled) {
+  background: rgba(124,58,237,0.25);
+}
+.updateBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .licenseLine {
