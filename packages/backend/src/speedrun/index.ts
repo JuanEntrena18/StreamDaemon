@@ -108,6 +108,17 @@ export function handleGetState(channel: string) {
   getIO().to(`channel:${channel}`).emit('speedrun:update', state);
 }
 
+export function handleSpeedrunConfig(channel: string, config: Partial<SpeedrunState> & { splits?: SpeedrunSplit[] }) {
+  if (!channel) return;
+  const state = getOrCreate(channel);
+  if (config.game !== undefined) state.game = config.game;
+  if (config.category !== undefined) state.category = config.category;
+  if (config.pb !== undefined) state.pb = config.pb;
+  if (config.wr !== undefined) state.wr = config.wr;
+  if (config.splits !== undefined) state.splits = config.splits;
+  broadcast(channel);
+}
+
 export function setupSpeedrun(app: FastifyInstance) {
   app.get('/speedrun/:channel', async (req, reply) => {
     const { channel } = req.params as { channel: string };

@@ -515,9 +515,36 @@
     var timerRunning = false;
     var startTime = 0;
     var elapsedTime = 0;
-    var timerInterval = null;
+    var rafId = null;
     var currentSplitIndex = 0;
     var socketConnection = null;
+    var shortcutSplit = 'Control+Space';
+    var shortcutReset = 'Control+r';
+    var shortcutUndo = 'Control+z';
+
+    function loadShortcuts() {
+      try {
+        var saved = JSON.parse(localStorage.getItem('speedrun:shortcuts'));
+        if (saved) {
+          if (saved.split) shortcutSplit = saved.split;
+          if (saved.reset) shortcutReset = saved.reset;
+          if (saved.undo) shortcutUndo = saved.undo;
+        }
+      } catch(e) {}
+    }
+
+    function matchShortcut(e, shortcut) {
+      var parts = shortcut.split('+');
+      var ctrl = parts.indexOf('Control') !== -1;
+      var shift = parts.indexOf('Shift') !== -1;
+      var alt = parts.indexOf('Alt') !== -1;
+      var key = parts[parts.length - 1].toLowerCase();
+      if (e.ctrlKey !== ctrl) return false;
+      if (e.shiftKey !== shift) return false;
+      if (e.altKey !== alt) return false;
+      if (e.key.toLowerCase() !== key) return false;
+      return true;
+    }
 
     var splits = [
       { name: 'Limgrave Skip', pb: 180000, current: null, gold: 165000 },
@@ -595,6 +622,23 @@
       document.getElementById('mainTimer').textContent = formatTime(elapsedTime);
     }
 
+    function startRafLoop() {
+      function tick() {
+        if (timerRunning) {
+          updateTimer();
+          rafId = requestAnimationFrame(tick);
+        }
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function stopRafLoop() {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    }
+
     function calculatePace() {
       if (currentSplitIndex === 0) {
         document.getElementById('statPace').textContent = '\u2014';
@@ -628,7 +672,7 @@
       if (!timerRunning) {
         timerRunning = true;
         startTime = Date.now() - elapsedTime;
-        timerInterval = setInterval(updateTimer, 10);
+        startRafLoop();
         document.getElementById('btnStart').textContent = '\u23F1 SPLIT';
       } else {
         if (currentSplitIndex < splits.length) {
@@ -638,7 +682,7 @@
           calculatePace();
           if (currentSplitIndex >= splits.length) {
             timerRunning = false;
-            clearInterval(timerInterval);
+            stopRafLoop();
             document.getElementById('btnStart').textContent = 'FIN DE RUN';
             document.getElementById('btnStart').disabled = true;
             document.getElementById('endFinalTime').textContent = formatTime(elapsedTime);
@@ -662,7 +706,7 @@
         if (!timerRunning) {
           timerRunning = true;
           startTime = Date.now() - elapsedTime;
-          timerInterval = setInterval(updateTimer, 10);
+          startRafLoop();
           document.getElementById('btnStart').textContent = '\u23F1 SPLIT';
           document.getElementById('btnStart').disabled = false;
         }
@@ -675,7 +719,7 @@
         return;
       }
       timerRunning = false;
-      clearInterval(timerInterval);
+      stopRafLoop();
       elapsedTime = 0;
       currentSplitIndex = 0;
       splits.forEach(function(s) { s.current = null; });
@@ -755,10 +799,10 @@
         elapsedTime = data.elapsedTime || 0;
         renderSplits();
         calculatePace();
-        clearInterval(timerInterval);
+        stopRafLoop();
         if (timerRunning) {
           startTime = Date.now() - elapsedTime;
-          timerInterval = setInterval(updateTimer, 10);
+          startRafLoop();
           document.getElementById('btnStart').textContent = '\u23F1 SPLIT';
         } else {
           document.getElementById('mainTimer').textContent = formatTime(elapsedTime);
@@ -818,7 +862,7 @@
           if (!timerRunning) {
             timerRunning = true;
             startTime = Date.now() - elapsedTime;
-            timerInterval = setInterval(updateTimer, 10);
+            startRafLoop();
           }
           setTimeout(function() {
             splits[demoIdx].current = elapsedTime;
@@ -827,14 +871,29 @@
             if (demoIdx >= splits.length) {
               clearInterval(demoTimer);
               timerRunning = false;
-              clearInterval(timerInterval);
+              stopRafLoop();
             }
           }, 2000);
         }
       }, 5000);
     }
 
+    document.addEventListener('keydown', function(e) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (matchShortcut(e, shortcutSplit)) {
+        e.preventDefault();
+        triggerTimer();
+      } else if (matchShortcut(e, shortcutReset)) {
+        e.preventDefault();
+        resetTimer();
+      } else if (matchShortcut(e, shortcutUndo)) {
+        e.preventDefault();
+        undoSplit();
+      }
+    });
+
     window.onload = function() {
+      loadShortcuts();
       var params = new URLSearchParams(window.location.search);
       var obsScene = params.get('scene');
 

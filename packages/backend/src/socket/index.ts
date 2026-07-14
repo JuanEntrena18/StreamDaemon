@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { Server as SocketIOServer } from 'socket.io';
 import { joinChannel, leaveChannel, sendMessage } from '../chat/index.js';
-import { handleSpeedrunControl, handleGetState } from '../speedrun/index.js';
+import { handleSpeedrunControl, handleGetState, handleSpeedrunConfig } from '../speedrun/index.js';
 
 let io: SocketIOServer | null = null;
 const chatThrottle = new Map<string, number>();
@@ -38,6 +38,10 @@ export function setupSocketIO(app: FastifyInstance) {
 
     socket.on('speedrun:get-state', ({ channel }: { channel: string }) => {
       handleGetState(channel);
+    });
+
+    socket.on('speedrun:config', ({ channel, config }: { channel: string; config: any }) => {
+      handleSpeedrunConfig(channel, config);
     });
 
     socket.on('disconnect', () => {
