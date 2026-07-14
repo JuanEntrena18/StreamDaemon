@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useSocketEvent } from '../hooks/useSocket';
 import { useTts } from '../contexts/TtsContext';
-import { speak } from '../utils/tts';
+import { speak, cancelAll } from '../utils/tts';
 
 interface ChatMsg {
   id: string;
@@ -20,20 +20,24 @@ function shouldSkip(msg: ChatMsg, currentUserId: string | null, filters: { exclu
   return false;
 }
 
+const DEDUP_WINDOW = 10;
+
 export function TtsManager() {
   const { enabled, voiceURI, rate, volume, filters, currentUserId } = useTts();
-  const lastMsgRef = useRef('');
+  const recentTextsRef = useRef<string[]>([]);
 
   useSocketEvent('chat:message', useCallback((msg: ChatMsg) => {
-    if (!enabled || msg.text === lastMsgRef.current) return;
+    if (!enabled) return;
+    if (recentTextsRef.current.includes(msg.text)) return;
     if (shouldSkip(msg, currentUserId, filters)) return;
-    lastMsgRef.current = msg.text;
+    recentTextsRef.current.push(msg.text);
+    if (recentTextsRef.current.length > DEDUP_WINDOW) recentTextsRef.current.shift();
     const textToSpeak = filters.readAuthor ? `${msg.user.displayName}: ${msg.text}` : msg.text;
     speak(textToSpeak, voiceURI, rate, volume);
   }, [enabled, voiceURI, rate, volume, filters, currentUserId]));
 
   useEffect(() => {
-    if (!enabled) window.speechSynthesis?.cancel();
+    if (!enabled) cancelAll();
   }, [enabled]);
 
   return null;

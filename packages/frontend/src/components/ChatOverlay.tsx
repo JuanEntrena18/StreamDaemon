@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
+import { speak, getVoices, cancelAll } from '../utils/tts';
 import type { ChatMessage } from '@streamdaemon/shared';
 
 const MAX_MESSAGES = 50;
@@ -20,35 +21,7 @@ function saveTtsSettings(s: Record<string, unknown>) {
   try { localStorage.setItem(TTS_LS_KEY, JSON.stringify(s)); } catch {}
 }
 
-function getVoices(): SpeechSynthesisVoice[] {
-  return window.speechSynthesis?.getVoices()?.filter((v) => v.lang.startsWith('es') || v.lang.startsWith('en')) ?? [];
-}
 
-const activeUtterances: SpeechSynthesisUtterance[] = [];
-
-function speak(text: string, voiceURI: string | null, rate: number, volume: number) {
-  if (!window.speechSynthesis) return;
-  
-  const utterance = new SpeechSynthesisUtterance(text);
-  activeUtterances.push(utterance);
-  
-  utterance.onend = () => {
-    const i = activeUtterances.indexOf(utterance);
-    if (i > -1) activeUtterances.splice(i, 1);
-  };
-  utterance.onerror = () => {
-    const i = activeUtterances.indexOf(utterance);
-    if (i > -1) activeUtterances.splice(i, 1);
-  };
-
-  if (voiceURI) {
-    const found = getVoices().find((v) => v.voiceURI === voiceURI);
-    if (found) utterance.voice = found;
-  }
-  utterance.rate = rate;
-  utterance.volume = volume;
-  window.speechSynthesis.speak(utterance);
-}
 
 interface Props {
   channel: string;
@@ -62,7 +35,7 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const { socket } = useSocket();
   const listRef = useRef<HTMLDivElement>(null);
-  const ttsLastRef = useRef('');
+  const recentTtsRef = useRef<string[]>([]);
 
   const tls = loadTtsSettings();
   const [ttsEnabled, setTtsEnabled] = useState(() => tls.enabled ?? false);
@@ -90,8 +63,9 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
 
   useSocketEvent('chat:message', useCallback((msg: ChatMessage) => {
     setMessages((prev) => [...prev.slice(-MAX_MESSAGES + 1), msg]);
-    if (ttsEnabled && msg.text !== ttsLastRef.current) {
-      ttsLastRef.current = msg.text;
+    if (ttsEnabled && !recentTtsRef.current.includes(msg.text)) {
+      recentTtsRef.current.push(msg.text);
+      if (recentTtsRef.current.length > 10) recentTtsRef.current.shift();
       speak(msg.text, ttsVoiceURI, ttsRate, ttsVolume);
     }
   }, [ttsEnabled, ttsVoiceURI, ttsRate, ttsVolume]));
@@ -106,7 +80,7 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
     const next = !ttsEnabled;
     setTtsEnabled(next);
     saveTtsSettings({ ...loadTtsSettings(), enabled: next });
-    if (!next) window.speechSynthesis?.cancel();
+    if (!next) cancelAll();
   }
 
   function changeVoice(uri: string) {
@@ -200,7 +174,7 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
           />
 
           <button
-            onClick={() => window.speechSynthesis.cancel()}
+            onClick={() => cancelAll()}
             style={{
               background: 'none', border: 'none', color: '#718096',
               cursor: 'pointer', fontSize: 12, padding: '2px 6px',

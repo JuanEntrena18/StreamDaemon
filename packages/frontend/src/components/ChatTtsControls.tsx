@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n/context';
 import { useTts } from '../contexts/TtsContext';
-import { getVoices } from '../utils/tts';
+import { getVoices, cancelAll } from '../utils/tts';
 import { Toggle } from './Toggle';
 import styles from './ChatTtsControls.module.css';
 
@@ -25,13 +25,13 @@ export function ChatTtsControls() {
           <span className="text-dim" style={{ fontSize: '0.7rem', fontWeight: 500 }}>{t('chat.tts')}</span>
           <Toggle
             checked={tts.enabled}
-            onChange={(c) => { tts.setEnabled(c); if (c) window.speechSynthesis?.cancel(); }}
+            onChange={(c) => { tts.setEnabled(c); if (!c) cancelAll(); }}
             size="sm"
           />
         </div>
         {tts.enabled && window.speechSynthesis && (
           <button
-            onClick={() => window.speechSynthesis.cancel()}
+            onClick={() => cancelAll()}
             className={styles.collapseArrow}
           >{t('chat.detener')}</button>
         )}
