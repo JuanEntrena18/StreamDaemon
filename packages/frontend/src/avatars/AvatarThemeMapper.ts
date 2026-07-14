@@ -7,7 +7,7 @@ import type { SpriteThemeConfig } from './types';
 const THEME_REGISTRY: Record<string, SpriteThemeConfig> = {
   default: {
     sheetPath: '/sprites/default/spritesheet.png',
-    frameWidth: 128,
+    frameWidth: 170,
     frameHeight: 128,
     frames: {
       idle:  { index: 0, count: 4 },
