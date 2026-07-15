@@ -7,146 +7,300 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --sf-bg: #0a0a1a;
-      --sf-bg-2: #0f0f23;
-      --sf-surface: rgba(255,255,255,0.04);
-      --sf-border: rgba(255,255,255,0.08);
-      --sf-primary: #7c3aed;
-      --sf-primary-light: #a855f7;
-      --sf-primary-glow: rgba(124,58,237,0.35);
-      --sf-teal: #06b6d4;
-      --sf-success: #10b981;
-      --sf-danger: #ef4444;
-      --sf-warning: #f59e0b;
-      --sf-text: #f8fafc;
-      --sf-text-2: #94a3b8;
-      --sf-text-3: #64748b;
-      --sf-radius: 14px;
-      --sf-radius-sm: 8px;
+      --primary: #7c3aed;
+      --bg: #0a0a0f;
+      --surface: rgba(15, 15, 30, 0.6);
+      --border: rgba(255,255,255,0.08);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 16px;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    
     body {
       font-family: 'Inter', system-ui, sans-serif;
       background: transparent;
-      color: var(--sf-text);
-      width: 600px;
+      color: var(--text);
+      width: 100vw;
+      height: 100vh;
       overflow: hidden;
       user-select: none;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
     }
+
     .font-mono { font-family: 'JetBrains Mono', monospace; }
-    .glass-card {
-      background: var(--sf-surface);
-      border: 1px solid var(--sf-border);
-      border-radius: var(--sf-radius);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+    
+    /* ── Main Container ── */
+    #app {
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
+
+    /* ── Background Effects ── */
+    .bg-glow {
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary) 15%, transparent), transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .scan-line {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary) 30%, transparent), transparent);
+      animation: scan 6s linear infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes scan {
+      0% { top: -10%; }
+      100% { top: 110%; }
+    }
+
+    /* ── Header ── */
     .header {
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--sf-border);
+      position: relative;
+      z-index: 2;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%);
     }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-icon {
+      width: 32px;
+      height: 32px;
+      background: color-mix(in srgb, var(--primary) 20%, transparent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 1.1rem;
+      border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+      box-shadow: 0 0 15px color-mix(in srgb, var(--primary) 40%, transparent);
+    }
+
     .header h2 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 0.85rem;
+      font-size: 1rem;
       font-weight: 700;
-      color: var(--sf-teal);
-      letter-spacing: 2px;
-    }
-    .header span {
-      font-size: 0.7rem;
-      color: var(--sf-text-3);
+      color: #fff;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      text-shadow: 0 0 10px rgba(255,255,255,0.2);
     }
-    .event {
+
+    .header-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(0,0,0,0.3);
+      padding: 4px 10px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── Event List ── */
+    #eventList {
+      position: relative;
+      z-index: 2;
+      padding: 16px;
       display: flex;
-      gap: 0.75rem;
-      padding: 0.75rem 1.25rem;
-      align-items: flex-start;
-      border-bottom: 1px solid var(--sf-border);
+      flex-direction: column;
+      gap: 12px;
+      max-height: 800px;
+      overflow: hidden;
     }
-    .event:last-child { border-bottom: none; }
-    .event-date {
+
+    .event-card {
+      position: relative;
+      display: flex;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+      transition: transform 0.3s, background 0.3s;
+    }
+    
+    .event-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 4px;
+      background: var(--event-color, var(--primary));
+      box-shadow: 0 0 10px var(--event-color, var(--primary));
+    }
+
+    .event-date-box {
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-width: 44px;
+      justify-content: center;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.02);
+      border-right: 1px solid var(--border);
+      min-width: 70px;
     }
+
     .event-day {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1.3rem;
-      font-weight: 700;
-      line-height: 1.2;
+      font-size: 1.6rem;
+      font-weight: 800;
+      line-height: 1;
+      color: #fff;
+      text-shadow: 0 0 8px rgba(255,255,255,0.3);
     }
+
     .event-month {
-      font-size: 0.6rem;
+      font-size: 0.65rem;
+      font-weight: 700;
       text-transform: uppercase;
-      color: var(--sf-text-3);
-      letter-spacing: 0.06em;
+      color: var(--event-color, var(--primary));
+      letter-spacing: 0.1em;
+      margin-top: 4px;
     }
-    .event-color-dot {
-      width: 3px;
-      border-radius: 2px;
-      flex-shrink: 0;
-      margin-top: 2px;
+
+    .event-content {
+      padding: 12px 16px;
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
-    .event-body { flex: 1; min-width: 0; }
+
     .event-title {
-      font-size: 0.9rem;
-      font-weight: 600;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
+      margin-bottom: 4px;
     }
-    .event-game {
+
+    .event-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       font-size: 0.75rem;
-      color: var(--sf-text-2);
-      margin-top: 0.15rem;
+      color: var(--text-muted);
     }
-    .event-time {
+    
+    .event-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .event-meta-item.time {
+      color: var(--event-color, var(--primary));
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+    
+    .event-game {
+      display: inline-block;
+      padding: 2px 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
       font-size: 0.7rem;
-      color: var(--sf-text-3);
-      margin-top: 0.25rem;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 140px;
     }
-    .event-time .font-mono {
-      color: var(--sf-teal);
+
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .empty {
-      padding: 2rem 1.25rem;
+
+    .empty, .loading {
+      padding: 40px 20px;
       text-align: center;
-      color: var(--sf-text-3);
-      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
     }
-    .loading {
-      padding: 2rem;
-      text-align: center;
-      color: var(--sf-text-3);
-      font-size: 0.8rem;
+
+    .empty-icon {
+      font-size: 2rem;
+      opacity: 0.5;
     }
+
+    .loader {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <div class="glass-card" id="app">
+  <div id="app">
+    <div class="bg-glow"></div>
+    <div class="scan-line"></div>
+    
     <div class="header">
-      <h2>&#x2B21; PR&#xD3;XIMOS DIRECTOS</h2>
-      <span id="eventCount">0 eventos</span>
+      <div class="header-title">
+        <div class="header-icon">📅</div>
+        <h2>Directos</h2>
+      </div>
+      <span class="header-count" id="eventCount">0</span>
     </div>
+    
     <div id="eventList">
-      <div class="loading" id="loadingMsg">Cargando calendario...</div>
+      <div class="loading">
+        <div class="loader"></div>
+        <span>Sincronizando con el servidor...</span>
+      </div>
     </div>
   </div>
 
   <script>
     var CHANNEL = new URLSearchParams(location.search).get('channel') || '';
     var BACKEND_URL = new URLSearchParams(location.search).get('backend') || 'http://localhost:3000';
-    var LIMIT = parseInt(new URLSearchParams(location.search).get('limit'), 10) || 10;
+    var LIMIT = parseInt(new URLSearchParams(location.search).get('limit'), 10) || 5;
     var socketConnection = null;
 
     var MONTHS = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
-    var DAYS = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
 
     function formatTime(hours, minutes) {
       return String(hours).padStart(2,'0') + ':' + String(minutes).padStart(2,'0');
@@ -154,17 +308,22 @@
 
     function renderEvents(events) {
       var list = document.getElementById('eventList');
+      var countEl = document.getElementById('eventCount');
+      
       if (!events || events.length === 0) {
-        list.innerHTML = '<div class="empty">No hay pr&#xF3;ximos directos programados.</div>';
-        document.getElementById('eventCount').textContent = '0 eventos';
+        list.innerHTML = '<div class="empty"><div class="empty-icon">🛋️</div><div>No hay próximos directos programados.</div></div>';
+        countEl.textContent = '0';
         return;
       }
 
       var now = new Date();
+      var todayStr = now.toISOString().split('T')[0];
+      
       var upcoming = events
         .filter(function(e) {
-          var d = new Date(e.date + 'T' + e.startTime);
-          return d >= now;
+          if (e.date > todayStr) return true;
+          if (e.date === todayStr) return true; // keep all today's events
+          return false;
         })
         .sort(function(a, b) {
           return new Date(a.date + 'T' + a.startTime) - new Date(b.date + 'T' + b.startTime);
@@ -172,45 +331,47 @@
         .slice(0, LIMIT);
 
       if (upcoming.length === 0) {
-        list.innerHTML = '<div class="empty">No hay pr&#xF3;ximos directos programados.</div>';
-        document.getElementById('eventCount').textContent = '0 eventos';
+        list.innerHTML = '<div class="empty"><div class="empty-icon">🛋️</div><div>No hay próximos directos programados.</div></div>';
+        countEl.textContent = '0';
         return;
       }
 
-      document.getElementById('eventCount').textContent = upcoming.length + ' evento' + (upcoming.length !== 1 ? 's' : '');
-
+      countEl.textContent = upcoming.length;
       list.innerHTML = '';
-      upcoming.forEach(function(e) {
+      
+      upcoming.forEach(function(e, index) {
         var d = new Date(e.date + 'T' + e.startTime);
-        var day = d.getDate();
+        var day = String(d.getDate()).padStart(2, '0');
         var month = MONTHS[d.getMonth()];
-        var dow = DAYS[d.getDay()];
         var timeStr = formatTime(d.getHours(), d.getMinutes());
 
         var minutes = e.duration || 60;
         var hours = Math.floor(minutes / 60);
         var mins = minutes % 60;
-        var durStr = hours > 0 ? hours + 'h ' + mins + 'm' : mins + 'm';
+        var durStr = hours > 0 ? (mins > 0 ? hours + 'h ' + mins + 'm' : hours + 'h') : mins + 'm';
 
         var color = e.color || '#7c3aed';
         var gameHtml = e.game ? '<div class="event-game">' + e.game + '</div>' : '';
 
         var row = document.createElement('div');
-        row.className = 'event';
+        row.className = 'event-card';
+        row.style.setProperty('--event-color', color);
+        row.style.animationDelay = (index * 0.1) + 's';
+        
         row.innerHTML =
-          '<div class="event-date">' +
-            '<span class="event-day" style="color:' + color + '">' + day + '</span>' +
-            '<span class="event-month">' + month + '</span>' +
+          '<div class="event-date-box">' +
+            '<div class="event-day">' + day + '</div>' +
+            '<div class="event-month">' + month + '</div>' +
           '</div>' +
-          '<div class="event-color-dot" style="background:' + color + ';height:auto;align-self:stretch;"></div>' +
-          '<div class="event-body">' +
+          '<div class="event-content">' +
             '<div class="event-title">' + e.title + '</div>' +
-            gameHtml +
-            '<div class="event-time">' +
-              '<span class="font-mono">' + timeStr + '</span>' +
-              ' &middot; ' + durStr +
+            '<div class="event-meta">' +
+              '<div class="event-meta-item time">⏱ ' + timeStr + '</div>' +
+              '<div class="event-meta-item">⏳ ' + durStr + '</div>' +
+              (gameHtml ? '<div>' + gameHtml + '</div>' : '') +
             '</div>' +
           '</div>';
+          
         list.appendChild(row);
       });
     }
@@ -238,7 +399,7 @@
       }
       socketConnection.on('connect', function() {
         socketConnection.emit('join:channel', CHANNEL);
-        socketConnection.emit('calendar:get-state', { channel: CHANNEL });
+        fetchEvents();
       });
       socketConnection.on('calendar:update', function(events) {
         if (events) renderEvents(events);
