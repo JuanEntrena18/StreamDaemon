@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useSocket } from '../hooks/useSocket';
 import { OVERLAY_REGISTRY } from '../config/overlayRegistry';
+import { apiGet, apiPost, apiPut, apiDelete } from '../utils/api';
 import styles from './CalendarPanel.module.css';
 
 interface CalendarEvent {
@@ -51,10 +52,10 @@ export function CalendarPanel({ channel }: Props) {
   // Load events
   const loadEvents = useCallback(async () => {
     try {
-      const res = await fetch(`${be}/calendar/${channel}`);
+      const res = await apiGet(`/calendar/${channel}`);
       if (res.ok) setEvents(await res.json());
     } catch {}
-  }, [channel, be]);
+  }, [channel]);
 
   useEffect(() => { loadEvents(); }, [loadEvents]);
 
@@ -113,22 +114,14 @@ export function CalendarPanel({ channel }: Props) {
     const body = { ...form };
     try {
       if (editingId) {
-        const res = await fetch(`${be}/calendar/${channel}/${editingId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
+        const res = await apiPut(`/calendar/${channel}/${editingId}`, body);
         if (res.ok) {
           const updated = await res.json();
           setEvents(prev => prev.map(e => e.id === editingId ? updated : e));
           emitConfig('PUT', { id: editingId, ...body });
         }
       } else {
-        const res = await fetch(`${be}/calendar/${channel}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
+        const res = await apiPost(`/calendar/${channel}`, body);
         if (res.ok) {
           const created = await res.json();
           setEvents(prev => [...prev, created]);
@@ -141,7 +134,7 @@ export function CalendarPanel({ channel }: Props) {
 
   const deleteEvent = async (id: string) => {
     try {
-      await fetch(`${be}/calendar/${channel}/${id}`, { method: 'DELETE' });
+      await apiDelete(`/calendar/${channel}/${id}`);
       setEvents(prev => prev.filter(e => e.id !== id));
       emitConfig('DELETE', { id });
     } catch {}
