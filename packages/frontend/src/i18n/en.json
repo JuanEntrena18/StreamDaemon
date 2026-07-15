@@ -38,7 +38,8 @@
     "kpiTab": "KPI Analytics",
     "configTab": "Settings",
     "avatarsTab": "Avatars",
-    "speedrunTab": "Speedruns (beta)"
+    "speedrunTab": "Speedruns (beta)",
+    "calendarTab": "📅 Calendar"
   },
   "app": {
     "minimizar": "Minimize",
@@ -47,7 +48,7 @@
     "siempreEncima": "🎮 Always on top",
     "desactivarSiempreEncima": "Disable always on top",
     "activarSiempreEncima": "Enable always on top",
-    "version": "v0.4.7 · Open Source",
+    "version": "v0.4.8 · Open Source",
     "panelControl": "Dashboard · StreamDaemon",
     "hash": "#",
     "placeholderCanal": "twitch channel...",
@@ -189,7 +190,7 @@
     "siempreEncimaDesc": "Keeps window above other applications",
     "acercaDe": "📋 About",
     "appName": "StreamDaemon",
-    "appVersion": "v0.4.7 · by Cyber Haute Couture",
+    "appVersion": "v0.4.8 · by Cyber Haute Couture",
     "appDesc": "Modular open-source application for content creators. Manage your Twitch channel with custom overlays, interactive giveaways, predictions, and real-time chat.",
     "checkUpdate": "Check for updates",
     "updateChecking": "Checking…",
@@ -538,7 +539,9 @@
     "fondoBlanco": "White",
     "fondoCroma": "Green Chroma",
     "speedrunSuite": "🏃 Speedrun Suite",
-    "speedrunSuiteDesc": "Complete speedrun suite with splits, LiveSplit timer, chat, and 4 scenes (intro, gameplay, BRB, ending). Real-time connection via Socket.IO. ⚠️ BETA"
+    "speedrunSuiteDesc": "Complete speedrun suite with splits, LiveSplit timer, chat, and 4 scenes (intro, gameplay, BRB, ending). Real-time connection via Socket.IO. ⚠️ BETA",
+    "calendar": "📅 Calendar Overlay",
+    "calendarDesc": "Shows upcoming scheduled streams in a clean overlay for OBS. Auto-updates in real-time via Socket.IO."
   },
   "security": {
     "loading": "Loading security configuration...",

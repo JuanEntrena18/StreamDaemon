@@ -36,7 +36,7 @@ export function CommandPalette({ isOpen, onClose, onNavigate, onToggleAlwaysOnTo
     const navItems: CommandItem[] = [
       { id: 'dashboard', title: s('gestorTab'), description: 'Panel principal y controles rápidos', icon: '📡', shortcut: 'Ctrl+1', keywords: ['inicio', 'gestor', 'stream', 'panel'], action: () => onNavigate('dashboard') },
       { id: 'tracker', title: s('trackerTab'), description: 'Estadísticas en tiempo real', icon: '📈', shortcut: 'Ctrl+2', keywords: ['estadisticas', 'graficos', 'views', 'subs'], action: () => onNavigate('tracker') },
-      { id: 'achievements', title: s('achievementsTab'), description: 'Logros desbloqueables', icon: '🏆', shortcut: 'Ctrl+3', keywords: ['logros', 'trofeos', 'metas'], action: () => onNavigate('achievements') },
+      { id: 'calendar', title: s('calendarTab'), description: 'Calendario de directos', icon: '📅', keywords: ['calendario', 'programación', 'streams'], action: () => onNavigate('calendar') },
       { id: 'chat', title: s('chatTab'), description: 'Chat de Twitch integrado', icon: '💬', shortcut: 'Ctrl+4', keywords: ['chat', 'mensajes', 'leer'], action: () => onNavigate('chat') },
       { id: 'security', title: s('antiBotsTab'), description: 'Protección y anti-bots', icon: '🔒', shortcut: 'Ctrl+5', keywords: ['seguridad', 'antibot', 'proteccion'], action: () => onNavigate('security') },
       { id: 'mod', title: s('moderacionTab'), description: 'Herramientas de moderación', icon: '🛡️', shortcut: 'Ctrl+6', keywords: ['mod', 'ban', 'timeout', 'moderador'], action: () => onNavigate('mod') },

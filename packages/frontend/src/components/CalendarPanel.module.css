@@ -1,0 +1,300 @@
+.container {
+  max-width: 780px;
+}
+
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--sf-text-3);
+  line-height: 1.6;
+  margin-top: 0.5rem;
+}
+
+.card {
+  padding: 1.5rem;
+}
+
+.sectionTitle {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--sf-text);
+  margin-bottom: 0.75rem;
+}
+
+.twoColGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Calendar grid */
+.calNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.calNavBtn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--sf-border);
+  color: var(--sf-text-2);
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--sf-radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.calNavBtn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--sf-text);
+}
+
+.calMonthLabel {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sf-text);
+  letter-spacing: 1px;
+}
+
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 1rem;
+}
+
+.calDayHeader {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--sf-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0;
+}
+
+.calDay {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius-sm);
+  min-height: 70px;
+  padding: 0.3rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.calDay:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.calDayOther {
+  opacity: 0.3;
+}
+
+.calDayNum {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--sf-text-2);
+  margin-bottom: 0.2rem;
+}
+
+.calDayToday .calDayNum {
+  color: var(--sf-teal);
+}
+
+.calDayDot {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  margin-bottom: 2px;
+}
+
+/* Event list below calendar */
+.eventList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.eventRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--sf-radius-sm);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--sf-border);
+  font-size: 0.78rem;
+}
+
+.eventColor {
+  width: 4px;
+  height: 28px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.eventInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.eventTitle {
+  font-weight: 600;
+  color: var(--sf-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eventMeta {
+  font-size: 0.68rem;
+  color: var(--sf-text-3);
+  margin-top: 0.1rem;
+}
+
+.eventActions {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.eventBtn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--sf-border);
+  color: var(--sf-text-2);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.eventBtn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--sf-text);
+}
+
+.eventBtnDanger {
+  composes: eventBtn;
+  color: var(--sf-danger);
+}
+
+.eventBtnDanger:hover {
+  background: rgba(239,68,68,0.15);
+}
+
+/* Modal overlay */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--sf-bg);
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius);
+  width: 420px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--sf-border);
+}
+
+.modalTitle {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  color: var(--sf-text-3);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.25rem;
+  font-family: inherit;
+}
+
+.modalClose:hover {
+  color: var(--sf-text);
+}
+
+.modalBody {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fieldLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--sf-text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.urlBox {
+  display: block;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: var(--sf-text-2);
+  background: rgba(0,0,0,0.3);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  border: 1px solid var(--sf-border);
+  margin-bottom: 0.75rem;
+}
+
+.copyBtn {
+  font-size: 0.78rem;
+  padding: 0.45rem 0.875rem;
+  min-width: 90px;
+}
+
+.addBtnRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}

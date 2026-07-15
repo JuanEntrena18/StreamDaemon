@@ -24,10 +24,10 @@ import { setupChatTimers } from './chat-timers/index.js';
 import { setupFortnite } from './fortnite/index.js';
 import { setupSecurity } from './security/index.js';
 import { setupAlertSounds } from './alert-sounds/index.js';
-import { setupAchievements } from './achievements/index.js';
 import { setupAvatars } from './avatars/index.js';
 import { setupKpi } from './kpi/index.js';
 import { setupSpeedrun } from './speedrun/index.js';
+import { setupCalendar } from './calendar/index.js';
 import { setupObs } from './obs/index.js';
 import { setupLayouts } from './layouts/index.js';
 
@@ -114,10 +114,10 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupFortnite(app);
   setupSecurity(app);
   setupAlertSounds(app);
-  setupAchievements(app);
   setupAvatars(app);
   setupKpi(app);
   setupSpeedrun(app);
+  setupCalendar(app);
   setupObs(app);
   setupLayouts(app);
 

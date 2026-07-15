@@ -21,11 +21,11 @@ const SecurityPanel = lazy(() => import('./SecurityPanel').then(m => ({ default:
 const BitrateCalculatorPanel = lazy(() => import('./BitrateCalculatorPanel').then(m => ({ default: m.BitrateCalculatorPanel })));
 const VerticalStreamingPanel = lazy(() => import('./VerticalStreamingPanel').then(m => ({ default: m.VerticalStreamingPanel })));
 const AlertSoundsPanel = lazy(() => import('./AlertSoundsPanel').then(m => ({ default: m.AlertSoundsPanel })));
-const AchievementsPanel = lazy(() => import('./AchievementsPanel').then(m => ({ default: m.AchievementsPanel })));
 const KpiPanel = lazy(() => import('./KpiPanel').then(m => ({ default: m.KpiPanel })));
 const BuilderPanel = lazy(() => import('./BuilderPanel').then(m => ({ default: m.BuilderPanel })));
 const AvatarsPanel = lazy(() => import('./AvatarsPanel').then(m => ({ default: m.AvatarsPanel })));
 const SpeedrunPanel = lazy(() => import('./SpeedrunPanel').then(m => ({ default: m.SpeedrunPanel })));
+const CalendarPanel = lazy(() => import('./CalendarPanel').then(m => ({ default: m.CalendarPanel })));
 
 interface Props {
   activeTab: Tab;
@@ -78,10 +78,10 @@ export function MainContent({ activeTab, tabDirection, channel, alwaysOnTop, tog
       case 'bitrate':   return <BitrateCalculatorPanel />;
       case 'vertical':  return <VerticalStreamingPanel />;
       case 'alertsounds': return <AlertSoundsPanel channel={channel} />;
-      case 'achievements': return <AchievementsPanel channel={channel} />;
       case 'kpi':       return <KpiPanel channel={channel} />;
       case 'avatars':   return <AvatarsPanel channel={channel} />;
       case 'speedrun':  return <SpeedrunPanel channel={channel} />;
+      case 'calendar':  return <CalendarPanel channel={channel} />;
       case 'config':    return <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />;
       default:          return null;
     }

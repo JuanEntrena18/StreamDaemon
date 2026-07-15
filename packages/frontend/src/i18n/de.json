@@ -36,7 +36,8 @@
     "alertsoundsTab": "Alert-Sounds",
     "achievementsTab": "Erfolge",
     "kpiTab": "KPI Analytics",
-    "configTab": "Einstellungen"
+    "configTab": "Einstellungen",
+    "calendarTab": "📅 Kalender"
   },
   "app": {
     "minimizar": "Minimieren",
@@ -45,7 +46,7 @@
     "siempreEncima": "🎮 Immer im Vordergrund",
     "desactivarSiempreEncima": "Immer im Vordergrund deaktivieren",
     "activarSiempreEncima": "Immer im Vordergrund aktivieren",
-    "version": "v0.4.7 · Open Source",
+    "version": "v0.4.8 · Open Source",
     "panelControl": "Dashboard · StreamDaemon",
     "hash": "#",
     "placeholderCanal": "Twitch-Kanal...",
@@ -183,7 +184,7 @@
     "siempreEncimaDesc": "Hält das Fenster über anderen Anwendungen",
     "acercaDe": "📋 Über",
     "appName": "StreamDaemon",
-    "appVersion": "v0.4.7 · by Cyber Haute Couture",
+    "appVersion": "v0.4.8 · by Cyber Haute Couture",
     "appDesc": "Modulare Open-Source-Anwendung für Content-Ersteller. Verwalte deinen Twitch-Kanal mit benutzerdefinierten Overlays, interaktiven Gewinnspielen, Vorhersagen und Echtzeit-Chat.",
     "checkUpdate": "Nach Updates suchen",
     "updateChecking": "Prüfe…",
@@ -517,6 +518,8 @@
     "cyberpunkVerticalGameplayDesc": "Vertical Cyberpunk gameplay overlay with corner accents (1080×1920)",
     "cyberpunkVerticalJustChatting": "CyberPunk Vertical · Just Chatting",
     "cyberpunkVerticalJustChattingDesc": "Vertical Cyberpunk just chatting overlay (1080×1920)",
+    "calendar": "📅 Kalender-Overlay",
+    "calendarDesc": "Zeigt geplante Streams in einem sauberen Overlay für OBS an. Echtzeit-Updates via Socket.IO.",
     "catGeneral": "Allgemein",
     "catDJ": "DJ",
     "cat8bits": "Retro 8-Bit",

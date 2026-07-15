@@ -36,7 +36,8 @@
     "alertsoundsTab": "Sons d'Alertes",
     "achievementsTab": "Succès",
     "kpiTab": "KPI Analytics",
-    "configTab": "Configuration"
+    "configTab": "Configuration",
+    "calendarTab": "📅 Calendrier"
   },
   "app": {
     "minimizar": "Minimiser",
@@ -45,7 +46,7 @@
     "siempreEncima": "🎮 Toujours au premier plan",
     "desactivarSiempreEncima": "Désactiver toujours au premier plan",
     "activarSiempreEncima": "Activer toujours au premier plan",
-    "version": "v0.4.7 · Open Source",
+    "version": "v0.4.8 · Open Source",
     "panelControl": "Tableau de bord · StreamDaemon",
     "hash": "#",
     "placeholderCanal": "chaîne twitch...",
@@ -183,7 +184,7 @@
     "siempreEncimaDesc": "Maintient la fenêtre au-dessus des autres applications",
     "acercaDe": "📋 À propos",
     "appName": "StreamDaemon",
-    "appVersion": "v0.4.7 · by Cyber Haute Couture",
+    "appVersion": "v0.4.8 · by Cyber Haute Couture",
     "appDesc": "Application modulaire open-source pour créateurs de contenu. Gérez votre chaîne Twitch avec des overlays personnalisés, giveaways, prédictions et chat en temps réel.",
     "checkUpdate": "Vérifier les mises à jour",
     "updateChecking": "Vérification…",
@@ -517,6 +518,8 @@
     "cyberpunkVerticalGameplayDesc": "Vertical Cyberpunk gameplay overlay with corner accents (1080×1920)",
     "cyberpunkVerticalJustChatting": "CyberPunk Vertical · Just Chatting",
     "cyberpunkVerticalJustChattingDesc": "Vertical Cyberpunk just chatting overlay (1080×1920)",
+    "calendar": "📅 Overlay Calendrier",
+    "calendarDesc": "Affiche les prochains directs programmés dans un overlay propre pour OBS. Mise à jour en temps réel via Socket.IO.",
     "catGeneral": "Général",
     "catDJ": "DJ",
     "cat8bits": "Rétro 8-bits",
