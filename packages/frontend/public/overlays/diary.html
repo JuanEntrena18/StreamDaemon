@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StreamDaemon - Game Diary Overlay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sf-bg: #0a0a1a;
+      --sf-surface: rgba(255,255,255,0.04);
+      --sf-border: rgba(255,255,255,0.08);
+      --sf-teal: #06b6d4;
+      --sf-success: #10b981;
+      --sf-danger: #ef4444;
+      --sf-warning: #f59e0b;
+      --sf-text: #f8fafc;
+      --sf-text-2: #94a3b8;
+      --sf-text-3: #64748b;
+      --sf-radius: 14px;
+      --sf-radius-sm: 8px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: transparent;
+      color: var(--sf-text);
+      width: 600px;
+      overflow: hidden;
+      user-select: none;
+    }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .glass-card {
+      background: var(--sf-surface);
+      border: 1px solid var(--sf-border);
+      border-radius: var(--sf-radius);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--sf-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--sf-teal);
+      letter-spacing: 2px;
+    }
+    .header span {
+      font-size: 0.7rem;
+      color: var(--sf-text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .game {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.65rem 1.25rem;
+      align-items: center;
+      border-bottom: 1px solid var(--sf-border);
+    }
+    .game:last-child { border-bottom: none; }
+    .game-cover {
+      width: 40px;
+      height: 54px;
+      border-radius: 4px;
+      object-fit: cover;
+      background: rgba(255,255,255,0.04);
+      flex-shrink: 0;
+    }
+    .game-cover-placeholder {
+      width: 40px;
+      height: 54px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.04);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .game-body { flex: 1; min-width: 0; }
+    .game-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .game-meta {
+      font-size: 0.7rem;
+      color: var(--sf-text-2);
+      margin-top: 0.15rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .game-score {
+      color: #fbbf24;
+      font-size: 0.7rem;
+    }
+    .game-hours {
+      color: var(--sf-text-3);
+    }
+    .hltb-badge {
+      display: inline-block;
+      font-size: 0.6rem;
+      padding: 0.05rem 0.35rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .hltb-faster { background: rgba(16,185,129,0.15); color: #34d399; }
+    .hltb-slower { background: rgba(239,68,68,0.15); color: #f87171; }
+    .hltb-match  { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .empty {
+      padding: 2rem 1.25rem;
+      text-align: center;
+      color: var(--sf-text-3);
+      font-size: 0.8rem;
+    }
+    .loading {
+      padding: 2rem;
+      text-align: center;
+      color: var(--sf-text-3);
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="glass-card" id="app">
+    <div class="header">
+      <h2>&#x2B21; JUEGOS COMPLETADOS</h2>
+      <span id="gameCount">0 juegos</span>
+    </div>
+    <div id="gameList">
+      <div class="loading" id="loadingMsg">Cargando...</div>
+    </div>
+  </div>
+
+  <script>
+    var CHANNEL = new URLSearchParams(location.search).get('channel') || '';
+    var BACKEND_URL = new URLSearchParams(location.search).get('backend') || 'http://localhost:3000';
+    var socketConnection = null;
+
+    function formatHours(h) {
+      if (!h || h === 0) return '-';
+      var hours = Math.floor(h);
+      var mins = Math.round((h - hours) * 60);
+      if (hours === 0) return mins + 'm';
+      if (mins === 0) return hours + 'h';
+      return hours + 'h ' + mins + 'm';
+    }
+
+    function hltbDiff(userHours, hltbHours) {
+      if (!userHours || !hltbHours) return '';
+      var diff = userHours - hltbHours;
+      var pct = Math.round((userHours / hltbHours) * 100);
+      if (Math.abs(diff) < 1) return '<span class="hltb-badge hltb-match">&#x2248; HLTB</span>';
+      if (diff < 0) return '<span class="hltb-badge hltb-faster">' + Math.abs(Math.round(diff)) + 'h m&#xE1;s r&#xE1;pido (' + pct + '%)</span>';
+      return '<span class="hltb-badge hltb-slower">' + Math.round(diff) + 'h m&#xE1;s lento (' + pct + '%)</span>';
+    }
+
+    function stars(score) {
+      var s = '';
+      for (var i = 1; i <= 10; i++) {
+        s += '<span style="color:' + (i <= score ? '#fbbf24' : '#475569') + ';">&#x2605;</span>';
+      }
+      return s;
+    }
+
+    function renderGames(entries) {
+      var list = document.getElementById('gameList');
+      if (!entries || entries.length === 0) {
+        list.innerHTML = '<div class="empty">No hay juegos registrados a&#xFA;n.</div>';
+        document.getElementById('gameCount').textContent = '0 juegos';
+        return;
+      }
+
+      var sorted = entries.slice().sort(function(a, b) {
+        return (b.completedDate || b.createdAt || '').localeCompare(a.completedDate || a.createdAt || '');
+      });
+
+      document.getElementById('gameCount').textContent = sorted.length + ' juego' + (sorted.length !== 1 ? 's' : '');
+      list.innerHTML = '';
+
+      sorted.forEach(function(g) {
+        var diffHtml = g.hltbData && g.hltbData.mainStory ? hltbDiff(g.hoursPlayed, g.hltbData.mainStory) : '';
+        var coverHtml = g.coverUrl
+          ? '<img src="' + g.coverUrl + '" class="game-cover" onerror="this.style.display=\'none\'" />'
+          : '<div class="game-cover-placeholder">&#x1F3AE;</div>';
+
+        var row = document.createElement('div');
+        row.className = 'game';
+        row.innerHTML =
+          coverHtml +
+          '<div class="game-body">' +
+            '<div class="game-name">' + g.name + '</div>' +
+            '<div class="game-meta">' +
+              '<span class="game-score">' + stars(g.score) + '</span>' +
+              '<span class="game-hours">' + formatHours(g.hoursPlayed) + '</span>' +
+              diffHtml +
+            '</div>' +
+          '</div>';
+        list.appendChild(row);
+      });
+    }
+
+    function fetchGames() {
+      if (!CHANNEL) return;
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', BACKEND_URL + '/diary/' + CHANNEL, true);
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          try { renderGames(JSON.parse(xhr.responseText)); } catch(e) { console.error(e); }
+        }
+      };
+      xhr.send();
+    }
+
+    function initSocket() {
+      try {
+        socketConnection = io(BACKEND_URL, { transports: ['websocket'] });
+      } catch(e) {
+        console.warn('Socket.IO unavailable');
+        return;
+      }
+      socketConnection.on('connect', function() {
+        socketConnection.emit('join:channel', CHANNEL);
+        socketConnection.emit('diary:get-state', { channel: CHANNEL });
+      });
+      socketConnection.on('diary:update', function(data) {
+        if (data) renderGames(data);
+      });
+    }
+
+    function loadSocketIO(cb) {
+      var script = document.createElement('script');
+      script.onload = function() { cb(); };
+      script.onerror = function() { cb(new Error('Socket.IO not found')); };
+      script.src = './js/socket.io.js';
+      document.head.appendChild(script);
+    }
+
+    window.onload = function() {
+      fetchGames();
+      loadSocketIO(function(err) {
+        if (!err) initSocket();
+      });
+      setInterval(fetchGames, 60000);
+    };
+  </script>
+</body>
+</html>

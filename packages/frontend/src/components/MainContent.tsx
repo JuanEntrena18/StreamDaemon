@@ -26,6 +26,7 @@ const BuilderPanel = lazy(() => import('./BuilderPanel').then(m => ({ default: m
 const AvatarsPanel = lazy(() => import('./AvatarsPanel').then(m => ({ default: m.AvatarsPanel })));
 const SpeedrunPanel = lazy(() => import('./SpeedrunPanel').then(m => ({ default: m.SpeedrunPanel })));
 const CalendarPanel = lazy(() => import('./CalendarPanel').then(m => ({ default: m.CalendarPanel })));
+const DiaryPanel = lazy(() => import('./DiaryPanel').then(m => ({ default: m.DiaryPanel })));
 
 interface Props {
   activeTab: Tab;
@@ -82,6 +83,7 @@ export function MainContent({ activeTab, tabDirection, channel, alwaysOnTop, tog
       case 'avatars':   return <AvatarsPanel channel={channel} />;
       case 'speedrun':  return <SpeedrunPanel channel={channel} />;
       case 'calendar':  return <CalendarPanel channel={channel} />;
+      case 'diary':     return <DiaryPanel channel={channel} />;
       case 'config':    return <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />;
       default:          return null;
     }

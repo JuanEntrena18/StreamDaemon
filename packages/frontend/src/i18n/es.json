@@ -39,7 +39,8 @@
     "configTab": "Configuración",
     "avatarsTab": "Avatares",
     "speedrunTab": "Speedruns (beta)",
-    "calendarTab": "📅 Calendario"
+    "calendarTab": "Calendario",
+    "diaryTab": "Diario de Juegos"
   },
   "app": {
     "minimizar": "Minimizar",
@@ -566,7 +567,11 @@
     "fondoBlanco": "Blanco",
     "fondoCroma": "Verde Croma",
     "speedrunSuite": "🏃 Speedrun Suite",
-    "speedrunSuiteDesc": "Suite completa de speedrun con splits, temporizador LiveSplit, chat y 4 escenas (inicio, gameplay, BRB, final). Conexión en tiempo real vía Socket.IO. ⚠️ BETA"
+    "speedrunSuiteDesc": "Suite completa de speedrun con splits, temporizador LiveSplit, chat y 4 escenas (inicio, gameplay, BRB, final). Conexión en tiempo real vía Socket.IO. ⚠️ BETA",
+    "calendar": "📅 Overlay de Calendario",
+    "calendarDesc": "Muestra los próximos directos programados en un overlay limpio para OBS. Se actualiza en tiempo real via Socket.IO.",
+    "diary": "🎮 Overlay Diario de Juegos",
+    "diaryDesc": "Muestra los juegos completados con puntuación, horas y comparativa con HowLongToBeat. Se actualiza en tiempo real via Socket.IO."
   },
   "security": {
     "loading": "Cargando configuración de seguridad...",
@@ -624,7 +629,7 @@
     "period90d": "90 días",
     "title": "📊 Twitch Tracker",
     "subtitle": "Estadísticas de rendimiento de tu canal",
-    "periodo": "📅 Período",
+    "periodo": "Período",
     "cargando": "Cargando estadísticas…",
     "error": "No se pudieron cargar las estadísticas. Asegúrate de tener Twitch conectado.",
     "empty": "No hay streams archivados en este período.",

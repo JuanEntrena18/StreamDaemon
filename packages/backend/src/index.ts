@@ -28,6 +28,7 @@ import { setupAvatars } from './avatars/index.js';
 import { setupKpi } from './kpi/index.js';
 import { setupSpeedrun } from './speedrun/index.js';
 import { setupCalendar } from './calendar/index.js';
+import { setupDiary } from './diary/index.js';
 import { setupObs } from './obs/index.js';
 import { setupLayouts } from './layouts/index.js';
 
@@ -118,6 +119,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupKpi(app);
   setupSpeedrun(app);
   setupCalendar(app);
+  setupDiary(app);
   setupObs(app);
   setupLayouts(app);
 

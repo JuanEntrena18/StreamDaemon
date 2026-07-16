@@ -205,6 +205,7 @@ export function App() {
         { id: 'tracker' as Tab, icon: '📈', label: s('trackerTab'), shortcut: 'Ctrl+2' },
         { id: 'kpi' as Tab, icon: '📊', label: s('kpiTab'), shortcut: 'Ctrl+3' },
         { id: 'calendar' as Tab, icon: '📅', label: s('calendarTab') },
+        { id: 'diary' as Tab, icon: '🎮', label: s('diaryTab') },
       ]},
       { id: 'chat-section', label: s('chat'), items: [{ id: 'chat' as Tab, icon: '💬', label: s('chatTab'), shortcut: 'Ctrl+4' }] },
       { id: 'security-section', label: s('seguridad'), items: [{ id: 'security' as Tab, icon: '🔒', label: s('antiBotsTab'), shortcut: 'Ctrl+5' }] },

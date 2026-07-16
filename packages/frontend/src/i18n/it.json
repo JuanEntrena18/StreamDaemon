@@ -37,7 +37,8 @@
     "achievementsTab": "Obiettivi",
     "kpiTab": "KPI Analytics",
     "configTab": "Impostazioni",
-    "calendarTab": "📅 Calendario"
+    "calendarTab": "Calendario",
+    "diaryTab": "Diario di Giochi"
   },
   "app": {
     "minimizar": "Minimizza",
@@ -518,8 +519,10 @@
     "cyberpunkVerticalGameplayDesc": "Vertical Cyberpunk gameplay overlay with corner accents (1080×1920)",
     "cyberpunkVerticalJustChatting": "CyberPunk Vertical · Just Chatting",
     "cyberpunkVerticalJustChattingDesc": "Vertical Cyberpunk just chatting overlay (1080×1920)",
-    "calendar": "📅 Overlay Calendario",
+    "calendar": "Overlay Calendario",
     "calendarDesc": "Mostra i prossimi streaming programmati in un overlay pulito per OBS. Aggiornamento in tempo reale via Socket.IO.",
+    "diary": "🎮 Overlay Diario di Giochi",
+    "diaryDesc": "Mostra i giochi completati con punteggio, ore di gioco e confronto HowLongToBeat. Aggiornamento in tempo reale via Socket.IO.",
     "catGeneral": "Generale",
     "catDJ": "DJ",
     "cat8bits": "Retro 8-bit",
@@ -584,7 +587,7 @@
     "period90d": "90 giorni",
     "title": "📊 Twitch Tracker",
     "subtitle": "Statistiche di performance del tuo canale",
-    "periodo": "📅 Periodo",
+    "periodo": "Periodo",
     "cargando": "Caricamento statistiche...",
     "error": "Impossibile caricare le statistiche. Assicurati che Twitch sia connesso.",
     "empty": "Nessuno stream archiviato in questo periodo.",

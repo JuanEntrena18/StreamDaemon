@@ -39,7 +39,8 @@
     "configTab": "Settings",
     "avatarsTab": "Avatars",
     "speedrunTab": "Speedruns (beta)",
-    "calendarTab": "📅 Calendar"
+    "calendarTab": "Calendar",
+    "diaryTab": "Game Diary"
   },
   "app": {
     "minimizar": "Minimize",
@@ -540,8 +541,10 @@
     "fondoCroma": "Green Chroma",
     "speedrunSuite": "🏃 Speedrun Suite",
     "speedrunSuiteDesc": "Complete speedrun suite with splits, LiveSplit timer, chat, and 4 scenes (intro, gameplay, BRB, ending). Real-time connection via Socket.IO. ⚠️ BETA",
-    "calendar": "📅 Calendar Overlay",
-    "calendarDesc": "Shows upcoming scheduled streams in a clean overlay for OBS. Auto-updates in real-time via Socket.IO."
+    "calendar": "Calendar Overlay",
+    "calendarDesc": "Shows upcoming scheduled streams in a clean overlay for OBS. Auto-updates in real-time via Socket.IO.",
+    "diary": "Game Diary Overlay",
+    "diaryDesc": "Shows completed games with scores, playtime, and HowLongToBeat comparison. Auto-updates in real-time via Socket.IO."
   },
   "security": {
     "loading": "Loading security configuration...",
@@ -593,7 +596,7 @@
     "period90d": "90 days",
     "title": "📊 Twitch Tracker",
     "subtitle": "Your channel's performance statistics",
-    "periodo": "📅 Period",
+    "periodo": "Period",
     "cargando": "Loading statistics...",
     "error": "Could not load statistics. Make sure Twitch is connected.",
     "empty": "No archived streams in this period.",
