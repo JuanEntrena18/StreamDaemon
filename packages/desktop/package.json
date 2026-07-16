@@ -36,7 +36,7 @@
       "output": "dist-electron",
       "buildResources": "resources"
     },
-    "asar": false,
+    "asar": true,
     "files": [
       "dist/**/*",
       "prisma/**/*",

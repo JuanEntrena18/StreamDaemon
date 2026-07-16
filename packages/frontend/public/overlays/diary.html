@@ -7,139 +7,291 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --sf-bg: #0a0a1a;
-      --sf-surface: rgba(255,255,255,0.04);
-      --sf-border: rgba(255,255,255,0.08);
-      --sf-teal: #06b6d4;
-      --sf-success: #10b981;
-      --sf-danger: #ef4444;
-      --sf-warning: #f59e0b;
-      --sf-text: #f8fafc;
-      --sf-text-2: #94a3b8;
-      --sf-text-3: #64748b;
-      --sf-radius: 14px;
-      --sf-radius-sm: 8px;
+      --primary: #06b6d4; /* Teal for Diary */
+      --bg: #0a0a0f;
+      --surface: rgba(15, 15, 30, 0.6);
+      --border: rgba(255,255,255,0.08);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 16px;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    
     body {
       font-family: 'Inter', system-ui, sans-serif;
       background: transparent;
-      color: var(--sf-text);
-      width: 600px;
+      color: var(--text);
+      width: 100vw;
+      height: 100vh;
       overflow: hidden;
       user-select: none;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
     }
+
     .font-mono { font-family: 'JetBrains Mono', monospace; }
-    .glass-card {
-      background: var(--sf-surface);
-      border: 1px solid var(--sf-border);
-      border-radius: var(--sf-radius);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+    
+    /* ── Main Container ── */
+    #app {
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
+
+    /* ── Background Effects ── */
+    .bg-glow {
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary) 15%, transparent), transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .scan-line {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary) 30%, transparent), transparent);
+      animation: scan 6s linear infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes scan {
+      0% { top: -10%; }
+      100% { top: 110%; }
+    }
+
+    /* ── Header ── */
     .header {
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--sf-border);
+      position: relative;
+      z-index: 2;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%);
     }
-    .header h2 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--sf-teal);
-      letter-spacing: 2px;
-    }
-    .header span {
-      font-size: 0.7rem;
-      color: var(--sf-text-3);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .game {
+
+    .header-title {
       display: flex;
-      gap: 0.75rem;
-      padding: 0.65rem 1.25rem;
       align-items: center;
-      border-bottom: 1px solid var(--sf-border);
+      gap: 12px;
     }
-    .game:last-child { border-bottom: none; }
-    .game-cover {
-      width: 40px;
-      height: 54px;
-      border-radius: 4px;
-      object-fit: cover;
-      background: rgba(255,255,255,0.04);
-      flex-shrink: 0;
-    }
-    .game-cover-placeholder {
-      width: 40px;
-      height: 54px;
-      border-radius: 4px;
-      background: rgba(255,255,255,0.04);
-      flex-shrink: 0;
+
+    .header-icon {
+      width: 32px;
+      height: 32px;
+      background: color-mix(in srgb, var(--primary) 20%, transparent);
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--primary);
       font-size: 1.1rem;
+      border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+      box-shadow: 0 0 15px color-mix(in srgb, var(--primary) 40%, transparent);
     }
-    .game-body { flex: 1; min-width: 0; }
-    .game-name {
-      font-size: 0.85rem;
+
+    .header h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(255,255,255,0.2);
+    }
+
+    .header-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
       font-weight: 600;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      color: var(--text-muted);
+      background: rgba(0,0,0,0.3);
+      padding: 4px 10px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
     }
-    .game-meta {
-      font-size: 0.7rem;
-      color: var(--sf-text-2);
-      margin-top: 0.15rem;
+
+    /* ── Game List ── */
+    #gameList {
+      position: relative;
+      z-index: 2;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 800px;
+      overflow: hidden;
+    }
+
+    .game-card {
+      position: relative;
+      display: flex;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+      transition: transform 0.3s, background 0.3s;
+      align-items: center;
+    }
+    
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 4px;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    .game-cover-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      background: rgba(255,255,255,0.02);
+      border-right: 1px solid var(--border);
+      min-width: 70px;
+      height: 100%;
+    }
+
+    .game-cover {
+      width: 45px;
+      height: 60px;
+      border-radius: 6px;
+      object-fit: cover;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    .game-cover-placeholder {
+      width: 45px;
+      height: 60px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.04);
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .game-content {
+      padding: 12px 16px;
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .game-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 6px;
+    }
+
+    .game-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
       flex-wrap: wrap;
     }
+    
+    .game-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     .game-score {
       color: #fbbf24;
-      font-size: 0.7rem;
+      font-size: 0.8rem;
     }
-    .game-hours {
-      color: var(--sf-text-3);
-    }
+    
     .hltb-badge {
       display: inline-block;
-      font-size: 0.6rem;
-      padding: 0.05rem 0.35rem;
+      font-size: 0.65rem;
+      padding: 2px 6px;
       border-radius: 4px;
       font-weight: 600;
     }
     .hltb-faster { background: rgba(16,185,129,0.15); color: #34d399; }
     .hltb-slower { background: rgba(239,68,68,0.15); color: #f87171; }
     .hltb-match  { background: rgba(245,158,11,0.15); color: #fbbf24; }
-    .empty {
-      padding: 2rem 1.25rem;
-      text-align: center;
-      color: var(--sf-text-3);
-      font-size: 0.8rem;
+
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .loading {
-      padding: 2rem;
+
+    .empty, .loading {
+      padding: 40px 20px;
       text-align: center;
-      color: var(--sf-text-3);
-      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
     }
+
+    .empty-icon {
+      font-size: 2rem;
+      opacity: 0.5;
+    }
+
+    .loader {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <div class="glass-card" id="app">
+  <div id="app">
+    <div class="bg-glow"></div>
+    <div class="scan-line"></div>
+    
     <div class="header">
-      <h2>&#x2B21; JUEGOS COMPLETADOS</h2>
-      <span id="gameCount">0 juegos</span>
+      <div class="header-title">
+        <div class="header-icon">🎮</div>
+        <h2>Juegos Completados</h2>
+      </div>
+      <span class="header-count" id="gameCount">0</span>
     </div>
+    
     <div id="gameList">
-      <div class="loading" id="loadingMsg">Cargando...</div>
+      <div class="loading">
+        <div class="loader"></div>
+        <span>Cargando diario...</span>
+      </div>
     </div>
   </div>
 
@@ -176,9 +328,11 @@
 
     function renderGames(entries) {
       var list = document.getElementById('gameList');
+      var countEl = document.getElementById('gameCount');
+
       if (!entries || entries.length === 0) {
-        list.innerHTML = '<div class="empty">No hay juegos registrados a&#xFA;n.</div>';
-        document.getElementById('gameCount').textContent = '0 juegos';
+        list.innerHTML = '<div class="empty"><div class="empty-icon">🎮</div><div>No hay juegos registrados a&#xFA;n.</div></div>';
+        countEl.textContent = '0 juegos';
         return;
       }
 
@@ -186,27 +340,32 @@
         return (b.completedDate || b.createdAt || '').localeCompare(a.completedDate || a.createdAt || '');
       });
 
-      document.getElementById('gameCount').textContent = sorted.length + ' juego' + (sorted.length !== 1 ? 's' : '');
+      countEl.textContent = sorted.length + (sorted.length === 1 ? ' juego' : ' juegos');
       list.innerHTML = '';
 
-      sorted.forEach(function(g) {
+      sorted.forEach(function(g, index) {
         var diffHtml = g.hltbData && g.hltbData.mainStory ? hltbDiff(g.hoursPlayed, g.hltbData.mainStory) : '';
         var coverHtml = g.coverUrl
           ? '<img src="' + g.coverUrl + '" class="game-cover" onerror="this.style.display=\'none\'" />'
           : '<div class="game-cover-placeholder">&#x1F3AE;</div>';
 
         var row = document.createElement('div');
-        row.className = 'game';
+        row.className = 'game-card';
+        row.style.animationDelay = (index * 0.1) + 's';
+        
         row.innerHTML =
-          coverHtml +
-          '<div class="game-body">' +
-            '<div class="game-name">' + g.name + '</div>' +
+          '<div class="game-cover-box">' +
+            coverHtml +
+          '</div>' +
+          '<div class="game-content">' +
+            '<div class="game-title">' + g.name + '</div>' +
             '<div class="game-meta">' +
-              '<span class="game-score">' + stars(g.score) + '</span>' +
-              '<span class="game-hours">' + formatHours(g.hoursPlayed) + '</span>' +
-              diffHtml +
+              '<div class="game-meta-item game-score">' + stars(g.score) + '</div>' +
+              '<div class="game-meta-item" style="color:var(--primary); font-family:\'JetBrains Mono\', monospace; font-weight:600;">⏱ ' + formatHours(g.hoursPlayed) + '</div>' +
+              (diffHtml ? '<div>' + diffHtml + '</div>' : '') +
             '</div>' +
           '</div>';
+          
         list.appendChild(row);
       });
     }

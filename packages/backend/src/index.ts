@@ -52,7 +52,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
       "default-src 'self'; " +
       "connect-src 'self' https://id.twitch.tv https://api.twitch.tv wss://eventsub.wss.twitch.tv ws://localhost:3000 ws://127.0.0.1:3000; " +
       "frame-src 'self' https://player.twitch.tv; " +
-      "img-src 'self' https://static-cdn.jtvnw.net data: blob:; " +
+      "img-src 'self' https://static-cdn.jtvnw.net https://howlongtobeat.com data: blob:; " +
       "script-src 'self' 'unsafe-inline' blob:; " +
       "worker-src 'self' blob:; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
