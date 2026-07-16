@@ -73,6 +73,8 @@ Most streaming tools lock you into paid subscriptions, closed ecosystems, or clo
 - Scoreboard & Fighter Overlay for tournaments and 1v1s
 - Fortnite Stats Overlay (kills, wins, K/D)
 - Bitrate Calculator with OBS configuration guide
+- **Game Diary:** Track your completed games and compare times with HowLongToBeat
+- **Stream Calendar:** Schedule and display your upcoming streams
 
 </td>
 <td>
@@ -143,6 +145,8 @@ Add a **Browser Source** in OBS pointing to the overlay URL. Replace `yourchanne
 | Scoreboard | `http://localhost:3000/overlay.html?mode=scoreboard&channel=yourchannel` |
 | Fighter | `http://localhost:3000/overlay.html?mode=fighter&channel=yourchannel` |
 | Social Media | `http://localhost:3000/overlay.html?mode=social` |
+| Calendar | `http://localhost:3000/overlays/calendar.html?channel=yourchannel` |
+| Diary | `http://localhost:3000/overlays/diary.html?channel=yourchannel` |
 
 **Themed overlays** — each theme includes start, gameplay, chatting, BRB, farewell, chat, and alert screens:
 
