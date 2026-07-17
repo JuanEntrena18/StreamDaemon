@@ -10,7 +10,7 @@ import { promisify } from 'util';
 const pump = promisify(pipeline);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.resolve(__dirname, '../../data');
+const DATA_DIR = process.env.DATA_DIR || path.resolve(__dirname, '../../data');
 
 interface AdsConfig {
   mode: 'lateral' | 'crossfade';
