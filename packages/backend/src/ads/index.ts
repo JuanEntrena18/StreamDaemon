@@ -1,9 +1,13 @@
 import { FastifyInstance } from 'fastify';
 import { readFile, writeFile, mkdir, unlink, readdir } from 'fs/promises';
-import { existsSync } from 'fs';
+import { existsSync, createWriteStream } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getIO } from '../socket/index.js';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
+
+const pump = promisify(pipeline);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.resolve(__dirname, '../../data');
@@ -114,12 +118,8 @@ export function setupAds(app: FastifyInstance) {
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     const filename = `${id}.png`;
     const filePath = path.join(adsDir(channel), filename);
-    const writeStream = require('fs').createWriteStream(filePath);
-    await data.file.pipe(writeStream);
-    await new Promise((resolve, reject) => {
-      writeStream.on('finish', resolve);
-      writeStream.on('error', reject);
-    });
+    const writeStream = createWriteStream(filePath);
+    await pump(data.file, writeStream);
     broadcast(channel);
     reply.status(201).send({ id, filename });
   });

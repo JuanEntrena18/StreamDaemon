@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useSocket } from '../hooks/useSocket';
 import { OVERLAY_REGISTRY } from '../config/overlayRegistry';
+import { apiGet, apiPut, apiDelete, apiFetch, BACKEND_URL } from '../utils/api';
 import styles from './AdsPanel.module.css';
 
 interface AdsConfig {
@@ -35,7 +36,7 @@ export function AdsPanel({ channel }: Props) {
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const be = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+  const be = BACKEND_URL;
   const ov = OVERLAY_REGISTRY.find(o => o.id === 'ads');
   const overlayBaseUrl = import.meta.env.DEV ? 'http://localhost:5173' : window.location.origin;
   const overlayUrl = ov?.filename
@@ -44,14 +45,14 @@ export function AdsPanel({ channel }: Props) {
 
   const loadData = useCallback(async () => {
     try {
-      const res = await fetch(`${be}/ads/${channel}`);
+      const res = await apiGet(`/ads/${channel}`);
       if (res.ok) {
         const data: AdsData = await res.json();
         setConfig(data.config);
         setImages(data.images);
       }
     } catch {}
-  }, [channel, be]);
+  }, [channel]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -71,23 +72,19 @@ export function AdsPanel({ channel }: Props) {
     const updated = { ...config, ...patch };
     setConfig(updated);
     try {
-      await fetch(`${be}/ads/${channel}/config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(patch),
-      });
+      await apiPut(`/ads/${channel}/config`, patch);
     } catch {}
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.name.endsWith('.png')) { alert('Solo se permiten archivos PNG'); return; }
+    if (!file.name.toLowerCase().endsWith('.png')) { alert('Solo se permiten archivos PNG'); return; }
     setUploading(true);
     const form = new FormData();
     form.append('file', file);
     try {
-      await fetch(`${be}/ads/${channel}/upload`, { method: 'POST', body: form });
+      await apiFetch(`/ads/${channel}/upload`, { method: 'POST', body: form });
       await loadData();
     } catch {}
     setUploading(false);
@@ -96,7 +93,7 @@ export function AdsPanel({ channel }: Props) {
 
   const deleteImage = async (id: string) => {
     try {
-      await fetch(`${be}/ads/${channel}/${id}`, { method: 'DELETE' });
+      await apiDelete(`/ads/${channel}/${id}`);
       setImages(prev => prev.filter(im => im.id !== id));
     } catch {}
   };
@@ -107,11 +104,7 @@ export function AdsPanel({ channel }: Props) {
     list.splice(to, 0, moved);
     const reordered = list.map((im, i) => ({ ...im, order: i }));
     setImages(reordered);
-    fetch(`${be}/ads/${channel}/reorder`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids: reordered.map(im => im.id) }),
-    }).catch(() => {});
+    apiPut(`/ads/${channel}/reorder`, { ids: reordered.map(im => im.id) }).catch(() => {});
   };
 
   const copy = useCallback(async (text: string, id: string) => {
@@ -271,13 +264,14 @@ function PreviewLateral({ images, config, backend, channel }: { images: AdImage[
     if (!el || images.length === 0) return;
     let pos = 0;
     const speed = Math.max(0.2, config.speed / 10);
-    const totalW = images.length * (config.width + 20);
+    const renderWidth = Math.min(config.width, 600);
+    const totalW = images.length * (renderWidth + 20);
 
     el.innerHTML = '';
     [...images, ...images].forEach(img => {
       const im = document.createElement('img');
       im.src = `${backend}/ads/${channel}/${img.filename}`;
-      im.style.width = Math.min(config.width, 600) + 'px';
+      im.style.width = renderWidth + 'px';
       im.style.height = Math.min(config.height, 400) + 'px';
       im.style.objectFit = 'contain';
       im.style.flexShrink = '0';

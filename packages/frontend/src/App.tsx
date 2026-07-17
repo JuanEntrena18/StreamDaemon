@@ -206,7 +206,6 @@ export function App() {
         { id: 'kpi' as Tab, icon: '📊', label: s('kpiTab'), shortcut: 'Ctrl+3' },
         { id: 'calendar' as Tab, icon: '📅', label: s('calendarTab') },
         { id: 'diary' as Tab, icon: '🎮', label: s('diaryTab') },
-        { id: 'ads' as Tab, icon: '📢', label: s('adsTab') },
       ]},
       { id: 'chat-section', label: s('chat'), items: [{ id: 'chat' as Tab, icon: '💬', label: s('chatTab'), shortcut: 'Ctrl+4' }] },
       { id: 'security-section', label: s('seguridad'), items: [{ id: 'security' as Tab, icon: '🔒', label: s('antiBotsTab'), shortcut: 'Ctrl+5' }] },
@@ -224,6 +223,7 @@ export function App() {
         { id: 'alertsounds' as Tab, icon: '🔊', label: s('alertsoundsTab') },
         { id: 'avatars' as Tab, icon: '👾', label: s('avatarsTab') },
         { id: 'speedrun' as Tab, icon: '🏃', label: s('speedrunTab') },
+        { id: 'ads' as Tab, icon: '📢', label: s('adsTab') },
       ]},
       { id: 'utilidades-section', label: s('utilidades'), items: [
         { id: 'bitrate' as Tab,  icon: '🧮', label: s('bitrateTab') },

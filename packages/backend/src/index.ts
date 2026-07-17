@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
+import fastifyMultipart from '@fastify/multipart';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { config } from './config.js';
@@ -41,6 +42,11 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
 
   const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'];
   await app.register(cors, { origin: allowedOrigins, credentials: false });
+  await app.register(fastifyMultipart, {
+    limits: {
+      fileSize: 20 * 1024 * 1024, // 20MB
+    }
+  });
 
   // Rate limiting — 100 req/min per IP
   await app.register(rateLimit, { max: 100, timeWindow: '1 minute' });
