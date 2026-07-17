@@ -6,6 +6,8 @@ const KEEPALIVE_MS = 10_000;
 /** Auto-remove tracked utterances whose callbacks never fired */
 const ORPHAN_TIMEOUT_MS = 30_000;
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
+
 // ─── Public helpers ──────────────────────────────────────────────────
 
 export function getVoices(): SpeechSynthesisVoice[] {
@@ -68,6 +70,67 @@ function stopKeepalive() {
   }
 }
 
+// ─── Piper TTS (HTTP Server) ─────────────────────────────────────────
+
+const piperQueue: string[] = [];
+let isPiperPlaying = false;
+let currentPiperAudio: HTMLAudioElement | null = null;
+
+function processPiperQueue(volume: number) {
+  if (isPiperPlaying || piperQueue.length === 0) return;
+  const url = piperQueue.shift()!;
+  isPiperPlaying = true;
+  
+  const audio = new Audio(url);
+  audio.volume = volume;
+  currentPiperAudio = audio;
+  
+  const cleanup = () => {
+    URL.revokeObjectURL(url);
+    isPiperPlaying = false;
+    currentPiperAudio = null;
+    processPiperQueue(volume);
+  };
+  
+  audio.onended = cleanup;
+  audio.onerror = (e) => {
+    console.error('[TTS] Audio element error:', e);
+    cleanup();
+  };
+  audio.play().catch(err => {
+    console.error('[TTS] Audio play() failed:', err);
+    cleanup();
+  });
+}
+
+function speakPiper(text: string, volume: number, lang: 'es' | 'en') {
+  if (piperQueue.length >= MAX_QUEUE_SIZE) {
+    piperQueue.forEach(u => URL.revokeObjectURL(u));
+    piperQueue.length = 0;
+    if (currentPiperAudio) {
+      currentPiperAudio.pause();
+      isPiperPlaying = false;
+      currentPiperAudio = null;
+    }
+  }
+
+  const url = new URL(`${BACKEND_URL}/api/tts/piper`);
+  url.searchParams.set('text', text);
+  url.searchParams.set('lang', lang);
+  
+  fetch(url.toString())
+    .then(res => {
+      if (!res.ok) throw new Error(`Piper returned ${res.status}`);
+      return res.blob();
+    })
+    .then(blob => {
+      const audioUrl = URL.createObjectURL(blob);
+      piperQueue.push(audioUrl);
+      processPiperQueue(volume);
+    })
+    .catch(err => console.error('[TTS] Piper Error:', err));
+}
+
 // ─── Public API ──────────────────────────────────────────────────────
 
 /**
@@ -82,7 +145,14 @@ export function speak(
   voiceURI: string | null,
   rate: number,
   volume: number,
+  engine: 'native' | 'piper' = 'native',
+  piperLang: 'es' | 'en' = 'es'
 ) {
+  if (engine === 'piper') {
+    speakPiper(text, volume, piperLang);
+    return;
+  }
+
   const synth = window.speechSynthesis;
   if (!synth) return;
 
@@ -114,4 +184,12 @@ export function cancelAll() {
   window.speechSynthesis?.cancel();
   tracked.length = 0;
   stopKeepalive();
+
+  piperQueue.forEach(u => URL.revokeObjectURL(u));
+  piperQueue.length = 0;
+  if (currentPiperAudio) {
+    currentPiperAudio.pause();
+    currentPiperAudio = null;
+  }
+  isPiperPlaying = false;
 }

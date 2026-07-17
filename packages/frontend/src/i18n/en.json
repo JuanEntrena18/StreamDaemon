@@ -40,7 +40,8 @@
     "avatarsTab": "Avatars",
     "speedrunTab": "Speedruns (beta)",
     "calendarTab": "Calendar",
-    "diaryTab": "Game Diary"
+    "diaryTab": "Game Diary",
+    "adsTab": "Advertisement"
   },
   "app": {
     "minimizar": "Minimize",
@@ -49,7 +50,7 @@
     "siempreEncima": "🎮 Always on top",
     "desactivarSiempreEncima": "Disable always on top",
     "activarSiempreEncima": "Enable always on top",
-    "version": "v0.4.8 · Open Source",
+    "version": "v0.5.0 · Open Source",
     "panelControl": "Dashboard · StreamDaemon",
     "hash": "#",
     "placeholderCanal": "twitch channel...",
@@ -191,7 +192,7 @@
     "siempreEncimaDesc": "Keeps window above other applications",
     "acercaDe": "📋 About",
     "appName": "StreamDaemon",
-    "appVersion": "v0.4.8 · by Cyber Haute Couture",
+    "appVersion": "v0.5.0 · by Cyber Haute Couture",
     "appDesc": "Modular open-source application for content creators. Manage your Twitch channel with custom overlays, interactive giveaways, predictions, and real-time chat.",
     "checkUpdate": "Check for updates",
     "updateChecking": "Checking…",
@@ -544,7 +545,9 @@
     "calendar": "Calendar Overlay",
     "calendarDesc": "Shows upcoming scheduled streams in a clean overlay for OBS. Auto-updates in real-time via Socket.IO.",
     "diary": "Game Diary Overlay",
-    "diaryDesc": "Shows completed games with scores, playtime, and HowLongToBeat comparison. Auto-updates in real-time via Socket.IO."
+    "diaryDesc": "Shows completed games with scores, playtime, and HowLongToBeat comparison. Auto-updates in real-time via Socket.IO.",
+    "ads": "📢 Advertisements Overlay",
+    "adsDesc": "Displays PNG images in a moving marquee or crossfade animation. Minimal overlay that only takes the image space, perfect for OBS integration."
   },
   "security": {
     "loading": "Loading security configuration...",

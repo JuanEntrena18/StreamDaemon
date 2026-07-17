@@ -17,7 +17,7 @@ import { TtsManager } from './components/TtsManager';
 import styles from './App.module.css';
 const isDesktop = typeof window.streamforger !== 'undefined';
 
-const APP_VERSION = '0.4.7';
+const APP_VERSION = '0.5.0';
 
 // Clear stale localStorage keys when version changes
 try {
@@ -206,6 +206,7 @@ export function App() {
         { id: 'kpi' as Tab, icon: '📊', label: s('kpiTab'), shortcut: 'Ctrl+3' },
         { id: 'calendar' as Tab, icon: '📅', label: s('calendarTab') },
         { id: 'diary' as Tab, icon: '🎮', label: s('diaryTab') },
+        { id: 'ads' as Tab, icon: '📢', label: s('adsTab') },
       ]},
       { id: 'chat-section', label: s('chat'), items: [{ id: 'chat' as Tab, icon: '💬', label: s('chatTab'), shortcut: 'Ctrl+4' }] },
       { id: 'security-section', label: s('seguridad'), items: [{ id: 'security' as Tab, icon: '🔒', label: s('antiBotsTab'), shortcut: 'Ctrl+5' }] },

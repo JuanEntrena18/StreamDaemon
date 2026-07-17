@@ -42,6 +42,8 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
   const [ttsVoiceURI, setTtsVoiceURI] = useState<string | null>(() => tls.voiceURI ?? null);
   const [ttsRate, setTtsRate] = useState(() => tls.rate ?? 1);
   const [ttsVolume, setTtsVolume] = useState(() => tls.volume ?? 1);
+  const [ttsEngine, setTtsEngine] = useState<'native' | 'piper'>(() => tls.engine ?? 'native');
+  const [ttsPiperLang, setTtsPiperLang] = useState<'es' | 'en'>(() => tls.piperLang ?? 'es');
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   useEffect(() => {
@@ -66,9 +68,9 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
     if (ttsEnabled && !recentTtsRef.current.includes(msg.text)) {
       recentTtsRef.current.push(msg.text);
       if (recentTtsRef.current.length > 10) recentTtsRef.current.shift();
-      speak(msg.text, ttsVoiceURI, ttsRate, ttsVolume);
+      speak(msg.text, ttsVoiceURI, ttsRate, ttsVolume, ttsEngine, ttsPiperLang);
     }
-  }, [ttsEnabled, ttsVoiceURI, ttsRate, ttsVolume]));
+  }, [ttsEnabled, ttsVoiceURI, ttsRate, ttsVolume, ttsEngine, ttsPiperLang]));
 
   useEffect(() => {
     if (listRef.current) {
@@ -87,6 +89,16 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
     const val = uri || null;
     setTtsVoiceURI(val);
     saveTtsSettings({ ...loadTtsSettings(), voiceURI: val });
+  }
+
+  function changeEngine(eng: 'native' | 'piper') {
+    setTtsEngine(eng);
+    saveTtsSettings({ ...loadTtsSettings(), engine: eng });
+  }
+
+  function changePiperLang(lang: 'es' | 'en') {
+    setTtsPiperLang(lang);
+    saveTtsSettings({ ...loadTtsSettings(), piperLang: lang });
   }
 
   function changeRate(r: number) {
@@ -142,20 +154,52 @@ export function ChatOverlay({ channel, fontFamily = "'Inter', sans-serif", fontS
           </button>
 
           <select
-            value={ttsVoiceURI ?? ''}
-            onChange={(e) => changeVoice(e.target.value)}
+            value={ttsEngine}
+            onChange={(e) => changeEngine(e.target.value as 'native' | 'piper')}
             style={{
-              flex: 1, minWidth: 0, maxWidth: 140, padding: '2px 6px', borderRadius: 4,
+              width: 60, padding: '2px 4px', borderRadius: 4,
               border: '1px solid rgba(255,255,255,0.15)',
               background: 'rgba(0,0,0,0.4)', color: '#e2e8f0',
               fontSize: 10, fontFamily: 'inherit', outline: 'none',
             }}
           >
-            <option value="">{t('overlay.voz')}</option>
-            {voices.map((v) => (
-              <option key={v.voiceURI} value={v.voiceURI}>{v.name}</option>
-            ))}
+            <option value="native">Win</option>
+            <option value="piper">Piper</option>
           </select>
+
+          {ttsEngine === 'native' && (
+            <select
+              value={ttsVoiceURI ?? ''}
+              onChange={(e) => changeVoice(e.target.value)}
+              style={{
+                flex: 1, minWidth: 0, maxWidth: 140, padding: '2px 6px', borderRadius: 4,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(0,0,0,0.4)', color: '#e2e8f0',
+                fontSize: 10, fontFamily: 'inherit', outline: 'none',
+              }}
+            >
+              <option value="">{t('overlay.voz')}</option>
+              {voices.map((v) => (
+                <option key={v.voiceURI} value={v.voiceURI}>{v.name}</option>
+              ))}
+            </select>
+          )}
+
+          {ttsEngine === 'piper' && (
+            <select
+              value={ttsPiperLang}
+              onChange={(e) => changePiperLang(e.target.value as 'es' | 'en')}
+              style={{
+                flex: 1, minWidth: 0, maxWidth: 80, padding: '2px 6px', borderRadius: 4,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(0,0,0,0.4)', color: '#e2e8f0',
+                fontSize: 10, fontFamily: 'inherit', outline: 'none',
+              }}
+            >
+              <option value="es">ES</option>
+              <option value="en">EN</option>
+            </select>
+          )}
 
           <span style={{ fontSize: 9, color: '#718096', whiteSpace: 'nowrap' }}>{t('overlay.vel')}</span>
           <input

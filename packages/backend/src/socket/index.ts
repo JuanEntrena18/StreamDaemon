@@ -4,6 +4,7 @@ import { joinChannel, leaveChannel, sendMessage } from '../chat/index.js';
 import { handleSpeedrunControl, handleGetState, handleSpeedrunConfig } from '../speedrun/index.js';
 import { handleGetCalendar } from '../calendar/index.js';
 import { handleGetDiary } from '../diary/index.js';
+import { handleGetAds } from '../ads/index.js';
 
 let io: SocketIOServer | null = null;
 const chatThrottle = new Map<string, number>();
@@ -52,6 +53,10 @@ export function setupSocketIO(app: FastifyInstance) {
 
     socket.on('diary:get-state', ({ channel }: { channel: string }) => {
       handleGetDiary(channel);
+    });
+
+    socket.on('ads:get-state', ({ channel }: { channel: string }) => {
+      handleGetAds(channel);
     });
 
     socket.on('disconnect', () => {

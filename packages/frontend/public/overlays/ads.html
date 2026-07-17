@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StreamDaemon - Ads Overlay</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: transparent;
+      overflow: hidden;
+      user-select: none;
+      font-family: system-ui, sans-serif;
+    }
+    #container {
+      position: relative;
+      overflow: hidden;
+    }
+    .ad-track {
+      display: flex;
+      gap: 20px;
+      will-change: transform;
+    }
+    .ad-track img {
+      flex-shrink: 0;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+    .crossfade-container {
+      position: relative;
+    }
+    .crossfade-container img {
+      position: absolute;
+      top: 0; left: 0;
+      object-fit: contain;
+      border-radius: 6px;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .crossfade-container img.active {
+      opacity: 1;
+    }
+    .empty-msg {
+      color: rgba(255,255,255,0.3);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 2rem;
+      font-family: system-ui, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="empty-msg" id="emptyMsg">Sin imágenes publicitarias</div>
+    <div id="container" style="display:none"></div>
+  </div>
+
+  <script>
+    var CHANNEL = new URLSearchParams(location.search).get('channel') || '';
+    var BACKEND_URL = new URLSearchParams(location.search).get('backend') || 'http://localhost:3000';
+    var socketConnection = null;
+    var animFrame = null;
+    var crossfadeTimer = null;
+    var currentIndex = 0;
+
+    function loadConfig() {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', BACKEND_URL + '/ads/' + CHANNEL, true);
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          try { render(JSON.parse(xhr.responseText)); } catch(e) { console.error(e); }
+        }
+      };
+      xhr.send();
+    }
+
+    function render(data) {
+      if (!data) return;
+      var config = data.config || { mode: 'lateral', speed: 50, width: 300, height: 200 };
+      var images = data.images || [];
+      var container = document.getElementById('container');
+      var emptyMsg = document.getElementById('emptyMsg');
+
+      if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+      if (crossfadeTimer) { clearInterval(crossfadeTimer); crossfadeTimer = null; }
+
+      if (images.length === 0) {
+        container.style.display = 'none';
+        emptyMsg.style.display = 'block';
+        return;
+      }
+
+      emptyMsg.style.display = 'none';
+      container.style.display = 'block';
+      container.style.width = config.width + 'px';
+      container.style.height = config.height + 'px';
+
+      if (config.mode === 'lateral') {
+        renderLateral(container, images, config);
+      } else {
+        renderCrossfade(container, images, config);
+      }
+    }
+
+    function renderLateral(container, images, config) {
+      container.innerHTML = '<div class="ad-track" id="adTrack"></div>';
+      var track = document.getElementById('adTrack');
+      var totalWidth = 0;
+
+      images.forEach(function(img) {
+        var el = document.createElement('img');
+        el.src = BACKEND_URL + '/ads/' + CHANNEL + '/' + img.filename;
+        el.width = config.width;
+        el.height = config.height;
+        track.appendChild(el);
+        totalWidth += config.width + 20;
+      });
+
+      // Clone for seamless loop
+      images.forEach(function(img) {
+        var el = document.createElement('img');
+        el.src = BACKEND_URL + '/ads/' + CHANNEL + '/' + img.filename;
+        el.width = config.width;
+        el.height = config.height;
+        track.appendChild(el);
+      });
+
+      var pos = 0;
+      var speed = Math.max(0.2, config.speed / 10);
+
+      function animate() {
+        pos -= speed;
+        if (pos <= -totalWidth) pos = 0;
+        track.style.transform = 'translateX(' + pos + 'px)';
+        animFrame = requestAnimationFrame(animate);
+      }
+      animate();
+    }
+
+    function renderCrossfade(container, images, config) {
+      container.innerHTML = '<div class="crossfade-container" id="cfContainer" style="width:' + config.width + 'px;height:' + config.height + 'px"></div>';
+      var cf = document.getElementById('cfContainer');
+      currentIndex = 0;
+
+      images.forEach(function(img, i) {
+        var el = document.createElement('img');
+        el.src = BACKEND_URL + '/ads/' + CHANNEL + '/' + img.filename;
+        el.width = config.width;
+        el.height = config.height;
+        if (i === 0) el.className = 'active';
+        cf.appendChild(el);
+      });
+
+      var interval = Math.max(2000, 6000 - config.speed * 50);
+      crossfadeTimer = setInterval(function() {
+        var imgs = cf.querySelectorAll('img');
+        imgs[currentIndex].className = '';
+        currentIndex = (currentIndex + 1) % imgs.length;
+        imgs[currentIndex].className = 'active';
+      }, interval);
+    }
+
+    function initSocket() {
+      try {
+        socketConnection = io(BACKEND_URL, { transports: ['websocket'] });
+      } catch(e) {
+        console.warn('Socket.IO unavailable');
+        return;
+      }
+      socketConnection.on('connect', function() {
+        socketConnection.emit('join:channel', CHANNEL);
+        socketConnection.emit('ads:get-state', { channel: CHANNEL });
+      });
+      socketConnection.on('ads:update', function(data) {
+        if (data) render(data);
+      });
+    }
+
+    function loadSocketIO(cb) {
+      var script = document.createElement('script');
+      script.onload = function() { cb(); };
+      script.onerror = function() { cb(new Error('Socket.IO not found')); };
+      script.src = './js/socket.io.js';
+      document.head.appendChild(script);
+    }
+
+    window.onload = function() {
+      loadConfig();
+      loadSocketIO(function(err) {
+        if (!err) initSocket();
+      });
+      setInterval(loadConfig, 60000);
+    };
+  </script>
+</body>
+</html>

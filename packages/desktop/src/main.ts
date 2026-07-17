@@ -15,6 +15,9 @@ const isDev = !app.isPackaged;
 // ── Remove default menu (File / Edit / View…) ─────────────
 Menu.setApplicationMenu(null);
 
+// ── Disable Autoplay restrictions for TTS ─────────────────
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+
 // ── Load backend credentials BEFORE importing the backend ──
 function loadBackendEnv() {
   const envPath = isDev

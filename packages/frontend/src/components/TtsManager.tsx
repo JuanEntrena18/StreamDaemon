@@ -23,7 +23,7 @@ function shouldSkip(msg: ChatMsg, currentUserId: string | null, filters: { exclu
 const DEDUP_WINDOW = 10;
 
 export function TtsManager() {
-  const { enabled, voiceURI, rate, volume, filters, currentUserId } = useTts();
+  const { enabled, voiceURI, rate, volume, engine, piperLang, filters, currentUserId } = useTts();
   const recentTextsRef = useRef<string[]>([]);
 
   useSocketEvent('chat:message', useCallback((msg: ChatMsg) => {
@@ -33,8 +33,8 @@ export function TtsManager() {
     recentTextsRef.current.push(msg.text);
     if (recentTextsRef.current.length > DEDUP_WINDOW) recentTextsRef.current.shift();
     const textToSpeak = filters.readAuthor ? `${msg.user.displayName}: ${msg.text}` : msg.text;
-    speak(textToSpeak, voiceURI, rate, volume);
-  }, [enabled, voiceURI, rate, volume, filters, currentUserId]));
+    speak(textToSpeak, voiceURI, rate, volume, engine, piperLang);
+  }, [enabled, voiceURI, rate, volume, engine, piperLang, filters, currentUserId]));
 
   useEffect(() => {
     if (!enabled) cancelAll();

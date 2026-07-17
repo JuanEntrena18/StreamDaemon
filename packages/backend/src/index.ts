@@ -8,6 +8,7 @@ import { config } from './config.js';
 import { setupAuth, onAuth } from './auth/index.js';
 import { requireLocalAuth } from './auth/api-auth.js';
 import { setupChat, setEnterGiveaway, setAddTickets, setupChatGreeting } from './chat/index.js';
+import { setupPiper } from './chat/piper.js';
 import { setupSocketIO, getIO } from './socket/index.js';
 import { setupGiveaways, enterGiveaway, addTickets } from './giveaways/index.js';
 import { setupPredictions } from './predictions/index.js';
@@ -29,6 +30,7 @@ import { setupKpi } from './kpi/index.js';
 import { setupSpeedrun } from './speedrun/index.js';
 import { setupCalendar } from './calendar/index.js';
 import { setupDiary } from './diary/index.js';
+import { setupAds } from './ads/index.js';
 import { setupObs } from './obs/index.js';
 import { setupLayouts } from './layouts/index.js';
 
@@ -53,6 +55,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
       "connect-src 'self' https://id.twitch.tv https://api.twitch.tv wss://eventsub.wss.twitch.tv ws://localhost:3000 ws://127.0.0.1:3000; " +
       "frame-src 'self' https://player.twitch.tv; " +
       "img-src 'self' https://static-cdn.jtvnw.net https://howlongtobeat.com data: blob:; " +
+      "media-src 'self' blob:; " +
       "script-src 'self' 'unsafe-inline' blob:; " +
       "worker-src 'self' blob:; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
@@ -96,6 +99,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setAddTickets(addTickets);
   await setupChat();
   setupChatGreeting(app);
+  setupPiper(app);
   setupEventSub();
   onAuth(() => { 
     setupChat(); 
@@ -120,6 +124,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupSpeedrun(app);
   setupCalendar(app);
   setupDiary(app);
+  setupAds(app);
   setupObs(app);
   setupLayouts(app);
 

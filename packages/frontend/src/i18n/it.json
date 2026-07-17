@@ -38,7 +38,8 @@
     "kpiTab": "KPI Analytics",
     "configTab": "Impostazioni",
     "calendarTab": "Calendario",
-    "diaryTab": "Diario di Giochi"
+    "diaryTab": "Diario di Giochi",
+    "adsTab": "Pubblicità"
   },
   "app": {
     "minimizar": "Minimizza",
@@ -47,7 +48,7 @@
     "siempreEncima": "🎮 Sempre in primo piano",
     "desactivarSiempreEncima": "Disattiva sempre in primo piano",
     "activarSiempreEncima": "Attiva sempre in primo piano",
-    "version": "v0.4.8 · Open Source",
+    "version": "v0.5.0 · Open Source",
     "panelControl": "Pannello di controllo · StreamDaemon",
     "hash": "#",
     "placeholderCanal": "canale twitch...",
@@ -185,7 +186,7 @@
     "siempreEncimaDesc": "Mantiene la finestra sopra le altre applicazioni",
     "acercaDe": "📋 Informazioni",
     "appName": "StreamDaemon",
-    "appVersion": "v0.4.8 · by Cyber Haute Couture",
+    "appVersion": "v0.5.0 · by Cyber Haute Couture",
     "appDesc": "Applicazione modulare open-source per creator di contenuti. Gestisci il tuo canale Twitch con overlay personalizzati, giveaway interattivi, previsioni e chat in tempo reale.",
     "checkUpdate": "Cerca aggiornamenti",
     "updateChecking": "Controllo…",
@@ -523,6 +524,8 @@
     "calendarDesc": "Mostra i prossimi streaming programmati in un overlay pulito per OBS. Aggiornamento in tempo reale via Socket.IO.",
     "diary": "🎮 Overlay Diario di Giochi",
     "diaryDesc": "Mostra i giochi completati con punteggio, ore di gioco e confronto HowLongToBeat. Aggiornamento in tempo reale via Socket.IO.",
+    "ads": "📢 Overlay Pubblicità",
+    "adsDesc": "Mostra immagini PNG in una tendina mobile o dissolvenza. Overlay minimo che occupa solo lo spazio delle immagini, ideale per OBS.",
     "catGeneral": "Generale",
     "catDJ": "DJ",
     "cat8bits": "Retro 8-bit",
