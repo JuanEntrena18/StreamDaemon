@@ -7,11 +7,11 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org)
 [![Twitch](https://img.shields.io/badge/Twitch-API-9146FF?logo=twitch&logoColor=white)](https://dev.twitch.tv)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey)]()
+[![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey)]()
 
-*A free, self-hosted streaming toolkit with 57+ themed overlays, real-time chat, giveaways, predictions, subathons, anti-bot protection, and analytics — all in one app.*
+*A free, local-first streaming toolkit with 57+ themed overlays, real-time chat, giveaways, predictions, subathons, anti-bot protection, and analytics — all in one Windows app.*
 
-[**Download for Windows**](https://github.com/JuanEntrena18/StreamDaemon/releases) · [**Self-Host on Linux**](#-quick-start) · [**Support the Project**](https://buymeacoffee.com/jentrena)
+[**Download for Windows**](https://github.com/JuanEntrena18/StreamDaemon/releases) · [**Support the Project**](https://buymeacoffee.com/jentrena)
 
 </div>
 
@@ -25,6 +25,7 @@ Most streaming tools lock you into paid subscriptions, closed ecosystems, or clo
 |---|:---:|:---:|:---:|:---:|
 | **Free & Open Source** | ✅ | ❌ | ❌ | ❌ |
 | **Runs Locally** | ✅ | ❌ | ✅ | ✅ |
+| **Windows Desktop App** | ✅ | ❌ | ❌ | ❌ |
 | **No Account Required** | ✅ | ❌ | ❌ | ❌ |
 | **57+ Themed Overlays** | ✅ | — | — | — |
 | **Built-in Anti-Bots** | ✅ | ❌ | ✅ | ❌ |
@@ -96,26 +97,12 @@ Most streaming tools lock you into paid subscriptions, closed ecosystems, or clo
 
 Download the latest `.exe` from [**Releases**](https://github.com/JuanEntrena18/StreamDaemon/releases), run it, and you're live.
 
-### Linux Server — Self-Hosted
-
-```bash
-git clone https://github.com/JuanEntrena18/StreamDaemon.git
-cd StreamDaemon
-npm install
-cp packages/backend/.env.example packages/backend/.env
-# Add your TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET
-npm run build
-npm run start -w packages/backend
-```
-
-Open `http://localhost:3000` in your browser.
-
 ### Development
 
 ```bash
 npm install
 cp packages/backend/.env.example packages/backend/.env
-npm run dev
+npm run dev:desktop
 ```
 
 Frontend: `http://localhost:5173` · API: `http://localhost:3000`

@@ -2,7 +2,7 @@
 
 ## Visión General
 
-Aplicación modular para creadores de contenido que permite gestionar el canal de Twitch con overlays personalizados por juego, sorteos, predicciones, interacción con chat y sistema de Subathon. Compatible con OBS vía Browser Source.
+Aplicación de escritorio para Windows que permite gestionar el canal de Twitch con overlays personalizados por juego, sorteos, predicciones, interacción con chat y sistema de Subathon. Compatible con OBS vía Browser Source.
 
 ---
 
@@ -149,9 +149,8 @@ El dashboard usa tokens CSS + clases utilitarias + CSS Modules:
 
 | Tecnología | Propósito |
 |---|---|
-| **SQLite** | Base de datos única compartida entre backend y desktop. Sin servidor externo. |
-| **Prisma 5** | ORM para ambos packages. |
-| **PostgreSQL 16** | Opcional — disponible vía `docker-compose.yml` para producción multi-usuario. |
+| **SQLite** | Base de datos única embebida en la app de escritorio. Sin servidor externo. |
+| **Prisma 5** | ORM para backend y desktop. |
 
 ---
 
@@ -189,20 +188,15 @@ El overlay de chat se renderiza con React en una ventana Electron separada (o co
 
 ## Autenticación Twitch
 
-Dos flujos OAuth 2.0 según el entorno:
+Flujo OAuth 2.0 utilizado en la app de escritorio Windows:
 
-### Authorization Code Grant (browser / servidor Linux)
-
-1. Usuario hace clic en "Conectar con Twitch"
-2. Backend redirige a Twitch → callback → intercambia code → almacena tokens
-3. `RefreshingAuthProvider` refresca token automáticamente
-
-### Device Code Grant (Electron / escritorio Windows)
+### Device Code Grant (Electron)
 
 1. `POST /auth/device` → backend pide device code a Twitch
 2. Panel muestra `user_code` y link `twitch.tv/activate`
 3. Usuario ingresa el código en su navegador
 4. Frontend sondea `POST /auth/device/poll` hasta que Twitch aprueba
+5. `RefreshingAuthProvider` refresca el token automáticamente
 
 Scopes solicitados: `chat:read`, `chat:edit`, `channel:read:redemptions`, `channel:manage:predictions`, `channel:read:predictions`, `channel:manage:raids`, `moderator:read:followers`, `channel:read:subscriptions`, `bits:read`, `channel:moderate`, `moderator:read:chatters`, `moderator:manage:banned_users`.
 

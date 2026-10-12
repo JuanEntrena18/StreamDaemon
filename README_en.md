@@ -4,8 +4,7 @@
 
 StreamDaemon is a modular application for content creators to manage Twitch channels with game-customizable overlays, interactive giveaways, predictions, real-time chat, and a **Subathon** system. Compatible with OBS Studio via Browser Source.
 
-Available in two modes:
-- **🖥️ Linux Server** — Multi-user, SQLite, production-ready
+Available as a Windows desktop application:
 - **💻 Windows Desktop** — Portable app with Electron + SQLite, zero configuration
 
 ---
@@ -28,7 +27,7 @@ Available in two modes:
 - **🤖 Commands** — Custom chat command management: create, edit, enable/disable, with aliases and cooldown.
 - **🔒 Anti-Bots** — Automatic bot and spam protection inspired by **Sery Bot**. Follow bot detection via EventSub, chat spam filtering by patterns, auto-ban via Helix API, and manual follower scan. Dashboard with stats, protection toggles, whitelist, and detection log.
 - **🎮 Transparent overlay control** — Always-on-top window with sidebar toggle, background mode (black/transparent), font selector (6 fonts), text size slider (10-24px), general opacity control (10-100%), always-visible control bar with drag handle and integrated settings panel. Settings persist in localStorage. Includes `OverlayErrorBoundary` that catches React errors and shows a visible message instead of leaving the window invisible.
-- **🔐 OAuth Authentication** — Twitch login. Browser: Authorization Code Grant with redirect. Desktop: **Device Code Grant** (user enters a code at twitch.tv/activate). Auto-refreshing tokens. Full logout.
+- **🔐 OAuth Authentication** — Twitch login via **Device Code Grant** (user enters a code at twitch.tv/activate). Auto-refreshing tokens. Full logout.
 - **🖥️ Premium Dashboard** — Collapsible sidebar (expands from 56px icons to 220px full navigation), responsive drawer mode on mobile with hamburger menu, glassmorphism, Framer Motion animations, violet/indigo palette, Twitch user badge, real-time connection status. All components use **CSS Modules** (`*.module.css`) instead of inline styles.
 - **📊 Fortnite Stats Overlay** — Configurable overlay panel showing kills, wins, matches, K/D, and win rate from [fortnite-api.com](https://fortnite-api.com). Per-user API key management. 5 min cache.
 - **📋 Activity Feed** — Chronological log of follows, subs, bits, and raids with filters and file persistence.
@@ -56,12 +55,12 @@ StreamDaemon implements multiple security layers:
 
 ## 🚀 Tech Stack
 
-| Layer | Linux Server | Windows Desktop |
-|---|---|---|
-| **Frontend** | React 18 + Vite + Framer Motion + pure HTML/CSS/JS overlays | React 18 + Vite |
-| **Backend** | Node.js + Fastify + Socket.IO + @twurple | Node.js + Fastify (embedded in Electron) |
-| **Database** | SQLite (Prisma ORM) | SQLite (Prisma ORM) |
-| **Runtime** | Node.js directly | Electron (.exe) |
+| Layer | Windows Desktop |
+|---|---|
+| **Frontend** | React 18 + Vite + Framer Motion + pure HTML/CSS/JS overlays |
+| **Backend** | Node.js + Fastify + Socket.IO + @twurple (embedded in Electron) |
+| **Database** | SQLite (Prisma ORM) |
+| **Runtime** | Electron (.exe) |
 
 ---
 
@@ -72,26 +71,12 @@ StreamDaemon implements multiple security layers:
 - Node.js 20+
 - A registered app at [dev.twitch.tv/console](https://dev.twitch.tv/console)
 
-### 🔧 Linux Server / Production
-
-```bash
-git clone https://github.com/JuanEntrena18/StreamDaemon.git
-cd StreamDaemon
-npm install
-cp packages/backend/.env.example packages/backend/.env
-# Edit with TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET
-npm run build
-npm run start -w packages/backend
-```
-
-Dashboard: `http://localhost:3000` · API: `http://localhost:3000`
-
 ### 💻 Development
 
 ```bash
 npm install
 cp packages/backend/.env.example packages/backend/.env
-npm run dev
+npm run dev:desktop
 ```
 
 Dashboard (Vite): `http://localhost:5173` · API: `http://localhost:3000`

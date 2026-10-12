@@ -3,10 +3,9 @@ export const OVERLAY_BASE_URL = import.meta.env.DEV ? 'http://localhost:5173' : 
 
 let _cachedToken: string | undefined;
 
+const isElectron = typeof window !== 'undefined' && !!(window as any).streamforger?.isDesktop;
+
 function getAuthToken(): string | undefined {
-  if (typeof window !== 'undefined' && (window as any).streamforger?.localApiToken) {
-    return (window as any).streamforger.localApiToken;
-  }
   return _cachedToken;
 }
 
@@ -24,7 +23,7 @@ async function fetchApiToken(): Promise<string | undefined> {
 
 let _initPromise: Promise<void> | undefined;
 async function ensureApiInit(): Promise<void> {
-  if (_cachedToken || getAuthToken()) return;
+  if (isElectron || _cachedToken) return;
   if (!_initPromise) {
     _initPromise = fetchApiToken().then(() => {});
   }

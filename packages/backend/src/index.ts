@@ -91,9 +91,14 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
     });
   }
 
-  // Protect all POST endpoints except auth routes and health check
+  // Protect all state-changing endpoints except auth routes and health check
   app.addHook('onRequest', async (req, reply) => {
-    if (req.method === 'POST' && !req.url.startsWith('/auth/') && req.url !== '/health') {
+    const publicPrefixes = ['/auth/', '/health', '/overlays/', '/socket.io/'];
+    const isPublic = publicPrefixes.some((p) => req.url.startsWith(p));
+    if (isPublic) return;
+
+    const protectedMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
+    if (protectedMethods.includes(req.method)) {
       return requireLocalAuth(req, reply);
     }
   });

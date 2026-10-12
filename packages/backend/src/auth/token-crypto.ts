@@ -4,47 +4,52 @@ import path from 'path';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
-const TAG_LENGTH = 16;
 
 const LEGACY_SALT = 'streamforger-token-salt-v1';
 
 const DATA_DIR = process.env.DATA_DIR || path.resolve('data');
-const SALT_FILE = path.join(DATA_DIR, 'token-salt.bin');
+const MASTER_KEY_FILE = path.join(DATA_DIR, 'token-master.key');
 
-function loadOrGenerateSalt(): Buffer {
+function ensureDataDir(): void {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+}
+
+function loadOrGenerateMasterKey(): Buffer {
   try {
-    if (fs.existsSync(SALT_FILE)) {
-      return fs.readFileSync(SALT_FILE);
+    if (fs.existsSync(MASTER_KEY_FILE)) {
+      const key = fs.readFileSync(MASTER_KEY_FILE);
+      if (key.length === 32) return key;
     }
   } catch { /* generará uno nuevo */ }
-  const salt = randomBytes(16);
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.writeFileSync(SALT_FILE, salt);
-  return salt;
+  const key = randomBytes(32);
+  ensureDataDir();
+  try {
+    fs.writeFileSync(MASTER_KEY_FILE, key, { mode: 0o600 });
+  } catch {
+    // Fallback if permissions can't be set (e.g. some Windows configs)
+    fs.writeFileSync(MASTER_KEY_FILE, key);
+  }
+  return key;
 }
 
-const INSTALL_SALT = loadOrGenerateSalt();
+const MASTER_KEY = loadOrGenerateMasterKey();
 
-function deriveKey(secret: string): Buffer {
-  return scryptSync(secret, INSTALL_SALT, 32);
-}
-
-export function encryptToken(plain: string, secret: string): string {
-  const key = deriveKey(secret);
+export function encryptToken(plain: string): string {
   const iv = randomBytes(IV_LENGTH);
-  const cipher = createCipheriv(ALGORITHM, key, iv);
+  const cipher = createCipheriv(ALGORITHM, MASTER_KEY, iv);
   const enc = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()]);
   const tag = cipher.getAuthTag();
   return `${iv.toString('hex')}:${tag.toString('hex')}:${enc.toString('hex')}`;
 }
 
-export function decryptToken(encoded: string, secret: string): string {
-  const key = deriveKey(secret);
-  return decryptWithKey(encoded, key);
+export function decryptToken(encoded: string): string {
+  return decryptWithKey(encoded, MASTER_KEY);
 }
 
-export function decryptTokenLegacy(encoded: string, secret: string): string {
-  const key = scryptSync(secret, LEGACY_SALT, 32);
+export function decryptTokenLegacy(encoded: string, legacySecret: string): string {
+  const key = scryptSync(legacySecret, LEGACY_SALT, 32);
   return decryptWithKey(encoded, key);
 }
 

@@ -1,5 +1,5 @@
 import {
-  app, BrowserWindow, shell, ipcMain,
+  app, BrowserWindow, shell, ipcMain, session,
   globalShortcut, Menu, MenuItem,
 } from 'electron';
 import path from 'path';
@@ -72,11 +72,10 @@ mkdirSync(dataDir, { recursive: true });
 process.env.DATA_DIR = dataDir;
 
 // ── Version migration: clear old data on version change ────
-const APP_VERSION = '0.2.4';
+const APP_VERSION = app.getVersion();
 const versionMarkerPath = path.join(app.getPath('userData'), '.streamforger-version');
 
 function runVersionMigration() {
-  const dataDir = path.dirname(dbPath);
   const oldVersion = existsSync(versionMarkerPath) ? readFileSync(versionMarkerPath, 'utf8').trim() : '';
 
   if (oldVersion !== APP_VERSION) {
@@ -94,10 +93,6 @@ function runVersionMigration() {
 }
 
 runVersionMigration();
-
-if (!isDev) {
-  process.env.FRONTEND_URL = 'http://localhost:3000';
-}
 
 // ── Frontend dist path ────────────────────────────────────
 function getFrontendDistDir(): string {
@@ -119,14 +114,26 @@ let mainAlwaysOnTop = false;
 let backendReady = false;
 
 // ── Backend ───────────────────────────────────────────────
-async function startBackend() {
-  try {
-    const { startServer } = await import('@streamdaemon/backend/dist/index.js');
-    await startServer({ port: 3000, frontendDir: getFrontendDistDir() });
-    backendReady = true;
-    console.log('✅ Backend started — serving frontend at http://localhost:3000');
-  } catch (err) {
-    console.error('⚠️  Backend failed to start:', err instanceof Error ? err.message : err);
+async function startBackend(retries = 3, delayMs = 1000) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const { startServer } = await import('@streamdaemon/backend/dist/index.js');
+      await startServer({ port: 3000, frontendDir: getFrontendDistDir() });
+      backendReady = true;
+      console.log('✅ Backend started — serving frontend at http://localhost:3000');
+      return;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`⚠️  Backend failed to start (attempt ${attempt}/${retries}):`, message);
+      if (attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
+      }
+    }
+  }
+
+  console.error('❌ Backend could not start after multiple attempts');
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    await mainWindow.loadURL('data:text/html;base64,PGh0bWw+PGJvZHk+PGgxPlN0cmVhbURhZW1vbiBubyBwdWVkZSBpbmljaWFyIGVsIHNlcnZpZG9yPC9oMT48cD5WZXJpZmlxdWUgcXVlIG5vIGhheSBvdHJvcyBwcm9jZXNvcyB1c2FuZG8gZWwgcHVlcnRvIDMwMDAgeSByZWluaWNpYSBsYSBhcHBsaWNhY2lvbi48L3A+PC9ib2R5PjwvaHRtbD4=');
   }
 }
 
@@ -463,43 +470,6 @@ ipcMain.on('overlay:resetWindow', () => {
 // Open overlay settings window
 ipcMain.on('overlay:showSettings', () => openOverlaySettingsWindow());
 
-// Auth: construct OAuth URL from env vars and open in default browser
-ipcMain.on('auth:login', () => {
-  const clientId = process.env.TWITCH_CLIENT_ID;
-  if (!clientId) {
-    console.warn('⚠️  TWITCH_CLIENT_ID not configured — open .env.example for instructions');
-    return;
-  }
-  const redirectUri = process.env.TWITCH_REDIRECT_URI || 'http://localhost:3000/auth/callback';
-  const scopes = [
-    'chat:read', 'chat:edit',
-    'channel:read:redemptions',
-    'channel:manage:predictions', 'channel:read:predictions',
-    'channel:manage:raids', 'channel:manage:moderators',
-  ];
-
-  const url =
-    `https://id.twitch.tv/oauth2/authorize` +
-    `?client_id=${clientId}` +
-    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-    `&response_type=code` +
-    `&scope=${scopes.join('+')}` +
-    `&state=${randomBytes(16).toString('hex')}`;
-
-  shell.openExternal(url);
-  console.log('🔗 OAuth URL opened in browser');
-
-  setTimeout(() => {
-    mainWindow?.focus();
-    mainWindow?.show();
-  }, 500);
-});
-
-// Local API token for backend auth
-ipcMain.on('get-local-api-token', (event) => {
-  event.returnValue = LOCAL_API_TOKEN;
-});
-
 // Backend readiness
 ipcMain.handle('backend:isReady', () => backendReady);
 
@@ -528,8 +498,35 @@ ipcMain.on('window:close',    () => mainWindow?.close());
 app.whenReady().then(async () => {
   globalShortcut.register('CommandOrControl+Shift+T', toggleClickThrough);
 
-  await startBackend();
+  // Inject local API token into all requests to the bundled backend.
+  // The renderer never sees the token, reducing exposure surface.
+  session.defaultSession.webRequest.onBeforeSendHeaders(
+    {
+      urls: [
+        'http://localhost:3000/*',
+        'http://127.0.0.1:3000/*',
+        'ws://localhost:3000/*',
+        'ws://127.0.0.1:3000/*',
+      ],
+    },
+    (details, callback) => {
+      details.requestHeaders['x-local-token'] = LOCAL_API_TOKEN;
+      callback({ requestHeaders: details.requestHeaders });
+    },
+  );
+
+  // Open the main window immediately with a loading screen so the UI is responsive
+  // while the bundled backend starts in the background.
   createMainWindow();
+  if (mainWindow) {
+    await mainWindow.loadURL('data:text/html;base64,PGh0bWw+PGhlYWQ+PHN0eWxlPmJvZHl7bWFyZ2luOjA7YmFja2dyb3VuZDojMGEwYTFhO2NvbG9yOiNmZmY7Zm9udC1mYW1pbHk6c3lzdGVtLXVpO2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7aGVpZ2h0OjEwMHZofTwvc3R5bGU+PC9oZWFkPjxib2R5Pjxzdmcgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiM3YzNhZWQiPjxwYXRoIGQ9Ik0xMiA0YTYgNiAwIDAgMCA2IDZWMThhNiA2IDAgMCAxLTEyIDBWMGExMCAxMCAwIDAgMSAxMCAwaC0uMDJhOCA4IDAgMCAwLTcuOTIgMEE4IDggMCAwIDAgMTIgNHptMCAyYTQgNCAwIDAgMSA0IDR2OGE0IDQgMCAwIDEtOCAwVjZhNiA2IDAgMCAxIDYtNnoiLz48YW5pbWF0ZVRyYW5zZm9ybSBhdHRyaWJ1dGVOYW1lPSJ0cmFuc2Zvcm0iIHR5cGU9InJvdGF0ZSIgZnJvbT0iMCAwIDEyIDEyIiB0bz0iMzYwIDAgMTIgMTIiIGR1cj0iMXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIi8+PC9zdmc+PHAgc3R5bGU9Im1hcmdpbi10b3A6MXJlbTtjb2xvcjojYTRhOGI2Ij5DdWFyZ2FuZG8gU3RyZWFtRGFlbW9uLi4uPC9wPjwvYm9keT48L2h0bWw+');
+  }
+
+  await startBackend();
+  if (backendReady && mainWindow) {
+    const mainUrl = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
+    mainWindow.loadURL(mainUrl);
+  }
 });
 
 app.on('window-all-closed', () => {

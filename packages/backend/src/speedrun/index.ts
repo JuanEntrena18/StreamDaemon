@@ -20,7 +20,13 @@ export interface SpeedrunState {
   elapsedTime: number;
 }
 
-const states = new Map<string, SpeedrunState>();
+interface SpeedrunInstance {
+  state: SpeedrunState;
+  startTime: number; // Date.now() when the current run started minus already elapsed time
+  tickInterval: ReturnType<typeof setInterval> | null;
+}
+
+const instances = new Map<string, SpeedrunInstance>();
 
 function defaultSplits(): SpeedrunSplit[] {
   return [
@@ -49,52 +55,77 @@ function defaultState(): SpeedrunState {
   };
 }
 
-function getOrCreate(channel: string): SpeedrunState {
-  let state = states.get(channel);
-  if (!state) {
-    state = defaultState();
-    states.set(channel, state);
+function getOrCreate(channel: string): SpeedrunInstance {
+  let inst = instances.get(channel);
+  if (!inst) {
+    inst = { state: defaultState(), startTime: 0, tickInterval: null };
+    instances.set(channel, inst);
   }
-  return state;
+  return inst;
+}
+
+function stopTick(inst: SpeedrunInstance) {
+  if (inst.tickInterval) {
+    clearInterval(inst.tickInterval);
+    inst.tickInterval = null;
+  }
+}
+
+function recalculateElapsed(inst: SpeedrunInstance) {
+  if (inst.state.timerRunning) {
+    inst.state.elapsedTime = Date.now() - inst.startTime;
+  }
 }
 
 function broadcast(channel: string) {
-  const state = states.get(channel);
-  if (state) getIO().to(`channel:${channel}`).emit('speedrun:update', state);
+  const inst = instances.get(channel);
+  if (!inst) return;
+  recalculateElapsed(inst);
+  getIO().to(`channel:${channel}`).emit('speedrun:update', inst.state);
 }
 
 export function handleSpeedrunControl(channel: string, action: string) {
   if (!channel) return;
-  const state = getOrCreate(channel);
+  const inst = getOrCreate(channel);
 
   switch (action) {
     case 'split': {
-      if (!state.timerRunning) {
-        state.timerRunning = true;
-        state.elapsedTime = 0;
-      } else if (state.currentSplitIndex < state.splits.length) {
-        state.splits[state.currentSplitIndex].current = state.elapsedTime;
-        state.currentSplitIndex++;
-        if (state.currentSplitIndex >= state.splits.length) {
-          state.timerRunning = false;
+      if (!inst.state.timerRunning) {
+        inst.state.timerRunning = true;
+        inst.state.elapsedTime = 0;
+        inst.startTime = Date.now();
+        inst.tickInterval = setInterval(() => broadcast(channel), 1000);
+      } else if (inst.state.currentSplitIndex < inst.state.splits.length) {
+        recalculateElapsed(inst);
+        inst.state.splits[inst.state.currentSplitIndex].current = inst.state.elapsedTime;
+        inst.state.currentSplitIndex++;
+        if (inst.state.currentSplitIndex >= inst.state.splits.length) {
+          inst.state.timerRunning = false;
+          stopTick(inst);
         }
       }
       break;
     }
     case 'undo': {
-      if (state.currentSplitIndex > 0) {
-        state.currentSplitIndex--;
-        state.splits[state.currentSplitIndex].current = null;
-        state.timerRunning = true;
+      if (inst.state.currentSplitIndex > 0) {
+        inst.state.currentSplitIndex--;
+        inst.state.splits[inst.state.currentSplitIndex].current = null;
+        inst.state.timerRunning = true;
+        inst.startTime = Date.now() - inst.state.elapsedTime;
+        if (!inst.tickInterval) {
+          inst.tickInterval = setInterval(() => broadcast(channel), 1000);
+        }
       }
       break;
     }
     case 'reset': {
-      state.timerRunning = false;
-      state.elapsedTime = 0;
-      state.currentSplitIndex = 0;
-      state.splits.forEach(s => s.current = null);
-      state.attempts++;
+      inst.state.timerRunning = false;
+      inst.state.elapsedTime = 0;
+      inst.state.currentSplitIndex = 0;
+      inst.state.splits.forEach((s) => (s.current = null));
+      inst.state.attempts++;
+      inst.startTime = 0;
+      stopTick(inst);
       break;
     }
   }
@@ -104,25 +135,28 @@ export function handleSpeedrunControl(channel: string, action: string) {
 
 export function handleGetState(channel: string) {
   if (!channel) return;
-  const state = getOrCreate(channel);
-  getIO().to(`channel:${channel}`).emit('speedrun:update', state);
+  const inst = getOrCreate(channel);
+  recalculateElapsed(inst);
+  getIO().to(`channel:${channel}`).emit('speedrun:update', inst.state);
 }
 
 export function handleSpeedrunConfig(channel: string, config: Partial<SpeedrunState> & { splits?: SpeedrunSplit[] }) {
   if (!channel) return;
-  const state = getOrCreate(channel);
-  if (config.game !== undefined) state.game = config.game;
-  if (config.category !== undefined) state.category = config.category;
-  if (config.pb !== undefined) state.pb = config.pb;
-  if (config.wr !== undefined) state.wr = config.wr;
-  if (config.splits !== undefined) state.splits = config.splits;
+  const inst = getOrCreate(channel);
+  if (config.game !== undefined) inst.state.game = config.game;
+  if (config.category !== undefined) inst.state.category = config.category;
+  if (config.pb !== undefined) inst.state.pb = config.pb;
+  if (config.wr !== undefined) inst.state.wr = config.wr;
+  if (config.splits !== undefined) inst.state.splits = config.splits;
   broadcast(channel);
 }
 
 export function setupSpeedrun(app: FastifyInstance) {
   app.get('/speedrun/:channel', async (req, reply) => {
     const { channel } = req.params as { channel: string };
-    reply.send(getOrCreate(channel));
+    const inst = getOrCreate(channel);
+    recalculateElapsed(inst);
+    reply.send(inst.state);
   });
 
   app.post('/speedrun/config', async (req, reply) => {
@@ -136,24 +170,25 @@ export function setupSpeedrun(app: FastifyInstance) {
     };
     if (!body.channel) return reply.status(400).send({ error: 'Missing channel' });
 
-    const state = getOrCreate(body.channel);
-    if (body.game !== undefined) state.game = body.game;
-    if (body.category !== undefined) state.category = body.category;
-    if (body.pb !== undefined) state.pb = body.pb;
-    if (body.wr !== undefined) state.wr = body.wr;
-    if (body.splits !== undefined) state.splits = body.splits;
+    const inst = getOrCreate(body.channel);
+    if (body.game !== undefined) inst.state.game = body.game;
+    if (body.category !== undefined) inst.state.category = body.category;
+    if (body.pb !== undefined) inst.state.pb = body.pb;
+    if (body.wr !== undefined) inst.state.wr = body.wr;
+    if (body.splits !== undefined) inst.state.splits = body.splits;
 
     broadcast(body.channel);
-    reply.send(state);
+    reply.send(inst.state);
   });
 
   app.post('/speedrun/reset', async (req, reply) => {
     const { channel } = req.body as { channel: string };
     if (!channel) return reply.status(400).send({ error: 'Missing channel' });
-    states.delete(channel);
-    const fresh = defaultState();
-    states.set(channel, fresh);
+    const inst = getOrCreate(channel);
+    stopTick(inst);
+    inst.state = defaultState();
+    inst.startTime = 0;
     broadcast(channel);
-    reply.send(fresh);
+    reply.send(inst.state);
   });
 }

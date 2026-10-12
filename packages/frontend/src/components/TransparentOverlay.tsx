@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '../i18n/context';
+import { useAuthStatus } from '../hooks/useAuthStatus';
 import { Toggle } from './Toggle';
 import styles from './TransparentOverlay.module.css';
 
@@ -10,6 +11,7 @@ interface Props {
 
 export function TransparentOverlay({ channel }: Props) {
   const { t } = useTranslation();
+  const { login } = useAuthStatus();
 
   const OVERLAY_MODES = [
     { mode: 'channel', icon: '💬', label: t('overlay.chatCanal') },
@@ -81,7 +83,7 @@ export function TransparentOverlay({ channel }: Props) {
   };
 
   const handleLogin = () => {
-    window.streamforger?.auth.login();
+    login();
     const interval = setInterval(async () => {
       await checkAuth();
       if (authStatus === 'logged') clearInterval(interval);

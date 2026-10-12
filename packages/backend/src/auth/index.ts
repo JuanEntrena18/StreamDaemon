@@ -7,7 +7,6 @@ import { execFileSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
-import { randomBytes } from 'crypto';
 import { encryptToken, decryptToken, decryptTokenLegacy } from './token-crypto.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -88,14 +87,12 @@ export async function setupAuth(app: FastifyInstance) {
     clientSecret: config.TWITCH_CLIENT_SECRET,
   });
 
-  const encKey = config.TWITCH_CLIENT_SECRET;
-
   authProvider.onRefresh(async (userId, newTokenData) => {
     await prisma.user.update({
       where: { twitchId: userId },
       data: {
-        accessToken: encryptToken(newTokenData.accessToken, encKey),
-        refreshToken: encryptToken(newTokenData.refreshToken ?? '', encKey),
+        accessToken: encryptToken(newTokenData.accessToken),
+        refreshToken: encryptToken(newTokenData.refreshToken ?? ''),
         tokenExpiresAt: newTokenData.expiresIn
           ? new Date(Date.now() + newTokenData.expiresIn * 1000)
           : null,
@@ -103,87 +100,7 @@ export async function setupAuth(app: FastifyInstance) {
     });
   });
 
-  // ── OAuth state store ──
-  const pendingStates = new Map<string, number>();
-
   await restoreSession();
-
-  // ── Authorization Code Grant (browser, redirect flow) ──
-
-  app.get('/auth/login', (_req, reply) => {
-    const state = randomBytes(16).toString('hex');
-    pendingStates.set(state, Date.now() + 10 * 60 * 1000);
-    const url =
-      `https://id.twitch.tv/oauth2/authorize` +
-      `?client_id=${config.TWITCH_CLIENT_ID}` +
-      `&redirect_uri=${config.TWITCH_REDIRECT_URI}` +
-      `&response_type=code` +
-      `&scope=${SCOPES.join('+')}` +
-      `&state=${state}`;
-    reply.redirect(url);
-  });
-
-  app.get('/auth/login-url', (_req, reply) => {
-    const state = randomBytes(16).toString('hex');
-    pendingStates.set(state, Date.now() + 10 * 60 * 1000);
-    const url =
-      `https://id.twitch.tv/oauth2/authorize` +
-      `?client_id=${config.TWITCH_CLIENT_ID}` +
-      `&redirect_uri=${encodeURIComponent(config.TWITCH_REDIRECT_URI)}` +
-      `&response_type=code` +
-      `&scope=${SCOPES.join('+')}` +
-      `&state=${state}`;
-    reply.send({ url });
-  });
-
-  app.get('/auth/callback', async (req, reply) => {
-    const { code, state } = req.query as { code?: string; state?: string };
-    if (!code) return reply.status(400).send({ error: 'Missing code' });
-    if (!state) return reply.status(400).send({ error: 'Missing state' });
-
-    const expiry = pendingStates.get(state);
-    if (!expiry || Date.now() > expiry) {
-      return reply.status(400).send({ error: 'Invalid or expired state' });
-    }
-    pendingStates.delete(state);
-
-    const params = new URLSearchParams({
-      client_id: config.TWITCH_CLIENT_ID,
-      client_secret: config.TWITCH_CLIENT_SECRET,
-      code,
-      grant_type: 'authorization_code',
-      redirect_uri: config.TWITCH_REDIRECT_URI,
-    });
-
-    const tokenRes = await fetch('https://id.twitch.tv/oauth2/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params,
-    });
-
-    if (!tokenRes.ok) {
-      const err = await tokenRes.json().catch(() => ({}));
-      req.log.error({ err }, 'Twitch token exchange failed');
-      return reply.status(400).send({ error: 'Authentication failed. Please try again.' });
-    }
-
-    const tokenData = await tokenRes.json();
-
-    const userRes = await fetch('https://api.twitch.tv/helix/users', {
-      headers: {
-        Authorization: `Bearer ${tokenData.access_token}`,
-        'Client-Id': config.TWITCH_CLIENT_ID,
-      },
-    });
-
-    const userBody = await userRes.json();
-    const twitchUser = userBody.data?.[0];
-    if (!twitchUser) return reply.status(500).send({ error: 'Failed to fetch user' });
-
-    await finishAuth(tokenData, twitchUser);
-
-    reply.redirect(`${config.FRONTEND_URL}?auth=success`);
-  });
 
   // ── Device Code Grant (Electron / desktop, no redirect) ──
 
@@ -284,7 +201,14 @@ export async function setupAuth(app: FastifyInstance) {
 
   // ── Status ──
 
-  app.get('/auth/token', async () => {
+  app.get('/auth/token', async (req, reply) => {
+    // Only expose the local token to trusted local origins (development browser mode).
+    // In the Electron build the main process injects this header automatically.
+    const origin = req.headers.origin;
+    const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'];
+    if (origin && !allowedOrigins.includes(origin)) {
+      return reply.status(403).send({ error: 'Forbidden' });
+    }
     return { token: config.LOCAL_API_TOKEN };
   });
 
@@ -322,16 +246,14 @@ async function finishAuth(
     profileImageUrl: twitchUser.profile_image_url,
   };
 
-  const encKey = config.TWITCH_CLIENT_SECRET;
-
   await prisma.user.upsert({
     where: { twitchId: twitchUser.id },
     update: {
       login: twitchUser.login,
       displayName: twitchUser.display_name,
       avatarUrl: twitchUser.profile_image_url,
-      accessToken: encryptToken(tokenData.access_token, encKey),
-      refreshToken: encryptToken(tokenData.refresh_token ?? '', encKey),
+      accessToken: encryptToken(tokenData.access_token),
+      refreshToken: encryptToken(tokenData.refresh_token ?? ''),
       tokenExpiresAt: tokenData.expires_in
         ? new Date(Date.now() + tokenData.expires_in * 1000)
         : null,
@@ -341,8 +263,8 @@ async function finishAuth(
       login: twitchUser.login,
       displayName: twitchUser.display_name,
       avatarUrl: twitchUser.profile_image_url,
-      accessToken: encryptToken(tokenData.access_token, encKey),
-      refreshToken: encryptToken(tokenData.refresh_token ?? '', encKey),
+      accessToken: encryptToken(tokenData.access_token),
+      refreshToken: encryptToken(tokenData.refresh_token ?? ''),
       tokenExpiresAt: tokenData.expires_in
         ? new Date(Date.now() + tokenData.expires_in * 1000)
         : null,
@@ -370,15 +292,14 @@ async function restoreSession() {
     let accessToken = user.accessToken;
     let refreshToken = user.refreshToken;
 
-    const encKey = config.TWITCH_CLIENT_SECRET;
     try {
-      accessToken = decryptToken(user.accessToken, encKey);
-      refreshToken = decryptToken(user.refreshToken, encKey);
+      accessToken = decryptToken(user.accessToken);
+      refreshToken = decryptToken(user.refreshToken);
     } catch {
       try {
-        // Fallback: tokens may have been encrypted with the old hardcoded salt
-        accessToken = decryptTokenLegacy(user.accessToken, encKey);
-        refreshToken = decryptTokenLegacy(user.refreshToken, encKey);
+        // Fallback: tokens may have been encrypted with the old TWITCH_CLIENT_SECRET-derived key
+        accessToken = decryptTokenLegacy(user.accessToken, config.TWITCH_CLIENT_SECRET);
+        refreshToken = decryptTokenLegacy(user.refreshToken, config.TWITCH_CLIENT_SECRET);
       } catch {
         // Tokens may be in plaintext from a very old version — use as-is
       }

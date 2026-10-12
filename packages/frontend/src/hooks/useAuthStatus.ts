@@ -142,10 +142,6 @@ export function useAuthStatus() {
     startDeviceLogin();
   }, [startDeviceLogin]);
 
-  const loginBrowser = useCallback(() => {
-    window.open(`${BACKEND_URL}/auth/login`, '_blank');
-  }, []);
-
   const logout = useCallback(async () => {
     try {
       await fetch(`${BACKEND_URL}/auth/logout`, { method: 'POST' });
@@ -153,5 +149,5 @@ export function useAuthStatus() {
     setStatus({ authenticated: false, user: null });
   }, []);
 
-  return { ...status, loading, login, loginBrowser, logout, deviceState, cancelDeviceLogin, refresh };
+  return { ...status, loading, login, logout, deviceState, cancelDeviceLogin, refresh };
 }

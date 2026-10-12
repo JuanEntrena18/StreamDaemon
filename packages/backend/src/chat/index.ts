@@ -93,7 +93,11 @@ export async function setupChat() {
   }
 
   if (chatClient) {
-    chatClient.quit();
+    try {
+      await chatClient.quit();
+    } catch (err) {
+      console.warn('⚠️ Error quitting previous chat client:', err);
+    }
     chatClient = null;
   }
 
@@ -117,8 +121,8 @@ export async function setupChat() {
     console.error('❌ Chat token fetch failed:', error.message);
   });
 
-  chatClient.connect();
   console.log('💬 Chat client connecting...');
+  await chatClient.connect();
 
   chatClient.onMessage((channel, user, text, msg) => {
     const channelName = channel.replace('#', '');
@@ -152,7 +156,8 @@ export async function setupChat() {
     if (user.toLowerCase() === currentUser?.login?.toLowerCase()) return;
 
     const key = `${channelName}:${user.toLowerCase()}`;
-    if (pendingGreetings.has(key)) return;
+    const existing = pendingGreetings.get(key);
+    if (existing) clearTimeout(existing);
 
     const timer = setTimeout(() => {
       sendGreeting(channelName, user, key, config.message);

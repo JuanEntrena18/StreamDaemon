@@ -18,6 +18,7 @@ export class AvatarEngine {
   private ticker: PIXI.Ticker | null = null;
   private initialized = false;
   private canvas: HTMLCanvasElement;
+  private resizeObserver: ResizeObserver | null = null;
 
   constructor(canvas: HTMLCanvasElement, config: AvatarConfig) {
     this.canvas = canvas;
@@ -60,7 +61,7 @@ export class AvatarEngine {
     this.ticker.add(this.onTick, this);
 
     // Handle resize
-    const resizeObserver = new ResizeObserver((entries) => {
+    this.resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width: w, height: h } = entry.contentRect;
         if (w > 0 && h > 0) {
@@ -70,7 +71,7 @@ export class AvatarEngine {
       }
     });
     if (parentEl) {
-      resizeObserver.observe(parentEl);
+      this.resizeObserver.observe(parentEl);
     }
 
     this.initialized = true;
@@ -104,7 +105,7 @@ export class AvatarEngine {
 
     // Enforce max avatars
     while (this.sprites.size > config.maxAvatars) {
-      const oldestKey = this.sprites.keys().next().value;
+      const oldestKey = Array.from(this.sprites.keys())[0];
       if (oldestKey) this.removeAvatar(oldestKey);
     }
   }
@@ -237,6 +238,12 @@ export class AvatarEngine {
   destroy() {
     if (this.ticker) {
       this.ticker.remove(this.onTick, this);
+      this.ticker = null;
+    }
+
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
     }
 
     for (const sprite of this.sprites.values()) {

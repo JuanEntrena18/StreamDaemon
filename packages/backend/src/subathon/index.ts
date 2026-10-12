@@ -5,9 +5,7 @@ import crypto from 'crypto';
 
 interface SubathonInstance {
   state: SubathonState;
-  startedAt: number;
-  pausedAt: number | null;
-  pausedRemaining: number;
+  endAt: number; // timestamp (ms) when the timer would reach zero if running
   tickInterval: ReturnType<typeof setInterval> | null;
 }
 
@@ -27,13 +25,26 @@ function broadcast(channel: string, inst: SubathonInstance) {
   getIO().to(`channel:${channel}`).emit('subathon:state', inst.state);
 }
 
-function tick(channel: string, inst: SubathonInstance) {
-  if (inst.state.status !== 'running') return;
-
-  if (inst.pausedAt !== null) {
-    const elapsed = Math.floor((Date.now() - inst.pausedAt) / 1000);
-    inst.state.remaining = Math.max(0, inst.pausedRemaining - elapsed);
+function stopTick(inst: SubathonInstance) {
+  if (inst.tickInterval) {
+    clearInterval(inst.tickInterval);
+    inst.tickInterval = null;
   }
+}
+
+function recalculateRemaining(inst: SubathonInstance) {
+  if (inst.state.status === 'running') {
+    inst.state.remaining = Math.max(0, Math.ceil((inst.endAt - Date.now()) / 1000));
+  }
+}
+
+function tick(channel: string, inst: SubathonInstance) {
+  if (inst.state.status !== 'running') {
+    stopTick(inst);
+    return;
+  }
+
+  recalculateRemaining(inst);
 
   getIO().to(`channel:${channel}`).emit('subathon:tick', {
     remaining: inst.state.remaining,
@@ -43,36 +54,33 @@ function tick(channel: string, inst: SubathonInstance) {
   if (inst.state.remaining <= 0) {
     inst.state.status = 'finished';
     inst.state.remaining = 0;
-    if (inst.tickInterval) {
-      clearInterval(inst.tickInterval);
-      inst.tickInterval = null;
-    }
+    stopTick(inst);
     broadcast(channel, inst);
   }
 }
 
 function addTime(channel: string, inst: SubathonInstance, action: SubathonAction) {
-  const newTotal = inst.state.remaining + action.timeAdded;
-  inst.state.remaining = Math.min(newTotal, inst.state.maxLimit);
-  inst.state.totalAdded += action.timeAdded;
+  const previousRemaining = inst.state.remaining;
+  const newRemaining = Math.min(previousRemaining + action.timeAdded, inst.state.maxLimit);
+  const actualAdded = newRemaining - previousRemaining;
+
+  inst.state.remaining = newRemaining;
+  inst.state.totalAdded += actualAdded;
   inst.state.actions.unshift(action);
   if (inst.state.actions.length > 100) inst.state.actions.pop();
 
   if (inst.state.status === 'stopped' || inst.state.status === 'finished') {
     inst.state.status = 'running';
-    inst.startedAt = Date.now();
-    inst.pausedAt = Date.now();
-    inst.pausedRemaining = inst.state.remaining;
+    inst.endAt = Date.now() + inst.state.remaining * 1000;
     inst.tickInterval = setInterval(() => tick(channel, inst), 1000);
   } else if (inst.state.status === 'paused') {
-    inst.pausedRemaining = inst.state.remaining;
+    // remain paused; remaining is already updated
   } else if (inst.state.status === 'running') {
-    inst.pausedAt = Date.now();
-    inst.pausedRemaining = inst.state.remaining;
+    inst.endAt = Date.now() + inst.state.remaining * 1000;
   }
 
   getIO().to(`channel:${channel}`).emit('subathon:time-added', {
-    amount: action.timeAdded,
+    amount: actualAdded,
     reason: action.note,
     user: action.user,
     type: action.type,
@@ -109,7 +117,7 @@ export function addSubathonTime(channel: string, action: SubathonAction) {
       ...DEFAULT_CONFIG,
       startTime: null, actions: [],
     };
-    inst = { state, startedAt: 0, pausedAt: null, pausedRemaining: 0, tickInterval: null };
+    inst = { state, endAt: 0, tickInterval: null };
     subathons.set(channel, inst);
   }
 
@@ -142,6 +150,9 @@ export function setupSubathon(app: FastifyInstance) {
   app.get('/subathon/:channel', async (req, reply) => {
     const { channel } = req.params as { channel: string };
     const inst = subathons.get(channel);
+    if (inst && inst.state.status === 'running') {
+      recalculateRemaining(inst);
+    }
     reply.send(inst?.state ?? defaultState());
   });
 
@@ -159,7 +170,7 @@ export function setupSubathon(app: FastifyInstance) {
     if (!body.channel) return reply.status(400).send({ error: 'Missing channel' });
 
     const existing = subathons.get(body.channel);
-    if (existing?.tickInterval) clearInterval(existing.tickInterval);
+    if (existing) stopTick(existing);
 
     const remaining = Math.min(body.initialTime ?? 0, body.maxLimit ?? DEFAULT_CONFIG.maxLimit);
 
@@ -199,9 +210,7 @@ export function setupSubathon(app: FastifyInstance) {
 
     const inst: SubathonInstance = {
       state,
-      startedAt: Date.now(),
-      pausedAt: remaining > 0 ? Date.now() : null,
-      pausedRemaining: remaining,
+      endAt: remaining > 0 ? Date.now() + remaining * 1000 : 0,
       tickInterval: null,
     };
 
@@ -240,11 +249,9 @@ export function setupSubathon(app: FastifyInstance) {
       return reply.status(400).send({ error: 'No active subathon' });
     }
 
-    if (inst.tickInterval) clearInterval(inst.tickInterval);
-    inst.tickInterval = null;
+    stopTick(inst);
+    recalculateRemaining(inst);
     inst.state.status = 'paused';
-    inst.pausedAt = null;
-    inst.pausedRemaining = inst.state.remaining;
     broadcast(channel, inst);
     reply.send(inst.state);
   });
@@ -259,8 +266,7 @@ export function setupSubathon(app: FastifyInstance) {
     }
 
     inst.state.status = 'running';
-    inst.pausedAt = Date.now();
-    inst.pausedRemaining = inst.state.remaining;
+    inst.endAt = Date.now() + inst.state.remaining * 1000;
     inst.tickInterval = setInterval(() => tick(channel, inst), 1000);
     broadcast(channel, inst);
     reply.send(inst.state);
@@ -271,7 +277,7 @@ export function setupSubathon(app: FastifyInstance) {
     if (!channel) return reply.status(400).send({ error: 'Missing channel' });
 
     const existing = subathons.get(channel);
-    if (existing?.tickInterval) clearInterval(existing.tickInterval);
+    if (existing) stopTick(existing);
     subathons.delete(channel);
     reply.send(defaultState());
   });

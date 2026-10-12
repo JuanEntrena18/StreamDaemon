@@ -4,6 +4,7 @@ import { apiPut, apiGet } from '../utils/api';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import { useToast } from '../contexts/ToastContext';
+import { useAuthStatus } from '../hooks/useAuthStatus';
 import styles from './StreamDashboard.module.css';
 
 interface Props {
@@ -66,6 +67,7 @@ function formatNumber(n: number): string {
 
 export function StreamDashboard({ channel }: Props) {
   const { t, dateLocale } = useTranslation();
+  const { login } = useAuthStatus();
   const [previewLoading, setPreviewLoading] = useState(true);
   const [stats, setStats] = useState<HudStats | null>(null);
   const { socket: sock } = useSocket();
@@ -436,7 +438,7 @@ export function StreamDashboard({ channel }: Props) {
             </button>
             {saved && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>{t('dashboard.guardado')}</span>}
             {missingScope && (
-              <button onClick={() => window.location.href = '/auth/login'}
+              <button onClick={login}
                 className="sf-btn"
                 style={{
                   fontSize: '0.72rem', padding: '0.25rem 0.6rem',

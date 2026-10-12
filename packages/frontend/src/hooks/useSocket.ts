@@ -5,9 +5,30 @@ const SOCKET_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000';
 
 let socket: Socket | null = null;
 
+const isElectron = typeof window !== 'undefined' && !!(window as any).streamforger?.isDesktop;
+
+async function fetchLocalToken(): Promise<string | undefined> {
+  if (isElectron) return undefined;
+  try {
+    const res = await fetch(`${SOCKET_URL}/auth/token`);
+    if (!res.ok) return undefined;
+    const data = await res.json();
+    return data.token;
+  } catch {
+    return undefined;
+  }
+}
+
 function getSocket(): Socket {
   if (!socket) {
-    socket = io(SOCKET_URL, { autoConnect: false });
+    socket = io(SOCKET_URL, {
+      autoConnect: false,
+      transports: ['websocket'],
+      auth: async (cb: (token?: string) => void) => {
+        const token = await fetchLocalToken();
+        cb(token);
+      },
+    });
   }
   return socket;
 }
