@@ -8,6 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import { encryptToken, decryptToken, decryptTokenLegacy } from './token-crypto.js';
+import { logger } from '../logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const _require = createRequire(import.meta.url);
@@ -61,7 +62,7 @@ async function pushDbSchema() {
     }
     if (!schemaPath || !existsSync(cliPath)) return;
 
-    console.log('🗄️  Pushing database schema...');
+    logger.info('Pushing database schema...');
     execFileSync(process.execPath, [
       cliPath, 'db', 'push',
       `--schema=${schemaPath}`,
@@ -73,9 +74,9 @@ async function pushDbSchema() {
       stdio: 'pipe',
       timeout: 30_000,
     });
-    console.log('✅ Database schema synchronized');
+    logger.info('Database schema synchronized');
   } catch (err) {
-    console.warn('⚠️  Schema push failed (non-fatal):', err instanceof Error ? err.message : err);
+    logger.warn({ err: err instanceof Error ? err.message : err }, 'Schema push failed (non-fatal)');
   }
 }
 
@@ -192,7 +193,7 @@ export async function setupAuth(app: FastifyInstance) {
 
   app.post('/auth/logout', async (_req, reply) => {
     if (currentUser) {
-      console.log(`🔓 Logging out ${currentUser.displayName}`);
+      logger.info({ user: currentUser.displayName }, 'Logging out user');
       currentUser = null;
       await prisma.user.deleteMany({});
     }
@@ -327,8 +328,8 @@ async function restoreSession() {
 
     notifyAuth();
 
-    console.log(`🔑 Session restored for ${user.displayName}`);
+    logger.info({ user: user.displayName }, 'Session restored');
   } catch (err) {
-    console.warn('⚠️  Could not restore session (database uninitialized?):', err instanceof Error ? err.message : err);
+    logger.warn({ err: err instanceof Error ? err.message : err }, 'Could not restore session');
   }
 }

@@ -6,6 +6,7 @@ import fastifyMultipart from '@fastify/multipart';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { config } from './config.js';
+import { logger, redirectConsoleToLogger } from './logger.js';
 import { setupAuth, onAuth } from './auth/index.js';
 import { requireLocalAuth } from './auth/api-auth.js';
 import { setupChat, setEnterGiveaway, setAddTickets, setupChatGreeting } from './chat/index.js';
@@ -38,7 +39,8 @@ import { setupLayouts } from './layouts/index.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function startServer(opts?: { port?: number; frontendDir?: string }) {
-  const app = Fastify({ logger: true });
+  redirectConsoleToLogger();
+  const app = Fastify({ logger });
 
   const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'];
   await app.register(cors, { origin: allowedOrigins, credentials: false });
@@ -143,7 +145,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
 
   const listenPort = opts?.port ?? parseInt(config.PORT, 10);
   await app.listen({ port: listenPort, host: '127.0.0.1' });
-  console.log(`🚀 Server running on http://localhost:${listenPort}`);
+  logger.info({ port: listenPort }, 'Server running');
 
   return app;
 }
@@ -153,7 +155,7 @@ const isMainModule = process.argv[1]?.includes('index');
 if (isMainModule) {
   const frontendDir = path.resolve(__dirname, '../../frontend/dist');
   startServer({ frontendDir }).catch((err) => {
-    console.error(err);
+    logger.error(err, 'Failed to start server');
     process.exit(1);
   });
 }

@@ -12,6 +12,15 @@ interface SceneConfig {
   height: number;
 }
 
+interface ObsScene {
+  sceneName: string;
+}
+
+interface ObsSceneItem {
+  inputKind?: string;
+  sourceName?: string;
+}
+
 export function setupObs(app: FastifyInstance) {
 
   app.post('/obs/connect', async (req, reply) => {
@@ -25,10 +34,11 @@ export function setupObs(app: FastifyInstance) {
       connected = true;
       currentHost = `${h}:${p}`;
       return { ok: true, host: currentHost };
-    } catch (err: any) {
+    } catch (err) {
       connected = false;
       reply.status(400);
-      return { ok: false, error: err.message || 'Failed to connect to OBS' };
+      const message = err instanceof Error ? err.message : 'Failed to connect to OBS';
+      return { ok: false, error: message };
     }
   });
 
@@ -38,9 +48,10 @@ export function setupObs(app: FastifyInstance) {
       connected = false;
       currentHost = '';
       return { ok: true };
-    } catch (err: any) {
+    } catch (err) {
       reply.status(400);
-      return { ok: false, error: err.message };
+      const message = err instanceof Error ? err.message : 'Failed to disconnect from OBS';
+      return { ok: false, error: message };
     }
   });
 
@@ -49,14 +60,14 @@ export function setupObs(app: FastifyInstance) {
   });
 
   async function upsertSceneSource(sc: SceneConfig) {
-    const result = await obs.call('GetSceneList') as { scenes: any[] };
-    const existingNames = result.scenes.map((s: any) => s.sceneName);
+    const result = await obs.call('GetSceneList') as unknown as { scenes: ObsScene[] };
+    const existingNames = result.scenes.map((s) => s.sceneName);
     if (!existingNames.includes(sc.name)) {
       await obs.call('CreateScene', { sceneName: sc.name });
     }
-    const inputs = await obs.call('GetSceneItemList', { sceneName: sc.name });
+    const inputs = await obs.call('GetSceneItemList', { sceneName: sc.name }) as { sceneItems?: ObsSceneItem[] };
     const browserItems = (inputs.sceneItems || []).filter(
-      (item: any) => item.inputKind === 'browser_source'
+      (item) => item.inputKind === 'browser_source'
     );
     if (browserItems.length > 0) {
       const browserItem = browserItems[0];
@@ -95,9 +106,10 @@ export function setupObs(app: FastifyInstance) {
     try {
       await upsertSceneSource({ name, url, width: width || 1920, height: height || 1080 });
       return { ok: true, scene: name };
-    } catch (err: any) {
+    } catch (err) {
       reply.status(500);
-      return { ok: false, error: err.message || 'Failed to apply scene' };
+      const message = err instanceof Error ? err.message : 'Failed to apply scene';
+      return { ok: false, error: message };
     }
   });
 
@@ -116,9 +128,10 @@ export function setupObs(app: FastifyInstance) {
         await upsertSceneSource(sc);
       }
       return { ok: true, scenes: scenes.map((s) => s.name) };
-    } catch (err: any) {
+    } catch (err) {
       reply.status(500);
-      return { ok: false, error: err.message || 'Failed to apply theme' };
+      const message = err instanceof Error ? err.message : 'Failed to apply theme';
+      return { ok: false, error: message };
     }
   });
 }

@@ -69,7 +69,7 @@ export function CalendarPanel({ channel }: Props) {
     return () => { socket.off('calendar:update', handler); };
   }, [socket]);
 
-  const emitConfig = (method: string, body: any) => {
+  const emitConfig = (method: string, body: Record<string, unknown>) => {
     if (socket?.connected) {
       socket.emit('calendar:config', { channel, method, body });
     }

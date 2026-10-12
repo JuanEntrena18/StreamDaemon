@@ -17,8 +17,33 @@ interface FortniteConfig {
 
 const DEFAULT_CONFIG: FortniteConfig = { apiKey: '', epicUsername: '', statsMode: 'overall', layout: 'stats' };
 
+interface FortniteApiStat {
+  value?: number;
+  [key: string]: unknown;
+}
+
+interface FortniteApiStats {
+  all?: Record<string, FortniteApiStat | undefined>;
+}
+
+interface FortniteStatsResult {
+  account: unknown;
+  battlePass: unknown;
+  mode: string;
+  kills: number;
+  wins: number;
+  matches: number;
+  kd: number;
+  winRate: number;
+  top10: number;
+  top25: number;
+  score: number;
+  minutesPlayed: number;
+  killsPerMatch: number;
+}
+
 let fortniteConfig: FortniteConfig = { ...DEFAULT_CONFIG };
-const statsCache = new Map<string, { data: any; expiresAt: number }>();
+const statsCache = new Map<string, { data: FortniteStatsResult; expiresAt: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
 
 function loadConfig() {
@@ -53,14 +78,16 @@ function getModeKey(mode: string): string {
   return 'overall';
 }
 
-function getStat(v: any): number {
+function getStat(v: unknown): number {
   if (v == null) return 0;
   if (typeof v === 'number') return v;
-  if (typeof v?.value === 'number') return v.value;
+  if (typeof v === 'object' && v !== null && typeof (v as FortniteApiStat).value === 'number') {
+    return (v as FortniteApiStat).value ?? 0;
+  }
   return 0;
 }
 
-async function fetchFortniteStats(username: string, mode: string): Promise<any> {
+async function fetchFortniteStats(username: string, mode: string): Promise<FortniteStatsResult> {
   const cacheKey = `${username}:${mode}`;
   const cached = statsCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) return cached.data;
@@ -76,21 +103,30 @@ async function fetchFortniteStats(username: string, mode: string): Promise<any> 
     throw new Error(`Fortnite API error ${res.status}: ${text}`);
   }
 
-  const body = await res.json();
+  const body = await res.json() as {
+    status?: number;
+    data?: {
+      account?: unknown;
+      battlePass?: unknown;
+      stats?: FortniteApiStats;
+    };
+  };
   if (body.status !== 200 || !body.data) throw new Error('Invalid Fortnite API response');
 
   const statsAll = body.data.stats?.all;
   if (!statsAll) throw new Error('No stats found for this user');
 
   const modeKey = getModeKey(mode);
-  let modeStats = statsAll[modeKey] || statsAll.overall;
+  let modeStats = statsAll[modeKey];
   // Fall back to overall when mode-specific stats are all zero
   if (modeStats && modeKey !== 'overall') {
     const zero = !(getStat(modeStats?.kills) || getStat(modeStats?.wins) || getStat(modeStats?.matches));
     if (zero) modeStats = statsAll.overall;
   }
+  if (!modeStats) modeStats = statsAll.overall;
+  if (!modeStats) throw new Error('No stats found for this user');
 
-  const s = (k: string) => getStat(modeStats?.[k as keyof typeof modeStats]);
+  const s = (k: string) => getStat(modeStats?.[k]);
   const result = {
     account: body.data.account,
     battlePass: body.data.battlePass,
@@ -141,8 +177,9 @@ export function setupFortnite(app: FastifyInstance) {
     try {
       const data = await fetchFortniteStats(username, mode || fortniteConfig.statsMode);
       reply.send(data);
-    } catch (err: any) {
-      reply.status(502).send({ error: err.message ?? 'Failed to fetch Fortnite stats' });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch Fortnite stats';
+      reply.status(502).send({ error: message });
     }
   });
 }

@@ -90,7 +90,7 @@ export function setupAlertSounds(app: FastifyInstance) {
       fs.writeFileSync(path.join(SOUNDS_DIR, filename), buffer);
 
       // Store just the filename — frontend/overlays prepend the URL
-      (sounds as any)[type] = filename;
+      sounds[type as keyof AlertSoundsConfig] = filename;
       saveConfig();
 
       reply.send({ ok: true, filename, url: `/alert-sounds/file/${filename}` });

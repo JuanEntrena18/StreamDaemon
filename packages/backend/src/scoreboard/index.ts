@@ -266,9 +266,11 @@ export function setupScoreboard(app: FastifyInstance) {
         state.timerRunning = false;
         stopFighterTimer(channel);
         if (state.p1.health !== state.p2.health) {
-          state.p1.health > state.p2.health
-            ? state.p1.rounds = Math.min(state.roundsToWin, state.p1.rounds + 1)
-            : state.p2.rounds = Math.min(state.roundsToWin, state.p2.rounds + 1);
+          if (state.p1.health > state.p2.health) {
+            state.p1.rounds = Math.min(state.roundsToWin, state.p1.rounds + 1);
+          } else {
+            state.p2.rounds = Math.min(state.roundsToWin, state.p2.rounds + 1);
+          }
           const winner = state.p1.health > state.p2.health ? state.p1 : state.p2;
           const loser = state.p1.health > state.p2.health ? state.p2 : state.p1;
           if (winner.rounds >= state.roundsToWin) {

@@ -10,7 +10,9 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.0",
@@ -33,7 +35,9 @@
   "devDependencies": {
     "@types/extract-zip": "^2.0.3",
     "@types/node": "^20.11.0",
+    "pino-pretty": "^13.2.0",
     "prisma": "^5.10.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^5.0.4"
   }
 }

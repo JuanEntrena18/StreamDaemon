@@ -176,7 +176,7 @@ export class AvatarSprite {
 
       // Restore current action
       this.playAnimation(this.currentAction);
-    } catch (e: any) {
+    } catch (e) {
       console.error('Failed to load spritesheet:', this.themeConfig.sheetPath, e);
       // Silently fall back to procedural avatar — no error overlay needed
     }
@@ -497,7 +497,7 @@ export class AvatarSprite {
   flash(color: number, _duration = 0.5) {
     if (this.destroyed) return;
     if (this.animatedSprite) {
-      gsap.to(this.animatedSprite, { tint: color, duration: 0.1, yoyo: true, repeat: 1 } as any);
+      gsap.to(this.animatedSprite, { tint: color, duration: 0.1, yoyo: true, repeat: 1 } as gsap.TweenVars);
     } else {
       gsap.to(this.mainGraphic, { pixi: { tint: color }, duration: 0.1, yoyo: true, repeat: 1 });
     }

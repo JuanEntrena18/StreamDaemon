@@ -3,7 +3,7 @@ export const OVERLAY_BASE_URL = import.meta.env.DEV ? 'http://localhost:5173' : 
 
 let _cachedToken: string | undefined;
 
-const isElectron = typeof window !== 'undefined' && !!(window as any).streamforger?.isDesktop;
+const isElectron = typeof window !== 'undefined' && !!window.streamforger?.isDesktop;
 
 function getAuthToken(): string | undefined {
   return _cachedToken;

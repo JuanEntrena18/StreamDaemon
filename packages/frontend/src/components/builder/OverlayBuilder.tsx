@@ -4,6 +4,7 @@ import { WidgetRenderer } from './WidgetRenderer';
 import { PreviewModal } from './PreviewModal';
 import { ExportPanel } from './ExportPanel';
 import { LayoutManager } from './LayoutManager';
+import type { Widget } from '@streamdaemon/shared';
 
 const TOOLBAR_HEIGHT = 44;
 
@@ -65,7 +66,7 @@ export function OverlayBuilder() {
         if (resizing.edge.includes('w')) { changes.width = Math.max(20, resizing.origW - dx); changes.x = gridSnap(resizing.origX + dx); }
         if (resizing.edge.includes('s')) { changes.height = Math.max(20, resizing.origH + dy); }
         if (resizing.edge.includes('n')) { changes.height = Math.max(20, resizing.origH - dy); changes.y = gridSnap(resizing.origY + dy); }
-        dispatch({ type: 'UPDATE_WIDGET', payload: { id: resizing.id, changes: changes as any } });
+        dispatch({ type: 'UPDATE_WIDGET', payload: { id: resizing.id, changes: changes as Partial<Widget> } });
       }
     };
 

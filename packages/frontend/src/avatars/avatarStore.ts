@@ -18,7 +18,7 @@ export function useAvatarConfig() {
       .catch((e) => console.error('Failed to load avatar config', e));
   }, []);
 
-  useSocketEvent('avatars:config_updated', useCallback((newConfig: any) => {
+  useSocketEvent('avatars:config_updated', useCallback((newConfig: Partial<AvatarConfig>) => {
     setConfigState((prev) => ({ ...prev, ...newConfig }));
   }, []));
 

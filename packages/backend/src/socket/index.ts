@@ -2,9 +2,11 @@ import { FastifyInstance } from 'fastify';
 import { Server as SocketIOServer } from 'socket.io';
 import { joinChannel, leaveChannel, sendMessage } from '../chat/index.js';
 import { handleSpeedrunControl, handleGetState, handleSpeedrunConfig } from '../speedrun/index.js';
+import type { SpeedrunState, SpeedrunSplit } from '../speedrun/index.js';
 import { handleGetCalendar } from '../calendar/index.js';
 import { handleGetDiary } from '../diary/index.js';
 import { handleGetAds } from '../ads/index.js';
+import { logger } from '../logger.js';
 
 let io: SocketIOServer | null = null;
 const chatThrottle = new Map<string, number>();
@@ -42,7 +44,7 @@ export function setupSocketIO(app: FastifyInstance) {
   });
 
   io.on('connection', (socket) => {
-    console.log(`⚡ Client connected: ${socket.id} (authenticated=${!!socket.data.authenticated})`);
+    logger.info({ socketId: socket.id, authenticated: !!socket.data.authenticated }, 'Client connected');
 
     socket.on('join:channel', async (channel: string) => {
       socket.join(`channel:${channel}`);
@@ -72,7 +74,7 @@ export function setupSocketIO(app: FastifyInstance) {
       handleGetState(channel);
     });
 
-    socket.on('speedrun:config', ({ channel, config }: { channel: string; config: any }) => {
+    socket.on('speedrun:config', ({ channel, config }: { channel: string; config: Partial<SpeedrunState> & { splits?: SpeedrunSplit[] } }) => {
       if (!socket.data.authenticated) return;
       handleSpeedrunConfig(channel, config);
     });
@@ -91,7 +93,7 @@ export function setupSocketIO(app: FastifyInstance) {
 
     socket.on('disconnect', () => {
       chatThrottle.delete(socket.id);
-      console.log(`❌ Client disconnected: ${socket.id}`);
+      logger.info({ socketId: socket.id }, 'Client disconnected');
     });
   });
 }

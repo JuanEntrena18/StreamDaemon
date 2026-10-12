@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useCallback, useRef, useEffect, memo } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useSocket } from '../hooks/useSocket';
 import { SOUNDS, setMasterVolume, type SoundKey } from '../utils/sounds';
 import { useTranslation } from '../i18n/context';
@@ -20,6 +20,61 @@ function formatTimestamp(ts: number, locale: string): string {
   return new Date(ts).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 }
 
+interface ChatMessageProps {
+  msg: ChatMsg;
+  locale: string;
+  menuMsg: string | null;
+  onHover: (id: string | null) => void;
+  onReply: (msg: ChatMsg) => void;
+  onModAction: (action: 'timeout' | 'ban', user: string) => void;
+  onConfirmMod: (action: 'timeout' | 'ban', user: string) => void;
+}
+
+const ChatMessage = memo(function ChatMessage({
+  msg,
+  locale,
+  menuMsg,
+  onHover,
+  onReply,
+  onModAction,
+  onConfirmMod,
+}: ChatMessageProps) {
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
+
+  return (
+    <div
+      className={styles.msgBubble}
+      onMouseEnter={() => onHover(msg.id)}
+      onMouseLeave={() => onHover(null)}
+      data-message-id={msg.id}
+    >
+      <div className="flex-row flex-wrap" style={{ gap: '0.35rem' }}>
+        {msg.user.badges?.map((b) => (
+          <span key={b} className={styles.badgeIcon}>{badgeIcon(b)}</span>
+        ))}
+        <span
+          className={styles.userName}
+          style={{ color: msg.user.color || '#a78bfa' }}
+          onClick={() => onReply(msg)}
+        >
+          {msg.user.displayName}
+        </span>
+        <span className={styles.timestamp}>{formatTimestamp(msg.timestamp, locale || 'es-ES')}</span>
+      </div>
+      <div className={styles.msgText}>{msg.text}</div>
+
+      {menuMsg === msg.id && (
+        <div ref={menuRef} className={styles.msgMenu}>
+          <button onClick={() => onReply(msg)} title={t('chat.responder')} aria-label={t('chat.responder')} className={styles.menuBtn}>↩</button>
+          <button onClick={() => onModAction('timeout', msg.user.displayName)} title={t('chat.timeout5m')} aria-label={t('chat.timeout5m')} className={styles.menuBtn}>⏳</button>
+          <button onClick={() => onConfirmMod('ban', msg.user.displayName)} title={t('chat.banear')} aria-label={t('chat.banear')} className={styles.menuBtn}>🚫</button>
+        </div>
+      )}
+    </div>
+  );
+});
+
 export function ChatPanel({ channel }: Props) {
   const { t, dateLocale } = useTranslation();
   const { messages, onNewMessage } = useChat();
@@ -33,8 +88,8 @@ export function ChatPanel({ channel }: Props) {
   const { socket, connected, reconnect } = useSocket();
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const lastSoundRef = useRef(0);
+  const stickToBottomRef = useRef(true);
 
   const playSound = useCallback(() => {
     if (!selectedSound) return;
@@ -50,20 +105,36 @@ export function ChatPanel({ channel }: Props) {
     return unsub;
   }, [onNewMessage, playSound]);
 
+  const virtualizer = useVirtualizer({
+    count: messages.length,
+    getScrollElement: () => listRef.current,
+    estimateSize: () => 64,
+    getItemKey: (index) => messages[index]?.id ?? index,
+    measureElement: (el) => {
+      const style = window.getComputedStyle(el);
+      const marginTop = parseFloat(style.marginTop) || 0;
+      const marginBottom = parseFloat(style.marginBottom) || 0;
+      return el.getBoundingClientRect().height + marginTop + marginBottom;
+    },
+    overscan: 5,
+  });
+
+  // Auto-scroll to bottom while user is near bottom
   useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTop = listRef.current.scrollHeight;
-    }
-  }, [messages]);
+    if (!stickToBottomRef.current) return;
+    virtualizer.scrollToIndex(messages.length - 1, { align: 'end' });
+  }, [messages.length, virtualizer]);
 
   useEffect(() => {
-    if (!menuMsg) return;
-    const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuMsg(null);
+    const el = listRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+      stickToBottomRef.current = nearBottom;
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [menuMsg]);
+    el.addEventListener('scroll', onScroll);
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
 
   function send() {
     const text = input.trim();
@@ -129,6 +200,8 @@ export function ChatPanel({ channel }: Props) {
   function pillClasses(active: boolean, extra?: string) {
     return `${styles.pillBtn} ${active ? styles['pillBtn--active'] : ''} ${extra || ''}`;
   }
+
+  const virtualItems = virtualizer.getVirtualItems();
 
   return (
     <div className={styles.container}>
@@ -236,41 +309,42 @@ export function ChatPanel({ channel }: Props) {
             description={t('chat.waitingMessages') || 'Esperando mensajes... ¡Rompe el hielo!'}
           />
         ) : (
-          <AnimatePresence initial={false}>
-            {messages.map((msg) => (
-              <motion.div
-                key={msg.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={styles.msgBubble}
-                onMouseEnter={() => setMenuMsg(msg.id)}
-                onMouseLeave={() => setMenuMsg(null)}
-              >
-                <div className="flex-row flex-wrap" style={{ gap: '0.35rem' }}>
-                  {msg.user.badges?.map((b) => (
-                    <span key={b} className={styles.badgeIcon}>{badgeIcon(b)}</span>
-                  ))}
-                  <span
-                    className={styles.userName}
-                    style={{ color: msg.user.color || '#a78bfa' }}
-                    onClick={() => setReplyTo({ id: msg.id, user: msg.user.displayName })}
-                  >
-                    {msg.user.displayName}
-                  </span>
-                  <span className={styles.timestamp}>{formatTimestamp(msg.timestamp, dateLocale || 'es-ES')}</span>
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {virtualItems.map((virtualItem) => {
+              const msg = messages[virtualItem.index];
+              if (!msg) return null;
+              return (
+                <div
+                  key={virtualItem.key}
+                  ref={virtualizer.measureElement}
+                  data-index={virtualItem.index}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <ChatMessage
+                    msg={msg}
+                    locale={dateLocale || 'es-ES'}
+                    menuMsg={menuMsg}
+                    onHover={setMenuMsg}
+                    onReply={handleReply}
+                    onModAction={handleModAction}
+                    onConfirmMod={(action, user) => setConfirmModAction({ action, user })}
+                  />
                 </div>
-                <div className={styles.msgText}>{msg.text}</div>
-
-                {menuMsg === msg.id && (
-                  <div ref={menuRef} className={styles.msgMenu}>
-                    <button onClick={() => handleReply(msg)} title={t('chat.responder')} aria-label={t('chat.responder')} className={styles.menuBtn}>↩</button>
-                    <button onClick={() => handleModAction('timeout', msg.user.displayName)} title={t('chat.timeout5m')} aria-label={t('chat.timeout5m')} className={styles.menuBtn}>⏳</button>
-                    <button onClick={() => setConfirmModAction({ action: 'ban', user: msg.user.displayName })} title={t('chat.banear')} aria-label={t('chat.banear')} className={styles.menuBtn}>🚫</button>
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </AnimatePresence>
+              );
+            })}
+          </div>
         )}
       </div>
 

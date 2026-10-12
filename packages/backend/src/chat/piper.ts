@@ -7,6 +7,7 @@ import { FastifyInstance } from 'fastify';
 import extractZip from 'extract-zip';
 import crypto from 'crypto';
 import os from 'os';
+import { logger } from '../logger.js';
 
 // Config
 const PIPER_WIN_URL = 'https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_windows_amd64.zip';
@@ -37,14 +38,20 @@ async function downloadFile(url: string, dest: string, io?: Server, stageName?: 
   
   const fileStream = fs.createWriteStream(dest);
   
-  // Use Readable stream iteration (node 18+)
-  for await (const chunk of res.body as any) {
-    downloaded += chunk.length;
-    fileStream.write(chunk);
-    
-    if (io && totalBytes > 0) {
-      const percent = Math.round((downloaded / totalBytes) * 100);
-      io.emit('tts:piper-download-progress', { stage: stageName, percent });
+  // Use ReadableStream reader iteration
+  if (res.body) {
+    const reader = res.body.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = value as Uint8Array;
+      downloaded += chunk.length;
+      fileStream.write(chunk);
+
+      if (io && totalBytes > 0) {
+        const percent = Math.round((downloaded / totalBytes) * 100);
+        io.emit('tts:piper-download-progress', { stage: stageName, percent });
+      }
     }
   }
   
@@ -158,9 +165,10 @@ export function setupPiper(app: FastifyInstance) {
       
       reply.header('Content-Type', 'audio/wav');
       return reply.send(audioBuffer);
-    } catch (err: any) {
-      console.error('[Piper TTS] Error:', err);
-      return reply.status(500).send({ error: 'TTS Generation Failed', details: err.message });
+    } catch (err) {
+      logger.error({ err }, '[Piper TTS] Error');
+      const message = err instanceof Error ? err.message : String(err);
+      return reply.status(500).send({ error: 'TTS Generation Failed', details: message });
     }
   });
 }

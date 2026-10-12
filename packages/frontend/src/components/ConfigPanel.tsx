@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '../i18n/context';
+import type { LocaleSetting } from '../i18n/types';
 import { useSocket } from '../hooks/useSocket';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import { apiGet, apiPost } from '../utils/api';
@@ -54,8 +55,9 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
       } else {
         setObsConnected(true);
       }
-    } catch (err: any) {
-      setObsError(err.message || 'Connection error');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Connection error';
+      setObsError(message);
       setObsConnected(false);
     } finally {
       setObsConnecting(false);
@@ -326,17 +328,17 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
         </p>
 
         <div className="flex-row flex-wrap" style={{ gap: '0.75rem' }}>
-          {[
+          {([
             { id: 'auto', label: 'Auto', icon: '🌐' },
             { id: 'es', label: 'Español', icon: '🇪🇸' },
             { id: 'en', label: 'English', icon: '🇬🇧' },
             { id: 'fr', label: 'Français', icon: '🇫🇷' },
             { id: 'de', label: 'Deutsch', icon: '🇩🇪' },
             { id: 'it', label: 'Italiano', icon: '🇮🇹' },
-          ].map(lang => (
+          ] as { id: LocaleSetting; label: string; icon: string }[]).map(lang => (
             <button
               key={lang.id}
-              onClick={() => setLocale(lang.id as any)}
+              onClick={() => setLocale(lang.id)}
               className={`sf-btn ${localeSetting === lang.id ? 'sf-btn-primary' : 'sf-btn-ghost'}`}
               style={{ flex: 1, minWidth: '100px', padding: '0.6rem', justifyContent: 'center' }}
             >

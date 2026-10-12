@@ -1,6 +1,6 @@
 import { prisma } from '../auth/index.js';
 
-let activeSessions = new Map<string, string>(); // userId -> sessionId
+const activeSessions = new Map<string, string>(); // userId -> sessionId
 
 export async function restoreActiveSessions() {
   try {

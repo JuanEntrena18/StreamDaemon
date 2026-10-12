@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useSocket } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import { OVERLAY_REGISTRY } from '../config/overlayRegistry';
+import type { SpeedrunState as SharedSpeedrunState } from '@streamdaemon/shared';
 import styles from './SpeedrunPanel.module.css';
 
 interface SpeedrunSplit {
@@ -133,7 +134,7 @@ export function SpeedrunPanel({ channel }: Props) {
   // Listen for speedrun:update from socket
   useEffect(() => {
     if (!socket) return;
-    const handler = (data: any) => {
+    const handler = (data: SharedSpeedrunState) => {
       if (!data) return;
       if (data.splits) setSplits(data.splits);
       if (data.attempts) setAttempts(data.attempts);
@@ -212,7 +213,7 @@ export function SpeedrunPanel({ channel }: Props) {
 
   const updateSplit = (index: number, field: keyof SpeedrunSplit, value: string | number | null) => {
     const updated = [...splits];
-    (updated[index] as any)[field] = value;
+    (updated[index] as Record<keyof SpeedrunSplit, string | number | null>)[field] = value;
     setSplits(updated);
   };
 

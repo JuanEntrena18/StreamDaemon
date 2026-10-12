@@ -69,8 +69,8 @@ let config: SecurityConfig = {
 
 let whitelist: WhitelistEntry[] = [];
 
-let detections: BotDetection[] = [];
-let stats: SecurityStats = {
+const detections: BotDetection[] = [];
+const stats: SecurityStats = {
   totalBanned: 0,
   todayBanned: 0,
   totalFlagged: 0,

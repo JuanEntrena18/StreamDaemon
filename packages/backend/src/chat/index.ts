@@ -10,6 +10,7 @@ import { checkMessage } from '../security/index.js';
 import type { enterGiveaway, addTickets } from '../giveaways/index.js';
 import { incrementChatCounter } from '../kpi/index.js';
 import { ChatGreetingConfigSchema } from '@streamdaemon/shared';
+import { logger } from '../logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = process.env.DATA_DIR || path.resolve(__dirname, '../../data');
@@ -40,7 +41,7 @@ function loadGreetingConfigs() {
       greetingConfigs = JSON.parse(fs.readFileSync(GREETING_CONFIG_FILE, 'utf-8'));
     }
   } catch (e) {
-    console.error('Failed to load greeting configs:', e);
+    logger.error({ err: e }, 'Failed to load greeting configs');
   }
 }
 
@@ -49,7 +50,7 @@ function saveGreetingConfigs() {
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
     fs.writeFileSync(GREETING_CONFIG_FILE, JSON.stringify(greetingConfigs, null, 2));
   } catch (e) {
-    console.error('Failed to save greeting configs:', e);
+    logger.error({ err: e }, 'Failed to save greeting configs');
   }
 }
 
@@ -88,7 +89,7 @@ function sendGreeting(channelName: string, user: string, key: string, message: s
 
 export async function setupChat() {
   if (!authProvider || !currentUser) {
-    console.log('⏳ Auth not ready or no user logged in, skipping chat setup');
+    logger.debug('Auth not ready or no user logged in, skipping chat setup');
     return;
   }
 
@@ -96,7 +97,7 @@ export async function setupChat() {
     try {
       await chatClient.quit();
     } catch (err) {
-      console.warn('⚠️ Error quitting previous chat client:', err);
+      logger.warn({ err }, 'Error quitting previous chat client');
     }
     chatClient = null;
   }
@@ -106,27 +107,27 @@ export async function setupChat() {
   chatClient = new ChatClient({ authProvider, channels: [], requestMembershipEvents: true });
 
   chatClient.onDisconnect((manually, reason) => {
-    console.log(`❌ Chat client disconnected (manually=${manually}): ${reason?.message || reason}`);
+    logger.info({ manually, reason: reason?.message || reason }, 'Chat client disconnected');
   });
 
   chatClient.onAuthenticationSuccess(() => {
-    console.log('🔑 Chat authentication successful');
+    logger.info('Chat authentication successful');
   });
 
   chatClient.onAuthenticationFailure((message, retryCount) => {
-    console.error(`❌ Chat client authentication failed (attempt ${retryCount}): ${message}`);
+    logger.error({ retryCount, message }, 'Chat client authentication failed');
   });
 
   chatClient.onTokenFetchFailure((error) => {
-    console.error('❌ Chat token fetch failed:', error.message);
+    logger.error({ error: error.message }, 'Chat token fetch failed');
   });
 
-  console.log('💬 Chat client connecting...');
+  logger.info('Chat client connecting...');
   await chatClient.connect();
 
   chatClient.onMessage((channel, user, text, msg) => {
     const channelName = channel.replace('#', '');
-    console.log(`[Twitch Chat] Received msg from ${user} in ${channelName}: ${text}`);
+    logger.debug({ user, channel: channelName, text }, 'Received Twitch chat message');
 
     const subTier = getSubTier(msg.userInfo.badges);
     handleCommands(channelName, user, text, subTier);
@@ -178,9 +179,9 @@ export async function setupChat() {
   for (const ch of joinedChannels) {
     try {
       await chatClient.join(ch);
-      console.log(`📡 Re-joined channel: ${ch}`);
+      logger.info({ channel: ch }, 'Re-joined channel');
     } catch (err) {
-      console.error(`❌ Failed to re-join channel ${ch}:`, err);
+      logger.error({ channel: ch, err }, 'Failed to re-join channel');
     }
   }
 }
@@ -251,15 +252,15 @@ export async function joinChannel(channel: string) {
   if (joinedChannels.has(channel)) return;
   joinedChannels.add(channel);
   if (!chatClient) {
-    console.log(`⏳ Channel ${channel} queued (chat client not ready)`);
+    logger.debug({ channel }, 'Channel queued (chat client not ready)');
     return;
   }
   try {
     await chatClient.join(channel);
-    console.log(`📡 Joined channel: ${channel}`);
+    logger.info({ channel }, 'Joined channel');
   } catch (err) {
     joinedChannels.delete(channel);
-    console.error(`❌ Failed to join channel ${channel}:`, err);
+    logger.error({ channel, err }, 'Failed to join channel');
   }
 }
 
@@ -268,12 +269,12 @@ export async function leaveChannel(channel: string) {
   joinedChannels.delete(channel);
   if (!chatClient) return;
   chatClient.part(channel);
-  console.log(`📡 Left channel: ${channel}`);
+  logger.info({ channel }, 'Left channel');
 }
 
 export async function sendMessage(channel: string, message: string) {
   if (!chatClient) {
-    console.warn('⚠️ Chat client not ready, cannot send message');
+    logger.warn('Chat client not ready, cannot send message');
     return;
   }
   try {
@@ -290,8 +291,8 @@ export async function sendMessage(channel: string, message: string) {
       text: message,
       timestamp: Date.now(),
     });
-    console.log(`📤 Message sent to #${channel}: ${message.substring(0, 50)}`);
+    logger.debug({ channel, message: message.substring(0, 50) }, 'Message sent');
   } catch (err) {
-    console.error(`❌ Failed to send message to #${channel}:`, err);
+    logger.error({ channel, err }, 'Failed to send message');
   }
 }

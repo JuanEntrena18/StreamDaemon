@@ -144,8 +144,9 @@ export function ObsPanel({ channel }: Props) {
       } else {
         toast.success(`✓ ${t(ov.labelKey)} → ${name}`);
       }
-    } catch (err: any) {
-      toast.error(err.message || 'Apply error');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Apply error';
+      toast.error(message);
     } finally {
       setObsApplyingId(null);
     }
@@ -163,7 +164,7 @@ export function ObsPanel({ channel }: Props) {
   }, []);
 
   const saveFnConfig = async () => {
-    const body: any = { epicUsername: fnEpicUsername, statsMode: fnStatsMode, layout: fnLayout };
+    const body: { epicUsername: string; statsMode: string; layout: string; apiKey?: string } = { epicUsername: fnEpicUsername, statsMode: fnStatsMode, layout: fnLayout };
     if (fnApiKey) body.apiKey = fnApiKey;
     await apiPut('/fortnite/config', body);
     setFnSaved(true);
@@ -544,14 +545,14 @@ export function ObsPanel({ channel }: Props) {
             {t('obs.orientacion')}
           </span>
           <div className="flex-row flex-row--gap-sm">
-            {[
+            {([
               { id: 'all', labelKey: 'obs.orientationAll' },
               { id: 'horizontal', labelKey: 'obs.orientationHorizontal' },
               { id: 'vertical', labelKey: 'obs.orientationVertical' },
-            ].map((o) => (
+            ] as { id: 'all' | 'horizontal' | 'vertical'; labelKey: string }[]).map((o) => (
               <button
                 key={o.id}
-                onClick={() => setOrientation(o.id as any)}
+                onClick={() => setOrientation(o.id)}
                 className={`sf-pill-selector__pill ${orientation === o.id ? 'sf-pill-selector__pill--active' : ''}`}
                 style={orientation === o.id ? {
                   borderColor: '#22d3ee',

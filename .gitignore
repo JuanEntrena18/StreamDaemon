@@ -10,6 +10,8 @@ dist-electron/
 release/
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 packages/desktop/extra/backend.env
 *.docx
 *.pdf

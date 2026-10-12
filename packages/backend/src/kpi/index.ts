@@ -18,8 +18,8 @@ const SNAPSHOTS_FILE = path.join(DATA_DIR, 'kpi_snapshots.json');
 const MAX_SNAPSHOTS = 120;
 let snapshots = new Map<string, ViewerSnapshot[]>();
 
-let chatMessageCount = new Map<string, number>();
-let uniqueChattersSet = new Map<string, Set<string>>();
+const chatMessageCount = new Map<string, number>();
+const uniqueChattersSet = new Map<string, Set<string>>();
 let chatMessageInterval: ReturnType<typeof setInterval> | null = null;
 
 export function resetChatCounter(channel: string) {
@@ -435,12 +435,12 @@ export function setupKpi(app: FastifyInstance) {
       const events = getEvents(channelLogin);
 
       for (const video of filteredVideos) {
-        const raw = getRawData(video) as Record<string, any>;
-        let gameName = raw.game_name || '';
+        const raw = getRawData(video) as unknown as Record<string, unknown>;
+        let gameName = String(raw.game_name || '');
         if (!gameName || gameName === 'Unknown' || gameName === '') {
           if (raw.game_id) {
             try {
-              const g = await apiClient.games.getGameById(raw.game_id);
+              const g = await apiClient.games.getGameById(String(raw.game_id));
               if (g) gameName = g.name;
             } catch {}
           }
@@ -507,12 +507,12 @@ export function setupKpi(app: FastifyInstance) {
       const gameMap = new Map<string, { views: number[]; durations: number[]; count: number; followersGained: number; boxArtUrl?: string }>();
 
       for (const video of videos.data) {
-        const raw = getRawData(video) as Record<string, any>;
-        let gameName = raw.game_name || '';
+        const raw = getRawData(video) as unknown as Record<string, unknown>;
+        let gameName = String(raw.game_name || '');
         if (!gameName || gameName === 'Unknown' || gameName === '') {
           if (raw.game_id) {
             try {
-              const g = await apiClient.games.getGameById(raw.game_id);
+              const g = await apiClient.games.getGameById(String(raw.game_id));
               if (g) gameName = g.name;
             } catch {}
           }

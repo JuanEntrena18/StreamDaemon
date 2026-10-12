@@ -177,8 +177,9 @@ export function CommandsPanel({ channel }: Props) {
         const err = await r.json();
         setImportResult(`❌ ${err.error || 'Error al importar'}`);
       }
-    } catch (e: any) {
-      setImportResult(`❌ ${e.message || 'Error al leer archivo'}`);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Error al leer archivo';
+      setImportResult(`❌ ${message}`);
     }
     e.target.value = '';
   };

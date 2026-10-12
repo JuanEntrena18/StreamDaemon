@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useBuilder } from './OverlayBuilderContext';
 import { apiGet } from '../../utils/api';
 import { BACKEND_URL } from '../../utils/api';
+import type { Layout } from '@streamdaemon/shared';
 
 interface LayoutSummary {
   id: string;
@@ -59,7 +60,7 @@ export function LayoutManager({ onClose }: { onClose: () => void }) {
           id: '', name: 'My Layout', widgets: [],
           resolution: { width: 1920, height: 1080 },
           backgroundColor: '#0f0f23', createdAt: 0, updatedAt: 0,
-        } as any });
+        } as Layout });
       }
     } catch (err) {
       console.error('Failed to delete layout:', err);

@@ -19,8 +19,9 @@ export function setupMod(app: FastifyInstance) {
         userDisplayName: c.userDisplayName,
       }));
       return reply.send({ chatters: allChatters });
-    } catch (err: any) {
-      return reply.status(500).send({ error: err?.message ?? 'Failed to fetch chatters' });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch chatters';
+      return reply.status(500).send({ error: message });
     }
   });
 
@@ -43,8 +44,9 @@ export function setupMod(app: FastifyInstance) {
         reason: reason ?? '',
       });
       return reply.send({ ok: true });
-    } catch (err: any) {
-      return reply.status(500).send({ error: err?.message ?? 'Failed to timeout user' });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to timeout user';
+      return reply.status(500).send({ error: message });
     }
   });
 
@@ -66,8 +68,9 @@ export function setupMod(app: FastifyInstance) {
         reason: reason ?? '',
       });
       return reply.send({ ok: true });
-    } catch (err: any) {
-      return reply.status(500).send({ error: err?.message ?? 'Failed to ban user' });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to ban user';
+      return reply.status(500).send({ error: message });
     }
   });
 
@@ -86,8 +89,9 @@ export function setupMod(app: FastifyInstance) {
 
       await api.moderation.unbanUser(user.id, target.id);
       return reply.send({ ok: true });
-    } catch (err: any) {
-      return reply.status(500).send({ error: err?.message ?? 'Failed to unban user' });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to unban user';
+      return reply.status(500).send({ error: message });
     }
   });
 }

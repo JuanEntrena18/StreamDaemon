@@ -73,6 +73,8 @@ twitch_overlay/
   - `src/avatars/`: Motor 2D en WebGL con PixiJS y físicas Matter.js para avatares interactivos.
   - `src/index.css`: Sistema de diseño global (variables CSS, temas oscuros, utilidades y tipografía).
   - `src/hooks/` & `src/contexts/`: Gestión de sockets, estado global, i18n y Web Speech TTS.
+  - `src/contexts/SocketContext.tsx`: Proveedor centralizado de Socket.IO. Todos los componentes React deben consumir el socket a través de `useSocket()` / `useSocketEvent()` desde este contexto.
+  - `src/components/ChatPanel.tsx`: Lista de chat virtualizada con `@tanstack/react-virtual` para mantener 60 FPS con grandes volúmenes de mensajes.
   - `public/overlays/`: Más de 57 overlays estáticos en HTML/CSS/JS puro para OBS Browser Source (Subnautica 2, Fortnite, Retro 8-bit, Win95, RetroWave, Sci-Fi, Vertical 9:16, etc.), con soporte para `?demo=true`.
 
 ### 📦 `packages/desktop` (`@streamdaemon/desktop`)
@@ -127,8 +129,12 @@ npm run lint
 # Formatear archivos con Prettier
 npm run format
 
-# Verificación de tipos TypeScript
+# Verificación de tipos TypeScript (build de todos los paquetes)
 npm run typecheck
+
+# Ejecutar tests unitarios
+npm run test -w packages/backend
+npm run test -w packages/frontend
 ```
 
 ---
@@ -141,7 +147,7 @@ $$\text{shared} \longrightarrow \text{backend} / \text{frontend} \longrightarrow
 Cualquier cambio en `@streamdaemon/shared` requiere recompilar `packages/shared` (`npm run build -w packages/shared`) para que backend y frontend reconozcan los nuevos tipos.
 
 ### 2. Estilo de Código y Tecnologías
-- **TypeScript:** Modo estricto activado en todos los paquetes. No usar `any` salvo excepciones justificadas.
+- **TypeScript:** Modo estricto activado en todos los paquetes. La regla ESLint `@typescript-eslint/no-explicit-any` está configurada como **error**; no usar `any` salvo excepciones justificadas y documentadas.
 - **ES Modules:** Todo el proyecto usa `"type": "module"`. Importaciones locales deben incluir extensión `.js` en código compilado de Node si es necesario.
 - **Estilos CSS:** Uso prioritario de **CSS Modules** (`[Component].module.css`) y variables del sistema de diseño en `index.css`. Evitar clases ad-hoc que rompan la estética cyber / dark mode.
 - **Aislamiento de Overlays:** Los overlays en `public/overlays/` deben permanecer como HTML/CSS/JS ligeros y autónomos, comunicándose vía Socket.IO y respondiendo a parámetros de URL (`?demo=true`, `?theme=...`).
@@ -158,15 +164,17 @@ Cualquier cambio en `@streamdaemon/shared` requiere recompilar `packages/shared`
 Al trabajar en la optimización de la aplicación, priorizar las siguientes áreas:
 
 ### A. Rendimiento del Frontend (React & Vite)
-1. **Lazy Loading & Code Splitting:** Carga diferida (`React.lazy` + `Suspense`) de paneles pesados del Dashboard (KPIs, Editor de OBS, Bitrate Calculator, Avatars Engine).
-2. **Optimización de Re-renders:** Uso de `React.memo`, `useCallback`, `useMemo` y selectores de estado finos en paneles con alta frecuencia de eventos (Chat feed, Activity Feed).
-3. **Limpieza de Recursos PixiJS/Matter.js:** Destrucción adecuada de texturas, listeners y bodies de físicas al desmontar componentes de avatares para evitar fugas de memoria.
-4. **Virtualización de Listas:** Implementar listas virtualizadas para el historial de chat, lista de VODs/clips y eventos de auditoría.
+1. ✅ **Centralización de Socket:** El socket del frontend se centraliza en `src/contexts/SocketContext.tsx`; todos los componentes React consumen `useSocket()` / `useSocketEvent()` desde este contexto.
+2. ✅ **Virtualización de Listas:** La lista de mensajes del chat ya está virtualizada con `@tanstack/react-virtual`.
+3. **Lazy Loading & Code Splitting:** Carga diferida (`React.lazy` + `Suspense`) de paneles pesados del Dashboard (KPIs, Editor de OBS, Bitrate Calculator, Avatars Engine).
+4. **Optimización de Re-renders:** Uso de `React.memo`, `useCallback`, `useMemo` y selectores de estado finos en paneles con alta frecuencia de eventos (Chat feed, Activity Feed).
+5. **Limpieza de Recursos PixiJS/Matter.js:** Destrucción adecuada de texturas, listeners y bodies de físicas al desmontar componentes de avatares para evitar fugas de memoria.
 
 ### B. Rendimiento del Backend (Fastify & Sockets)
 1. **Emisión Selectiva en Socket.IO:** Enviar payloads optimizados (solo deltas/diffs) y segmentar por salas (rooms) para evitar broadcasts innecesarios a overlays inactivos.
 2. **Batching & Throttling:** Agrupar escrituras a SQLite y aplicar debouncing a eventos frecuentes (viewers count, CPU polling).
 3. **Optimización de Consultas Prisma:** Índices adecuados en SQLite y consultas con `select` específico en lugar de recuperar modelos completos.
+4. ✅ **Logging Estructurado:** Uso de `pino` en backend y `electron-log` en desktop, con redirección de `console.*` al logger para trazabilidad y rotación de logs.
 
 ### C. Overlays & Browser Sources en OBS
 1. **Aceleración GPU & CSS:** Uso de `transform: translate3d()` y `will-change` en animaciones clave de overlays para garantizar 60 FPS estables en OBS.
@@ -176,7 +184,7 @@ Al trabajar en la optimización de la aplicación, priorizar las siguientes áre
 ### D. Optimización de Electron (Desktop)
 1. **Huella de Memoria:** Suspender o destruir ventanas secundarias (Settings, Preview) cuando están ocultas.
 2. **IPC Eficiente:** Usar transferencias binarias o buffers directos para datos pesados de video/audio, evitando serialización JSON redundante.
-3. **SQLite WAL Mode:** Configurar SQLite en modo WAL (Write-Ahead Logging) para lecturas y escrituras concurrentes de alta velocidad.
+3. ✅ **SQLite WAL Mode:** Configurado SQLite en modo WAL (Write-Ahead Logging) mediante `?journal_mode=WAL` en `DATABASE_URL` para lecturas y escrituras concurrentes de alta velocidad.
 
 ---
 

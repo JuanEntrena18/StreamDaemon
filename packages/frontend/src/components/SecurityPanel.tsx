@@ -93,7 +93,7 @@ export function SecurityPanel({ channel }: Props) {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  const toggleConfig = async (key: keyof SecurityConfig, value: any) => {
+  const toggleConfig = async (key: keyof SecurityConfig, value: SecurityConfig[keyof SecurityConfig]) => {
     const updated = { ...config, [key]: value };
     setConfig(updated);
     await apiPut('/security/config', updated);

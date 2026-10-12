@@ -4,6 +4,7 @@ import { authProvider } from '../auth/index.js';
 import { getIO } from '../socket/index.js';
 import type { HudData } from '@streamdaemon/shared';
 import { recordSnapshot } from '../kpi/index.js';
+import { logger } from '../logger.js';
 
 let pollInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -24,8 +25,8 @@ async function fetchHud(channelName: string): Promise<HudData | null> {
       if (followInfo.data.length > 0) {
         lastFollower = followInfo.data[0].userDisplayName;
       }
-    } catch (e: any) {
-      console.warn(`[HUD] Followers fetch failed for ${channelName}: ${e?.message ?? e}`);
+    } catch (e) {
+      logger.warn({ channel: channelName, err: e }, '[HUD] Followers fetch failed');
     }
 
     let totalSubs = 0;
@@ -36,8 +37,8 @@ async function fetchHud(channelName: string): Promise<HudData | null> {
       if (subs.data.length > 0) {
         lastSubscriber = subs.data[0].userDisplayName;
       }
-    } catch (e: any) {
-      console.warn(`[HUD] Subs fetch failed for ${channelName}: ${e?.message ?? e}`);
+    } catch (e) {
+      logger.warn({ channel: channelName, err: e }, '[HUD] Subs fetch failed');
     }
 
     return {
@@ -54,8 +55,8 @@ async function fetchHud(channelName: string): Promise<HudData | null> {
       lastFollower,
       lastSubscriber,
     };
-  } catch (e: any) {
-    console.warn(`[HUD] fetchHud failed for ${channelName}: ${e?.message ?? e}`);
+  } catch (e) {
+    logger.warn({ channel: channelName, err: e }, '[HUD] fetchHud failed');
     return null;
   }
 }
@@ -114,7 +115,7 @@ export function setupHud(app: FastifyInstance) {
       const user = await api.users.getUserByName(channel);
       if (!user) return reply.status(404).send({ error: 'User not found' });
 
-      const update: Record<string, any> = {};
+      const update: { title?: string; gameId?: string; tags?: string[] } = {};
       if (title !== undefined) update.title = title;
       if (gameName !== undefined && gameName) {
         const result = await api.search.searchCategories(gameName);
@@ -124,16 +125,16 @@ export function setupHud(app: FastifyInstance) {
       if (tags !== undefined) update.tags = tags;
 
       if (Object.keys(update).length > 0) {
-        await api.channels.updateChannelInfo(user.id, update as any);
+        await api.channels.updateChannelInfo(user.id, update as Parameters<typeof api.channels.updateChannelInfo>[1]);
       }
 
       reply.send({ ok: true });
-    } catch (err: any) {
-      const msg = err?.message ?? '';
-      if (msg.includes('scope') || msg.includes('channel:manage:broadcast')) {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '';
+      if (message.includes('scope') || message.includes('channel:manage:broadcast')) {
         reply.status(403).send({ error: 'missing_scope', message: 'Tu token de Twitch no tiene el permiso necesario (channel:manage:broadcast). Desconectá y volvé a conectar Twitch en Configuración para actualizar los permisos.' });
       } else {
-        reply.status(500).send({ error: err?.message ?? 'Failed to update stream info' });
+        reply.status(500).send({ error: message || 'Failed to update stream info' });
       }
     }
   });
@@ -148,8 +149,9 @@ export function setupHud(app: FastifyInstance) {
       const api = new ApiClient({ authProvider });
       const result = await api.search.searchCategories(query);
       reply.send(result.data.map((g) => ({ id: g.id, name: g.name, boxArtUrl: g.boxArtUrl })));
-    } catch (err: any) {
-      reply.status(500).send({ error: err?.message ?? 'Search failed' });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Search failed';
+      reply.status(500).send({ error: message });
     }
   });
 
@@ -191,8 +193,9 @@ export function setupHud(app: FastifyInstance) {
         gameId: stream?.gameId ?? null,
         gameName: stream?.gameName ?? '',
       });
-    } catch (err: any) {
-      reply.status(500).send({ error: err?.message ?? 'Failed to fetch tags' });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch tags';
+      reply.status(500).send({ error: message });
     }
   });
 }

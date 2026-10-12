@@ -2,6 +2,7 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { AvatarEngine } from '../avatars/AvatarEngine';
 import { useAvatarConfig } from '../avatars/avatarStore';
+import type { ChannelFollowEvent, ChannelSubscribeEvent, ChannelCheerEvent, ChannelRaidEvent, ChatMessageEvent } from '@streamdaemon/shared';
 
 
 interface Props {
@@ -49,7 +50,7 @@ export function AvatarOverlay({ channel, demo }: Props) {
   }, [channel, connected, socket]);
 
   // Chat messages
-  useSocketEvent('chat:message', useCallback((msg: any) => {
+  useSocketEvent('chat:message', useCallback((msg: ChatMessageEvent) => {
     if (engineRef.current) {
       engineRef.current.handleChatMessage(
         msg.user?.id || 'viewer',
@@ -61,7 +62,7 @@ export function AvatarOverlay({ channel, demo }: Props) {
   }, []));
 
   // Follow
-  useSocketEvent('channel:follow', useCallback((data: any) => {
+  useSocketEvent('channel:follow', useCallback((data: ChannelFollowEvent) => {
     if (engineRef.current) {
       engineRef.current.handleEvent({
         userId: data.userId || data.userName || `follow-${Date.now()}`,
@@ -73,7 +74,7 @@ export function AvatarOverlay({ channel, demo }: Props) {
   }, []));
 
   // Cheer / Bits
-  useSocketEvent('channel:cheer', useCallback((data: any) => {
+  useSocketEvent('channel:cheer', useCallback((data: ChannelCheerEvent) => {
     if (engineRef.current) {
       engineRef.current.handleEvent({
         userId: data.userName || `cheer-${Date.now()}`,
@@ -86,7 +87,7 @@ export function AvatarOverlay({ channel, demo }: Props) {
   }, []));
 
   // Subscribe
-  useSocketEvent('channel:subscribe', useCallback((data: any) => {
+  useSocketEvent('channel:subscribe', useCallback((data: ChannelSubscribeEvent) => {
     if (engineRef.current) {
       engineRef.current.handleEvent({
         userId: data.userName || `sub-${Date.now()}`,
@@ -99,7 +100,7 @@ export function AvatarOverlay({ channel, demo }: Props) {
   }, []));
 
   // Raid
-  useSocketEvent('channel:raid', useCallback((data: any) => {
+  useSocketEvent('channel:raid', useCallback((data: ChannelRaidEvent) => {
     if (engineRef.current) {
       engineRef.current.handleEvent({
         userId: data.fromChannel || `raid-${Date.now()}`,

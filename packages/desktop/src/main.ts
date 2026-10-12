@@ -7,10 +7,13 @@ import { fileURLToPath } from 'url';
 import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'fs';
 import { createRequire } from 'module';
 import { randomBytes } from 'crypto';
+import { logger, redirectConsoleToLogger } from './logger.js';
 const _require = createRequire(import.meta.url);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = !app.isPackaged;
+
+redirectConsoleToLogger();
 
 // ── Remove default menu (File / Edit / View…) ─────────────
 Menu.setApplicationMenu(null);
@@ -35,9 +38,9 @@ function loadBackendEnv() {
       const val = trimmed.slice(eq + 1).trim();
       if (!process.env[key]) process.env[key] = val;
     }
-    console.log('✅ Backend .env loaded');
+    logger.info('Backend .env loaded');
   } catch (err) {
-    console.warn('⚠️  Could not load backend .env:', err);
+    logger.warn('Could not load backend .env:', err);
   }
 }
 
@@ -62,7 +65,7 @@ const dbPath = isDev
 
 mkdirSync(path.dirname(dbPath), { recursive: true });
 
-process.env.DATABASE_URL = `file:${dbPath}`;
+process.env.DATABASE_URL = `file:${dbPath}?journal_mode=WAL`;
 
 const dataDir = isDev
   ? path.resolve(__dirname, '../../backend/data')
@@ -79,16 +82,16 @@ function runVersionMigration() {
   const oldVersion = existsSync(versionMarkerPath) ? readFileSync(versionMarkerPath, 'utf8').trim() : '';
 
   if (oldVersion !== APP_VERSION) {
-    console.log(`🔄 Version migration: ${oldVersion || '(none)'} → ${APP_VERSION}`);
+    logger.info({ oldVersion, newVersion: APP_VERSION }, 'Version migration');
 
     // Note: We no longer delete the database or configs here.
     // Prisma db push will handle schema changes safely without losing the Twitch session.
 
     // Write current version marker
     writeFileSync(versionMarkerPath, APP_VERSION, 'utf8');
-    console.log(`✅ Version marker written: ${APP_VERSION}`);
+    logger.info({ version: APP_VERSION }, 'Version marker written');
   } else {
-    console.log(`✓ Version unchanged (${APP_VERSION}), skipping migration`);
+    logger.info({ version: APP_VERSION }, 'Version unchanged, skipping migration');
   }
 }
 
@@ -120,18 +123,18 @@ async function startBackend(retries = 3, delayMs = 1000) {
       const { startServer } = await import('@streamdaemon/backend/dist/index.js');
       await startServer({ port: 3000, frontendDir: getFrontendDistDir() });
       backendReady = true;
-      console.log('✅ Backend started — serving frontend at http://localhost:3000');
+      logger.info('Backend started — serving frontend at http://localhost:3000');
       return;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error(`⚠️  Backend failed to start (attempt ${attempt}/${retries}):`, message);
+      logger.error({ attempt, retries, error: message }, 'Backend failed to start');
       if (attempt < retries) {
         await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
       }
     }
   }
 
-  console.error('❌ Backend could not start after multiple attempts');
+  logger.error('Backend could not start after multiple attempts');
   if (mainWindow && !mainWindow.isDestroyed()) {
     await mainWindow.loadURL('data:text/html;base64,PGh0bWw+PGJvZHk+PGgxPlN0cmVhbURhZW1vbiBubyBwdWVkZSBpbmljaWFyIGVsIHNlcnZpZG9yPC9oMT48cD5WZXJpZmlxdWUgcXVlIG5vIGhheSBvdHJvcyBwcm9jZXNvcyB1c2FuZG8gZWwgcHVlcnRvIDMwMDAgeSByZWluaWNpYSBsYSBhcHBsaWNhY2lvbi48L3A+PC9ib2R5PjwvaHRtbD4=');
   }
@@ -309,7 +312,7 @@ function recreateOverlayWindow() {
       :root { --bg-alpha: 0.6; }
     `);
   });
-  overlayWindow.webContents.on('before-input-event', (_event: any, input: any) => {
+  overlayWindow.webContents.on('before-input-event', (_event: Electron.Event, input: Electron.Input) => {
     if (input.key === 'F12') overlayWindow?.webContents.toggleDevTools();
   });
   overlayWindow.on('closed', () => {

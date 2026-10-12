@@ -3,6 +3,7 @@ import { useSocket, useSocketEvent } from './hooks/useSocket';
 import { useAuthStatus } from './hooks/useAuthStatus';
 import { useTranslation } from './i18n/context';
 import { apiGet } from './utils/api';
+import type { GiveawayData } from '@streamdaemon/shared';
 import { Sidebar } from './components/Sidebar';
 import type { Tab, NavSection } from './components/Sidebar';
 import { TopBar } from './components/TopBar';
@@ -114,7 +115,7 @@ export function App() {
       .catch(() => {});
   }, [channel]);
 
-  useSocketEvent('giveaway:start', useCallback((data: any) => {
+  useSocketEvent('giveaway:start', useCallback((data: GiveawayData) => {
     setGiveawayParticipants(data.entries || 0);
   }, []));
 

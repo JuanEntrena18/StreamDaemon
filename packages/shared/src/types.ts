@@ -71,6 +71,20 @@ export interface OverlayTheme {
   css: Record<string, string>;
 }
 
+export interface ChatUser {
+  id: string;
+  displayName: string;
+  color: string;
+  badges: string[];
+}
+
+export interface ChatMessageEvent {
+  id: string;
+  user: ChatUser;
+  text: string;
+  timestamp: number;
+}
+
 export interface ChannelFollowEvent {
   userDisplayName: string;
   userName: string;
@@ -183,6 +197,25 @@ export interface FighterState {
   status: 'waiting' | 'playing' | 'finished';
 }
 
+export interface SpeedrunSplit {
+  name: string;
+  pb: number;
+  current: number | null;
+  gold: number;
+}
+
+export interface SpeedrunState {
+  game: string;
+  category: string;
+  attempts: number;
+  pb: number;
+  wr: number;
+  splits: SpeedrunSplit[];
+  currentSplitIndex: number;
+  timerRunning: boolean;
+  elapsedTime: number;
+}
+
 export type ServerEvent =
   | { type: 'chat:message'; data: ChatMessage }
   | { type: 'channel:follow'; data: ChannelFollowEvent }
@@ -203,6 +236,7 @@ export type ServerEvent =
   | { type: 'timer:tick'; data: { remaining: number } }
   | { type: 'scoreboard:update'; data: ScoreboardState }
   | { type: 'fighter:update'; data: FighterState }
+  | { type: 'speedrun:update'; data: SpeedrunState }
   | { type: 'subathon:tick'; data: { remaining: number; maxLimit: number } }
   | { type: 'subathon:time-added'; data: { amount: number; reason: string; user: string; remaining: number; type: SubathonAction['type'] } }
   | { type: 'subathon:state'; data: SubathonState };

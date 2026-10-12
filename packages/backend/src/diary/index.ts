@@ -127,8 +127,17 @@ async function searchHltb(query: string): Promise<HltbSearchResult[]> {
       }),
     });
     if (!res.ok) return [];
-    const data = await res.json();
-    return (data.data || []).map((g: any) => ({
+    const data = await res.json() as {
+      data?: Array<{
+        game_id: number;
+        game_name: string;
+        game_image?: string;
+        comp_main?: number;
+        comp_plus?: number;
+        comp_100?: number;
+      }>;
+    };
+    return (data.data || []).map((g) => ({
       game_id: g.game_id,
       game_name: g.game_name,
       game_image_url: g.game_image ? `https://howlongtobeat.com/games/${g.game_image}` : undefined,
