@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamDaemon – Vibe Daemons</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+
+  #stage {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    gap: 28px;
+    padding: 60px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* ───────── DEMO BADGE ───────── */
+  #demo-badge {
+    position: absolute; top: 24px; right: 32px;
+    padding: 8px 22px;
+    background: rgba(200, 75, 255, 0.85);
+    border: 2px solid #fff;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 26px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity .3s;
+    z-index: 20;
+  }
+  #demo-badge.show { opacity: 1; }
+
+  /* ───────── VIBE CARD ───────── */
+  .vibe-card {
+    position: relative;
+    --accent-rgb: 0, 255, 136;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 34px 72px;
+    border-radius: 18px;
+    text-align: center;
+    background: rgba(8, 10, 24, 0.9);
+    border: 2px solid rgb(var(--accent-rgb));
+    box-shadow:
+      0 24px 70px rgba(0, 0, 0, 0.55),
+      0 0 52px rgba(var(--accent-rgb), 0.28),
+      inset 0 0 40px rgba(var(--accent-rgb), 0.07);
+    will-change: transform, opacity;
+    opacity: 0;
+    transform: translate3d(0, 48px, 0) scale(0.6);
+  }
+  .vibe-card.visible {
+    animation: vibe-in 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.4) forwards;
+  }
+  .vibe-card.hiding {
+    animation: vibe-out 0.45s ease-in forwards;
+  }
+
+  @keyframes vibe-in {
+    0%   { opacity: 0; transform: translate3d(0, 48px, 0) scale(0.6); }
+    60%  { opacity: 1; transform: translate3d(0, -6px, 0) scale(1.07); }
+    100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  }
+  @keyframes vibe-out {
+    0%   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    100% { opacity: 0; transform: translate3d(0, -48px, 0) scale(0.82); }
+  }
+
+  /* Expanding pulse ring spawned behind the card on activation */
+  .vibe-pulse {
+    position: absolute;
+    inset: -2px;
+    border-radius: 18px;
+    border: 3px solid rgba(var(--accent-rgb), 0.9);
+    pointer-events: none;
+    will-change: transform, opacity;
+    animation: pulse-ring 0.9s ease-out forwards;
+  }
+  @keyframes pulse-ring {
+    0%   { opacity: 0.9; transform: scale(1); }
+    100% { opacity: 0;   transform: scale(1.35); }
+  }
+
+  .vibe-icon {
+    font-size: 128px;
+    line-height: 1;
+    margin-bottom: 14px;
+    filter: drop-shadow(0 0 28px rgba(var(--accent-rgb), 0.85));
+    animation: icon-pop 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.6);
+  }
+  @keyframes icon-pop {
+    0%   { transform: translate3d(0, 0, 0) scale(0.2) rotate(-18deg); }
+    70%  { transform: translate3d(0, 0, 0) scale(1.25) rotate(6deg); }
+    100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  }
+
+  .vibe-title {
+    font-size: 74px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 0 0 26px rgba(var(--accent-rgb), 0.65);
+    max-width: 1400px;
+  }
+  .vibe-sub {
+    margin-top: 6px;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    color: rgba(var(--accent-rgb), 0.95);
+  }
+
+  /* ───────── MEDIA MODE (webm / imagen + texto sobre imagen) ───────── */
+  .vibe-media-wrap {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center;
+    will-change: transform, opacity;
+    opacity: 0;
+    transform: translate3d(0, 48px, 0) scale(0.7);
+  }
+  .vibe-media-wrap.visible {
+    animation: vibe-in 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.4) forwards;
+  }
+  .vibe-media-wrap.hiding {
+    animation: vibe-out 0.45s ease-in forwards;
+  }
+
+  .vibe-media {
+    position: relative;
+    height: var(--media-h, 44vh);
+    max-width: 80vw;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 3px solid rgba(var(--accent-rgb), 0.9);
+    box-shadow:
+      0 24px 70px rgba(0, 0, 0, 0.55),
+      0 0 52px rgba(var(--accent-rgb), 0.32);
+  }
+  .vibe-media video,
+  .vibe-media img {
+    height: 100%;
+    width: auto;
+    max-width: 80vw;
+    object-fit: contain;
+    display: block;
+  }
+
+  .vibe-media-text {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 46px 28px 22px;
+    background: linear-gradient(180deg, transparent 0%, rgba(4, 6, 16, 0.88) 70%);
+    text-align: center;
+  }
+  .vibe-media-text .vibe-title { font-size: 58px; }
+  .vibe-media-text .vibe-sub { font-size: 26px; letter-spacing: 6px; }
+</style>
+</head>
+<body>
+  <div id="stage"></div>
+  <div id="demo-badge">DEMO</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ──────────────────────────────────────────────
+     PARAMS
+    ─────────────────────────────────────────────── */
+  var PARAMS     = new URLSearchParams(location.search);
+  var CHANNEL    = PARAMS.get('channel') || '';
+  var DEMO_MODE  = PARAMS.get('demo') === 'true';
+  var BACKEND_URL = PARAMS.get('backend') || 'http://localhost:3000';
+  var POS        = PARAMS.get('pos') || 'center';
+  var MEDIA_H    = Math.max(10, Math.min(90, parseInt(PARAMS.get('size') || '44', 10) || 44));
+  var MAX_CARDS  = 3;
+
+  var stage = document.getElementById('stage');
+  stage.style.setProperty('--media-h', MEDIA_H + 'vh');
+
+  // pos: top | center | bottom (vertical) × left | center | right (horizontal)
+  var POSITIONS = {
+    'top':          ['flex-start', 'center'],
+    'center':       ['center', 'center'],
+    'bottom':       ['flex-end', 'center'],
+    'top-left':     ['flex-start', 'flex-start'],
+    'top-right':    ['flex-start', 'flex-end'],
+    'bottom-left':  ['flex-end', 'flex-start'],
+    'bottom-right': ['flex-end', 'flex-end'],
+    'left':         ['center', 'flex-start'],
+    'right':        ['center', 'flex-end'],
+  };
+  var pos = POSITIONS[POS] || POSITIONS.center;
+  stage.style.justifyContent = pos[0];
+  stage.style.alignItems = pos[1];
+
+  /* ──────────────────────────────────────────────
+     EVENT CATALOG
+    ─────────────────────────────────────────────── */
+  var EVENTS = {
+    kill:            { label: '+1 KILL',        icon: '🔥', rgb: '255, 106, 0' },
+    death:           { label: '+1 DEATH',       icon: '💀', rgb: '255, 77, 109' },
+    victory:         { label: '+1 VICTORY',     icon: '👑', rgb: '255, 209, 0' },
+    kill_streak:     { label: 'KILL STREAK',    icon: '⚡', rgb: '200, 75, 255' },
+    victory_streak:  { label: 'VICTORY STREAK', icon: '🏆', rgb: '0, 255, 136' },
+    low_health:      { label: 'LOW HEALTH',     icon: '🩸', rgb: '255, 51, 85' },
+    low_shield:      { label: 'LOW SHIELD',     icon: '🛡️', rgb: '0, 212, 255' },
+    storm_shrinking: { label: 'STORM SHRINKING', icon: '🌀', rgb: '200, 75, 255' },
+    manual:          { label: 'VIBE',           icon: '✨', rgb: '0, 255, 136' },
+  };
+
+  function catalog(eventType) {
+    return EVENTS[eventType] || EVENTS.manual;
+  }
+
+  /* ──────────────────────────────────────────────
+     SOUND
+    ─────────────────────────────────────────────── */
+  function playSound(soundUrl, volume) {
+    if (!soundUrl) return;
+    var url = /^https?:\/\//.test(soundUrl) ? soundUrl : BACKEND_URL + soundUrl;
+    try {
+      var audio = new Audio(url);
+      audio.volume = Math.max(0, Math.min(1, typeof volume === 'number' ? volume : 0.7));
+      audio.play().catch(function () {});
+    } catch (e) { /* ignore */ }
+  }
+
+  /* ──────────────────────────────────────────────
+     RENDER
+    ─────────────────────────────────────────────── */
+  function applyTemplate(str, activation) {
+    var ev = catalog(activation.eventType);
+    var vars = {
+      trigger: activation.triggerName || '',
+      game: String(activation.gameId || '').toUpperCase(),
+      event: ev.label,
+    };
+    return String(str || '').replace(/\{\{(\w+)\}\}/g, function (_, key) {
+      return vars[key] != null ? vars[key] : '{{' + key + '}}';
+    });
+  }
+
+  function buildCard(activation) {
+    var ev = catalog(activation.eventType);
+    var action = activation.action || {};
+    var duration = Math.max(500, action.durationMs || 3000);
+    var message = applyTemplate(action.message, activation) || activation.triggerName || ev.label;
+    var sub = ev.label + (activation.gameId ? ' · ' + String(activation.gameId).toUpperCase() : '');
+
+    var wrap;
+    var mediaUrl = action.mediaUrl || '';
+
+    if (mediaUrl) {
+      wrap = document.createElement('div');
+      wrap.className = 'vibe-media-wrap';
+      var mediaBox = document.createElement('div');
+      mediaBox.className = 'vibe-media';
+
+      if (/\.(webm|mp4|mov)(\?|$)/i.test(mediaUrl)) {
+        var video = document.createElement('video');
+        video.src = /^https?:\/\//.test(mediaUrl) ? mediaUrl : BACKEND_URL + mediaUrl;
+        video.autoplay = true; video.loop = true; video.muted = true;
+        video.setAttribute('playsinline', '');
+        mediaBox.appendChild(video);
+      } else {
+        var img = document.createElement('img');
+        img.src = /^https?:\/\//.test(mediaUrl) ? mediaUrl : BACKEND_URL + mediaUrl;
+        img.alt = message;
+        mediaBox.appendChild(img);
+      }
+
+      var mediaText = document.createElement('div');
+      mediaText.className = 'vibe-media-text';
+      var mTitle = document.createElement('div');
+      mTitle.className = 'vibe-title';
+      mTitle.textContent = message;
+      var mSub = document.createElement('div');
+      mSub.className = 'vibe-sub';
+      mSub.textContent = sub;
+      mediaText.appendChild(mTitle);
+      mediaText.appendChild(mSub);
+      mediaBox.appendChild(mediaText);
+      wrap.appendChild(mediaBox);
+    } else {
+      wrap = document.createElement('div');
+      wrap.className = 'vibe-card';
+      var pulse = document.createElement('div');
+      pulse.className = 'vibe-pulse';
+      var icon = document.createElement('div');
+      icon.className = 'vibe-icon';
+      icon.textContent = ev.icon;
+      var title = document.createElement('div');
+      title.className = 'vibe-title';
+      title.textContent = message;
+      var subEl = document.createElement('div');
+      subEl.className = 'vibe-sub';
+      subEl.textContent = sub;
+      wrap.appendChild(pulse);
+      wrap.appendChild(icon);
+      wrap.appendChild(title);
+      wrap.appendChild(subEl);
+    }
+
+    wrap.style.setProperty('--accent-rgb', ev.rgb);
+
+    // Entrance
+    requestAnimationFrame(function () {
+      wrap.classList.add('visible');
+    });
+
+    // Exit after duration
+    setTimeout(function () {
+      wrap.classList.add('hiding');
+      setTimeout(function () {
+        if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+      }, 500);
+    }, duration);
+
+    return wrap;
+  }
+
+  function triggerVibe(activation) {
+    if (!activation || !activation.eventType) return;
+    // Cap stacked activations: drop the oldest
+    while (stage.children.length >= MAX_CARDS) {
+      stage.removeChild(stage.firstChild);
+    }
+    stage.appendChild(buildCard(activation));
+    var action = activation.action || {};
+    playSound(action.soundUrl, action.volume);
+  }
+
+  /* ──────────────────────────────────────────────
+     SOCKET.IO
+    ─────────────────────────────────────────────── */
+  function initSocket() {
+    var socket;
+    try { socket = io(BACKEND_URL, { transports: ['websocket'] }); }
+    catch (e) { return; }
+
+    socket.on('connect', function () {
+      if (CHANNEL) socket.emit('join:channel', CHANNEL);
+    });
+    socket.on('connect_error', function (err) {
+      console.error('Socket connection error:', err.message);
+    });
+
+    socket.on('vibe-daemon:activation', function (activation) {
+      triggerVibe(activation);
+    });
+  }
+
+  /* ──────────────────────────────────────────────
+     DEMO
+    ─────────────────────────────────────────────── */
+  function startDemo() {
+    document.getElementById('demo-badge').classList.add('show');
+    var demoTypes = [
+      'kill', 'victory', 'kill_streak', 'low_shield',
+      'storm_shrinking', 'death', 'victory_streak', 'low_health',
+    ];
+    var names = {
+      kill: '¡Kill confirmado!',
+      victory: '¡Victoria total!',
+      kill_streak: '¡Imparable! Racha de 5',
+      low_shield: 'Escudo crítico',
+      storm_shrinking: '¡La tormenta avanza!',
+      death: 'Eliminado...',
+      victory_streak: '¡Doble victoria seguida!',
+      low_health: '¡Vida crítica!',
+    };
+    var i = 0;
+    function loop() {
+      var type = demoTypes[i % demoTypes.length];
+      i++;
+      triggerVibe({
+        triggerId: 'demo-' + type,
+        triggerName: names[type] || 'Vibe Daemon',
+        eventType: type,
+        gameId: 'fortnite',
+        action: { type: 'overlay', overlayId: 'vibe-daemon', durationMs: 3500 },
+        channel: CHANNEL || 'demo',
+        timestamp: Date.now(),
+      });
+      setTimeout(loop, 6000 + Math.random() * 3000);
+    }
+    setTimeout(loop, 1200);
+  }
+
+  /* ──────────────────────────────────────────────
+     BOOT
+    ─────────────────────────────────────────────── */
+  function loadSocketIO(cb) {
+    var script = document.createElement('script');
+    script.onload = function () { cb(null); };
+    script.onerror = function () { cb(new Error('load failed')); };
+    script.src = './js/socket.io.js';
+    document.head.appendChild(script);
+  }
+
+  loadSocketIO(function (err) {
+    if (!err) initSocket();
+    if (DEMO_MODE) startDemo();
+  });
+})();
+</script>
+</body>
+</html>

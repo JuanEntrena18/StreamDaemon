@@ -432,3 +432,153 @@ export interface Layout {
   updatedAt: number;
 }
 
+// ── Vibe Daemon ──
+
+export type VibeDaemonGameId = 'global' | 'fortnite' | string;
+
+export type VibeDaemonEventType =
+  | 'kill'
+  | 'death'
+  | 'victory'
+  | 'kill_streak'
+  | 'victory_streak'
+  | 'low_health'
+  | 'low_shield'
+  | 'storm_shrinking'
+  | 'manual';
+
+export type VibeDaemonConditionType = 'count' | 'threshold' | 'state';
+
+export type VibeDaemonResetPeriod = 'match' | 'round' | 'session' | 'time_window';
+
+export type VibeDaemonActionType = 'media' | 'sound' | 'overlay' | 'chat' | 'tts';
+
+export interface VibeDaemonCondition {
+  type: VibeDaemonConditionType;
+  count?: number;
+  threshold?: number;
+  period?: VibeDaemonResetPeriod;
+  timeWindowSeconds?: number;
+}
+
+export interface VibeDaemonAction {
+  type: VibeDaemonActionType;
+  mediaUrl?: string;
+  soundUrl?: string;
+  overlayId?: string;
+  message?: string;
+  durationMs?: number;
+  volume?: number;
+}
+
+export interface VibeDaemonTrigger {
+  id: string;
+  gameId: VibeDaemonGameId;
+  name: string;
+  enabled: boolean;
+  eventType: VibeDaemonEventType;
+  condition: VibeDaemonCondition;
+  action: VibeDaemonAction;
+  cooldownMs?: number;
+}
+
+export interface VibeDaemonConfig {
+  enabled: boolean;
+  triggers: VibeDaemonTrigger[];
+  hotkeys: {
+    kill?: string;
+    death?: string;
+    victory?: string;
+  };
+}
+
+export interface VibeDaemonEvent {
+  channel: string;
+  gameId: VibeDaemonGameId;
+  eventType: VibeDaemonEventType;
+  value?: number;
+  metadata?: Record<string, unknown>;
+  timestamp: number;
+}
+
+export interface VibeDaemonActivation {
+  triggerId: string;
+  triggerName: string;
+  eventType: VibeDaemonEventType;
+  gameId: VibeDaemonGameId;
+  action: VibeDaemonAction;
+  channel: string;
+  timestamp: number;
+}
+
+export interface VibeDaemonState {
+  channel: string;
+  gameId: VibeDaemonGameId;
+  kills: number;
+  deaths: number;
+  victories: number;
+  killStreak: number;
+  victoryStreak: number;
+  maxKillStreak: number;
+  maxVictoryStreak: number;
+  currentMatchKills: number;
+  currentMatchDeaths: number;
+  lastKillAt: number | null;
+  lastDeathAt: number | null;
+  lastVictoryAt: number | null;
+}
+
+// ── Vibe Daemon CV (detección automática beta: Fortnite) ──
+
+export interface VibeCvRoi {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface VibeCvConfig {
+  enabled: boolean;
+  sourceType: 'screen' | 'window';
+  windowTitleMatch: string;
+  captureFps: number;
+  shieldRoi: VibeCvRoi;
+  healthRoi: VibeCvRoi;
+  stormRoi: VibeCvRoi;
+  shieldTriggerRatio: number;
+  shieldRecoveryRatio: number;
+  healthTriggerRatio: number;
+  healthRecoveryRatio: number;
+  stormTriggerRatio: number;
+  stormClearRatio: number;
+  consecutiveFrames: number;
+  cooldowns: {
+    lowShieldMs: number;
+    lowHealthMs: number;
+    stormMs: number;
+  };
+}
+
+export interface VibeCvRatios {
+  shield: number;
+  health: number;
+  storm: number;
+}
+
+export interface VibeCvStatus {
+  running: boolean;
+  sourceLabel: string | null;
+  lastFrameAt: number | null;
+  lastError: string | null;
+  ratios: VibeCvRatios;
+  lastEvent: { eventType: string; at: number } | null;
+  captureSize: { width: number; height: number } | null;
+}
+
+export interface VibeCvCaptureDebug {
+  dataUrl: string | null;
+  ratios: VibeCvRatios;
+  sourceLabel: string | null;
+  captureSize: { width: number; height: number } | null;
+}
+

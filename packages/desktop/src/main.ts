@@ -7,7 +7,16 @@ import { fileURLToPath } from 'url';
 import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'fs';
 import { createRequire } from 'module';
 import { randomBytes } from 'crypto';
+import type { VibeCvConfig } from '@streamdaemon/shared';
 import { logger, redirectConsoleToLogger } from './logger.js';
+import {
+  initVibeCvDetector,
+  stopVibeCvDetector,
+  getVibeCvConfig,
+  setVibeCvConfig,
+  getVibeCvStatus,
+  captureVibeCvDebug,
+} from './vibe-cv/detector.js';
 const _require = createRequire(import.meta.url);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -137,6 +146,58 @@ async function startBackend(retries = 3, delayMs = 1000) {
   logger.error('Backend could not start after multiple attempts');
   if (mainWindow && !mainWindow.isDestroyed()) {
     await mainWindow.loadURL('data:text/html;base64,PGh0bWw+PGJvZHk+PGgxPlN0cmVhbURhZW1vbiBubyBwdWVkZSBpbmljaWFyIGVsIHNlcnZpZG9yPC9oMT48cD5WZXJpZmlxdWUgcXVlIG5vIGhheSBvdHJvcyBwcm9jZXNvcyB1c2FuZG8gZWwgcHVlcnRvIDMwMDAgeSByZWluaWNpYSBsYSBhcHBsaWNhY2lvbi48L3A+PC9ib2R5PjwvaHRtbD4=');
+  }
+}
+
+// ── Vibe Daemon hotkeys ───────────────────────────────────
+const BACKEND_ORIGIN = 'http://localhost:3000';
+let vibeHotkeySignature = '';
+const vibeHotkeyAccelerators: string[] = [];
+
+interface VibeDaemonDesktopConfig {
+  enabled: boolean;
+  hotkeys?: { kill?: string; death?: string; victory?: string };
+}
+
+async function setupVibeDaemonHotkeys() {
+  if (!backendReady) return;
+  try {
+    const headers = { 'x-local-token': LOCAL_API_TOKEN };
+    const statusRes = await fetch(`${BACKEND_ORIGIN}/auth/status`, { headers });
+    if (!statusRes.ok) return;
+    const status = (await statusRes.json()) as { authenticated: boolean; user?: { login?: string } };
+    if (!status.authenticated || !status.user?.login) return;
+
+    const configRes = await fetch(`${BACKEND_ORIGIN}/vibe-daemon/config`, { headers });
+    if (!configRes.ok) return;
+    const cfg = (await configRes.json()) as VibeDaemonDesktopConfig;
+    if (!cfg.enabled) return;
+
+    const channel = status.user.login;
+    const entries = Object.entries(cfg.hotkeys ?? {}) as Array<[string, string]>;
+    const signature = `${channel}|${entries.map(([k, v]) => `${k}=${v}`).join(',')}`;
+    if (signature === vibeHotkeySignature) return;
+
+    for (const accelerator of vibeHotkeyAccelerators.splice(0)) {
+      globalShortcut.unregister(accelerator);
+    }
+    vibeHotkeySignature = signature;
+
+    for (const [eventType, accelerator] of entries) {
+      if (!accelerator) continue;
+      const registered = globalShortcut.register(accelerator, () => {
+        fetch(`${BACKEND_ORIGIN}/vibe-daemon/event`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-local-token': LOCAL_API_TOKEN },
+          body: JSON.stringify({ channel, gameId: 'global', eventType, timestamp: Date.now() }),
+        }).catch(() => {});
+      });
+      if (registered) vibeHotkeyAccelerators.push(accelerator);
+    }
+    logger.info({ count: vibeHotkeyAccelerators.length }, 'Vibe Daemon hotkeys registered');
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.warn({ error: message }, 'Vibe Daemon hotkey setup failed');
   }
 }
 
@@ -476,6 +537,12 @@ ipcMain.on('overlay:showSettings', () => openOverlaySettingsWindow());
 // Backend readiness
 ipcMain.handle('backend:isReady', () => backendReady);
 
+// Vibe CV (detección automática beta: Fortnite)
+ipcMain.handle('vibe-cv:getConfig', () => getVibeCvConfig());
+ipcMain.handle('vibe-cv:setConfig', (_e, value: VibeCvConfig) => setVibeCvConfig(value));
+ipcMain.handle('vibe-cv:getStatus', () => getVibeCvStatus());
+ipcMain.handle('vibe-cv:captureDebug', () => captureVibeCvDebug());
+
 // Main window — always-on-top toggle
 ipcMain.handle('window:getAlwaysOnTop', () => mainAlwaysOnTop);
 ipcMain.on('window:setAlwaysOnTop', (_e, value: boolean) => {
@@ -530,9 +597,15 @@ app.whenReady().then(async () => {
     const mainUrl = isDev ? 'http://localhost:5173' : 'http://localhost:3000';
     mainWindow.loadURL(mainUrl);
   }
+
+  setupVibeDaemonHotkeys();
+  setInterval(setupVibeDaemonHotkeys, 60_000);
+
+  initVibeCvDetector();
 });
 
 app.on('window-all-closed', () => {
   globalShortcut.unregisterAll();
+  stopVibeCvDetector();
   app.quit();
 });

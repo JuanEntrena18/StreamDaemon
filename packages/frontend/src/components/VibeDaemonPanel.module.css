@@ -1,0 +1,286 @@
+.container {
+  max-width: 860px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--sf-text);
+}
+
+.sectionIcon {
+  font-size: 1.1rem;
+}
+
+.daemonCard {
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--sf-border);
+  margin-bottom: 0.75rem;
+}
+
+.daemonHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.daemonNameInput {
+  flex: 1;
+  min-width: 160px;
+  font-weight: 600;
+}
+
+.headerBtn {
+  font-size: 0.72rem;
+  padding: 0.3rem 0.6rem;
+}
+
+.testBtn {
+  composes: headerBtn;
+  background: rgba(0, 212, 255, 0.12);
+  color: #22d3ee;
+}
+
+.deleteBtn {
+  composes: headerBtn;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.configGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.fieldLabel {
+  font-size: 0.68rem;
+  color: var(--sf-text-2);
+  display: block;
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.fieldInput {
+  font-size: 0.78rem;
+  width: 100%;
+}
+
+.fullRow {
+  grid-column: 1 / -1;
+}
+
+.stateGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.6rem;
+}
+
+.statBox {
+  padding: 0.6rem 0.5rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--sf-border);
+  text-align: center;
+}
+
+.statValue {
+  font-size: 1.4rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: var(--sf-text);
+}
+
+.statLabel {
+  font-size: 0.65rem;
+  color: var(--sf-text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.eventBtn {
+  font-size: 0.75rem;
+  padding: 0.45rem 0.8rem;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.killBtn {
+  composes: eventBtn;
+  background: rgba(255, 106, 0, 0.15);
+  color: #ff8a3d;
+}
+
+.deathBtn {
+  composes: eventBtn;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.victoryBtn {
+  composes: eventBtn;
+  background: rgba(255, 209, 0, 0.12);
+  color: #ffd100;
+}
+
+.urlBox {
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--sf-border);
+  font-size: 0.74rem;
+  font-family: monospace;
+  color: #a78bfa;
+  word-break: break-all;
+}
+
+.hotkeyRow {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  color: var(--sf-text-2);
+  align-items: center;
+}
+
+.hotkeyKey {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--sf-border);
+  background: rgba(0, 0, 0, 0.35);
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: var(--sf-text);
+}
+
+.addForm {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.addField {
+  flex: 1;
+  min-width: 140px;
+}
+
+.lastActivation {
+  font-size: 0.72rem;
+  color: var(--sf-text-3);
+  margin-top: 0.4rem;
+}
+
+.savedFlash {
+  color: #34d399;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.dirtyBadge {
+  color: #fbbf24;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.emptyNote {
+  font-size: 0.8rem;
+  color: var(--sf-text-3);
+  padding: 0.75rem 0;
+}
+
+.cvPreview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  border: 1px solid var(--sf-border);
+  background: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.cvPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.cvNoCapture {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--sf-text-3);
+  text-align: center;
+  padding: 1rem;
+}
+
+.cvRoiBoxShield,
+.cvRoiBoxHealth,
+.cvRoiBoxStorm {
+  position: absolute;
+  border: 2px solid;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.cvRoiBoxShield { border-color: #22d3ee; box-shadow: 0 0 10px rgba(34, 211, 238, 0.5); }
+.cvRoiBoxHealth { border-color: #34d399; box-shadow: 0 0 10px rgba(52, 211, 153, 0.5); }
+.cvRoiBoxStorm { border-color: #c84bff; box-shadow: 0 0 10px rgba(200, 75, 255, 0.5); }
+
+.cvRatioRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.cvRatioBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--sf-border);
+  background: rgba(0, 0, 0, 0.3);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--sf-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.cvRatioDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.cvRoiRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.3rem;
+}
+
+.cvRoiInput {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.35rem;
+  font-family: monospace;
+}

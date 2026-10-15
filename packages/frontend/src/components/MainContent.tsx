@@ -28,6 +28,7 @@ const SpeedrunPanel = lazy(() => import('./SpeedrunPanel').then(m => ({ default:
 const CalendarPanel = lazy(() => import('./CalendarPanel').then(m => ({ default: m.CalendarPanel })));
 const DiaryPanel = lazy(() => import('./DiaryPanel').then(m => ({ default: m.DiaryPanel })));
 const AdsPanel = lazy(() => import('./AdsPanel').then(m => ({ default: m.AdsPanel })));
+const VibeDaemonPanel = lazy(() => import('./VibeDaemonPanel').then(m => ({ default: m.VibeDaemonPanel })));
 
 interface Props {
   activeTab: Tab;
@@ -86,6 +87,7 @@ export function MainContent({ activeTab, tabDirection, channel, alwaysOnTop, tog
       case 'calendar':  return <CalendarPanel channel={channel} />;
       case 'diary':     return <DiaryPanel channel={channel} />;
       case 'ads':       return <AdsPanel channel={channel} />;
+      case 'vibedaemon': return <VibeDaemonPanel channel={channel} />;
       case 'config':    return <ConfigPanel channel={channel} alwaysOnTop={alwaysOnTop} toggleAlwaysOnTop={toggleAlwaysOnTop} />;
       default:          return null;
     }

@@ -30,6 +30,13 @@ contextBridge.exposeInMainWorld('streamforger', {
     isReady: () => ipcRenderer.invoke('backend:isReady'),
   },
 
+  vibeCv: {
+    getConfig: () => ipcRenderer.invoke('vibe-cv:getConfig'),
+    setConfig: (config: unknown) => ipcRenderer.invoke('vibe-cv:setConfig', config),
+    getStatus: () => ipcRenderer.invoke('vibe-cv:getStatus'),
+    captureDebug: () => ipcRenderer.invoke('vibe-cv:captureDebug'),
+  },
+
   window: {
     minimize:       ()           => ipcRenderer.send('window:minimize'),
     close:          ()           => ipcRenderer.send('window:close'),

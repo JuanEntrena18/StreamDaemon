@@ -28,6 +28,12 @@ interface StreamforgerAPI {
   backend: {
     isReady: () => Promise<boolean>;
   };
+  vibeCv: {
+    getConfig: () => Promise<import('@streamdaemon/shared').VibeCvConfig>;
+    setConfig: (config: import('@streamdaemon/shared').VibeCvConfig) => Promise<boolean>;
+    getStatus: () => Promise<import('@streamdaemon/shared').VibeCvStatus>;
+    captureDebug: () => Promise<import('@streamdaemon/shared').VibeCvCaptureDebug>;
+  };
   auth: {
     login: () => void;
   };

@@ -50,6 +50,7 @@ export function CommandPalette({ isOpen, onClose, onNavigate, onToggleAlwaysOnTo
       { id: 'hud', title: s('hudTab'), description: 'Overlay HUD general', icon: '📊', keywords: ['hud', 'overlay'], action: () => onNavigate('hud') },
       { id: 'timer', title: s('temporizadorTab'), description: 'Cuenta regresiva', icon: '⏱️', keywords: ['temporizador', 'cuenta', 'atras', 'reloj'], action: () => onNavigate('timer') },
       { id: 'scoreboard', title: s('scoreboardTab'), description: 'Marcador de puntos', icon: '🏆', keywords: ['marcador', 'puntos', 'vs', 'juego'], action: () => onNavigate('scoreboard') },
+      { id: 'vibedaemon', title: s('vibeDaemonTab'), description: 'Reacciones a eventos de juego en directo', icon: '👹', keywords: ['vibe', 'daemon', 'juego', 'eventos', 'kills', 'racha'], action: () => onNavigate('vibedaemon') },
       { id: 'alertsounds', title: s('alertsoundsTab'), description: 'Sonidos de alerta', icon: '🔊', keywords: ['sonidos', 'alertas', 'audio'], action: () => onNavigate('alertsounds') },
       { id: 'bitrate', title: s('bitrateTab'), description: 'Calculadora de bitrate', icon: '🧮', keywords: ['bitrate', 'calculadora', 'internet', 'obs'], action: () => onNavigate('bitrate') },
       { id: 'vertical', title: s('verticalTab'), description: 'Streaming en formato vertical', icon: '📱', keywords: ['vertical', 'tiktok', 'reels', 'shorts'], action: () => onNavigate('vertical') },

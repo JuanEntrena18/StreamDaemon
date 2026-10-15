@@ -34,11 +34,19 @@ declare global {
     isReady: () => Promise<boolean>;
   }
 
+  interface StreamforgerVibeCvAPI {
+    getConfig: () => Promise<import('@streamdaemon/shared').VibeCvConfig>;
+    setConfig: (config: import('@streamdaemon/shared').VibeCvConfig) => Promise<boolean>;
+    getStatus: () => Promise<import('@streamdaemon/shared').VibeCvStatus>;
+    captureDebug: () => Promise<import('@streamdaemon/shared').VibeCvCaptureDebug>;
+  }
+
   interface StreamforgerAPI {
     isDesktop: boolean;
     backendUrl: string;
     overlay: StreamforgerOverlayAPI;
     backend: StreamforgerBackendAPI;
+    vibeCv: StreamforgerVibeCvAPI;
     window: StreamforgerWindowAPI;
   }
 

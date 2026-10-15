@@ -39,7 +39,8 @@
     "configTab": "Impostazioni",
     "calendarTab": "Calendario",
     "diaryTab": "Diario di Giochi",
-    "adsTab": "Pubblicità"
+    "adsTab": "Pubblicità",
+    "vibeDaemonTab": "Vibe Daemons"
   },
   "app": {
     "minimizar": "Minimizza",

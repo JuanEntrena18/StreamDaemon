@@ -35,6 +35,7 @@ import { setupDiary } from './diary/index.js';
 import { setupAds } from './ads/index.js';
 import { setupObs } from './obs/index.js';
 import { setupLayouts } from './layouts/index.js';
+import { setupVibeDaemon } from './vibe-daemon/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -140,6 +141,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupAds(app);
   setupObs(app);
   setupLayouts(app);
+  setupVibeDaemon(app);
 
   app.get('/health', async () => ({ status: 'ok', timestamp: Date.now() }));
 

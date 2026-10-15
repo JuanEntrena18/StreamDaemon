@@ -221,6 +221,7 @@ export function App() {
         { id: 'hud' as Tab,        icon: '📊', label: s('hudTab') },
         { id: 'timer' as Tab,      icon: '⏱️', label: s('temporizadorTab') },
         { id: 'scoreboard' as Tab, icon: '🏆', label: s('scoreboardTab') },
+        { id: 'vibedaemon' as Tab, icon: '👹', label: s('vibeDaemonTab') },
         { id: 'alertsounds' as Tab, icon: '🔊', label: s('alertsoundsTab') },
         { id: 'avatars' as Tab, icon: '👾', label: s('avatarsTab') },
         { id: 'speedrun' as Tab, icon: '🏃', label: s('speedrunTab') },

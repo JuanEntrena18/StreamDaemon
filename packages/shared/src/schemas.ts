@@ -223,3 +223,94 @@ export const LayoutUpdateSchema = z.object({
   }).optional(),
   backgroundColor: z.string().optional(),
 });
+
+// ── Vibe Daemon ──
+
+export const VibeDaemonConditionSchema = z.object({
+  type: z.enum(['count', 'threshold', 'state']),
+  count: z.number().int().min(0).optional(),
+  threshold: z.number().min(0).optional(),
+  period: z.enum(['match', 'round', 'session', 'time_window']).optional(),
+  timeWindowSeconds: z.number().int().min(1).optional(),
+});
+
+export const VibeDaemonActionSchema = z.object({
+  type: z.enum(['media', 'sound', 'overlay', 'chat', 'tts']),
+  mediaUrl: z.string().max(500).optional(),
+  soundUrl: z.string().max(500).optional(),
+  overlayId: z.string().max(100).optional(),
+  message: z.string().max(500).optional(),
+  durationMs: z.number().int().min(100).max(60000).optional(),
+  volume: z.number().min(0).max(1).optional(),
+});
+
+export const VibeDaemonTriggerSchema = z.object({
+  id: z.string().min(1).max(100),
+  gameId: z.string().min(1).max(100),
+  name: z.string().min(1).max(100),
+  enabled: z.boolean(),
+  eventType: z.enum([
+    'kill',
+    'death',
+    'victory',
+    'kill_streak',
+    'victory_streak',
+    'low_health',
+    'low_shield',
+    'storm_shrinking',
+    'manual',
+  ]),
+  condition: VibeDaemonConditionSchema,
+  action: VibeDaemonActionSchema,
+  cooldownMs: z.number().int().min(0).optional(),
+});
+
+export const VibeDaemonConfigSchema = z.object({
+  enabled: z.boolean(),
+  triggers: z.array(VibeDaemonTriggerSchema),
+  hotkeys: z.object({
+    kill: z.string().max(100).optional(),
+    death: z.string().max(100).optional(),
+    victory: z.string().max(100).optional(),
+  }).optional(),
+});
+
+export const VibeDaemonEventSchema = z.object({
+  channel: z.string().min(1),
+  gameId: z.string().min(1),
+  eventType: VibeDaemonTriggerSchema.shape.eventType,
+  value: z.number().optional(),
+  metadata: z.record(z.unknown()).optional(),
+  timestamp: z.number().optional(),
+});
+
+// ── Vibe Daemon CV ──
+
+export const VibeCvRoiSchema = z.object({
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+  w: z.number().min(0.005).max(1),
+  h: z.number().min(0.005).max(1),
+});
+
+export const VibeCvConfigSchema = z.object({
+  enabled: z.boolean(),
+  sourceType: z.enum(['screen', 'window']),
+  windowTitleMatch: z.string().max(100),
+  captureFps: z.number().min(0.5).max(2),
+  shieldRoi: VibeCvRoiSchema,
+  healthRoi: VibeCvRoiSchema,
+  stormRoi: VibeCvRoiSchema,
+  shieldTriggerRatio: z.number().min(0).max(1),
+  shieldRecoveryRatio: z.number().min(0).max(1),
+  healthTriggerRatio: z.number().min(0).max(1),
+  healthRecoveryRatio: z.number().min(0).max(1),
+  stormTriggerRatio: z.number().min(0).max(1),
+  stormClearRatio: z.number().min(0).max(1),
+  consecutiveFrames: z.number().int().min(1).max(10),
+  cooldowns: z.object({
+    lowShieldMs: z.number().int().min(1000),
+    lowHealthMs: z.number().int().min(1000),
+    stormMs: z.number().int().min(1000),
+  }),
+});
