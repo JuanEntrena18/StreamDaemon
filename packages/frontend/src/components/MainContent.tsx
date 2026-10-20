@@ -24,6 +24,7 @@ const AlertSoundsPanel = lazy(() => import('./AlertSoundsPanel').then(m => ({ de
 const KpiPanel = lazy(() => import('./KpiPanel').then(m => ({ default: m.KpiPanel })));
 const BuilderPanel = lazy(() => import('./BuilderPanel').then(m => ({ default: m.BuilderPanel })));
 const AvatarsPanel = lazy(() => import('./AvatarsPanel').then(m => ({ default: m.AvatarsPanel })));
+const StreamAvatarPanel = lazy(() => import('./StreamAvatarPanel').then(m => ({ default: m.StreamAvatarPanel })));
 const SpeedrunPanel = lazy(() => import('./SpeedrunPanel').then(m => ({ default: m.SpeedrunPanel })));
 const CalendarPanel = lazy(() => import('./CalendarPanel').then(m => ({ default: m.CalendarPanel })));
 const DiaryPanel = lazy(() => import('./DiaryPanel').then(m => ({ default: m.DiaryPanel })));
@@ -83,6 +84,7 @@ export function MainContent({ activeTab, tabDirection, channel, alwaysOnTop, tog
       case 'alertsounds': return <AlertSoundsPanel channel={channel} />;
       case 'kpi':       return <KpiPanel channel={channel} />;
       case 'avatars':   return <AvatarsPanel channel={channel} />;
+      case 'stream-avatar': return <StreamAvatarPanel channel={channel} />;
       case 'speedrun':  return <SpeedrunPanel channel={channel} />;
       case 'calendar':  return <CalendarPanel channel={channel} />;
       case 'diary':     return <DiaryPanel channel={channel} />;

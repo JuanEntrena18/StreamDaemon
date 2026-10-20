@@ -42,7 +42,8 @@
     "calendarTab": "Calendar",
     "diaryTab": "Game Diary",
     "adsTab": "Advertisement",
-    "vibeDaemonTab": "Vibe Daemons"
+    "vibeDaemonTab": "Vibe Daemons",
+    "streamAvatarTab": "Live Avatar"
   },
   "app": {
     "minimizar": "Minimize",
@@ -1323,5 +1324,51 @@
     "overlayDesc": "Copy this URL and add it as a Browser Source in OBS (full size recommended, e.g. 1920x1080).",
     "betaInfoTitle": "BETA Feature",
     "betaInfoText": "The avatar system is in an experimental phase. Currently, it shows basic shapes that react to events with full physics, preparing the ground for the full sprites. It does not affect or break any other StreamDaemon functionality. If you encounter issues, you can disable it from the main switch."
+  },
+  "streamAvatar": {
+    "title": "Live Avatar",
+    "subtitle": "Display an animated avatar on screen that moves its mouth in sync with your microphone. Perfect to replace or complement your webcam.",
+    "enableLabel": "Enable avatar",
+    "enableDesc": "Enable the lip-sync avatar on the overlay.",
+    "audioTitle": "Microphone Audio",
+    "micDevice": "Input device",
+    "micDefault": "Default microphone",
+    "voiceDetector": "Voice detector",
+    "micSensitivity": "Microphone sensitivity",
+    "smoothing": "Movement smoothing",
+    "noiseGate": "Noise gate",
+    "avatarTitle": "Avatar",
+    "streamAvatarDefault": "Classic",
+    "streamAvatarDefaultDesc": "Friendly vector avatar with soft expressions.",
+    "streamAvatarCyber": "Cyber",
+    "streamAvatarCyberDesc": "Dark neon aesthetic for cyberpunk streams.",
+    "streamAvatarPixel": "Pixel Art",
+    "streamAvatarPixelDesc": "Retro look with flat colors and sharp edges.",
+    "streamAvatarFuture": "Futuristic",
+    "streamAvatarFutureDesc": "Robotic appearance with cool metallic tones.",
+    "streamAvatarDark": "Dark",
+    "streamAvatarDarkDesc": "Shadowy palette with pale skin and dark clothes.",
+    "previewTitle": "Preview",
+    "layoutTitle": "Position & Scale",
+    "scale": "Scale",
+    "offsetX": "Horizontal offset",
+    "offsetY": "Vertical offset",
+    "flipX": "Mirror horizontally",
+    "obsTitle": "OBS URL",
+    "obsDesc": "Add this URL as a Browser Source in OBS to show the avatar on your scene.",
+    "chromaKey": "Color background (chroma key)",
+    "chromaKeyDesc": "Useful for removing the background in OBS with a chroma key filter.",
+    "chromaKeyColor": "Background color",
+    "customAvatarTitle": "Custom avatar",
+    "customAvatarDesc": "Upload a ZIP with the PNG images: body.png, eyes-open.png, eyes-closed.png, mouth-closed.png, mouth-slight.png, mouth-open.png, mouth-wide.png and mouth-round.png.",
+    "uploadAvatar": "Upload avatar ZIP",
+    "uploading": "Uploading...",
+    "deleteAsset": "Delete avatar",
+    "copyUrl": "Copy URL",
+    "copied": "Copied!"
+  },
+  "obs": {
+    "streamAvatar": "Live Avatar",
+    "streamAvatarDesc": "Animated avatar with mouth movement synced to your microphone."
   }
 }

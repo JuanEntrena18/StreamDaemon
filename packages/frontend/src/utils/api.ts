@@ -78,3 +78,12 @@ export async function apiDelete(path: string, body?: unknown): Promise<Response>
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 }
+
+export async function apiUpload(path: string, file: File): Promise<Response> {
+  const formData = new FormData();
+  formData.append('file', file);
+  return apiFetch(path, {
+    method: 'POST',
+    body: formData,
+  });
+}

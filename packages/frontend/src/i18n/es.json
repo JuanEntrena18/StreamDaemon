@@ -42,7 +42,8 @@
     "calendarTab": "Calendario",
     "diaryTab": "Diario de Juegos",
     "adsTab": "Publicidad",
-    "vibeDaemonTab": "Vibe Daemons"
+    "vibeDaemonTab": "Vibe Daemons",
+    "streamAvatarTab": "Avatar en Directo"
   },
   "app": {
     "minimizar": "Minimizar",
@@ -1392,5 +1393,51 @@
     "overlayDesc": "Copia esta URL y añádela como Fuente de Navegador en OBS (se recomienda tamaño completo, ej. 1920x1080).",
     "betaInfoTitle": "Característica en BETA",
     "betaInfoText": "El sistema de avatares está en fase experimental. Actualmente, muestra formas básicas que reaccionan a los eventos y físicas completas, preparando el terreno para los sprites completos. No afecta ni rompe ninguna otra funcionalidad de StreamDaemon. Si encuentras problemas, puedes desactivarlo desde el interruptor principal."
+  },
+  "streamAvatar": {
+    "title": "Avatar en Directo",
+    "subtitle": "Muestra un avatar animado en pantalla que mueve la boca sincronizado con tu micrófono. Ideal para sustituir o complementar tu webcam.",
+    "enableLabel": "Activar avatar",
+    "enableDesc": "Habilita el avatar con lip-sync en el overlay.",
+    "audioTitle": "Audio del Micrófono",
+    "micDevice": "Dispositivo de entrada",
+    "micDefault": "Micrófono por defecto",
+    "voiceDetector": "Detector de voz",
+    "micSensitivity": "Sensibilidad del micrófono",
+    "smoothing": "Suavizado de movimiento",
+    "noiseGate": "Puerta de ruido",
+    "avatarTitle": "Avatar",
+    "streamAvatarDefault": "Clásico",
+    "streamAvatarDefaultDesc": "Avatar vectorial amigable con expresiones suaves.",
+    "streamAvatarCyber": "Cyber",
+    "streamAvatarCyberDesc": "Estética neón oscura para streams cyberpunk.",
+    "streamAvatarPixel": "Pixel Art",
+    "streamAvatarPixelDesc": "Estética retro con colores planos y bordes nítidos.",
+    "streamAvatarFuture": "Futurista",
+    "streamAvatarFutureDesc": "Apariencia robótica con tonos fríos y metálicos.",
+    "streamAvatarDark": "Oscuro",
+    "streamAvatarDarkDesc": "Paleta sombría con piel pálida y ropa oscura.",
+    "previewTitle": "Vista previa",
+    "layoutTitle": "Posición y Escala",
+    "scale": "Escala",
+    "offsetX": "Desplazamiento horizontal",
+    "offsetY": "Desplazamiento vertical",
+    "flipX": "Espejo horizontal",
+    "obsTitle": "URL para OBS",
+    "obsDesc": "Añade esta URL como Fuente de Navegador en OBS para mostrar el avatar en tu escena.",
+    "chromaKey": "Fondo de color (chroma key)",
+    "chromaKeyDesc": "Útil para eliminar el fondo en OBS con un filtro de chroma key.",
+    "chromaKeyColor": "Color del fondo",
+    "customAvatarTitle": "Avatar personalizado",
+    "customAvatarDesc": "Sube un ZIP con las imágenes PNG del avatar: body.png, eyes-open.png, eyes-closed.png, mouth-closed.png, mouth-slight.png, mouth-open.png, mouth-wide.png y mouth-round.png.",
+    "uploadAvatar": "Subir avatar ZIP",
+    "uploading": "Subiendo...",
+    "deleteAsset": "Eliminar avatar",
+    "copyUrl": "Copiar URL",
+    "copied": "¡Copiado!"
+  },
+  "obs": {
+    "streamAvatar": "Avatar en Directo",
+    "streamAvatarDesc": "Avatar animado con movimiento de boca sincronizado al micrófono."
   }
 }

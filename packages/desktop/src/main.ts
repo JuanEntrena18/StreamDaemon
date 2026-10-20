@@ -21,6 +21,7 @@ const _require = createRequire(import.meta.url);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = !app.isPackaged;
+if (!isDev && !process.env.NODE_ENV) process.env.NODE_ENV = 'production';
 
 redirectConsoleToLogger();
 
@@ -210,8 +211,10 @@ function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
-    minWidth: 900,
-    minHeight: 600,
+    // Allow snapping to half of a 1080px-wide vertical monitor (~540px)
+    // while still leaving enough room for the mobile/responsive layout.
+    minWidth: 540,
+    minHeight: 480,
     show: true,
     frame: false,
     backgroundColor: '#0a0a1a',

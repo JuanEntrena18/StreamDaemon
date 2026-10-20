@@ -1,4 +1,4 @@
-import Fastify from 'fastify';
+import Fastify, { type FastifyBaseLogger } from 'fastify';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
@@ -28,6 +28,7 @@ import { setupFortnite } from './fortnite/index.js';
 import { setupSecurity } from './security/index.js';
 import { setupAlertSounds } from './alert-sounds/index.js';
 import { setupAvatars } from './avatars/index.js';
+import { setupStreamAvatar } from './stream-avatar/index.js';
 import { setupKpi } from './kpi/index.js';
 import { setupSpeedrun } from './speedrun/index.js';
 import { setupCalendar } from './calendar/index.js';
@@ -41,7 +42,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function startServer(opts?: { port?: number; frontendDir?: string }) {
   redirectConsoleToLogger();
-  const app = Fastify({ logger });
+  const app = Fastify({ loggerInstance: logger as FastifyBaseLogger });
 
   const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'];
   await app.register(cors, { origin: allowedOrigins, credentials: false });
@@ -134,6 +135,7 @@ export async function startServer(opts?: { port?: number; frontendDir?: string }
   setupSecurity(app);
   setupAlertSounds(app);
   setupAvatars(app);
+  setupStreamAvatar(app);
   setupKpi(app);
   setupSpeedrun(app);
   setupCalendar(app);

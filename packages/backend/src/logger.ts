@@ -1,10 +1,26 @@
 import pino from 'pino';
+import { createRequire } from 'module';
 
-const isDev = process.env.NODE_ENV !== 'production';
+// Electron empaquetado no define NODE_ENV, y pino-pretty (devDependency) no se incluye
+// en el instalador. Además, los transports de pino usan worker threads que fallan dentro de asar.
+const isPackagedElectron =
+  !!process.versions.electron &&
+  !(process as NodeJS.Process & { defaultApp?: boolean }).defaultApp &&
+  !process.env.ELECTRON_DEV;
+const isDev = process.env.NODE_ENV !== 'production' && !isPackagedElectron;
+
+function canUsePretty(): boolean {
+  try {
+    createRequire(import.meta.url).resolve('pino-pretty');
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export const logger = pino({
   level: process.env.LOG_LEVEL ?? (isDev ? 'debug' : 'info'),
-  transport: isDev
+  transport: isDev && canUsePretty()
     ? {
         target: 'pino-pretty',
         options: {

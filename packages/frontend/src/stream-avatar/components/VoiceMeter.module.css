@@ -1,0 +1,54 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 32px;
+}
+
+.bar {
+  flex: 1;
+  height: 100%;
+  background: var(--sf-border);
+  border-radius: 2px;
+  transition: background 0.05s ease, opacity 0.05s ease;
+}
+
+.barActive {
+  background: linear-gradient(to top, var(--sf-primary), var(--sf-accent));
+}
+
+.labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+}
+
+.label {
+  color: var(--sf-text-2);
+}
+
+.value {
+  color: var(--sf-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.peakBar {
+  width: 100%;
+  height: 4px;
+  background: var(--sf-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.peakFill {
+  height: 100%;
+  background: linear-gradient(to right, var(--sf-primary), var(--sf-accent));
+  transition: width 0.1s ease;
+}

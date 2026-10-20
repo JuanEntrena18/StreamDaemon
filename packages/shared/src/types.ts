@@ -285,6 +285,40 @@ export interface ViewerSnapshot {
   uniqueChatters?: number;
 }
 
+// ── StreamAvatar ──
+
+export type StreamAvatarViseme =
+  | 'closed'
+  | 'slight'
+  | 'open'
+  | 'wide'
+  | 'round'
+  | 'small'
+  | 'narrow';
+
+export interface StreamAvatarConfig {
+  enabled: boolean;
+  audioDeviceId: string;
+  micSensitivity: number;
+  smoothing: number;
+  noiseGate: number;
+  avatarId: string;
+  scale: number;
+  flipX: boolean;
+  offsetX: number;
+  offsetY: number;
+  chromaKey: boolean;
+  chromaKeyColor: string;
+  transparentBg: boolean;
+}
+
+export interface StreamAvatarState {
+  isSpeaking: boolean;
+  viseme: StreamAvatarViseme;
+  volume: number;
+  audioDeviceId: string | null;
+}
+
 export interface KpiOverview {
   channel: string;
   followers: number;

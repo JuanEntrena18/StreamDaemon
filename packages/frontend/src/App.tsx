@@ -224,6 +224,7 @@ export function App() {
         { id: 'vibedaemon' as Tab, icon: '👹', label: s('vibeDaemonTab') },
         { id: 'alertsounds' as Tab, icon: '🔊', label: s('alertsoundsTab') },
         { id: 'avatars' as Tab, icon: '👾', label: s('avatarsTab') },
+        { id: 'stream-avatar' as Tab, icon: '🎭', label: s('streamAvatarTab') },
         { id: 'speedrun' as Tab, icon: '🏃', label: s('speedrunTab') },
         { id: 'ads' as Tab, icon: '📢', label: s('adsTab') },
       ]},

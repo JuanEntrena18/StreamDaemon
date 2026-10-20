@@ -314,3 +314,21 @@ export const VibeCvConfigSchema = z.object({
     stormMs: z.number().int().min(1000),
   }),
 });
+
+// ── StreamAvatar ──
+
+export const StreamAvatarConfigSchema = z.object({
+  enabled: z.boolean().default(false),
+  audioDeviceId: z.string().default('default'),
+  micSensitivity: z.number().min(0.1).max(5).default(1.5),
+  smoothing: z.number().min(0).max(1).default(0.35),
+  noiseGate: z.number().min(0).max(0.5).default(0.02),
+  avatarId: z.string().default('default'),
+  scale: z.number().min(0.1).max(3).default(1),
+  flipX: z.boolean().default(false),
+  offsetX: z.number().min(-1).max(1).default(0),
+  offsetY: z.number().min(-1).max(1).default(0),
+  chromaKey: z.boolean().default(false),
+  chromaKeyColor: z.string().default('#00ff00'),
+  transparentBg: z.boolean().default(true),
+});

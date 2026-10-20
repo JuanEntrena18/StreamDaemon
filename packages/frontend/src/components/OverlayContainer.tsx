@@ -15,6 +15,7 @@ import { AllianceChatOverlay } from './AllianceChatOverlay';
 import { CyanChatOverlay } from './CyanChatOverlay';
 import { ChannelNotifications } from './ChannelNotifications';
 import { AvatarOverlay } from './AvatarOverlay';
+import { StreamAvatarOverlay } from './StreamAvatarOverlay.js';
 import styles from './OverlayContainer.module.css';
 
 const LS_KEY = 'streamforger-overlay-settings';
@@ -68,6 +69,8 @@ function OverlayContent({ mode, theme, channel, demo, fontFamily, fontSize, bgMo
       return <CyanChatOverlay channel={channel} />;
     case 'avatars':
       return <AvatarOverlay channel={channel} demo={demo} />;
+    case 'stream-avatar':
+      return <StreamAvatarOverlay channel={channel} demo={demo} />;
     case 'chat':
     default:
       if (theme === 'subnautica2') return <Subnautica2ChatOverlay channel={channel} />;
