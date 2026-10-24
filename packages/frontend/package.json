@@ -1,6 +1,6 @@
 {
   "name": "@streamdaemon/frontend",
-  "version": "0.5.0",
+  "version": "0.5.5",
   "private": true,
   "type": "module",
   "scripts": {

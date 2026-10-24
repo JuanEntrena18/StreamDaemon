@@ -254,7 +254,14 @@ export class AvatarEngine {
     this.physics.destroy();
     clearCooldowns();
 
-    this.app.destroy(true, { children: true });
+    try {
+      if (typeof (this.app as unknown as { _cancelResize?: () => void })._cancelResize !== 'function') {
+        (this.app as unknown as { _cancelResize?: () => void })._cancelResize = () => {};
+      }
+      this.app.destroy(true, { children: true });
+    } catch (e) {
+      console.warn('[AvatarEngine] Error during destroy:', e);
+    }
     this.initialized = false;
   }
 }

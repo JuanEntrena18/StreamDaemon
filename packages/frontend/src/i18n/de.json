@@ -49,7 +49,7 @@
     "siempreEncima": "🎮 Immer im Vordergrund",
     "desactivarSiempreEncima": "Immer im Vordergrund deaktivieren",
     "activarSiempreEncima": "Immer im Vordergrund aktivieren",
-    "version": "v0.5.0 · Open Source",
+    "version": "v0.5.5 · Open Source",
     "panelControl": "Dashboard · StreamDaemon",
     "hash": "#",
     "placeholderCanal": "Twitch-Kanal...",
@@ -187,7 +187,7 @@
     "siempreEncimaDesc": "Hält das Fenster über anderen Anwendungen",
     "acercaDe": "📋 Über",
     "appName": "StreamDaemon",
-    "appVersion": "v0.5.0 · by Cyber Haute Couture",
+    "appVersion": "v0.5.5 · by Cyber Haute Couture",
     "appDesc": "Modulare Open-Source-Anwendung für Content-Ersteller. Verwalte deinen Twitch-Kanal mit benutzerdefinierten Overlays, interaktiven Gewinnspielen, Vorhersagen und Echtzeit-Chat.",
     "checkUpdate": "Nach Updates suchen",
     "updateChecking": "Prüfe…",
@@ -1014,6 +1014,7 @@
     "esperandoDatos": "Warte auf Daten..."
   },
   "splash": {
+    "tagline": "Open-Source-Streaming-Tools, geschmiedet für Creator.",
     "apoya": "☕ Unterstütze die StreamDaemon-Entwicklung hier",
     "cargando": "Verbindung zum Backend…",
     "conectado": "Verbunden!",

@@ -77,13 +77,13 @@ export function SplashScreen({ onReady }: Props) {
 
         <div className={styles.titleWrap}>
           <h1 className={styles.title}>StreamDaemon</h1>
-          <p className={styles.tagline}>Open-source stream tools, forged for creators.</p>
+          <p className={styles.tagline}>{t('splash.tagline')}</p>
         </div>
 
         <div className={styles.divider} />
 
         <div className={styles.version}>
-          <div>v0.4.2</div>
+          <div>v0.5.5</div>
           <div>by Cyber Haute Couture</div>
         </div>
 

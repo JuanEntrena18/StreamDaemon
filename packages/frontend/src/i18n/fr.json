@@ -49,7 +49,7 @@
     "siempreEncima": "🎮 Toujours au premier plan",
     "desactivarSiempreEncima": "Désactiver toujours au premier plan",
     "activarSiempreEncima": "Activer toujours au premier plan",
-    "version": "v0.5.0 · Open Source",
+    "version": "v0.5.5 · Open Source",
     "panelControl": "Tableau de bord · StreamDaemon",
     "hash": "#",
     "placeholderCanal": "chaîne twitch...",
@@ -187,7 +187,7 @@
     "siempreEncimaDesc": "Maintient la fenêtre au-dessus des autres applications",
     "acercaDe": "📋 À propos",
     "appName": "StreamDaemon",
-    "appVersion": "v0.5.0 · by Cyber Haute Couture",
+    "appVersion": "v0.5.5 · by Cyber Haute Couture",
     "appDesc": "Application modulaire open-source pour créateurs de contenu. Gérez votre chaîne Twitch avec des overlays personnalisés, giveaways, prédictions et chat en temps réel.",
     "checkUpdate": "Vérifier les mises à jour",
     "updateChecking": "Vérification…",
@@ -1014,6 +1014,7 @@
     "esperandoDatos": "En attente de données..."
   },
   "splash": {
+    "tagline": "Outils open-source pour le streaming, forgés pour les créateurs.",
     "apoya": "☕ Soutenez le développement de StreamDaemon ici",
     "cargando": "Connexion au backend…",
     "conectado": "Connecté !",

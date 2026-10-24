@@ -74,6 +74,8 @@ export class PixiAvatarRenderer {
   private mouthOpen = 0;
   private config: StreamAvatarConfig;
   private colors: AvatarColors;
+  private isDestroyed = false;
+  private initPromise: Promise<void> | null = null;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -84,40 +86,75 @@ export class PixiAvatarRenderer {
   }
 
   async init(): Promise<void> {
-    if (this.app) return;
+    if (this.isDestroyed) return;
+    if (this.initPromise) return this.initPromise;
 
-    const parent = this.canvas.parentElement;
-    const width = parent?.clientWidth ?? this.canvas.width ?? 400;
-    const height = parent?.clientHeight ?? this.canvas.height ?? 400;
+    this.initPromise = (async () => {
+      const parent = this.canvas.parentElement;
+      const width = parent?.clientWidth ?? this.canvas.width ?? 400;
+      const height = parent?.clientHeight ?? this.canvas.height ?? 400;
 
-    this.app = new PIXI.Application();
-    await this.app.init({
-      canvas: this.canvas,
-      width,
-      height,
-      backgroundAlpha: this.config.transparentBg ? 0 : 1,
-      backgroundColor: this.config.chromaKey ? this.hexToNumber(this.config.chromaKeyColor) : 0x000000,
-      antialias: true,
-      resolution: Math.min(window.devicePixelRatio, 2),
-      autoDensity: true,
-      preference: 'webgl',
-    });
+      const app = new PIXI.Application();
+      this.app = app;
 
-    this.buildAvatar();
-    this.app.stage.addChild(this.container);
-    this.applyTransform();
+      // Safe patch against PixiJS v8 ResizePlugin bug if destroy is called before init finishes
+      if (typeof (app as unknown as { _cancelResize?: () => void })._cancelResize !== 'function') {
+        (app as unknown as { _cancelResize?: () => void })._cancelResize = () => {};
+      }
 
-    this.app.ticker.add(() => this.onTick());
+      try {
+        await app.init({
+          canvas: this.canvas,
+          width,
+          height,
+          backgroundAlpha: this.config.transparentBg ? 0 : 1,
+          backgroundColor: this.config.chromaKey ? this.hexToNumber(this.config.chromaKeyColor) : 0x000000,
+          antialias: true,
+          resolution: Math.min(window.devicePixelRatio, 2),
+          autoDensity: true,
+          preference: 'webgl',
+        });
+      } catch (err) {
+        if (this.isDestroyed) return;
+        throw err;
+      }
+
+      if (this.isDestroyed) {
+        this.safeDestroyApp(app);
+        return;
+      }
+
+      this.buildAvatar();
+      app.stage.addChild(this.container);
+      this.applyTransform();
+
+      app.ticker.add(() => this.onTick());
+    })();
+
+    return this.initPromise;
   }
 
   destroy(): void {
+    this.isDestroyed = true;
     if (this.app) {
-      this.app.destroy(true, { children: true, texture: true });
+      this.safeDestroyApp(this.app);
       this.app = null;
     }
   }
 
+  private safeDestroyApp(app: PIXI.Application): void {
+    try {
+      if (typeof (app as unknown as { _cancelResize?: () => void })._cancelResize !== 'function') {
+        (app as unknown as { _cancelResize?: () => void })._cancelResize = () => {};
+      }
+      app.destroy(true, { children: true, texture: true });
+    } catch (err) {
+      console.warn('[PixiAvatarRenderer] Error during destroy:', err);
+    }
+  }
+
   updateConfig(config: StreamAvatarConfig): void {
+    if (this.isDestroyed) return;
     const avatarChanged = this.config.avatarId !== config.avatarId;
     this.config = config;
     this.colors = this.resolveColors(config.avatarId);
@@ -213,6 +250,7 @@ export class PixiAvatarRenderer {
   }
 
   private onTick(): void {
+    if (this.isDestroyed || !this.app) return;
     // Blink logic
     this.blinkState.timer += this.app?.ticker.deltaMS ?? 16;
 

@@ -45,13 +45,18 @@ export function StreamAvatarPanel({ channel }: Props) {
   useEffect(() => {
     if (!canvasRef.current || loading) return;
 
-    rendererRef.current?.destroy();
+    try {
+      rendererRef.current?.destroy();
+    } catch {}
+
     const renderer = createAvatarRenderer(canvasRef.current, config);
     rendererRef.current = renderer;
     renderer.init().catch((e) => console.error('[stream-avatar] Preview init failed', e));
 
     return () => {
-      rendererRef.current?.destroy();
+      try {
+        rendererRef.current?.destroy();
+      } catch {}
       rendererRef.current = null;
     };
   }, [loading, config.avatarId]);
@@ -112,7 +117,7 @@ export function StreamAvatarPanel({ channel }: Props) {
   }, [overlayUrl]);
 
   if (loading) {
-    return <div className={styles.container}>{t('app.loading')}</div>;
+    return <div className={styles.container}>{t('common.loading')}</div>;
   }
 
   return (

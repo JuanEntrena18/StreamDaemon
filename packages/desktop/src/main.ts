@@ -588,11 +588,28 @@ app.whenReady().then(async () => {
     },
   );
 
+function getInitialLoadingHtml(): string {
+  const locale = (app.getLocale() || '').toLowerCase();
+  let text = 'Loading StreamDaemon...';
+  if (locale.startsWith('es')) {
+    text = 'Cargando StreamDaemon...';
+  } else if (locale.startsWith('fr')) {
+    text = 'Chargement de StreamDaemon...';
+  } else if (locale.startsWith('de')) {
+    text = 'StreamDaemon wird geladen...';
+  } else if (locale.startsWith('it')) {
+    text = 'Caricamento di StreamDaemon...';
+  }
+
+  const html = `<!doctype html><html><head><meta charset="utf-8"/><style>body{margin:0;background:#0a0a1a;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;user-select:none;overflow:hidden}</style></head><body><svg width="48" height="48" viewBox="0 0 24 24" fill="#7c3aed"><path d="M12 4a6 6 0 0 0 6 6V18a6 6 0 0 1-12 0V0a10 10 0 0 1 10 0h-.02a8 8 0 0 0-7.92 0A8 8 0 0 0 12 4zm0 2a4 4 0 0 1 4 4v8a4 4 0 0 1-8 0V6a6 6 0 0 1 6-6z"/><animateTransform attributeName="transform" type="rotate" from="0 0 12 12" to="360 0 12 12" dur="1s" repeatCount="indefinite"/></svg><p style="margin-top:1rem;color:#a4a8b6;font-size:0.95rem;letter-spacing:0.02em">${text}</p></body></html>`;
+  return `data:text/html;base64,${Buffer.from(html, 'utf-8').toString('base64')}`;
+}
+
   // Open the main window immediately with a loading screen so the UI is responsive
   // while the bundled backend starts in the background.
   createMainWindow();
   if (mainWindow) {
-    await mainWindow.loadURL('data:text/html;base64,PGh0bWw+PGhlYWQ+PHN0eWxlPmJvZHl7bWFyZ2luOjA7YmFja2dyb3VuZDojMGEwYTFhO2NvbG9yOiNmZmY7Zm9udC1mYW1pbHk6c3lzdGVtLXVpO2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7aGVpZ2h0OjEwMHZofTwvc3R5bGU+PC9oZWFkPjxib2R5Pjxzdmcgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiM3YzNhZWQiPjxwYXRoIGQ9Ik0xMiA0YTYgNiAwIDAgMCA2IDZWMThhNiA2IDAgMCAxLTEyIDBWMGExMCAxMCAwIDAgMSAxMCAwaC0uMDJhOCA4IDAgMCAwLTcuOTIgMEE4IDggMCAwIDAgMTIgNHptMCAyYTQgNCAwIDAgMSA0IDR2OGE0IDQgMCAwIDEtOCAwVjZhNiA2IDAgMCAxIDYtNnoiLz48YW5pbWF0ZVRyYW5zZm9ybSBhdHRyaWJ1dGVOYW1lPSJ0cmFuc2Zvcm0iIHR5cGU9InJvdGF0ZSIgZnJvbT0iMCAwIDEyIDEyIiB0bz0iMzYwIDAgMTIgMTIiIGR1cj0iMXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIi8+PC9zdmc+PHAgc3R5bGU9Im1hcmdpbi10b3A6MXJlbTtjb2xvcjojYTRhOGI2Ij5DdWFyZ2FuZG8gU3RyZWFtRGFlbW9uLi4uPC9wPjwvYm9keT48L2h0bWw+');
+    await mainWindow.loadURL(getInitialLoadingHtml());
   }
 
   await startBackend();
