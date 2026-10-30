@@ -3,6 +3,7 @@ import { useTranslation } from '../i18n/context';
 import { apiGet, apiPost, apiPut } from '../utils/api';
 import { ConfirmModal } from './ConfirmModal';
 import { EmptyState } from './EmptyState';
+import { IconTimer } from './icons/icons';
 import styles from './CommandsPanel.module.css';
 
 interface Props {
@@ -148,7 +149,7 @@ export function TimersTab({ channel }: Props) {
       <div className="glass-card" style={{ padding: '1rem' }}>
         {timers.length === 0 ? (
           <EmptyState
-            icon="⏱️"
+            icon={<IconTimer size={18} />}
             title={t('commands.timersTitle') || 'Timers'}
             description={channel ? (t('commands.emptyTimers') || 'Crea tu primer timer arriba.') : (t('commands.emptyChannel') || 'Conecta un canal.')}
             actionLabel={!channel ? (t('commands.emptyAction') || 'Ir a Configuración') : undefined}

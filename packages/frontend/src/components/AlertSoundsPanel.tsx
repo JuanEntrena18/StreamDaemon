@@ -163,9 +163,9 @@ export function AlertSoundsPanel({ channel }: Props) {
                   disabled={uploading === key}
                   className={`sf-btn ${styles.uploadBtn}`}
                   style={{
-                    border: `1px solid #7c3aed66`,
-                    background: `${'#7c3aed'}18`,
-                    color: '#7c3aed',
+                    border: '1px solid color-mix(in srgb, var(--sf-primary) 40%, transparent)',
+                    background: 'color-mix(in srgb, var(--sf-primary) 10%, transparent)',
+                    color: 'var(--sf-primary-light)',
                   }}
                 >
                   {uploading === key ? 'Subiendo...' : sounds[key] ? '🔄 Cambiar' : '📂 Seleccionar MP3'}

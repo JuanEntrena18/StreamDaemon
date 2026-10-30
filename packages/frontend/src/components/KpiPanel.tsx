@@ -414,7 +414,7 @@ function RecordsTab({ channel }: { channel: string }) {
               <span style={{ fontSize: '2rem' }}>{r.icon}</span>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span className={styles.kpiLabel}>{r.label}</span>
-                <span className={styles.kpiValue} style={{ color: '#fff' }}>{r.value}</span>
+                <span className={styles.kpiValue}>{r.value}</span>
               </div>
             </div>
             {r.streamTitle && <div style={{ fontSize: '0.85rem', color: 'var(--sf-text-2)', marginTop: '0.5rem' }}>{r.streamTitle}</div>}

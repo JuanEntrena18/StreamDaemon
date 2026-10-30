@@ -49,6 +49,19 @@ function interpolate(str: string, params?: Record<string, string | number>): str
   });
 }
 
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return v != null && typeof v === 'object' && !Array.isArray(v);
+}
+
+function deepMerge(base: Record<string, unknown>, override: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...base };
+  for (const [k, v] of Object.entries(override)) {
+    const prev = out[k];
+    out[k] = isPlainObject(prev) && isPlainObject(v) ? deepMerge(prev, v) : v;
+  }
+  return out;
+}
+
 const localeModules: Record<Locale, () => Promise<{ default: Record<string, unknown> }>> = {
   es: () => import('./es.json'),
   en: () => import('./en.json'),
@@ -75,7 +88,7 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
     const base = localeModules[locale]();
     const fallback = locale === 'es' ? Promise.resolve({ default: {} }) : localeModules.es();
     Promise.all([base, fallback]).then(([baseMod, fallbackMod]) => {
-      setDict({ ...fallbackMod.default, ...baseMod.default });
+      setDict(deepMerge(fallbackMod.default, baseMod.default));
     });
   }, [locale]);
 

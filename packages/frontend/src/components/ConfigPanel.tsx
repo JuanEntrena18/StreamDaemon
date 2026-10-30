@@ -7,6 +7,7 @@ import { apiGet, apiPost } from '../utils/api';
 import { ConfirmModal } from './ConfirmModal';
 import { Logo } from './Logo';
 import { Toggle } from './Toggle';
+import { APP_VERSION } from '../version';
 import styles from './ConfigPanel.module.css';
 
 interface Props {
@@ -85,7 +86,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
       if (!r.ok) throw new Error('fetch failed');
       const data = await r.json();
       const latest = (data.tag_name || '').replace(/^v/i, '');
-      const current = t('config.appVersion').replace(/^v/i, '').split(' ·')[0];
+      const current = APP_VERSION;
       if (latest && latest !== current) {
         setUpdateVersion(data.tag_name);
         setUpdateStatus('available');
@@ -228,7 +229,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
                   {t('config.authTitle')}
                 </p>
                 <ol style={{ fontSize: '0.82rem', color: 'var(--sf-text-2)', lineHeight: 1.8, paddingLeft: '1.25rem', marginBottom: '1rem' }}>
-                  <li>{t('config.authAbre')} <strong style={{ color: '#a78bfa' }}>{deviceState.verificationUri}</strong> {t('config.authEnNavegador')}</li>
+                  <li>{t('config.authAbre')} <strong style={{ color: 'var(--sf-primary-light)' }}>{deviceState.verificationUri}</strong> {t('config.authEnNavegador')}</li>
                   <li>{t('config.authCodigo')} <strong className={styles.authCode}>{deviceState.userCode}</strong></li>
                   <li>{t('config.authInstrucciones')}</li>
                 </ol>
@@ -250,7 +251,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
                     onClick={cancelDeviceLogin}
                     className="sf-btn"
                     style={{
-                      background: 'rgba(255,255,255,0.06)',
+                      background: 'var(--sf-surface-hover)',
                       color: 'var(--sf-text-2)', fontSize: '0.78rem',
                       padding: '0.4rem 0.875rem',
                     }}
@@ -368,7 +369,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
                   {obsConnecting ? '...' : t('obs.obsWsConnect')}
                 </button>
               </div>
-              {obsError && <p className="text-xs" style={{ color: '#ef4444' }}>{obsError}</p>}
+              {obsError && <p className="text-xs" style={{ color: 'var(--sf-danger)' }}>{obsError}</p>}
             </>
           ) : (
             <div className="flex-row flex-row--gap-sm" style={{ alignItems: 'center' }}>
@@ -420,7 +421,7 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
               {t('config.appName')}
             </div>
             <div className="text-xs text-dim" style={{ marginTop: '2px' }}>
-              {t('config.appVersion')}
+              {`v${APP_VERSION} · by Cyber Haute Couture`}
             </div>
           </div>
         </div>
@@ -434,15 +435,15 @@ export function ConfigPanel({ channel, alwaysOnTop, toggleAlwaysOnTop }: Props) 
             {updateStatus === 'checking' ? t('config.updateChecking') : t('config.checkUpdate')}
           </button>
           {updateStatus === 'uptodate' && (
-            <span className="text-xs" style={{ color: '#4ade80' }}>{t('config.updateUpToDate')}</span>
+            <span className="text-xs" style={{ color: 'var(--sf-success)' }}>{t('config.updateUpToDate')}</span>
           )}
           {updateStatus === 'available' && (
-            <span className="text-xs" style={{ color: '#fbbf24' }}>
+            <span className="text-xs" style={{ color: 'var(--sf-warning)' }}>
               {t('config.updateAvailable', { version: updateVersion })}
             </span>
           )}
           {updateStatus === 'error' && (
-            <span className="text-xs" style={{ color: '#f87171' }}>{t('config.updateError')}</span>
+            <span className="text-xs" style={{ color: 'var(--sf-danger)' }}>{t('config.updateError')}</span>
           )}
         </div>
 

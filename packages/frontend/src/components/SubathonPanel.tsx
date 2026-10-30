@@ -5,6 +5,7 @@ import { apiGet, apiPost, OVERLAY_BASE_URL } from '../utils/api';
 import { ConfirmModal } from './ConfirmModal';
 import { Toggle } from './Toggle';
 import { EmptyState } from './EmptyState';
+import { IconSubathon } from './icons/icons';
 import type { SubathonState, SubathonAction } from '@streamdaemon/shared';
 import styles from './SubathonPanel.module.css';
 
@@ -397,7 +398,7 @@ export function SubathonPanel({ channel }: Props) {
           </div>
         ) : (
           <EmptyState
-            icon="⏳"
+            icon={<IconSubathon size={18} />}
             title={t('subathon.emptyTitle') || 'Sin actividad'}
             description={t('subathon.emptyDesc') || 'Aún no hay acciones registradas. ¡Inicia el subathon y espera a que tu comunidad participe!'}
           />

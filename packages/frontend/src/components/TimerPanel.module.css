@@ -44,7 +44,7 @@
   height: 4px;
   border-radius: 99px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--sf-surface-elevated);
   margin-bottom: 0.75rem;
 }
 

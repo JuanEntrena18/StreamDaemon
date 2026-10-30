@@ -62,13 +62,13 @@ export function StreamList({ streams, expandedStream, onToggleExpand }: Props) {
                 </div>
                 <div className={styles.streamGains}>
                   {s.followersGained > 0 && (
-                    <span style={{ fontSize: '0.72rem', color: '#f87171' }}>+{s.followersGained} ❤️</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--sf-data-red)' }}>+{s.followersGained} ❤️</span>
                   )}
                   {s.subsGained > 0 && (
-                    <span style={{ fontSize: '0.72rem', color: '#a78bfa' }}>+{s.subsGained} ⭐</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--sf-data-violet)' }}>+{s.subsGained} ⭐</span>
                   )}
                   {s.bitsDonated > 0 && (
-                    <span style={{ fontSize: '0.72rem', color: '#fbbf24' }}>+{s.bitsDonated} 💎</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--sf-data-amber)' }}>+{s.bitsDonated} 💎</span>
                   )}
                 </div>
                 <span className={styles.streamArrow} style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }}>

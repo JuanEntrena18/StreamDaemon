@@ -191,8 +191,8 @@
 
 .statusDotActive {
   composes: statusDot;
-  background: #10b981;
-  box-shadow: 0 0 6px #10b981;
+  background: var(--sf-success);
+  box-shadow: 0 0 6px var(--sf-success);
 }
 
 .statusDotInactive {
@@ -388,7 +388,7 @@
 .categoryCount {
   font-size: 0.7rem;
   color: var(--sf-text-3);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--sf-surface-hover);
   padding: 0.1rem 0.55rem;
   border-radius: 999px;
   border: 1px solid var(--sf-border);

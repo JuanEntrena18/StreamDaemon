@@ -6,6 +6,7 @@ import { useTranslation } from '../i18n/context';
 import { useChat, type ChatMsg } from '../contexts/ChatContext';
 import { ConfirmModal } from './ConfirmModal';
 import { EmptyState } from './EmptyState';
+import { IconChat, IconInbox } from './icons/icons';
 import { ChatSoundSelector } from './ChatSoundSelector';
 import { ChatTtsControls } from './ChatTtsControls';
 import { ChatGreetingConfig } from './ChatGreetingConfig';
@@ -296,7 +297,7 @@ export function ChatPanel({ channel }: Props) {
       <div className={`glass-card ${styles.msgContainer}`} ref={listRef} aria-live="polite">
         {!channel ? (
           <EmptyState 
-            icon="💬"
+            icon={<IconChat size={18} />}
             title={t('chat.emptyStateTitle') || 'Conecta a tu canal'}
             description={t('chat.emptyStateDesc') || 'Introduce el nombre de tu canal en la barra superior o ve a Configuración para iniciar sesión.'}
             actionLabel={t('chat.emptyStateBtn') || 'Ir a Configuración'}
@@ -304,7 +305,7 @@ export function ChatPanel({ channel }: Props) {
           />
         ) : messages.length === 0 ? (
           <EmptyState 
-            icon="📭"
+            icon={<IconInbox size={18} />}
             title={t('chat.emptyMessagesTitle') || 'El chat está tranquilo'}
             description={t('chat.waitingMessages') || 'Esperando mensajes... ¡Rompe el hielo!'}
           />
@@ -396,7 +397,10 @@ export function ChatPanel({ channel }: Props) {
       {/* Info bar */}
       <div className={styles.infoBar}>
         <span>{t('chat.conectadoA')} <strong style={{ color: 'var(--sf-text-2)' }}>#{channel || '—'}</strong></span>
-        <span>{messages.length} {t('chat.mensajes')} · {connected ? '🟢' : '🔴'}</span>
+        <span className={styles.infoRight}>
+          {messages.length} {t('chat.mensajes')}
+          <span className={`${styles.infoDot} ${connected ? styles.infoDotOn : ''}`} />
+        </span>
       </div>
 
       <ConfirmModal

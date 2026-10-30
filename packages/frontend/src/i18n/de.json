@@ -40,7 +40,8 @@
     "calendarTab": "Kalender",
     "diaryTab": "Game-Tagebuch",
     "adsTab": "Werbung",
-    "vibeDaemonTab": "Vibe Daemons"
+    "vibeDaemonTab": "Vibe Daemons",
+    "streamAvatarTab": "Live-Avatar"
   },
   "app": {
     "minimizar": "Minimieren",
@@ -49,7 +50,7 @@
     "siempreEncima": "🎮 Immer im Vordergrund",
     "desactivarSiempreEncima": "Immer im Vordergrund deaktivieren",
     "activarSiempreEncima": "Immer im Vordergrund aktivieren",
-    "version": "v0.5.5 · Open Source",
+    "version": "v0.6.0 · Open Source",
     "panelControl": "Dashboard · StreamDaemon",
     "hash": "#",
     "placeholderCanal": "Twitch-Kanal...",
@@ -59,14 +60,23 @@
     "conectado": "Verbunden",
     "desconectado": "Getrennt",
     "colapsarSidebar": "Sidebar einklappen",
-    "expandirSidebar": "Sidebar ausklappen"
+    "expandirSidebar": "Sidebar ausklappen",
+    "toggleTheme": "Design wechseln"
+  },
+  "sidebar": {
+    "favorites": "Favoriten",
+    "addFavorite": "Zu Favoriten hinzufügen",
+    "removeFavorite": "Aus Favoriten entfernen",
+    "importExport": "Seitenleiste",
+    "export": "Exportieren",
+    "import": "Importieren"
   },
   "chat": {
-    "title": "💬 Live-Chat",
+    "title": "Live-Chat",
     "subtitle": "Echtzeit-Chatnachrichten",
-    "abrirOverlay": "🪟 Transparentes Fenster öffnen",
-    "cerrarOverlay": "✕ Overlay schließen",
-    "controlOverlay": "🪟 Overlay-Steuerung",
+    "abrirOverlay": "Transparentes Fenster öffnen",
+    "cerrarOverlay": "Overlay schließen",
+    "controlOverlay": "Overlay-Steuerung",
     "cerrar": "✕ Schließen",
     "small": "Klein",
     "medium": "Mittel",
@@ -120,14 +130,14 @@
   "dashboard": {
     "title": "Stream-Manager",
     "emptyState": "Gib einen Twitch-Kanal in der oberen Leiste ein, um eine Vorschau anzuzeigen, Stream-Infos zu bearbeiten und Live-Aktivitäten zu verfolgen.",
-    "actividadReciente": "🔴 Letzte Aktivität",
+    "actividadReciente": "Letzte Aktivität",
     "todos": "Alle",
     "esperandoActividad": "Warte auf Kanalaktivität...",
     "conectarParaActividad": "Verbinde einen Kanal, um Aktivitäten zu sehen.",
     "cargandoStream": "Lade Stream...",
     "enVivo": "LIVE",
     "offline": "OFFLINE",
-    "twitchLink": "↗ Twitch",
+    "twitchLink": "Auf Twitch ansehen",
     "tituloStream": "Stream-Titel",
     "tituloPlaceholder": "Stream-Titel...",
     "juegoCategoria": "Spiel / Kategorie",
@@ -153,7 +163,12 @@
     "eventResub": "hat Abo verlängert ({{tier}}, {{months}} Monate)",
     "eventGift": "hat {{amount}} Abo(s) verschenkt ({{tier}})",
     "eventRedeem": "hat {{reward}} eingelöst ({{cost}} Pkt.)",
-    "eventBits": "hat {{bits}} Bits gespendet"
+    "eventBits": "hat {{bits}} Bits gespendet",
+    "sinTitulo": "Kein Titel",
+    "sinCategoria": "Keine Kategorie",
+    "actividadVaciaTitulo": "Noch keine Aktivität",
+    "actividadVaciaDesc": "Follows, Subs, Bits und Raids erscheinen hier, sobald sie passieren.",
+    "infoTitle": "Stream-Infos"
   },
   "config": {
     "title": "⚙️ Einstellungen",
@@ -187,7 +202,7 @@
     "siempreEncimaDesc": "Hält das Fenster über anderen Anwendungen",
     "acercaDe": "📋 Über",
     "appName": "StreamDaemon",
-    "appVersion": "v0.5.5 · by Cyber Haute Couture",
+    "appVersion": "v0.6.0 · by Cyber Haute Couture",
     "appDesc": "Modulare Open-Source-Anwendung für Content-Ersteller. Verwalte deinen Twitch-Kanal mit benutzerdefinierten Overlays, interaktiven Gewinnspielen, Vorhersagen und Echtzeit-Chat.",
     "checkUpdate": "Nach Updates suchen",
     "updateChecking": "Prüfe…",
@@ -495,12 +510,6 @@
     "brbTacticalDesc": "Tactical be right back screen with DRADIS radar sweep",
     "brbHorda": "Horde · BRB",
     "brbHordaDesc": "Horde be right back screen with dark bastion design",
-    "cyberpunkStartingSoon": "CyberPunk · Starting Soon",
-    "cyberpunkStartingSoonDesc": "Cyberpunk starting soon screen with glitch effects and countdown timer",
-    "cyberpunkBrb": "CyberPunk · BRB",
-    "cyberpunkBrbDesc": "Cyberpunk be right back screen with AFK warning panel",
-    "cyberpunkEnd": "CyberPunk · Ending",
-    "cyberpunkEndDesc": "Cyberpunk ending screen with configurable social network links",
     "cyberpunkGameplay": "CyberPunk · Gameplay",
     "cyberpunkGameplayDesc": "Cyberpunk gameplay overlay with neon corner accents and scanlines",
     "cyberpunkJustChatting": "CyberPunk · Just Chatting",
@@ -1015,7 +1024,7 @@
   },
   "splash": {
     "tagline": "Open-Source-Streaming-Tools, geschmiedet für Creator.",
-    "apoya": "☕ Unterstütze die StreamDaemon-Entwicklung hier",
+    "apoya": "Unterstütze die StreamDaemon-Entwicklung hier",
     "cargando": "Verbindung zum Backend…",
     "conectado": "Verbunden!",
     "timeout": "Weiter…"

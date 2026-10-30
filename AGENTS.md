@@ -194,3 +194,28 @@ Al trabajar en la optimización de la aplicación, priorizar las siguientes áre
 2. **Preservar la Integridad del Monorepo:** No romper scripts de construcción ni rutas de empaquetado de Electron (`extraPath`, `dist-electron`).
 3. **Validación Continua:** Tras cada cambio significativo, verificar con `npm run typecheck` y `npm run lint`.
 4. **Documentación Clara:** Documentar en markdown cualquier nuevo módulo o contrato de Socket.IO.
+
+---
+
+## 8. Directrices de Diseño Frontend
+
+Al crear nuevas interfaces de usuario o rediseñar componentes existentes, seguir las directrices de `docs/FRONTEND_DESIGN_GUIDELINES.md`. Estas son las reglas esenciales:
+
+### Principios Clave
+1. **Identidad Visual Distintiva:** Cada diseño debe tener una personalidad propia, no genérica ni templada. Evitar los "defaults AI" (ej: fondo crema + terracota, SaaS-card kit, ALL-CAPS eyebrow labels).
+2. **Typography Intencional:** Elegir fuentes deliberadamente, usar máximo 2 familias claramente distintas. Los textos son contenido, no decoración.
+3. **Estructura Informada:** Borders, dividers y spacing deben codificar información jerárquica, no ser decoración gratuita.
+4. **Motion Deliberado:** Usar animación solo para atención intencional. Evitar fade-and-slide-up en cada sección (genérico).
+5. **Restraint:** Un elemento memorable por vista. Todo lo demás quieto y disciplinado.
+
+### Antes de Diseñar
+1. **Identificar el Brief:** ¿Qué es el producto? ¿Quién es el usuario? ¿Cuál es el job principal del diseño?
+2. **Propuesta de Plan:** Crear un token system (color, tipo, layout, principios) antes de escribir código.
+3. **Self-Critique:** Revisar si el plan suena genérico o específico del brief. Si es genérico, revisar y justificar por qué.
+
+### Trabajando con Código
+- CSS Modules y variables del sistema de diseño en `index.css` siempre.
+- Estructurar selectores con cuidado de especificidad.
+- Usar `useCallback`/`useMemo` en componentes de alta frecuencia (Chat, overlays).
+
+**Regla de Oro:** Si el resultado se ve "templated" o se parece a un boilerplate de cualquier otro proyecto, parar y revisar. El diseño debe responder al brief específico, no a patrones genéricos.

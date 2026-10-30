@@ -67,7 +67,7 @@ export function ChatGreetingConfig({ channel }: Props) {
           </div>
           {greetingMessage.includes('{user}') && (
             <div className={styles.greetingPreview}>
-              {t('chat.greetingPreview')}: <span style={{ color: '#a78bfa' }}>
+              {t('chat.greetingPreview')}: <span style={{ color: 'var(--sf-primary-light)' }}>
                 {greetingMessage.replace(/\{user\}/g, '@' + (channel || 'usuario'))}
               </span>
             </div>

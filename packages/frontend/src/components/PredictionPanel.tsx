@@ -4,6 +4,7 @@ import { useTranslation } from '../i18n/context';
 import { useToast } from '../contexts/ToastContext';
 import { apiPost } from '../utils/api';
 import { EmptyState } from './EmptyState';
+import { IconPrediction } from './icons/icons';
 import styles from './PredictionPanel.module.css';
 
 interface Props {
@@ -73,7 +74,7 @@ export function PredictionPanel({ channel }: Props) {
 
         {!channel ? (
           <EmptyState
-            icon="🔮"
+            icon={<IconPrediction size={18} />}
             title={t('predictions.emptyTitle') || 'Sin conexión'}
             description={t('predictions.emptyChannel') || 'Conecta tu cuenta de Twitch en Configuración para crear predicciones.'}
             actionLabel={t('predictions.emptyAction') || 'Ir a Configuración'}

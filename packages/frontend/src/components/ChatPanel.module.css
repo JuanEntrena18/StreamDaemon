@@ -59,7 +59,7 @@
 .msgBubble {
   padding: 0.35rem 0.5rem;
   border-radius: 4px;
-  background: rgba(255,255,255,0.02);
+  background: var(--sf-surface);
   line-height: 1.45;
   position: relative;
   margin-bottom: 1px;
@@ -73,14 +73,6 @@
   color: var(--sf-text-3);
   font-size: 0.85rem;
   text-align: center;
-}
-
-.msgBubble {
-  padding: 0.35rem 0.5rem;
-  border-radius: 4px;
-  background: rgba(255,255,255,0.02);
-  line-height: 1.45;
-  position: relative;
 }
 
 .badgeIcon {
@@ -183,6 +175,22 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.infoRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.infoDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sf-danger);
+}
+.infoDotOn {
+  background: var(--sf-success);
 }
 
 /* Pill button — shared pattern for mode/size/sound selectors */

@@ -60,7 +60,7 @@
 }
 
 .stepCard--done {
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  border: 1px solid color-mix(in srgb, var(--sf-success) 30%, transparent);
 }
 
 .stepCard--pending {
@@ -90,19 +90,19 @@
 }
 
 .stepNumber--done {
-  background: rgba(34, 197, 94, 0.15);
-  color: #22c55e;
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: color-mix(in srgb, var(--sf-success) 15%, transparent);
+  color: var(--sf-success);
+  border: 1px solid color-mix(in srgb, var(--sf-success) 30%, transparent);
 }
 
 .stepNumber--active {
-  background: rgba(124, 58, 237, 0.15);
+  background: color-mix(in srgb, var(--sf-primary) 15%, transparent);
   color: var(--sf-primary);
   border: 1px solid transparent;
 }
 
 .stepNumber--comingSoon {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--sf-surface-hover);
   color: var(--sf-text-3);
   border: 1px solid transparent;
 }
@@ -122,8 +122,8 @@
   margin-left: 0.5rem;
   font-size: 0.65rem;
   font-weight: 600;
-  background: rgba(251, 191, 36, 0.15);
-  color: #fbbf24;
+  background: color-mix(in srgb, var(--sf-warning) 15%, transparent);
+  color: var(--sf-warning);
   padding: 0.1rem 0.5rem;
   border-radius: 99px;
 }
@@ -132,8 +132,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: color-mix(in srgb, var(--sf-success) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sf-success) 25%, transparent);
   border-radius: 99px;
   padding: 0.3rem 0.75rem;
 }
@@ -154,7 +154,7 @@
 .authName {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #22c55e;
+  color: var(--sf-success);
 }
 
 .connectDesc {
@@ -180,8 +180,8 @@
 .deviceCodeBox {
   margin-top: 1rem;
   padding: 1rem;
-  background: rgba(124, 58, 237, 0.08);
-  border: 1px solid rgba(124, 58, 237, 0.25);
+  background: color-mix(in srgb, var(--sf-primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sf-primary) 25%, transparent);
   border-radius: var(--sf-radius-sm);
 }
 
@@ -201,15 +201,15 @@
 }
 
 .codeHighlight {
-  color: #a78bfa;
+  color: var(--sf-primary-light);
 }
 
 .codeValue {
   font-size: 1.3rem;
   font-family: monospace;
-  color: #c4b5fd;
+  color: var(--sf-primary-light);
   letter-spacing: 0.15em;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--sf-bg-3);
   padding: 0.15rem 0.6rem;
   border-radius: 6px;
 }
@@ -229,7 +229,7 @@
 }
 
 .cancelBtn {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--sf-surface-hover);
   color: var(--sf-text-2);
   font-size: 0.75rem;
   padding: 0.35rem 0.75rem;
@@ -237,7 +237,7 @@
 
 .errorText {
   font-size: 0.75rem;
-  color: #f87171;
+  color: var(--sf-danger);
   margin-top: 0.5rem;
 }
 
@@ -263,7 +263,7 @@
 }
 
 .finishBtn--disabled {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--sf-surface-elevated);
   color: var(--sf-text-3);
   cursor: not-allowed;
 }

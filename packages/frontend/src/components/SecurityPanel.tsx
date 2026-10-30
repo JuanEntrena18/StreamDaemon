@@ -4,6 +4,7 @@ import { useTranslation } from '../i18n/context';
 import { ConfirmModal } from './ConfirmModal';
 import { Toggle } from './Toggle';
 import { EmptyState } from './EmptyState';
+import { IconSecurity } from './icons/icons';
 import styles from './SecurityPanel.module.css';
 
 interface Props {
@@ -192,15 +193,15 @@ export function SecurityPanel({ channel }: Props) {
         </h3>
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
-            <div className={styles.statValue} style={{ color: '#f87171' }}>{stats?.stats.totalBanned ?? 0}</div>
+            <div className={styles.statValue} style={{ color: 'var(--sf-danger)' }}>{stats?.stats.totalBanned ?? 0}</div>
             <div className={styles.statLabel}>{t('security.baneadosTotales')}</div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statValue} style={{ color: '#fbbf24' }}>{stats?.stats.todayBanned ?? 0}</div>
+            <div className={styles.statValue} style={{ color: 'var(--sf-warning)' }}>{stats?.stats.todayBanned ?? 0}</div>
             <div className={styles.statLabel}>{t('security.baneadosHoy')}</div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statValue} style={{ color: '#fb923c' }}>{stats?.stats.totalFlagged ?? 0}</div>
+            <div className={styles.statValue} style={{ color: 'var(--sf-data-amber)' }}>{stats?.stats.totalFlagged ?? 0}</div>
             <div className={styles.statLabel}>{t('security.marcados')}</div>
           </div>
           <div className={styles.statCard}>
@@ -343,7 +344,7 @@ export function SecurityPanel({ channel }: Props) {
         </h3>
         {(!stats?.recentDetections || stats.recentDetections.length === 0) ? (
           <EmptyState
-            icon="🛡️"
+            icon={<IconSecurity size={18} />}
             title={t('security.emptyTitle') || 'Todo despejado'}
             description={t('security.detectionsEmpty') || 'No se han detectado bots o spam recientes.'}
           />

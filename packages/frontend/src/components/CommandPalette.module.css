@@ -101,7 +101,7 @@
 }
 
 .itemActive {
-  background: var(--sf-primary-alpha) !important;
+  background: var(--sf-primary) !important;
   color: #fff;
 }
 
@@ -172,7 +172,7 @@
   background: rgba(0, 0, 0, 0.04);
 }
 
-:global([data-theme="light"]) .itemShortcut {
+:global([data-theme="light"]) .item:not(.itemActive) .itemShortcut {
   background: rgba(0, 0, 0, 0.04);
   border-color: rgba(0, 0, 0, 0.06);
 }

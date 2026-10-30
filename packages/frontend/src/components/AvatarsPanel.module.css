@@ -167,7 +167,7 @@
   justify-content: space-between;
   padding: 0.6rem 0.85rem;
   border-radius: var(--sf-radius-sm);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--sf-surface);
   border: 1px solid var(--sf-border);
 }
 
@@ -196,7 +196,7 @@
   justify-content: space-between;
   padding: 0.6rem 0.85rem;
   border-radius: var(--sf-radius-sm);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--sf-surface);
   border: 1px solid var(--sf-border);
 }
 

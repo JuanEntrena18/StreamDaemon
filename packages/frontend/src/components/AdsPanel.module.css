@@ -99,7 +99,7 @@
 }
 
 .previewContainer {
-  background: #0a0a1a;
+  background: var(--sf-stage);
   border-radius: 8px;
   overflow: hidden;
   display: flex;

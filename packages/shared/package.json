@@ -1,6 +1,6 @@
 {
   "name": "@streamdaemon/shared",
-  "version": "0.5.5",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -13,4 +13,3 @@
     "zod": "^3.22.0"
   }
 }
-

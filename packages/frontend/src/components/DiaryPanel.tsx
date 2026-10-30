@@ -249,7 +249,7 @@ export function DiaryPanel({ channel }: Props) {
                   <div className="text-dim text-xs">Horas totales</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#fbbf24' }}>{avgScore}</div>
+                  <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--sf-warning)' }}>{avgScore}</div>
                   <div className="text-dim text-xs">Nota media</div>
                 </div>
               </div>

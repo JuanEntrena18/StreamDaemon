@@ -181,13 +181,13 @@ export function ScoreboardPanel({ channel }: Props) {
           <button onClick={timerStart} className="sf-btn sf-btn-primary text-sm">
             ▶ {t('scoreboard.start')}
           </button>
-          <button onClick={timerPause} className="sf-btn text-sm" style={{ background: 'rgba(255,255,255,0.06)' }}>
+          <button onClick={timerPause} className="sf-btn sf-btn-ghost text-sm">
             ⏸ {t('scoreboard.pause')}
           </button>
-          <button onClick={timerReset} className="sf-btn text-sm" style={{ background: 'rgba(255,255,255,0.06)' }}>
+          <button onClick={timerReset} className="sf-btn sf-btn-ghost text-sm">
             ⏹ {t('scoreboard.reset')}
           </button>
-          <button onClick={resetMatch} className="sf-btn text-sm" style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>
+          <button onClick={resetMatch} className="sf-btn sf-btn-danger text-sm">
             🔄 {t('scoreboard.resetMatch')}
           </button>
         </div>

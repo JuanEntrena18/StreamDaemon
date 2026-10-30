@@ -1,10 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
+import type { ComponentType } from 'react';
 import { apiPut, apiGet } from '../utils/api';
 import { useSocket, useSocketEvent } from '../hooks/useSocket';
 import { useTranslation } from '../i18n/context';
 import { useToast } from '../contexts/ToastContext';
 import { useAuthStatus } from '../hooks/useAuthStatus';
+import { EmptyState } from './EmptyState';
+import type { IconProps } from './icons/IconBase';
+import {
+  IconHeart, IconStar, IconRefresh, IconGiveaway, IconSword,
+  IconGem, IconWand, IconArrowUpRight, IconInbox, IconDashboard,
+} from './icons/icons';
 import styles from './StreamDashboard.module.css';
 
 interface Props {
@@ -42,21 +48,32 @@ interface TagInfo {
   isAuto: boolean;
 }
 
-const TYPE_CONFIG = (t: (key: string) => string): Record<string, { icon: string; label: string }> => ({
-  follow: { icon: '❤️', label: t('dashboard.typeFollow') },
-  sub: { icon: '⭐', label: t('dashboard.typeSub') },
-  resub: { icon: '🔄', label: t('dashboard.typeResub') },
-  gift: { icon: '🎁', label: t('dashboard.typeGift') },
-  raid: { icon: '⚔️', label: t('dashboard.typeRaid') },
-  cheer: { icon: '💎', label: t('dashboard.typeCheer') },
-  redemption: { icon: '🪄', label: t('dashboard.typeRedeem') },
-});
+const TYPE_ICONS: Record<string, ComponentType<IconProps>> = {
+  follow: IconHeart,
+  sub: IconStar,
+  resub: IconRefresh,
+  gift: IconGiveaway,
+  raid: IconSword,
+  cheer: IconGem,
+  redemption: IconWand,
+};
+
+const TYPE_LABEL: Record<string, string> = {
+  follow: 'typeFollow',
+  sub: 'typeSub',
+  resub: 'typeResub',
+  gift: 'typeGift',
+  raid: 'typeRaid',
+  cheer: 'typeCheer',
+  redemption: 'typeRedeem',
+};
 
 function formatUptime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
   const s = seconds % 60;
-  return `${h}h ${m}m ${s}s`;
+  return `${m}m ${s}s`;
 }
 
 function formatNumber(n: number): string {
@@ -219,136 +236,168 @@ export function StreamDashboard({ channel }: Props) {
     }
   };
 
+  const focusChannelInput = () => {
+    document.querySelector<HTMLInputElement>('[data-channel-input]')?.focus();
+  };
+
   const filteredEvents = filter === 'all' ? events : events.filter((e) => e.type === filter);
 
   if (!channel) {
     return (
-      <div className={styles.emptyState}>
-        <div className={`glass-card ${styles.emptyCard}`}>
-          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎮</div>
-          <h2 className="sf-heading mb-2">{t('dashboard.title')}</h2>
-          <p className="text-dim" style={{ fontSize: '0.9rem', maxWidth: 400, margin: '0 auto' }}>
-            {t('dashboard.emptyState')}
-          </p>
-        </div>
+      <div className={styles.emptyWrap}>
+        <EmptyState
+          icon={<IconDashboard size={20} />}
+          title={t('dashboard.title')}
+          description={t('dashboard.emptyState')}
+          actionLabel={t('chat.emptyStateTitle')}
+          onAction={focusChannelInput}
+        />
       </div>
     );
   }
 
+  const live = !!stats?.isLive;
+
   return (
     <div className={styles.container}>
-      {/* ── Activity Feed (top) ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={`glass-card ${styles.activityCard}`}
-      >
-        <div className={styles.activityHeader}>
-          <h3 className="flex-row--gap-sm" style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--sf-text)' }}>
-            {t('dashboard.actividadReciente')}
-          </h3>
-          <div className="flex-row--gap-sm flex-wrap">
-            <button
-              onClick={() => setFilter('all')}
-              className={`${styles.filterBtn} ${filter === 'all' ? styles.filterBtnActive : styles.filterBtnInactive}`}
-            >{t('dashboard.todos')}</button>
-            {Object.entries(TYPE_CONFIG(t)).map(([key, cfg]) => (
-              <button
-                key={key}
-                onClick={() => setFilter(key)}
-                className={`${styles.filterBtn} ${filter === key ? styles.filterBtnActive : styles.filterBtnInactive}`}
-              >{cfg.icon} {cfg.label}</button>
-            ))}
-          </div>
-        </div>
-
-        {filteredEvents.length === 0 ? (
-          <p className="text-dim text-center" style={{ fontSize: '0.82rem', padding: '1.5rem 0' }}>
-            {channel ? t('dashboard.esperandoActividad') : t('dashboard.conectarParaActividad')}
-          </p>
-        ) : (
-          <div className="flex-col--gap-sm" style={{ gap: 4 }} aria-live="polite">
-            {filteredEvents.slice(0, 20).map((event) => (
-              <div key={event.id} className={styles.eventItem}>
-                <span className={styles.eventIcon}>{TYPE_CONFIG(t)[event.type]?.icon ?? '📌'}</span>
-                <strong className={styles.eventUser}>{event.user}</strong>
-                <span className={styles.eventMsg}>{event.message}</span>
-                <span className={styles.eventTime}>{new Date(event.timestamp).toLocaleTimeString(dateLocale || 'es-ES')}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </motion.div>
-
-      {/* ── Bottom section: Preview + Info ── */}
-      <div className={styles.bottomGrid}>
-        {/* Preview */}
-        <motion.div
-          initial={{ y: 10 }}
-          animate={{ y: 0 }}
-          className={`glass-card ${styles.previewCard}`}
-        >
-          <div className={styles.previewWrap}>
-            <iframe
-              key={channel}
-              src={`https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&parent=localhost&parent=127.0.0.1&muted=true`}
-              onLoad={() => setPreviewLoading(false)}
-              className={styles.previewIframe}
-              allow="autoplay; fullscreen"
-              allowFullScreen
-            />
-            {previewLoading && (
-              <div className={styles.previewLoading}>{t('dashboard.cargandoStream')}</div>
+      {/* ── Resumen del directo ── */}
+      <section className={`sf-card ${styles.summary}`}>
+        <div className={styles.summaryMain}>
+          <div className={styles.statusRow}>
+            <span className={`${styles.statusDot} ${live ? styles.statusDotLive : ''}`} />
+            <span className={`${styles.statusLabel} ${live ? styles.statusLabelLive : ''}`}>
+              {live ? t('dashboard.enVivo') : t('dashboard.offline')}
+            </span>
+            {live && (
+              <span className={styles.uptime}>{formatUptime(stats?.uptimeSeconds ?? 0)}</span>
             )}
           </div>
-        </motion.div>
 
-        {/* Info + Stats */}
-        <motion.div
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.05 }}
-          className={`glass-card ${styles.infoCard}`}
+          <h2 className={styles.streamTitle} title={stats?.streamTitle || ''}>
+            {stats?.streamTitle || t('dashboard.sinTitulo')}
+          </h2>
+          <p className={styles.streamMeta}>{stats?.gameName || t('dashboard.sinCategoria')}</p>
+        </div>
+
+        <div className={styles.statsRow}>
+          <Stat label={t('dashboard.statsViewers')} value={stats ? formatNumber(stats.viewers) : '—'} />
+          <Stat label={t('dashboard.statsFollowers')} value={stats ? formatNumber(stats.followers) : '—'} />
+          <Stat label={t('dashboard.statsSubs')} value={stats ? formatNumber(stats.subscribers) : '—'} />
+          <Stat label={t('dashboard.statsUptime')} value={live ? formatUptime(stats?.uptimeSeconds ?? 0) : '—'} />
+        </div>
+
+        <a
+          href={`https://twitch.tv/${channel}`}
+          target="_blank"
+          rel="noreferrer"
+          className={styles.extLink}
         >
-          {/* Live indicator */}
-          <div className="flex-between">
-            <div className="flex-row--gap-sm">
-              <span style={{
-                width: 8, height: 8, borderRadius: '50%',
-                background: stats?.isLive ? '#34d399' : '#6b7280',
-                boxShadow: stats?.isLive ? '0 0 8px rgba(52,211,153,0.5)' : 'none',
-              }} />
-              <span style={{
-                fontSize: '0.82rem', fontWeight: 600,
-                color: stats?.isLive ? '#34d399' : 'var(--sf-text-3)',
-              }}>
-                {stats?.isLive ? t('dashboard.enVivo') : t('dashboard.offline')}
-              </span>
+          {t('dashboard.twitchLink')}
+          <IconArrowUpRight size={12} />
+        </a>
+      </section>
+
+      <div className={styles.mainGrid}>
+        {/* ── Columna izquierda: preview + actividad ── */}
+        <div className={styles.leftCol}>
+          <div className={`sf-card ${styles.previewCard}`}>
+            <div className={styles.previewWrap}>
+              <iframe
+                key={channel}
+                src={`https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&parent=localhost&parent=127.0.0.1&muted=true`}
+                onLoad={() => setPreviewLoading(false)}
+                className={styles.previewIframe}
+                allow="autoplay; fullscreen"
+                allowFullScreen
+                title={channel}
+              />
+              {previewLoading && (
+                <div className={styles.previewLoading}>{t('dashboard.cargandoStream')}</div>
+              )}
             </div>
-            <a
-              href={`https://twitch.tv/${channel}`}
-              target="_blank" rel="noreferrer"
-              className="text-xs text-muted" style={{ color: 'var(--sf-primary-light)', textDecoration: 'none' }}
-            >
-              {t('dashboard.twitchLink')}
-            </a>
           </div>
 
-          {/* Stream info editor */}
-          <div>
-            <label className="sf-label mb-2">{t('dashboard.tituloStream')}</label>
+          <section className={`sf-card ${styles.activityCard}`}>
+            <header className={styles.activityHeader}>
+              <h3 className={styles.cardTitle}>{t('dashboard.actividadReciente')}</h3>
+              <div className={styles.filters}>
+                <button
+                  onClick={() => setFilter('all')}
+                  className={`${styles.filterBtn} ${filter === 'all' ? styles.filterBtnActive : ''}`}
+                >
+                  {t('dashboard.todos')}
+                </button>
+                {Object.keys(TYPE_ICONS).map((key) => {
+                  const Icon = TYPE_ICONS[key];
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setFilter(key)}
+                      className={`${styles.filterBtn} ${filter === key ? styles.filterBtnActive : ''}`}
+                    >
+                      <Icon size={12} />
+                      {t(`dashboard.${TYPE_LABEL[key]}`)}
+                    </button>
+                  );
+                })}
+              </div>
+            </header>
+
+            {filteredEvents.length === 0 ? (
+              <div className={styles.activityEmpty}>
+                <IconInbox size={16} />
+                <div>
+                  <p className={styles.activityEmptyTitle}>{t('dashboard.actividadVaciaTitulo')}</p>
+                  <p className={styles.activityEmptyDesc}>{t('dashboard.actividadVaciaDesc')}</p>
+                </div>
+              </div>
+            ) : (
+              <ul className={styles.eventList} aria-live="polite">
+                {filteredEvents.slice(0, 20).map((event) => {
+                  const Icon = TYPE_ICONS[event.type] ?? IconInbox;
+                  return (
+                    <li key={event.id} className={styles.eventItem}>
+                      <span className={styles.eventIcon}><Icon size={13} /></span>
+                      <strong className={styles.eventUser}>{event.user}</strong>
+                      <span className={styles.eventMsg}>{event.message}</span>
+                      <span className={styles.eventTime}>
+                        {new Date(event.timestamp).toLocaleTimeString(dateLocale || 'es-ES', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        {/* ── Columna derecha: editor de info ── */}
+        <aside className={`sf-card ${styles.infoCard}`}>
+          <h3 className={styles.cardTitle}>{t('dashboard.infoTitle')}</h3>
+
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="stream-title">
+              {t('dashboard.tituloStream')}
+            </label>
             <input
+              id="stream-title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t('dashboard.tituloPlaceholder')}
               className="sf-input"
-              style={{ fontSize: '0.82rem' }}
             />
           </div>
-          <div style={{ position: 'relative' }}>
-            <label className="sf-label mb-2">{t('dashboard.juegoCategoria')}</label>
+
+          <div className={styles.field} style={{ position: 'relative' }}>
+            <label className={styles.fieldLabel} htmlFor="stream-game">
+              {t('dashboard.juegoCategoria')}
+            </label>
             <input
+              id="stream-game"
               type="text"
               value={game}
               onChange={(e) => handleGameInput(e.target.value)}
@@ -356,14 +405,13 @@ export function StreamDashboard({ channel }: Props) {
               onBlur={() => setTimeout(() => setShowGameResults(false), 200)}
               placeholder={t('dashboard.juegoPlaceholder')}
               className="sf-input"
-              style={{ fontSize: '0.82rem' }}
             />
-            {searchingGame && <span className="text-dim" style={{ position: 'absolute', right: 8, top: 28, fontSize: '0.65rem' }}>{t('dashboard.buscando')}</span>}
+            {searchingGame && <span className={styles.searching}>{t('dashboard.buscando')}</span>}
             {showGameResults && gameResults.length > 0 && (
               <div className={styles.gameSearchResults}>
                 {gameResults.map((g) => (
                   <div key={g.id} onClick={() => selectGame(g)} className={styles.gameSearchItem}>
-                    {g.boxArtUrl && <img src={g.boxArtUrl} alt="" style={{ width: 28, height: 38, borderRadius: 4, objectFit: 'cover' }} />}
+                    {g.boxArtUrl && <img src={g.boxArtUrl} alt="" className={styles.boxArt} />}
                     <span>{g.name}</span>
                   </div>
                 ))}
@@ -371,108 +419,110 @@ export function StreamDashboard({ channel }: Props) {
             )}
           </div>
 
-          {/* Tags */}
-          <div>
-            <label className="sf-label mb-2">
-              {t('dashboard.tagsStream')} {activeTagIds.length > 0 && <span className="text-dim" style={{ fontSize: '0.65rem' }}>({activeTagIds.length}/10)</span>}
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>
+              {t('dashboard.tagsStream')}
+              {activeTagIds.length > 0 && (
+                <span className={styles.fieldCount}>{activeTagIds.length}/10</span>
+              )}
             </label>
-            <div className="flex-col--gap-sm">
-              <div className="flex-row flex-wrap" style={{ gap: '0.3rem', minHeight: 24 }}>
-                {activeTagIds.map((tagId) => {
-                  const tagInfo = allTags.find((t) => t.id === tagId);
-                  return (
-                    <span key={tagId} className={styles.tagChip}>
-                      {tagInfo?.name ?? tagId}
-                      <span onClick={() => toggleTag(tagId)} className={styles.tagRemove}>×</span>
-                    </span>
-                  );
-                })}
-                {activeTagIds.length === 0 && (
-                  <span className="text-dim" style={{ fontSize: '0.68rem' }}>{t('dashboard.sinTags')}</span>
-                )}
-              </div>
-              <div className="flex-row" style={{ gap: '0.3rem' }}>
-                <input
-                  type="text"
-                  value={customTagInput}
-                  onChange={(e) => setCustomTagInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && addCustomTag()}
-                  placeholder={t('dashboard.tagPlaceholder')}
-                  className="sf-input"
-                  style={{ flex: 1, fontSize: '0.75rem' }}
-                  maxLength={25}
-                />
-                <button onClick={addCustomTag} disabled={activeTagIds.length >= 10} className="sf-btn" style={{ fontSize: '0.68rem', padding: '0.2rem 0.5rem' }}>
-                  {t('dashboard.agregarTag')}
-                </button>
-              </div>
+
+            <div className={styles.tagList}>
+              {activeTagIds.map((tagId) => {
+                const tagInfo = allTags.find((tg) => tg.id === tagId);
+                return (
+                  <span key={tagId} className={styles.tagChip}>
+                    {tagInfo?.name ?? tagId}
+                    <button
+                      type="button"
+                      onClick={() => toggleTag(tagId)}
+                      className={styles.tagRemove}
+                      aria-label={`Remove ${tagInfo?.name ?? tagId}`}
+                    >
+                      ×
+                    </button>
+                  </span>
+                );
+              })}
+              {activeTagIds.length === 0 && (
+                <span className={styles.fieldHint}>{t('dashboard.sinTags')}</span>
+              )}
+            </div>
+
+            <div className={styles.tagInputRow}>
+              <input
+                type="text"
+                value={customTagInput}
+                onChange={(e) => setCustomTagInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addCustomTag()}
+                placeholder={t('dashboard.tagPlaceholder')}
+                className="sf-input"
+                maxLength={25}
+              />
+              <button
+                onClick={addCustomTag}
+                disabled={activeTagIds.length >= 10}
+                className="sf-btn sf-btn-ghost sf-btn-sm"
+              >
+                {t('dashboard.agregarTag')}
+              </button>
+            </div>
+
+            {allTags.length > 0 && (
               <input
                 type="text"
                 value={tagSearch}
                 onChange={(e) => setTagSearch(e.target.value)}
-                placeholder={allTags.length > 0 ? t('dashboard.buscarTags') : ''}
+                placeholder={t('dashboard.buscarTags')}
                 className="sf-input"
-                style={{ fontSize: '0.75rem', display: allTags.length > 0 ? '' : 'none' }}
               />
-              {tagSearch && allTags.length > 0 && (
-                <div className="flex-row flex-wrap" style={{ gap: '0.3rem', maxHeight: 80, overflowY: 'auto' }}>
-                  {allTags
-                    .filter((tag) => tag.name.toLowerCase().includes(tagSearch.toLowerCase()) && !activeTagIds.includes(tag.id))
-                    .slice(0, 15)
-                    .map((tag) => (
-                      <button
-                        key={tag.id}
-                        onClick={() => toggleTag(tag.id)}
-                        className={styles.tagBtn}
-                        style={{ opacity: tag.isAuto ? 0.5 : 1 }}
-                      >{tag.name}{tag.isAuto ? ` (${t('dashboard.auto')})` : ''}</button>
-                    ))}
-                </div>
-              )}
-            </div>
+            )}
+
+            {tagSearch && allTags.length > 0 && (
+              <div className={styles.tagSuggestions}>
+                {allTags
+                  .filter((tag) => tag.name.toLowerCase().includes(tagSearch.toLowerCase()) && !activeTagIds.includes(tag.id))
+                  .slice(0, 15)
+                  .map((tag) => (
+                    <button
+                      key={tag.id}
+                      onClick={() => toggleTag(tag.id)}
+                      className={styles.tagBtn}
+                      style={{ opacity: tag.isAuto ? 0.55 : 1 }}
+                    >
+                      {tag.name}{tag.isAuto ? ` ${t('dashboard.auto')}` : ''}
+                    </button>
+                  ))}
+              </div>
+            )}
           </div>
 
-          <div className="flex-row" style={{ gap: '0.75rem', paddingTop: '0.25rem' }}>
-            <button onClick={saveInfo} disabled={saving} className="sf-btn sf-btn-primary" style={{ fontSize: '0.78rem', padding: '0.4rem 1rem' }}>
+          <div className={styles.actions}>
+            <button
+              onClick={saveInfo}
+              disabled={saving}
+              className="sf-btn sf-btn-primary sf-btn-sm"
+            >
               {saving ? t('dashboard.guardando') : t('dashboard.guardarCambios')}
             </button>
-            {saved && <span style={{ fontSize: '0.72rem', color: '#34d399' }}>{t('dashboard.guardado')}</span>}
+            {saved && <span className={styles.savedMsg}>{t('dashboard.guardado')}</span>}
             {missingScope && (
-              <button onClick={login}
-                className="sf-btn"
-                style={{
-                  fontSize: '0.72rem', padding: '0.25rem 0.6rem',
-                  background: 'rgba(239,68,68,0.1)', color: '#f87171',
-                  border: '1px solid rgba(239,68,68,0.25)',
-                }}>
+              <button onClick={login} className="sf-btn sf-btn-danger sf-btn-sm">
                 {t('dashboard.reconnectTwitch')}
               </button>
             )}
           </div>
-
-          {/* Stats */}
-          <div className={styles.statsGrid}>
-            <StatCard label={t('dashboard.statsViewers')} value={stats ? formatNumber(stats.viewers) : '—'} />
-            <StatCard label={t('dashboard.statsFollowers')} value={stats ? formatNumber(stats.followers) : '—'} />
-            <StatCard label={t('dashboard.statsSubs')} value={stats ? formatNumber(stats.subscribers) : '—'} />
-            <StatCard label={t('dashboard.statsUptime')} value={stats && stats.isLive ? formatUptime(stats.uptimeSeconds) : '—'} />
-          </div>
-        </motion.div>
+        </aside>
       </div>
     </div>
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{
-      padding: '0.5rem 0.625rem',
-      background: 'rgba(255,255,255,0.03)',
-      borderRadius: 8,
-      textAlign: 'center',
-    }}>
-      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--sf-text)' }}>{value}</div>
-      <div className="text-dim" style={{ fontSize: '0.65rem', marginTop: '1px' }}>{label}</div>
+    <div className={styles.stat}>
+      <span className={styles.statValue}>{value}</span>
+      <span className={styles.statLabel}>{label}</span>
     </div>
   );
 }

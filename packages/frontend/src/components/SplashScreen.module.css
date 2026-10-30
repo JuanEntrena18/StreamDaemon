@@ -14,6 +14,11 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
+  background: radial-gradient(
+    ellipse 45% 38% at 50% 42%,
+    color-mix(in srgb, var(--sf-primary) 10%, transparent) 0%,
+    transparent 70%
+  );
 }
 
 .content {
@@ -22,151 +27,84 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.9rem;
 }
 
-.titleWrap {
-  text-align: center;
-}
-
-.title {
-  font-size: 2rem;
-  font-weight: 800;
+.wordmark {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--sf-text);
-  margin: 0;
 }
 
-.tagline {
-  font-size: 0.85rem;
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.4rem;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sf-text-3);
+  animation: splash-pulse 1.4s ease-in-out infinite;
+}
+.statusDotOk {
+  background: var(--sf-success);
+  animation: none;
+}
+
+.statusLabel {
+  font-size: var(--sf-text-caption);
   color: var(--sf-text-3);
-  margin-top: 0.3rem;
-  font-weight: 400;
-}
-
-.divider {
-  width: 200px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.4), transparent);
-}
-
-.version {
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--sf-text-2);
-  line-height: 1.8;
-}
-
-.ghLink {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 1rem;
-  border-radius: 99px;
-  background: rgba(124, 58, 237, 0.1);
-  border: 1px solid rgba(124, 58, 237, 0.2);
-  color: #a78bfa;
-  text-decoration: none;
-  font-size: 0.8rem;
-  font-weight: 500;
-  transition: all 0.15s;
-}
-
-.bmcLink {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.875rem;
-  border-radius: 99px;
-  background: rgba(255, 221, 0, 0.1);
-  border: 1px solid rgba(255, 221, 0, 0.2);
-  color: #fbbf24;
-  text-decoration: none;
-  font-size: 0.75rem;
-  font-weight: 500;
-  transition: all 0.15s;
-}
-
-.loadingRow {
-  margin-top: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  width: 240px;
 }
 
 .progressTrack {
-  width: 100%;
-  height: 3px;
+  width: 180px;
+  height: 2px;
   background: var(--sf-border);
-  border-radius: 99px;
+  border-radius: 999px;
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  border-radius: 99px;
-  background: linear-gradient(90deg, var(--sf-primary), var(--sf-accent));
+  border-radius: 999px;
+  background: var(--sf-primary-light);
   transition: width 0.4s ease;
 }
 
-.loadingLabel {
-  font-size: 0.72rem;
+@keyframes splash-pulse {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+
+.footer {
+  position: absolute;
+  bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.68rem;
+  color: var(--sf-text-4);
+}
+
+.footerLink {
   color: var(--sf-text-3);
-  transition: color 0.3s ease;
+  text-decoration: none;
+}
+.footerLink:hover {
+  color: var(--sf-text);
 }
 
-.loadingLabelSuccess {
-  color: #34d399;
+.footerSep {
+  color: var(--sf-text-4);
 }
 
-.loadingDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--sf-text-3);
-  display: inline-block;
-  margin-right: 0.4rem;
-  animation: pulse-spinner 1s ease-in-out infinite;
-}
-
-.loadingDotSuccess {
-  background: #34d399;
-}
-
-@keyframes pulse-spinner {
-  0%, 100% { opacity: 0.3; transform: scale(0.8); }
-  50% { opacity: 1; transform: scale(1.2); }
-}
-
-/* ══════════════════════════════════════════
-   LIQUID GLASS — Light Mode Overrides
-   ══════════════════════════════════════════ */
-
-:global([data-theme="light"]) .bgGlow {
-  opacity: 0;
-}
-
-:global([data-theme="light"]) .divider {
-  background: linear-gradient(90deg, transparent, rgba(109, 40, 217, 0.2), transparent);
-}
-
-:global([data-theme="light"]) .ghLink {
-  background: rgba(109, 40, 217, 0.06);
-  border-color: rgba(109, 40, 217, 0.12);
-  color: #6d28d9;
-}
-
-:global([data-theme="light"]) .bmcLink {
-  background: rgba(255, 221, 0, 0.06);
-  border-color: rgba(255, 221, 0, 0.15);
-  color: #b45309;
-}
-
-:global([data-theme="light"]) .loadingLabelSuccess {
-  color: #059669;
-}
-:global([data-theme="light"]) .loadingDotSuccess {
-  background: #059669;
+.footerVersion {
+  font-family: 'SF Mono', 'Cascadia Code', monospace;
+  color: var(--sf-text-4);
 }

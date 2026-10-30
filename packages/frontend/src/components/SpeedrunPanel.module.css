@@ -177,7 +177,7 @@
   justify-content: space-between;
   padding: 0.5rem 0.75rem;
   border-radius: var(--sf-radius-sm);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--sf-surface);
   border: 1px solid var(--sf-border);
 }
 
@@ -210,7 +210,7 @@
 
 .statusDotConnected {
   composes: statusDot;
-  background: #10b981;
+  background: var(--sf-success);
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
 }
 
@@ -255,7 +255,7 @@
   gap: 1rem;
   padding: 0.75rem 1rem;
   border-radius: var(--sf-radius-sm);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--sf-surface);
   border: 1px solid var(--sf-border);
 }
 
@@ -298,7 +298,7 @@
   gap: 0.5rem;
   padding: 0.4rem 0.6rem;
   border-radius: var(--sf-radius-sm);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--sf-surface);
   border: 1px solid var(--sf-border);
 }
 

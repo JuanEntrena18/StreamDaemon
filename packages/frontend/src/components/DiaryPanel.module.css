@@ -64,7 +64,7 @@
   gap: 0.75rem;
   padding: 0.6rem 0.75rem;
   border-radius: var(--sf-radius-sm);
-  background: rgba(255,255,255,0.03);
+  background: var(--sf-surface);
   border: 1px solid var(--sf-border);
 }
 
@@ -73,7 +73,7 @@
   height: 64px;
   border-radius: 4px;
   object-fit: cover;
-  background: rgba(255,255,255,0.05);
+  background: var(--sf-surface-hover);
   flex-shrink: 0;
 }
 
@@ -81,7 +81,7 @@
   width: 48px;
   height: 64px;
   border-radius: 4px;
-  background: rgba(255,255,255,0.05);
+  background: var(--sf-surface-hover);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -121,7 +121,7 @@
 }
 
 .gameBtn {
-  background: rgba(255,255,255,0.05);
+  background: var(--sf-surface-hover);
   border: 1px solid var(--sf-border);
   color: var(--sf-text-2);
   padding: 0.2rem 0.5rem;
@@ -133,7 +133,7 @@
 }
 
 .gameBtn:hover {
-  background: rgba(255,255,255,0.1);
+  background: var(--sf-surface-elevated);
   color: var(--sf-text);
 }
 
@@ -190,12 +190,12 @@
   left: 0;
   right: 0;
   z-index: 50;
-  background: #0f0f23;
+  background: var(--sf-bg-3);
   border: 1px solid var(--sf-border);
   border-radius: var(--sf-radius-sm);
   max-height: 300px;
   overflow-y: auto;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  box-shadow: var(--sf-shadow-2);
 }
 
 .searchResultItem {
@@ -209,7 +209,7 @@
 }
 
 .searchResultItem:hover {
-  background: rgba(255,255,255,0.05);
+  background: var(--sf-surface-hover);
 }
 
 .searchResultItem:last-child {
@@ -221,7 +221,7 @@
   height: 42px;
   border-radius: 3px;
   object-fit: cover;
-  background: rgba(255,255,255,0.05);
+  background: var(--sf-surface-hover);
   flex-shrink: 0;
 }
 
@@ -249,7 +249,7 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: var(--sf-scrim);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -264,7 +264,7 @@
   width: 480px;
   max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: var(--sf-shadow-3);
 }
 
 .modalHeader {
@@ -360,7 +360,7 @@
 .hltbChangeBtn {
   font-size: 0.65rem;
   padding: 0.2rem 0.5rem;
-  background: rgba(255,255,255,0.05);
+  background: var(--sf-surface-hover);
   border: 1px solid var(--sf-border);
   color: var(--sf-text-2);
   border-radius: 4px;
@@ -370,5 +370,5 @@
 }
 
 .hltbChangeBtn:hover {
-  background: rgba(255,255,255,0.1);
+  background: var(--sf-surface-elevated);
 }

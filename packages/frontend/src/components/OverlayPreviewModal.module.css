@@ -16,7 +16,9 @@
   max-height: 1000px;
   display: flex;
   flex-direction: column;
-  background: var(--sf-surface, #1a1a2e);
+  /* Sala de previsualización: siempre oscura, como el canvas de OBS.
+     No hereda el tema para que el overlay se juzgue sobre negro real. */
+  background: #12121d;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 8px 60px rgba(0, 0, 0, 0.7);

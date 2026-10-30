@@ -38,12 +38,12 @@
   left: 0;
   right: 0;
   z-index: 100;
-  background: #1a1a2e;
+  background: var(--sf-bg-3);
   border: 1px solid rgba(124, 58, 237, 0.4);
   border-radius: 8px;
   max-height: 220px;
   overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--sf-shadow-3);
 }
 
 .varPickerHeader {
@@ -53,7 +53,7 @@
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--sf-border);
 }
 
 .varPickerItem {
@@ -88,7 +88,7 @@
   gap: 0.5rem;
   font-size: 0.78rem;
   padding: 0.3rem 0.5rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--sf-surface);
   border-radius: 6px;
 }
 
@@ -134,7 +134,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--sf-surface);
   border-radius: 8px;
 }
 

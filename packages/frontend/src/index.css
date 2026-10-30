@@ -5,36 +5,84 @@
 
 /* ── Design Tokens ── */
 :root {
-  /* Dashboard palette */
-  --sf-bg: #0a0a1a;
-  --sf-bg-2: #0f0f23;
-  --sf-bg-3: #13132e;
+  /* ── Color: backgrounds (darkest → lightest) ── */
+  --sf-bg: #07070f;
+  --sf-bg-2: #0f0f1e;
+  --sf-bg-3: #16162b;
+
+  /* ── Color: surfaces ── */
   --sf-surface: rgba(255,255,255,0.04);
   --sf-surface-hover: rgba(255,255,255,0.07);
+  --sf-surface-elevated: rgba(255,255,255,0.09);
   --sf-border: rgba(255,255,255,0.08);
+  --sf-border-strong: rgba(255,255,255,0.14);
   --sf-border-accent: rgba(124,58,237,0.5);
 
-  --sf-primary: #7c3aed;       /* Violet 700 */
-  --sf-primary-light: #a855f7; /* Violet 500 */
+  /* ── Color: brand ── */
+  --sf-primary: #7c3aed;
+  --sf-primary-light: #a855f7;
   --sf-primary-glow: rgba(124,58,237,0.35);
-  --sf-accent: #6366f1;        /* Indigo 500 */
-  --sf-accent-2: #8b5cf6;      /* Violet 500 */
-  --sf-teal: #06b6d4;          /* Cyan 500 */
-  --sf-success: #10b981;       /* Emerald 500 */
-  --sf-danger: #ef4444;        /* Red 500 */
-  --sf-warning: #f59e0b;       /* Amber 500 */
+  --sf-accent: #6366f1;
 
+  /* ── Color: state ── */
+  --sf-live: #06b6d4;           /* Cyan — "en directo" state */
+  --sf-live-glow: rgba(6,182,212,0.3);
+  --sf-success: #10b981;
+  --sf-danger: #ef4444;
+  --sf-warning: #f59e0b;
+
+  /* ── Color: datos (métricas con color propio, legibles en ambos temas) ── */
+  --sf-data-blue: #60a5fa;
+  --sf-data-violet: #a78bfa;
+  --sf-data-amber: #fbbf24;
+  --sf-data-green: #34d399;
+  --sf-data-red: #f87171;
+
+  /* ── Color: lienzo de preview (simula el canvas de OBS, no cambia con el tema) ── */
+  --sf-stage: #05050c;
+  --sf-scrim: rgba(0,0,0,0.6);
+
+  /* ── Color: text ── */
   --sf-text: #f8fafc;
   --sf-text-2: #94a3b8;
   --sf-text-3: #64748b;
   --sf-text-4: #475569;
 
-  --sf-radius: 14px;
-  --sf-radius-sm: 8px;
-  --sf-shadow-glow: 0 0 30px rgba(124,58,237,0.2);
-  --sf-shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+  /* ── Radius (3 levels) ── */
+  --sf-radius-sm: 6px;
+  --sf-radius: 10px;
+  --sf-radius-lg: 16px;
 
-  /* Overlay themes */
+  /* ── Shadow (3 levels, purpose-driven) ── */
+  --sf-shadow-1: 0 1px 2px rgba(0,0,0,0.2);
+  --sf-shadow-2: 0 4px 16px rgba(0,0,0,0.3);
+  --sf-shadow-3: 0 8px 32px rgba(0,0,0,0.4);
+  --sf-shadow-glow: 0 0 24px var(--sf-primary-glow);
+
+  /* ── Spacing scale (4px base) ── */
+  --sf-space-xs: 0.25rem;
+  --sf-space-sm: 0.5rem;
+  --sf-space-md: 1rem;
+  --sf-space-lg: 1.5rem;
+  --sf-space-xl: 2rem;
+  --sf-space-xxl: 3rem;
+
+  /* ── Typography scale ── */
+  --sf-text-display: 2rem;
+  --sf-text-h1: 1.375rem;
+  --sf-text-h2: 1rem;
+  --sf-text-h3: 0.875rem;
+  --sf-text-body: 0.875rem;
+  --sf-text-body-sm: 0.8rem;
+  --sf-text-caption: 0.75rem;
+  --sf-text-mono: 0.78rem;
+
+  /* ── Legacy aliases (keep existing components working) ── */
+  --sf-accent-2: #8b5cf6;
+  --sf-teal: #06b6d4;
+  --sf-shadow-card: var(--sf-shadow-2);
+
+  /* ── Overlay themes ── */
   --theme-primary: #ffffff;
   --theme-secondary: #333333;
   --theme-bg: #000000;
@@ -45,33 +93,54 @@
 }
 
 [data-theme="light"] {
-  /* ── Liquid Glass Palette ── */
-  --sf-bg: #f5f5f7;
-  --sf-bg-2: #ececef;
-  --sf-bg-3: #e5e5ea;
-  --sf-surface: rgba(255, 255, 255, 0.55);
-  --sf-surface-hover: rgba(255, 255, 255, 0.72);
-  --sf-border: rgba(0, 0, 0, 0.06);
+  /* ── Color: backgrounds ── */
+  --sf-bg: #fafafa;
+  --sf-bg-2: #f4f4f6;
+  --sf-bg-3: #ececef;
+
+  /* ── Color: surfaces ── */
+  --sf-surface: rgba(0, 0, 0, 0.04);
+  --sf-surface-hover: rgba(0, 0, 0, 0.07);
+  --sf-surface-elevated: rgba(0, 0, 0, 0.09);
+  --sf-border: rgba(0, 0, 0, 0.08);
+  --sf-border-strong: rgba(0, 0, 0, 0.14);
   --sf-border-accent: rgba(109, 40, 217, 0.3);
 
+  /* ── Color: brand ── */
   --sf-primary: #6d28d9;
   --sf-primary-light: #7c3aed;
   --sf-primary-glow: rgba(109, 40, 217, 0.12);
   --sf-accent: #6366f1;
-  --sf-accent-2: #8b5cf6;
-  --sf-teal: #0891b2;
+
+  /* ── Color: state ── */
+  --sf-live: #0891b2;
+  --sf-live-glow: rgba(8,145,178,0.15);
   --sf-success: #059669;
   --sf-danger: #dc2626;
   --sf-warning: #d97706;
 
-  --sf-text: #1d1d1f;
-  --sf-text-2: #6e6e73;
-  --sf-text-3: #aeaeb2;
-  --sf-text-4: #c7c7cc;
+  /* ── Color: datos (versiones oscurecidas para fondo claro) ── */
+  --sf-data-blue: #2563eb;
+  --sf-data-violet: #6d28d9;
+  --sf-data-amber: #b45309;
+  --sf-data-green: #047857;
+  --sf-data-red: #b91c1c;
 
-  --sf-radius: 16px;
+  /* ── Scrim de modales: menos denso sobre fondo claro ── */
+  --sf-scrim: rgba(0,0,0,0.32);
+
+  /* ── Color: text ──
+     Rampa calibrada para pasar WCAG AA (4.5:1) incluso sobre --sf-bg-2. */
+  --sf-text: #1d1d1f;
+  --sf-text-2: #52525b;
+  --sf-text-3: #64646d;
+  --sf-text-4: #71717a;
+
+  /* ── Shadow ── */
+  --sf-shadow-1: 0 1px 2px rgba(0,0,0,0.06);
+  --sf-shadow-2: 0 4px 16px rgba(0,0,0,0.08);
+  --sf-shadow-3: 0 8px 32px rgba(0,0,0,0.12);
   --sf-shadow-glow: 0 0 0 transparent;
-  --sf-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 /* ══════════════════════════════════════════
@@ -118,23 +187,36 @@
 
 /* ── Buttons ── */
 [data-theme="light"] .sf-btn-primary {
-  background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 50%, #6366f1 100%);
-  box-shadow: 0 1px 4px rgba(109, 40, 217, 0.2), 0 2px 8px rgba(109, 40, 217, 0.1);
+  background: var(--sf-primary);
+  box-shadow: var(--sf-shadow-1);
 }
 [data-theme="light"] .sf-btn-primary:hover {
-  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.3), 0 4px 16px rgba(109, 40, 217, 0.15);
+  background: var(--sf-primary-light);
+  box-shadow: 0 2px 10px rgba(109, 40, 217, 0.2);
+}
+[data-theme="light"] .sf-btn-secondary,
+[data-theme="light"] .sf-btn-outline {
+  background: transparent;
+  color: var(--sf-primary);
+  border-color: rgba(109, 40, 217, 0.28);
+}
+[data-theme="light"] .sf-btn-secondary:hover,
+[data-theme="light"] .sf-btn-outline:hover {
+  background: rgba(109, 40, 217, 0.06);
+  border-color: var(--sf-primary);
 }
 [data-theme="light"] .sf-btn-danger {
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-  box-shadow: 0 1px 4px rgba(220, 38, 38, 0.15);
+  background: transparent;
+  color: var(--sf-danger);
+  border-color: rgba(220, 38, 38, 0.28);
 }
 [data-theme="light"] .sf-btn-ghost {
-  background: rgba(120, 120, 128, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: transparent;
+  border-color: var(--sf-border);
   color: var(--sf-text-2);
 }
 [data-theme="light"] .sf-btn-ghost:hover {
-  background: rgba(120, 120, 128, 0.12);
+  background: var(--sf-surface-hover);
   color: var(--sf-text);
 }
 
@@ -366,22 +448,36 @@ html[data-zoom="200"] { font-size: 32px !important; }
   opacity: 1 !important;
 }
 
-/* ── Glassmorphism card ── */
+/* ── Sistema de tarjetas (3 niveles de profundidad) ── */
+
+/* Nivel 0 — superficie: separación sin peso visual */
+.sf-surface {
+  background: var(--sf-surface);
+  border-radius: var(--sf-radius);
+}
+
+/* Nivel 1 — tarjeta: contenido principal del panel */
+.sf-card,
 .glass-card {
   background: var(--sf-surface);
   border: 1px solid var(--sf-border);
   border-radius: var(--sf-radius);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: var(--sf-shadow-card);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--sf-shadow-1);
+  transition: border-color 0.2s ease;
 }
 .glass-card:hover {
-  border-color: rgba(255,255,255,0.12);
+  border-color: var(--sf-border-strong);
 }
 .glass-card--accent {
   border-color: var(--sf-border-accent);
-  box-shadow: var(--sf-shadow-card), 0 0 0 1px rgba(124,58,237,0.1);
+}
+
+/* Nivel 2 — elevado: modales, previews, flotantes */
+.sf-elevated {
+  background: var(--sf-bg-3);
+  border: 1px solid var(--sf-border-strong);
+  border-radius: var(--sf-radius-lg);
+  box-shadow: var(--sf-shadow-2);
 }
 
 /* ── Input base ── */
@@ -448,48 +544,69 @@ html[data-zoom="200"] { font-size: 32px !important; }
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.6rem 1.25rem;
+  padding: 0.5rem 1rem;
   border-radius: var(--sf-radius-sm);
-  font-size: 0.875rem;
+  font-size: var(--sf-text-body);
   font-weight: 600;
   font-family: inherit;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   outline: none;
   white-space: nowrap;
 }
 .sf-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 
+/* Tamaño compacto para acciones dentro de paneles */
+.sf-btn-sm {
+  padding: 0.35rem 0.8rem;
+  font-size: var(--sf-text-caption);
+}
+
+/* Nivel 1 — CTA principal (único gradiente permitido por vista) */
 .sf-btn-primary {
-  background: linear-gradient(135deg, var(--sf-primary) 0%, var(--sf-accent) 100%);
+  background: var(--sf-primary);
   color: #fff;
-  box-shadow: 0 2px 12px var(--sf-primary-glow);
+  box-shadow: var(--sf-shadow-1);
 }
 .sf-btn-primary:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 4px 20px var(--sf-primary-glow);
-  transform: translateY(-1px);
+  background: var(--sf-primary-light);
+  box-shadow: var(--sf-shadow-glow);
 }
 
-.sf-btn-danger {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  color: #fff;
-  box-shadow: 0 2px 12px rgba(239,68,68,0.3);
+/* Nivel 2 — Acción secundaria */
+.sf-btn-secondary,
+.sf-btn-outline {
+  background: transparent;
+  color: var(--sf-primary-light);
+  border-color: var(--sf-border-accent);
 }
-.sf-btn-danger:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
+.sf-btn-secondary:hover,
+.sf-btn-outline:hover {
+  background: rgba(124,58,237,0.1);
+  border-color: var(--sf-primary);
 }
 
+/* Nivel 3 — Acción terciaria / texto */
 .sf-btn-ghost {
-  background: var(--sf-surface-hover);
+  background: transparent;
   color: var(--sf-text-2);
-  border: 1px solid var(--sf-border);
+  border-color: var(--sf-border);
 }
 .sf-btn-ghost:hover {
-  background: rgba(255,255,255,0.1);
+  background: var(--sf-surface-hover);
   color: var(--sf-text);
+}
+
+/* Destructivo */
+.sf-btn-danger {
+  background: transparent;
+  color: var(--sf-danger);
+  border-color: rgba(239,68,68,0.3);
+}
+.sf-btn-danger:hover {
+  background: rgba(239,68,68,0.1);
+  border-color: var(--sf-danger);
 }
 
 /* ── Animations ── */
@@ -590,10 +707,72 @@ html[data-zoom="200"] { font-size: 32px !important; }
 .text-center { text-align: center; }
 .text-uppercase { text-transform: uppercase; letter-spacing: 0.04em; }
 
-/* ── Section heading (.sf-section-title alternative) ── */
-.sf-heading {
-  font-size: 1.25rem;
+/* ── Typography scale ── */
+.sf-display {
+  font-size: var(--sf-text-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--sf-text);
+  line-height: 1.1;
+}
+.sf-h1 {
+  font-size: var(--sf-text-h1);
   font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--sf-text);
+  line-height: 1.2;
+}
+.sf-h2 {
+  font-size: var(--sf-text-h2);
+  font-weight: 600;
+  color: var(--sf-text);
+  line-height: 1.3;
+}
+.sf-h3 {
+  font-size: var(--sf-text-h3);
+  font-weight: 600;
+  color: var(--sf-text-2);
+  line-height: 1.4;
+}
+.sf-caption {
+  font-size: var(--sf-text-caption);
+  font-weight: 500;
+  color: var(--sf-text-3);
+}
+.sf-mono {
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+  font-size: var(--sf-text-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Indicador estado en vivo ── */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+.sf-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sf-live);
+  animation: live-pulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.sf-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--sf-text-caption);
+  font-weight: 600;
+  color: var(--sf-live);
+  letter-spacing: 0.04em;
+}
+
+/* ── Section heading ── */
+.sf-heading {
+  font-size: var(--sf-text-h1);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--sf-text);
 }
 .sf-label {
@@ -776,7 +955,7 @@ html[data-zoom="200"] { font-size: 32px !important; }
 /* ── Error / warning text ── */
 .sf-error-text {
   font-size: 0.75rem;
-  color: #f87171;
+  color: var(--sf-danger);
   margin-top: 0.5rem;
 }
 

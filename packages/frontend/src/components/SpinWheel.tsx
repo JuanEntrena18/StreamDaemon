@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 're
 import { motion } from 'framer-motion';
 import { useTranslation } from '../i18n/context';
 import { EmptyState } from './EmptyState';
+import { IconGiveaway } from './icons/icons';
 import styles from './SpinWheel.module.css';
 
 export interface SpinWheelHandle {
@@ -234,7 +235,7 @@ export const SpinWheel = forwardRef<SpinWheelHandle>((_props, ref) => {
         {wheelNames.length < 2 ? (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <EmptyState
-              icon="🎡"
+              icon={<IconGiveaway size={18} />}
               title={t('giveaway.emptyTitle') || 'Ruleta vacía'}
               description={t('giveaway.minimoNombres') || 'Añade al menos 2 nombres para girar la ruleta.'}
             />

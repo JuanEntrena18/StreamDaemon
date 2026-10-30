@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n/context';
 import { motion } from 'framer-motion';
 import { EmptyState } from './EmptyState';
+import { IconKpi, IconInbox } from './icons/icons';
 import { TrackerChart } from './TrackerChart';
 import { SkeletonCard, SkeletonChart } from './Skeletons';
 import { TrackerAdvice } from './TrackerAdvice';
@@ -38,9 +39,9 @@ interface AdviceResponse {
 }
 
 const CHART_COLORS: Record<string, string> = {
-  views: '#a78bfa',
-  followers: '#f87171',
-  duration: '#22d3ee',
+  views: 'var(--sf-data-violet)',
+  followers: 'var(--sf-data-red)',
+  duration: 'var(--sf-live)',
 };
 
 export function TrackerPanel({ channel }: Props) {
@@ -123,8 +124,10 @@ export function TrackerPanel({ channel }: Props) {
               className={styles.periodBtnBase}
               style={{
                 borderColor: period === p.id ? 'var(--sf-primary)' : 'var(--sf-border)',
-                background: period === p.id ? 'rgba(124,58,237,0.2)' : 'transparent',
-                color: period === p.id ? '#a78bfa' : 'var(--sf-text-3)',
+                background: period === p.id
+                  ? 'color-mix(in srgb, var(--sf-primary) 16%, transparent)'
+                  : 'transparent',
+                color: period === p.id ? 'var(--sf-primary-light)' : 'var(--sf-text-3)',
                 fontWeight: period === p.id ? 600 : 400,
               }}
             >
@@ -157,7 +160,7 @@ export function TrackerPanel({ channel }: Props) {
       {!channel && !loading ? (
         <div style={{ marginTop: '2rem' }}>
           <EmptyState 
-            icon="📊"
+            icon={<IconKpi size={18} />}
             title={t('tracker.emptyStateTitle') || 'Conecta tu cuenta de Twitch'}
             description={t('tracker.emptyStateDesc') || 'Vincula tu canal para ver tus estadísticas en tiempo real y recibir consejos de IA personalizados sobre tu stream.'}
             actionLabel={t('tracker.emptyStateBtn') || 'Ir a Configuración'}
@@ -167,7 +170,7 @@ export function TrackerPanel({ channel }: Props) {
       ) : noData && !loading ? (
         <div style={{ marginTop: '2rem' }}>
           <EmptyState 
-            icon="📭"
+            icon={<IconInbox size={18} />}
             title={t('tracker.emptyDataTitle') || 'Sin datos recientes'}
             description={t('tracker.empty') || 'No se han encontrado datos de transmisiones para el período seleccionado. ¡Haz un stream pronto!'}
           />

@@ -1,5 +1,4 @@
 import { lazy, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { Tab } from './Sidebar';
 import { TabSkeleton } from './TabSkeleton';
 import { ChatPanel } from './ChatPanel';
@@ -33,7 +32,6 @@ const VibeDaemonPanel = lazy(() => import('./VibeDaemonPanel').then(m => ({ defa
 
 interface Props {
   activeTab: Tab;
-  tabDirection: number;
   channel: string;
   alwaysOnTop: boolean;
   toggleAlwaysOnTop: () => void;
@@ -52,7 +50,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '2rem', color: '#ff4d4d', background: '#220000', borderRadius: '8px' }}>
+        <div style={{ padding: '2rem', color: 'var(--sf-danger)', background: 'color-mix(in srgb, var(--sf-danger) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--sf-danger) 25%, transparent)', borderRadius: '8px' }}>
           <h3>Error en la Interfaz (Frontend Crash)</h3>
           <p>{this.state.error?.message}</p>
         </div>
@@ -62,7 +60,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   }
 }
 
-export function MainContent({ activeTab, tabDirection, channel, alwaysOnTop, toggleAlwaysOnTop }: Props) {
+export function MainContent({ activeTab, channel, alwaysOnTop, toggleAlwaysOnTop }: Props) {
   const panel = (() => {
     switch (activeTab) {
       case 'dashboard': return <StreamDashboard channel={channel} />;
@@ -96,27 +94,12 @@ export function MainContent({ activeTab, tabDirection, channel, alwaysOnTop, tog
   })();
 
   return (
-    <AnimatePresence mode="wait" custom={tabDirection}>
-      <motion.div
-        key={activeTab}
-        className={styles.content}
-        custom={tabDirection}
-        variants={{
-          enter: (dir: number) => ({ opacity: 0, x: dir * 20, y: 0 }),
-          center: { opacity: 1, x: 0, y: 0 },
-          exit: { opacity: 0, y: -6, x: 0 },
-        }}
-        initial="enter"
-        animate="center"
-        exit="exit"
-        transition={{ duration: 0.25, ease: 'easeOut' }}
-      >
-        <ErrorBoundary>
-          <Suspense fallback={<TabSkeleton />}>
-            {panel}
-          </Suspense>
-        </ErrorBoundary>
-      </motion.div>
-    </AnimatePresence>
+    <div key={activeTab} className={styles.content}>
+      <ErrorBoundary>
+        <Suspense fallback={<TabSkeleton />}>
+          {panel}
+        </Suspense>
+      </ErrorBoundary>
+    </div>
   );
 }

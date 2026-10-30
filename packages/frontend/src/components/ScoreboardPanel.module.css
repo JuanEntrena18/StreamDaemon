@@ -84,7 +84,7 @@
 
 .presetBtnDefault {
   composes: presetBtn;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--sf-surface-hover);
   color: var(--sf-text);
 }
 

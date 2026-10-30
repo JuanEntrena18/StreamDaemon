@@ -485,7 +485,7 @@ export function ObsPanel({ channel }: Props) {
                   </div>
 
                   <p className={styles.socialHelp}>
-                    {t('obs.socialHelp')}<span style={{ color: '#10b981' }}>●</span>) se incluirán en la URL del overlay.
+                    {t('obs.socialHelp')}<span style={{ color: 'var(--sf-success)' }}>●</span>) se incluirán en la URL del overlay.
                   </p>
                 </div>
               </motion.div>
@@ -509,7 +509,7 @@ export function ObsPanel({ channel }: Props) {
         </h2>
         <p className="text-sm text-muted" style={{ lineHeight: 1.6 }}>
           {t('obs.obsInstructions')} <strong style={{ color: 'var(--sf-text)' }}>{t('obs.browserSource')}</strong>.
-          {' '}{t('obs.resolucionRecomendada')} <code style={{ background: 'rgba(124,58,237,0.15)', padding: '0.1rem 0.4rem', borderRadius: 4, color: '#a78bfa' }}>1920×1080</code> / <code style={{ background: 'rgba(6,182,212,0.15)', padding: '0.1rem 0.4rem', borderRadius: 4, color: '#22d3ee' }}>1080×1920</code>
+          {' '}{t('obs.resolucionRecomendada')} <code style={{ background: 'color-mix(in srgb, var(--sf-primary) 15%, transparent)', padding: '0.1rem 0.4rem', borderRadius: 4, color: 'var(--sf-primary-light)' }}>1920×1080</code> / <code style={{ background: 'color-mix(in srgb, var(--sf-live) 15%, transparent)', padding: '0.1rem 0.4rem', borderRadius: 4, color: 'var(--sf-live)' }}>1080×1920</code>
         </p>
       </div>
 
@@ -555,9 +555,9 @@ export function ObsPanel({ channel }: Props) {
                 onClick={() => setOrientation(o.id)}
                 className={`sf-pill-selector__pill ${orientation === o.id ? 'sf-pill-selector__pill--active' : ''}`}
                 style={orientation === o.id ? {
-                  borderColor: '#22d3ee',
+                  borderColor: 'var(--sf-live)',
                   background: 'rgba(6,182,212,0.15)',
-                  color: '#22d3ee',
+                  color: 'var(--sf-live)',
                 } : {}}
               >
                 {t(o.labelKey)}
@@ -709,7 +709,7 @@ export function ObsPanel({ channel }: Props) {
 
       {/* Help note */}
       <div className={styles.helpNote}>
-        <strong style={{ color: '#22d3ee' }}>{t('obs.tip')}</strong> {t('obs.obsTip')}
+        <strong style={{ color: 'var(--sf-live)' }}>{t('obs.tip')}</strong> {t('obs.obsTip')}
       </div>
 
       {previewOverlay && (

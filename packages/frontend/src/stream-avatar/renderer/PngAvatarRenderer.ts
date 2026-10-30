@@ -142,8 +142,9 @@ export class PngAvatarRenderer {
     if (this.isDestroyed) return;
     this.config = config;
     this.applyTransform();
-    if (this.app) {
-      this.app.renderer.background.color = this.config.chromaKey
+    const renderer = this.app?.renderer;
+    if (renderer) {
+      renderer.background.color = this.config.chromaKey
         ? this.hexToNumber(this.config.chromaKeyColor)
         : 0x000000;
     }
@@ -188,9 +189,10 @@ export class PngAvatarRenderer {
   }
 
   private applyTransform(): void {
-    if (!this.app) return;
+    const renderer = this.app?.renderer;
+    if (!renderer) return;
 
-    const { width, height } = this.app.renderer;
+    const { width, height } = renderer;
     const scale = this.config.scale;
 
     this.container.scale.set(this.config.flipX ? -scale : scale, scale);

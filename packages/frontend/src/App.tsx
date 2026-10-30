@@ -11,14 +11,14 @@ import { MainContent } from './components/MainContent';
 import { SplashScreen } from './components/SplashScreen';
 import { SetupWizard, isSetupComplete } from './components/SetupWizard';
 import { CommandPalette } from './components/CommandPalette';
-import { TtsProvider, useTts } from './contexts/TtsContext';
+import { APP_VERSION, APP_VERSION_LABEL } from './version';
 import { ToastProvider } from './contexts/ToastContext';
 import { ChatProvider } from './contexts/ChatContext';
+import { useUiPreferences } from './contexts/UiPreferencesContext';
+import { TtsProvider, useTts } from './contexts/TtsContext';
 import { TtsManager } from './components/TtsManager';
 import styles from './App.module.css';
 const isDesktop = typeof window.streamforger !== 'undefined';
-
-const APP_VERSION = '0.5.5';
 
 // Clear stale localStorage keys when version changes
 try {
@@ -42,11 +42,8 @@ export function App() {
   const { authenticated, user, loading: authLoading, refresh } = useAuthStatus();
   const [channel, setChannel] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('chat');
-  const [tabDirection, setTabDirection] = useState(1);
   const [setupComplete, setSetupComplete] = useState(isSetupComplete);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    try { return localStorage.getItem('streamforger-sidebar-collapsed') === 'true'; } catch { return false; }
-  });
+  const { sidebarCollapsed, toggleSidebarCollapsed } = useUiPreferences();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -136,7 +133,6 @@ export function App() {
     const handleNav = (e: Event) => {
       const customEvent = e as CustomEvent<Tab>;
       setActiveTab(customEvent.detail);
-      setTabDirection(1);
     };
     window.addEventListener('navigateTab', handleNav);
     return () => window.removeEventListener('navigateTab', handleNav);
@@ -184,57 +180,63 @@ export function App() {
     window.streamforger?.window.setAlwaysOnTop(next);
   }
 
-  function toggleSidebarCollapse() {
-    const next = !sidebarCollapsed;
-    setSidebarCollapsed(next);
-    try { localStorage.setItem('streamforger-sidebar-collapsed', next ? 'true' : 'false'); } catch {}
-  }
-
   function handleTabChange(newTab: Tab) {
-    const navOrder = buildNav().flatMap(s => s.items.map(i => i.id));
-    const currentIndex = navOrder.indexOf(activeTab);
-    const newIndex = navOrder.indexOf(newTab);
-    setTabDirection(newIndex > currentIndex ? 1 : -1);
     setActiveTab(newTab);
   }
 
   function buildNav() {
     const s = (k: string) => t(`nav.${k}`);
     return [
-      { id: 'gestor', label: s('gestorDelStream'), items: [{ id: 'dashboard' as Tab, icon: '📡', label: s('gestorTab'), shortcut: 'Ctrl+1' }] },
-      { id: 'tracker-section', label: s('estadisticas'), items: [
-        { id: 'tracker' as Tab, icon: '📈', label: s('trackerTab'), shortcut: 'Ctrl+2' },
-        { id: 'kpi' as Tab, icon: '📊', label: s('kpiTab'), shortcut: 'Ctrl+3' },
-        { id: 'calendar' as Tab, icon: '📅', label: s('calendarTab') },
-        { id: 'diary' as Tab, icon: '🎮', label: s('diaryTab') },
+      { id: 'gestor', label: s('gestorDelStream'), items: [
+        { id: 'dashboard' as Tab, label: s('gestorTab'), shortcut: 'Ctrl+1' },
       ]},
-      { id: 'chat-section', label: s('chat'), items: [{ id: 'chat' as Tab, icon: '💬', label: s('chatTab'), shortcut: 'Ctrl+4' }] },
-      { id: 'security-section', label: s('seguridad'), items: [{ id: 'security' as Tab, icon: '🔒', label: s('antiBotsTab'), shortcut: 'Ctrl+5' }] },
-      { id: 'mod-section', label: s('mod'), items: [{ id: 'mod' as Tab, icon: '🛡️', label: s('moderacionTab'), shortcut: 'Ctrl+6' }] },
-      { id: 'commands-section', label: s('comandos'), items: [{ id: 'commands' as Tab, icon: '🤖', label: s('comandosTab'), shortcut: 'Ctrl+7' }] },
+      { id: 'tracker-section', label: s('estadisticas'), items: [
+        { id: 'tracker' as Tab, label: s('trackerTab'), shortcut: 'Ctrl+2' },
+        { id: 'kpi' as Tab, label: s('kpiTab'), shortcut: 'Ctrl+3' },
+        { id: 'calendar' as Tab, label: s('calendarTab') },
+        { id: 'diary' as Tab, label: s('diaryTab') },
+      ]},
+      { id: 'chat-section', label: s('chat'), items: [
+        { id: 'chat' as Tab, label: s('chatTab'), shortcut: 'Ctrl+4' },
+      ]},
+      { id: 'security-section', label: s('seguridad'), items: [
+        { id: 'security' as Tab, label: s('antiBotsTab'), shortcut: 'Ctrl+5' },
+      ]},
+      { id: 'mod-section', label: s('mod'), items: [
+        { id: 'mod' as Tab, label: s('moderacionTab'), shortcut: 'Ctrl+6' },
+      ]},
+      { id: 'commands-section', label: s('comandos'), items: [
+        { id: 'commands' as Tab, label: s('comandosTab'), shortcut: 'Ctrl+7' },
+      ]},
       { id: 'tools', label: s('herramientas'), items: [
-        { id: 'builder' as Tab,   icon: '🎨', label: s('builderTab') },
-        { id: 'obs' as Tab,       icon: '🎮', label: s('gameOverlaysTab'), shortcut: 'Ctrl+8' },
-        { id: 'subathon' as Tab,   icon: '🔴', label: s('subathonTab'), shortcut: 'Ctrl+9' },
-        { id: 'giveaway' as Tab,   icon: '🎁', label: s('sorteosTab') },
-        { id: 'prediction' as Tab, icon: '📊', label: s('prediccionesTab') },
-        { id: 'hud' as Tab,        icon: '📊', label: s('hudTab') },
-        { id: 'timer' as Tab,      icon: '⏱️', label: s('temporizadorTab') },
-        { id: 'scoreboard' as Tab, icon: '🏆', label: s('scoreboardTab') },
-        { id: 'vibedaemon' as Tab, icon: '👹', label: s('vibeDaemonTab') },
-        { id: 'alertsounds' as Tab, icon: '🔊', label: s('alertsoundsTab') },
-        { id: 'avatars' as Tab, icon: '👾', label: s('avatarsTab') },
-        { id: 'stream-avatar' as Tab, icon: '🎭', label: s('streamAvatarTab') },
-        { id: 'speedrun' as Tab, icon: '🏃', label: s('speedrunTab') },
-        { id: 'ads' as Tab, icon: '📢', label: s('adsTab') },
+        { id: 'builder' as Tab,   label: s('builderTab') },
+        { id: 'obs' as Tab,       label: s('gameOverlaysTab'), shortcut: 'Ctrl+8' },
+        { id: 'subathon' as Tab,  label: s('subathonTab'), shortcut: 'Ctrl+9' },
+        { id: 'giveaway' as Tab,  label: s('sorteosTab') },
+        { id: 'prediction' as Tab, label: s('prediccionesTab') },
+        { id: 'hud' as Tab,       label: s('hudTab') },
+        { id: 'timer' as Tab,     label: s('temporizadorTab') },
+        { id: 'scoreboard' as Tab, label: s('scoreboardTab') },
+        { id: 'vibedaemon' as Tab, label: s('vibeDaemonTab') },
+        { id: 'alertsounds' as Tab, label: s('alertsoundsTab') },
+        { id: 'avatars' as Tab,   label: s('avatarsTab') },
+        { id: 'stream-avatar' as Tab, label: s('streamAvatarTab') },
+        { id: 'speedrun' as Tab,  label: s('speedrunTab') },
+        { id: 'ads' as Tab,       label: s('adsTab') },
       ]},
       { id: 'utilidades-section', label: s('utilidades'), items: [
-        { id: 'bitrate' as Tab,  icon: '🧮', label: s('bitrateTab') },
-        { id: 'vertical' as Tab, icon: '📱', label: s('verticalTab') },
+        { id: 'bitrate' as Tab,  label: s('bitrateTab') },
+        { id: 'vertical' as Tab, label: s('verticalTab') },
       ]},
-      { id: 'config', label: s('configuracion'), items: [{ id: 'config' as Tab, icon: '⚙️', label: s('configTab') }] },
+      { id: 'config', label: s('configuracion'), items: [
+        { id: 'config' as Tab, label: s('configTab') },
+      ]},
     ] as NavSection[];
   }
+
+  const navSections = buildNav();
+  const pageTitle =
+    navSections.flatMap((s) => s.items).find((i) => i.id === activeTab)?.label ?? '';
 
   return (
     <ToastProvider>
@@ -273,13 +275,13 @@ export function App() {
           isDesktop={isDesktop}
           isMobile={isMobile}
           onMobileToggle={() => setMobileOpen(true)}
+          pageTitle={pageTitle}
           channel={channel}
           onChannelChange={setChannel}
           authLoading={authLoading}
           authenticated={authenticated}
           user={user}
           connected={connected}
-          activeTab={activeTab}
           onNavigateConfig={() => setActiveTab('config')}
           t={t}
         />
@@ -287,16 +289,16 @@ export function App() {
         <div className={styles.bodyRow}>
           <Sidebar
             collapsed={sidebarCollapsed && !isMobile}
-            onToggleCollapse={toggleSidebarCollapse}
+            onToggleCollapse={toggleSidebarCollapsed}
             mobileOpen={mobileOpen}
             onMobileClose={() => setMobileOpen(false)}
-            navSections={buildNav()}
+            navSections={navSections}
             activeTab={activeTab}
             onTabChange={handleTabChange}
             isDesktop={isDesktop}
             alwaysOnTop={alwaysOnTop}
             onToggleAlwaysOnTop={toggleAlwaysOnTop}
-            version={t('app.version')}
+            version={APP_VERSION_LABEL}
             t={t}
             badges={badges}
           />
@@ -304,7 +306,6 @@ export function App() {
           <main id="main-content" className={styles.main}>
             <MainContent
               activeTab={activeTab}
-              tabDirection={tabDirection}
               channel={channel}
               alwaysOnTop={alwaysOnTop}
               toggleAlwaysOnTop={toggleAlwaysOnTop}

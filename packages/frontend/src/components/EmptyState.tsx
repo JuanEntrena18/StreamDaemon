@@ -1,32 +1,33 @@
-import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
 import styles from './EmptyState.module.css';
 
 interface Props {
-  icon: string | React.ReactNode;
+  icon?: ReactNode;
   title: string;
   description: string;
   actionLabel?: string;
   onAction?: () => void;
+  hint?: string;
 }
 
-export function EmptyState({ icon, title, description, actionLabel, onAction }: Props) {
+/**
+ * Estado vacío = invitación a actuar.
+ * Icono + motivo + siguiente paso concreto. Sin animación de entrada.
+ */
+export function EmptyState({ icon, title, description, actionLabel, onAction, hint }: Props) {
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className={styles.container}
-    >
-      <div className={`animate-float ${styles.icon}`}>
-        {icon}
-      </div>
+    <div className={styles.container}>
+      {icon && <div className={styles.iconWrap}>{icon}</div>}
       <h3 className={styles.title}>{title}</h3>
       <p className={styles.description}>{description}</p>
-      
+
       {actionLabel && onAction && (
-        <button onClick={onAction} className={styles.actionBtn}>
+        <button onClick={onAction} className="sf-btn sf-btn-primary sf-btn-sm">
           {actionLabel}
         </button>
       )}
-    </motion.div>
+
+      {hint && <p className={styles.hint}>{hint}</p>}
+    </div>
   );
 }

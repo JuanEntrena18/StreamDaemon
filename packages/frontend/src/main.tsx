@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import { TranslationProvider } from './i18n/context';
 import { SocketProvider } from './contexts/SocketContext';
+import { UiPreferencesProvider } from './contexts/UiPreferencesContext';
 import './index.css';
 
 try {
@@ -14,7 +15,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <TranslationProvider>
       <SocketProvider>
-        <App />
+        <UiPreferencesProvider>
+          <App />
+        </UiPreferencesProvider>
       </SocketProvider>
     </TranslationProvider>
   </React.StrictMode>,

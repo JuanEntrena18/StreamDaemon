@@ -46,7 +46,7 @@ function getRecommendation(uploadMbps: number) {
 function btnStyle(active: boolean, color: string): React.CSSProperties {
   return {
     borderColor: active ? color : 'var(--sf-border)',
-    background: active ? `${color}22` : 'transparent',
+    background: active ? `color-mix(in srgb, ${color} 14%, transparent)` : 'transparent',
     color: active ? color : 'var(--sf-text-2)',
     fontWeight: active ? 700 : 400,
   };
@@ -147,8 +147,9 @@ export function BitrateCalculatorPanel() {
         </div>
         {rec && (
           <div className={styles.resultBanner} style={{
-            background: 'rgba(16,185,129,0.08)', color: '#34d399',
-            borderLeft: '3px solid #34d399',
+            background: 'color-mix(in srgb, var(--sf-success) 10%, transparent)',
+            color: 'var(--sf-success)',
+            borderLeft: '3px solid var(--sf-success)',
           }}>
             {label('safeBitrateResult').replace('{bitrate}', rec.maxBitrate.toString())}
           </div>
@@ -175,11 +176,11 @@ export function BitrateCalculatorPanel() {
             )}
           </div>
           <div className={styles.recGrid}>
-            <MiniBox label={fmtLabel('resolution')} value={rec.label} color="#60a5fa" />
-            <MiniBox label={fmtLabel('fps')} value={`${rec.fps} fps`} color="#34d399" />
-            <MiniBox label={fmtLabel('videoBitrate')} value={`${rec.videoBitrate} kbps`} color="#a78bfa" />
-            <MiniBox label={fmtLabel('totalBitrate')} value={`${rec.totalBitrate} kbps`} color="#fbbf24" />
-            <MiniBox label={fmtLabel('audio')} value={`${rec.audio} kbps`} color="#fb923c" />
+            <MiniBox label={fmtLabel('resolution')} value={rec.label} color="var(--sf-data-blue)" />
+            <MiniBox label={fmtLabel('fps')} value={`${rec.fps} fps`} color="var(--sf-data-green)" />
+            <MiniBox label={fmtLabel('videoBitrate')} value={`${rec.videoBitrate} kbps`} color="var(--sf-data-violet)" />
+            <MiniBox label={fmtLabel('totalBitrate')} value={`${rec.totalBitrate} kbps`} color="var(--sf-data-amber)" />
+            <MiniBox label={fmtLabel('audio')} value={`${rec.audio} kbps`} color="var(--sf-data-amber)" />
           </div>
         </div>
       )}
@@ -209,13 +210,13 @@ export function BitrateCalculatorPanel() {
             {Object.keys(PRESETS).map((r) => (
               <button key={r} onClick={() => { setResolution(r); markManual(); }}
                 className={styles.pillBtn}
-                style={btnStyle(resolution === r, '#60a5fa')}>
+                style={btnStyle(resolution === r, 'var(--sf-data-blue)')}>
                 {r}
               </button>
             ))}
             <button onClick={() => { setResolution('custom'); markManual(); }}
               className={styles.pillBtn}
-              style={btnStyle(isCustom, '#a78bfa')}>
+              style={btnStyle(isCustom, 'var(--sf-data-violet)')}>
               {fmtLabel('custom')}
             </button>
           </div>
@@ -246,7 +247,7 @@ export function BitrateCalculatorPanel() {
             {FPS_OPTIONS.map((f) => (
               <button key={f} onClick={() => { setFps(f); markManual(); }}
                 className={styles.pillBtn}
-                style={btnStyle(fps === f, '#34d399')}>
+                style={btnStyle(fps === f, 'var(--sf-data-green)')}>
                 {f} fps
               </button>
             ))}
@@ -259,13 +260,13 @@ export function BitrateCalculatorPanel() {
             <span className={styles.sliderLabel}>
               {fmtLabel('bpp')}
             </span>
-            <span className={styles.sliderValue} style={{ color: '#60a5fa' }}>
+            <span className={styles.sliderValue} style={{ color: 'var(--sf-data-blue)' }}>
               {bpp.toFixed(2)}
             </span>
           </div>
           <input type="range" min={0.01} max={0.15} step={0.01} value={bpp}
             onChange={(e) => { setBpp(Number(e.target.value)); markManual(); }}
-            className={styles.slider} style={{ accentColor: '#7c3aed' }} />
+            className={styles.slider} style={{ accentColor: 'var(--sf-primary)' }} />
           <div className={styles.sliderHint}>
             {fmtLabel('bppDesc')}
           </div>
@@ -280,7 +281,7 @@ export function BitrateCalculatorPanel() {
             {AUDIO_OPTIONS.map((a) => (
               <button key={a} onClick={() => { setAudioBitrate(a); markManual(); }}
                 className={styles.pillBtn}
-                style={btnStyle(audioBitrate === a, '#fbbf24')}>
+                style={btnStyle(audioBitrate === a, 'var(--sf-data-amber)')}>
                 {a} kbps
               </button>
             ))}
@@ -293,13 +294,13 @@ export function BitrateCalculatorPanel() {
             <span className={styles.sliderLabel}>
               {fmtLabel('usage')}
             </span>
-            <span className={styles.sliderValue} style={{ color: '#34d399' }}>
+            <span className={styles.sliderValue} style={{ color: 'var(--sf-success)' }}>
               {usagePct}%
             </span>
           </div>
           <input type="range" min={50} max={100} step={1} value={usagePct}
             onChange={(e) => setUsagePct(Number(e.target.value))}
-            className={styles.slider} style={{ accentColor: '#7c3aed' }} />
+            className={styles.slider} style={{ accentColor: 'var(--sf-primary)' }} />
           <div className={styles.sliderHint}>
             {fmtLabel('usageDesc')}
           </div>
@@ -309,27 +310,29 @@ export function BitrateCalculatorPanel() {
       {/* Results */}
       <div className="glass-card sf-card">
         <div className={styles.resultsGrid}>
-          <ResultBox label={fmtLabel('videoBitrate')} value={`${videoBitrate.toLocaleString()}`} unit="kbps" color="#60a5fa" />
-          <ResultBox label={fmtLabel('totalBitrate')} value={`${totalBitrate.toLocaleString()}`} unit="kbps" color="#a78bfa" />
-          <ResultBox label={fmtLabel('needed')} value={`${neededUpload.toFixed(1)}`} unit="mbps" color="#fbbf24" />
+          <ResultBox label={fmtLabel('videoBitrate')} value={`${videoBitrate.toLocaleString()}`} unit="kbps" color="var(--sf-data-blue)" />
+          <ResultBox label={fmtLabel('totalBitrate')} value={`${totalBitrate.toLocaleString()}`} unit="kbps" color="var(--sf-data-violet)" />
+          <ResultBox label={fmtLabel('needed')} value={`${neededUpload.toFixed(1)}`} unit="mbps" color="var(--sf-data-amber)" />
         </div>
 
         {exceedsTwitch && (
-          <div className={styles.warningBox} style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171' }}>
+          <div className={styles.warningBox} style={{ background: 'color-mix(in srgb, var(--sf-danger) 10%, transparent)', color: 'var(--sf-danger)' }}>
             {fmtLabel('warning')}
           </div>
         )}
         {!exceedsTwitch && videoBitrate > 0 && (
-          <div className={styles.warningBox} style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399' }}>
+          <div className={styles.warningBox} style={{ background: 'color-mix(in srgb, var(--sf-success) 10%, transparent)', color: 'var(--sf-success)' }}>
             {fmtLabel('recommendation')}
           </div>
         )}
 
         {speedEntered && speedVal > 0 && (
           <div className={styles.connectionBox} style={{
-            background: neededUpload <= speedVal ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
-            color: neededUpload <= speedVal ? '#34d399' : '#f87171',
-            borderLeft: `3px solid ${neededUpload <= speedVal ? '#34d399' : '#f87171'}`,
+            background: neededUpload <= speedVal
+              ? 'color-mix(in srgb, var(--sf-success) 10%, transparent)'
+              : 'color-mix(in srgb, var(--sf-danger) 10%, transparent)',
+            color: neededUpload <= speedVal ? 'var(--sf-success)' : 'var(--sf-danger)',
+            borderLeft: `3px solid ${neededUpload <= speedVal ? 'var(--sf-success)' : 'var(--sf-danger)'}`,
           }}>
             {neededUpload <= speedVal
               ? label('connectionOk').replace('{needed}', neededUpload.toFixed(1)).replace('{upload}', speedVal.toFixed(1))

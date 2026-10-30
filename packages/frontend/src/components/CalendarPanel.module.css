@@ -40,7 +40,7 @@
 }
 
 .calNavBtn {
-  background: rgba(255,255,255,0.06);
+  background: var(--sf-surface-hover);
   border: 1px solid var(--sf-border);
   color: var(--sf-text-2);
   padding: 0.4rem 0.75rem;
@@ -53,7 +53,7 @@
 }
 
 .calNavBtn:hover {
-  background: rgba(255,255,255,0.1);
+  background: var(--sf-surface-elevated);
   color: var(--sf-text);
 }
 
@@ -83,7 +83,7 @@
 }
 
 .calDay {
-  background: rgba(255,255,255,0.03);
+  background: var(--sf-surface);
   border: 1px solid var(--sf-border);
   border-radius: var(--sf-radius-sm);
   min-height: 70px;
@@ -94,8 +94,8 @@
 }
 
 .calDay:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.15);
+  background: var(--sf-surface-hover);
+  border-color: var(--sf-border-strong);
 }
 
 .calDayOther {
@@ -134,7 +134,7 @@
   gap: 0.6rem;
   padding: 0.5rem 0.75rem;
   border-radius: var(--sf-radius-sm);
-  background: rgba(255,255,255,0.03);
+  background: var(--sf-surface);
   border: 1px solid var(--sf-border);
   font-size: 0.78rem;
 }
@@ -172,7 +172,7 @@
 }
 
 .eventBtn {
-  background: rgba(255,255,255,0.05);
+  background: var(--sf-surface-hover);
   border: 1px solid var(--sf-border);
   color: var(--sf-text-2);
   padding: 0.2rem 0.5rem;
@@ -184,7 +184,7 @@
 }
 
 .eventBtn:hover {
-  background: rgba(255,255,255,0.1);
+  background: var(--sf-surface-elevated);
   color: var(--sf-text);
 }
 
@@ -201,7 +201,7 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: var(--sf-scrim);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -216,7 +216,7 @@
   width: 420px;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: var(--sf-shadow-3);
 }
 
 .modalHeader {

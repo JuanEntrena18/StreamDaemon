@@ -123,7 +123,7 @@ export function VibeCvSection() {
       <p className="text-sm text-muted">{t('vibedaemon.cvSubtitle')}</p>
 
       {!isDesktop && (
-        <p className="text-sm" style={{ marginTop: '0.5rem', color: '#fbbf24' }}>
+        <p className="text-sm" style={{ marginTop: '0.5rem', color: 'var(--sf-warning)' }}>
           {t('vibedaemon.cvNotDesktop')}
         </p>
       )}
@@ -194,7 +194,7 @@ export function VibeCvSection() {
           </div>
 
           {status?.lastError && (
-            <p className="text-sm" style={{ marginTop: '0.4rem', color: '#f87171' }}>{status.lastError}</p>
+            <p className="text-sm" style={{ marginTop: '0.4rem', color: 'var(--sf-danger)' }}>{status.lastError}</p>
           )}
           {status?.lastEvent && (
             <div className={styles.lastActivation}>
