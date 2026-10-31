@@ -1,5 +1,6 @@
 import 'pixi.js/unsafe-eval';
 import * as PIXI from 'pixi.js';
+import { BACKEND_URL } from '../../utils/api.js';
 import type { StreamAvatarConfig, StreamAvatarViseme } from '../types.js';
 
 const MOUTH_TEXTURES: Record<StreamAvatarViseme, string> = {
@@ -12,17 +13,31 @@ const MOUTH_TEXTURES: Record<StreamAvatarViseme, string> = {
   narrow: 'mouth-closed.png',
 };
 
+const UNIQUE_MOUTH_FILES = [
+  'mouth-closed.png',
+  'mouth-slight.png',
+  'mouth-open.png',
+  'mouth-wide.png',
+  'mouth-round.png',
+] as const;
+
 export class PngAvatarRenderer {
   private app: PIXI.Application | null = null;
   private container: PIXI.Container = new PIXI.Container();
+  private characterRig: PIXI.Container = new PIXI.Container();
   private body: PIXI.Sprite | null = null;
   private eyesOpen: PIXI.Sprite | null = null;
   private eyesClosed: PIXI.Sprite | null = null;
   private mouth: PIXI.Sprite | null = null;
+  private mouthTextureCache = new Map<string, PIXI.Texture>();
   private config: StreamAvatarConfig;
   private baseUrl: string;
   private blinkState = { open: 1, target: 1, timer: 0, nextBlink: 2000 };
   private currentViseme: StreamAvatarViseme = 'closed';
+  private currentVolume = 0;
+  private smoothedVolume = 0;
+  private time = 0;
+  private baseFitScale = 1;
   private isDestroyed = false;
   private initPromise: Promise<void> | null = null;
 
@@ -32,7 +47,7 @@ export class PngAvatarRenderer {
     assetId: string,
   ) {
     this.config = config;
-    this.baseUrl = `${window.location.origin}/stream-avatar/assets/${assetId}`;
+    this.baseUrl = `${BACKEND_URL}/stream-avatar/assets/${encodeURIComponent(assetId)}`;
   }
 
   async init(): Promise<void> {
@@ -52,12 +67,14 @@ export class PngAvatarRenderer {
         (app as unknown as { _cancelResize?: () => void })._cancelResize = () => {};
       }
 
+      const useSolidBg = this.config.chromaKey || !this.config.transparentBg;
+
       try {
         await app.init({
           canvas: this.canvas,
           width,
           height,
-          backgroundAlpha: this.config.transparentBg ? 0 : 1,
+          backgroundAlpha: useSolidBg ? 1 : 0,
           backgroundColor: this.config.chromaKey ? this.hexToNumber(this.config.chromaKeyColor) : 0x000000,
           antialias: true,
           resolution: Math.min(window.devicePixelRatio, 2),
@@ -80,6 +97,7 @@ export class PngAvatarRenderer {
         return;
       }
 
+      this.container.addChild(this.characterRig);
       app.stage.addChild(this.container);
       this.applyTransform();
       app.ticker.add(() => this.onTick());
@@ -89,20 +107,29 @@ export class PngAvatarRenderer {
   }
 
   private async loadSprites(): Promise<void> {
-    const load = (file: string) => PIXI.Assets.load(`${this.baseUrl}/${file}`);
+    const load = (file: string) => PIXI.Assets.load<PIXI.Texture>(`${this.baseUrl}/${file}`);
 
     try {
-      const [body, eyesOpen, eyesClosed, mouthClosed] = await Promise.all([
+      const [body, eyesOpen, eyesClosed, ...mouthTextures] = await Promise.all([
         load('body.png'),
         load('eyes-open.png'),
         load('eyes-closed.png'),
-        load('mouth-closed.png'),
+        ...UNIQUE_MOUTH_FILES.map((file) => load(file)),
       ]);
+
+      UNIQUE_MOUTH_FILES.forEach((file, idx) => {
+        const tex = mouthTextures[idx];
+        if (tex) {
+          this.mouthTextureCache.set(file, tex);
+        }
+      });
+
+      const closedMouthTex = this.mouthTextureCache.get('mouth-closed.png') ?? mouthTextures[0];
 
       this.body = new PIXI.Sprite(body);
       this.eyesOpen = new PIXI.Sprite(eyesOpen);
       this.eyesClosed = new PIXI.Sprite(eyesClosed);
-      this.mouth = new PIXI.Sprite(mouthClosed);
+      this.mouth = new PIXI.Sprite(closedMouthTex);
 
       for (const sprite of [this.body, this.eyesOpen, this.eyesClosed, this.mouth]) {
         if (!sprite) continue;
@@ -110,8 +137,14 @@ export class PngAvatarRenderer {
         sprite.scale.set(1);
       }
 
-      // Layer order: body, mouth, eyes
-      this.container.addChild(this.body, this.mouth, this.eyesOpen, this.eyesClosed);
+      const renderer = this.app?.renderer;
+      if (renderer && this.body.texture) {
+        const maxDim = Math.max(this.body.texture.width, this.body.texture.height, 1);
+        this.baseFitScale = (Math.min(renderer.width, renderer.height) * 0.84) / maxDim;
+      }
+
+      // Layer order: body (base), mouth (middle), eyes (top)
+      this.characterRig.addChild(this.body, this.mouth, this.eyesOpen, this.eyesClosed);
       this.updateMouth();
       this.updateEyes();
     } catch (e) {
@@ -121,6 +154,7 @@ export class PngAvatarRenderer {
 
   destroy(): void {
     this.isDestroyed = true;
+    this.mouthTextureCache.clear();
     if (this.app) {
       this.safeDestroyApp(this.app);
       this.app = null;
@@ -132,7 +166,7 @@ export class PngAvatarRenderer {
       if (typeof (app as unknown as { _cancelResize?: () => void })._cancelResize !== 'function') {
         (app as unknown as { _cancelResize?: () => void })._cancelResize = () => {};
       }
-      app.destroy(true, { children: true, texture: true });
+      app.destroy(true, { children: true, texture: false });
     } catch (err) {
       console.warn('[PngAvatarRenderer] Error during destroy:', err);
     }
@@ -144,23 +178,28 @@ export class PngAvatarRenderer {
     this.applyTransform();
     const renderer = this.app?.renderer;
     if (renderer) {
+      const useSolidBg = this.config.chromaKey || !this.config.transparentBg;
+      renderer.background.alpha = useSolidBg ? 1 : 0;
       renderer.background.color = this.config.chromaKey
         ? this.hexToNumber(this.config.chromaKeyColor)
         : 0x000000;
     }
   }
 
-  setViseme(viseme: StreamAvatarViseme, _volume: number): void {
+  setViseme(viseme: StreamAvatarViseme, volume: number): void {
+    this.currentVolume = volume;
     if (this.currentViseme === viseme) return;
     this.currentViseme = viseme;
     this.updateMouth();
   }
 
-  private async updateMouth(): Promise<void> {
+  private updateMouth(): void {
     if (!this.mouth) return;
     const file = MOUTH_TEXTURES[this.currentViseme];
-    const texture = await PIXI.Assets.load(`${this.baseUrl}/${file}`);
-    this.mouth.texture = texture;
+    const cached = this.mouthTextureCache.get(file);
+    if (cached) {
+      this.mouth.texture = cached;
+    }
   }
 
   private updateEyes(): void {
@@ -170,7 +209,10 @@ export class PngAvatarRenderer {
   }
 
   private onTick(): void {
-    this.blinkState.timer += this.app?.ticker.deltaMS ?? 16;
+    if (this.isDestroyed) return;
+    const dt = this.app?.ticker.deltaMS ?? 16;
+    this.time += dt * 0.001;
+    this.blinkState.timer += dt;
 
     if (this.blinkState.timer >= this.blinkState.nextBlink) {
       this.blinkState.target = 0;
@@ -185,6 +227,16 @@ export class PngAvatarRenderer {
     if (Math.abs(this.blinkState.open - this.blinkState.target) < 0.01) {
       this.blinkState.open = this.blinkState.target;
     }
+
+    this.smoothedVolume += (this.currentVolume - this.smoothedVolume) * 0.25;
+
+    // Subtle breathing & voice bounce so PNG tubers feel dynamic
+    const breathY = Math.sin(this.time * 2.2) * 3;
+    const talkBounceY = -this.smoothedVolume * 10;
+    const talkScaleY = 1 + this.smoothedVolume * 0.025;
+    this.characterRig.position.y = breathY + talkBounceY;
+    this.characterRig.scale.set(1, talkScaleY);
+
     this.updateEyes();
   }
 
@@ -193,7 +245,12 @@ export class PngAvatarRenderer {
     if (!renderer) return;
 
     const { width, height } = renderer;
-    const scale = this.config.scale;
+    if (this.body?.texture) {
+      const maxDim = Math.max(this.body.texture.width, this.body.texture.height, 1);
+      this.baseFitScale = (Math.min(width, height) * 0.84) / maxDim;
+    }
+
+    const scale = this.baseFitScale * this.config.scale;
 
     this.container.scale.set(this.config.flipX ? -scale : scale, scale);
     this.container.position.set(
@@ -204,6 +261,6 @@ export class PngAvatarRenderer {
 
   private hexToNumber(hex: string): number {
     const cleaned = hex.replace('#', '');
-    return parseInt(cleaned, 16);
+    return parseInt(cleaned, 16) || 0x00ff00;
   }
 }

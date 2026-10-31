@@ -62,7 +62,10 @@ function listAssets(): Array<{ id: string; name: string; createdAt: number }> {
       let name = e.name;
       let createdAt = 0;
       try {
-        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8')) as {
+          name?: string;
+          createdAt?: number;
+        };
         name = manifest.name || e.name;
         createdAt = manifest.createdAt || 0;
       } catch {}
@@ -112,15 +115,15 @@ export function setupStreamAvatar(app: FastifyInstance) {
       return { ok: false, error: 'Invalid ZIP file' };
     }
 
-    // Flatten if files are inside a single subfolder
-    const files = fs.readdirSync(assetDir);
+    // Flatten if files are inside a single subfolder (ignoring __MACOSX)
+    const files = fs.readdirSync(assetDir).filter((f) => f !== '__MACOSX' && !f.startsWith('.'));
     const subdirs = files.filter((f) => fs.statSync(path.join(assetDir, f)).isDirectory());
     if (subdirs.length === 1 && files.length === 1) {
       const subDir = path.join(assetDir, subdirs[0]);
       for (const file of fs.readdirSync(subDir)) {
         fs.renameSync(path.join(subDir, file), path.join(assetDir, file));
       }
-      fs.rmdirSync(subDir);
+      fs.rmSync(subDir, { recursive: true, force: true });
     }
 
     const missing = REQUIRED_FILES.filter((f) => !fs.existsSync(path.join(assetDir, f)));
@@ -139,16 +142,46 @@ export function setupStreamAvatar(app: FastifyInstance) {
     return { ok: true, assetId, assets: listAssets() };
   });
 
+  app.post('/stream-avatar/template-zip', async (req, reply) => {
+    const body = req.body as {
+      files?: Record<string, string>;
+      readme?: string;
+    };
+
+    const zip = new AdmZip();
+
+    if (body?.files) {
+      for (const fileName of REQUIRED_FILES) {
+        const dataUrl = body.files[fileName];
+        if (typeof dataUrl === 'string') {
+          const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+          zip.addFile(fileName, Buffer.from(base64, 'base64'));
+        }
+      }
+    }
+
+    if (typeof body?.readme === 'string' && body.readme.trim().length > 0) {
+      zip.addFile('README_TEMPLATE.txt', Buffer.from(body.readme, 'utf-8'));
+    }
+
+    const zipBuffer = zip.toBuffer();
+    reply
+      .header('Content-Type', 'application/zip')
+      .header('Content-Disposition', 'attachment; filename="streamdaemon-avatar-template.zip"')
+      .send(zipBuffer);
+  });
+
   app.delete('/stream-avatar/assets/:id', async (req, _reply) => {
     const { id } = req.params as { id: string };
-    const assetDir = path.join(ASSETS_DIR, id);
+    const safeId = path.basename(id);
+    const assetDir = path.join(ASSETS_DIR, safeId);
     if (!fs.existsSync(assetDir)) {
       return { ok: false, error: 'Asset not found' };
     }
     fs.rmSync(assetDir, { recursive: true, force: true });
 
     // Reset to default avatar if the deleted asset was selected
-    if (currentConfig.avatarId === id) {
+    if (currentConfig.avatarId === safeId) {
       currentConfig = { ...currentConfig, avatarId: 'default' };
       saveConfig();
       getIO().emit('stream-avatar:config_updated', currentConfig);

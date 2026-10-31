@@ -20,7 +20,11 @@ export function StreamAvatarOverlay({ channel, demo = false }: Props) {
   useEffect(() => {
     if (!canvasRef.current || loading) return;
 
-    rendererRef.current?.destroy();
+    setError(null);
+    try {
+      rendererRef.current?.destroy();
+    } catch {}
+
     const renderer = createAvatarRenderer(canvasRef.current, config);
     rendererRef.current = renderer;
 
@@ -30,7 +34,9 @@ export function StreamAvatarOverlay({ channel, demo = false }: Props) {
     });
 
     return () => {
-      rendererRef.current?.destroy();
+      try {
+        rendererRef.current?.destroy();
+      } catch {}
       rendererRef.current = null;
     };
   }, [loading, config.avatarId]);
@@ -61,7 +67,15 @@ export function StreamAvatarOverlay({ channel, demo = false }: Props) {
       engineRef.current?.stop();
       engineRef.current = null;
     };
-  }, [config.enabled, config.audioDeviceId, config.micSensitivity, config.smoothing, config.noiseGate, demo]);
+  }, [
+    config.enabled,
+    config.avatarId,
+    config.audioDeviceId,
+    config.micSensitivity,
+    config.smoothing,
+    config.noiseGate,
+    demo,
+  ]);
 
   // Demo mode: simulate talking
   useEffect(() => {
@@ -70,12 +84,12 @@ export function StreamAvatarOverlay({ channel, demo = false }: Props) {
     const visemes = ['closed', 'slight', 'open', 'wide', 'round', 'open', 'slight'] as const;
     let i = 0;
     const interval = setInterval(() => {
-      rendererRef.current?.setViseme(visemes[i % visemes.length], 0.5);
+      rendererRef.current?.setViseme(visemes[i % visemes.length], 0.55);
       i++;
-    }, 250);
+    }, 240);
 
     return () => clearInterval(interval);
-  }, [demo]);
+  }, [demo, config.avatarId]);
 
   return (
     <div className={styles.root} data-channel={channel}>

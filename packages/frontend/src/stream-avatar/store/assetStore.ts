@@ -35,13 +35,13 @@ export function useStreamAvatarAssets() {
     setAssets(Array.isArray(data) ? data : []);
   }, []));
 
-  const uploadAsset = async (file: File): Promise<{ ok: boolean; error?: string }> => {
+  const uploadAsset = async (file: File): Promise<{ ok: boolean; assetId?: string; error?: string }> => {
     setUploading(true);
     try {
       const res = await apiUpload('/stream-avatar/assets', file);
       const data = await res.json();
       if (data.assets) setAssets(data.assets);
-      return { ok: data.ok, error: data.error };
+      return { ok: data.ok, assetId: data.assetId, error: data.error };
     } catch (e) {
       console.error('[stream-avatar] Upload failed', e);
       return { ok: false, error: 'Upload failed' };

@@ -1,19 +1,79 @@
 .root {
   display: flex;
   flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.75rem 0.85rem;
+  background: rgba(8, 8, 16, 0.55);
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius-sm);
+}
+
+.meterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 0.5rem;
+}
+
+.statusDotWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.statusDotOff,
+.statusDotIdle,
+.statusDotSpeaking {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusDotOff {
+  background: var(--sf-text-3);
+  opacity: 0.5;
+}
+
+.statusDotIdle {
+  background: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.45);
+}
+
+.statusDotSpeaking {
+  background: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+}
+
+.visemeBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.visemeCode {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--sf-accent);
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.28);
+  padding: 0.12rem 0.45rem;
+  border-radius: 99px;
+  letter-spacing: 0.04em;
 }
 
 .bars {
   display: flex;
   align-items: flex-end;
-  gap: 3px;
-  height: 32px;
+  gap: 4px;
+  height: 30px;
 }
 
 .bar {
   flex: 1;
-  height: 100%;
   background: var(--sf-border);
   border-radius: 2px;
   transition: background 0.05s ease, opacity 0.05s ease;
@@ -21,34 +81,42 @@
 
 .barActive {
   background: linear-gradient(to top, var(--sf-primary), var(--sf-accent));
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.25);
 }
 
-.labels {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.78rem;
+.barHot {
+  background: linear-gradient(to top, #06b6d4, #10b981);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.35);
 }
 
 .label {
+  font-size: 0.76rem;
   color: var(--sf-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .value {
-  color: var(--sf-text-3);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--sf-text);
   font-variant-numeric: tabular-nums;
+  min-width: 2.4rem;
+  text-align: right;
 }
 
 .peakBar {
   width: 100%;
-  height: 4px;
-  background: var(--sf-border);
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .peakFill {
   height: 100%;
-  background: linear-gradient(to right, var(--sf-primary), var(--sf-accent));
-  transition: width 0.1s ease;
+  background: linear-gradient(to right, var(--sf-primary), var(--sf-accent), #10b981);
+  transition: width 0.08s ease;
 }
